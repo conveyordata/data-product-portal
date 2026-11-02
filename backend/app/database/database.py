@@ -45,6 +45,48 @@ def get_url(async_: bool = False) -> str:
     )
 
 
+def _entra_token_provider():
+    """Returns a callable producing a fresh Entra ID access token for Azure Database for PostgreSQL.
+
+    DefaultAzureCredential caches tokens until close to expiry, so calling it per connection is cheap.
+    """
+    from azure.identity import (
+        DefaultAzureCredential,  # optional dependency, only for entra mode
+    )
+
+    credential = DefaultAzureCredential(
+        managed_identity_client_id=settings.AZURE_PURPOSE_CLIENT_ID or None
+    )
+    scope = "https://ossrdbms-aad.database.windows.net/.default"
+
+    def token() -> str:
+        return credential.get_token(scope).token
+
+    return token
+
+
+def apply_auth(engine: Engine) -> Engine:
+    """Configures connection-time authentication on an engine according to the settings.
+
+    In ``entra`` mode a short-lived Entra ID token replaces the password on every new
+    connection, so pooled connections keep working after the token that opened them expired.
+    """
+    if settings.POSTGRES_SSLMODE:
+
+        @event.listens_for(engine, "do_connect")
+        def set_sslmode(dialect, conn_rec, cargs, cparams):
+            cparams.setdefault("sslmode", settings.POSTGRES_SSLMODE)
+
+    if settings.POSTGRES_AUTH_MODE == "entra":
+        get_token = _entra_token_provider()
+
+        @event.listens_for(engine, "do_connect")
+        def inject_entra_token(dialect, conn_rec, cargs, cparams):
+            cparams["password"] = get_token()
+
+    return engine
+
+
 engine = create_engine(
     get_url(),
     connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
@@ -55,6 +97,7 @@ engine = create_engine(
     pool_pre_ping=settings.DB_POOL_PRE_PING,
     pool_use_lifo=True,
 )
+apply_auth(engine)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
