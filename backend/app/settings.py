@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -19,6 +19,15 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE_SECONDS: int = 1800
     DB_POOL_PRE_PING: bool = True
     DB_CONNECT_TIMEOUT_SECONDS: int = 5
+    # Database authentication mode:
+    #   "password": POSTGRES_PASSWORD is sent as-is (default)
+    #   "entra":    an Azure Entra ID access token is fetched with DefaultAzureCredential and used
+    #               as the password on every new connection (Azure Database for PostgreSQL with
+    #               Entra-only authentication). AZURE_PURPOSE_CLIENT_ID selects the user-assigned
+    #               managed identity when the host carries more than one identity.
+    POSTGRES_AUTH_MODE: Literal["password", "entra"] = "password"
+    AZURE_PURPOSE_CLIENT_ID: Optional[str] = None
+    POSTGRES_SSLMODE: Optional[str] = None
 
     HOST: str
 
