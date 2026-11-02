@@ -42,7 +42,10 @@ sidebar_position: 200
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
 - **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
 - **[MCP]**: Search, Data Product analytics and the marketplace overview no longer fail when a Hidden Data Product owns Technical Assets. Technical Assets of Hidden Data Products are now left out for users who can't see the Data Product, also in the Technical Asset details and Glue tools.
-- **[API]**: Configuration managers who are not admins can delete a tag that is used by a Hidden Data Product, a private Output Port or a Technical Asset they can't see. Before, the deletion failed.
+- **[API]**: Configuration managers who are not admins can delete a tag that is used by a Hidden Data Product, an Invite only Output Port or a Technical Asset they can't see. Before, the deletion failed.
+- **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
+- **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
+- **[API]**: Deleting a tag or Data Product type that doesn't exist returns a 404 instead of a 500.
 - **[API/UI]**: The Output Port graph no longer fails for consumers of an Output Port of a Hidden Data Product. They see its linked Technical Assets, as on the Output Port details, but not the Hidden Data Product itself.
 
 ## 0.8.0

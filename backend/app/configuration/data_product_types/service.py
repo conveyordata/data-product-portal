@@ -21,6 +21,7 @@ from app.configuration.data_product_types.schema_response import (
     DataProductTypesGetItem,
     UpdateDataProductTypeResponse,
 )
+from app.database.database import UNFILTERED
 
 
 class DataProductTypeService:
@@ -76,10 +77,11 @@ class DataProductTypeService:
         return UpdateDataProductTypeResponse(id=id)
 
     def remove_data_product_type(self, id: UUID) -> None:
-        data_product_type = self.db.get(
-            DataProductTypeModel,
+        data_product_type = ensure_data_product_type_exists(
             id,
+            self.db,
             options=[selectinload(DataProductTypeModel.data_products)],
+            execution_options=UNFILTERED,
         )
 
         if data_product_type.data_products:
@@ -98,6 +100,7 @@ class DataProductTypeService:
             from_id,
             self.db,
             options=[selectinload(DataProductTypeModel.data_products)],
+            execution_options=UNFILTERED,
         )
         new_data_product_type = ensure_data_product_type_exists(to_id, self.db)
 

@@ -31,10 +31,14 @@ class TechnicalAssetAccessMode(Base, BaseORM):
     __tablename__ = "technical_asset_access_modes"
 
     technical_asset_id = Column(
-        UUID(as_uuid=True), ForeignKey("data_outputs.id"), primary_key=True
+        UUID(as_uuid=True),
+        ForeignKey("data_outputs.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     access_mode_id = Column(
-        UUID(as_uuid=True), ForeignKey("access_modes.id"), primary_key=True
+        UUID(as_uuid=True),
+        ForeignKey("access_modes.id", ondelete="NO ACTION"),
+        primary_key=True,
     )
 
 
@@ -73,6 +77,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         secondary=tag_technical_asset_table,
         back_populates="technical_assets",
         lazy="selectin",
+        passive_deletes=True,
     )
 
     environment_configurations: Mapped[
@@ -90,6 +95,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         secondary="technical_asset_access_modes",
         order_by="AccessMode.name",
         lazy="selectin",
+        passive_deletes=True,
     )
 
     def to_event(self) -> TechnicalAssetEvent:
