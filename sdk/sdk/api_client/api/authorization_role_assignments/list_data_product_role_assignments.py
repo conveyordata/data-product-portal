@@ -17,7 +17,7 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     *,
     data_product_id: UUID | Unset = UNSET,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
     decision: DecisionStatus | Unset = UNSET,
 ) -> dict[str, Any]:
@@ -29,10 +29,10 @@ def _get_kwargs(
         json_data_product_id = str(data_product_id)
     params["data_product_id"] = json_data_product_id
 
-    json_user_id: str | Unset = UNSET
-    if not isinstance(user_id, Unset):
-        json_user_id = str(user_id)
-    params["user_id"] = json_user_id
+    json_identity_id: str | Unset = UNSET
+    if not isinstance(identity_id, Unset):
+        json_identity_id = str(identity_id)
+    params["identity_id"] = json_identity_id
 
     json_role_id: str | Unset = UNSET
     if not isinstance(role_id, Unset):
@@ -90,7 +90,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     data_product_id: UUID | Unset = UNSET,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
     decision: DecisionStatus | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListDataProductRoleAssignmentsResponse]:
@@ -98,7 +98,7 @@ def sync_detailed(
 
     Args:
         data_product_id (UUID | Unset):
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
         decision (DecisionStatus | Unset):
 
@@ -112,7 +112,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         data_product_id=data_product_id,
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
         decision=decision,
     )
@@ -128,7 +128,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     data_product_id: UUID | Unset = UNSET,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
     decision: DecisionStatus | Unset = UNSET,
 ) -> HTTPValidationError | ListDataProductRoleAssignmentsResponse | None:
@@ -136,7 +136,7 @@ def sync(
 
     Args:
         data_product_id (UUID | Unset):
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
         decision (DecisionStatus | Unset):
 
@@ -151,7 +151,7 @@ def sync(
     return sync_detailed(
         client=client,
         data_product_id=data_product_id,
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
         decision=decision,
     ).parsed
@@ -161,7 +161,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     data_product_id: UUID | Unset = UNSET,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
     decision: DecisionStatus | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListDataProductRoleAssignmentsResponse]:
@@ -169,7 +169,7 @@ async def asyncio_detailed(
 
     Args:
         data_product_id (UUID | Unset):
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
         decision (DecisionStatus | Unset):
 
@@ -183,7 +183,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         data_product_id=data_product_id,
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
         decision=decision,
     )
@@ -197,7 +197,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     data_product_id: UUID | Unset = UNSET,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
     decision: DecisionStatus | Unset = UNSET,
 ) -> HTTPValidationError | ListDataProductRoleAssignmentsResponse | None:
@@ -205,7 +205,7 @@ async def asyncio(
 
     Args:
         data_product_id (UUID | Unset):
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
         decision (DecisionStatus | Unset):
 
@@ -221,7 +221,7 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             data_product_id=data_product_id,
-            user_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
             decision=decision,
         )

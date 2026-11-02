@@ -9,6 +9,7 @@ import {
     createExplorationIdPath,
     createMarketplaceOutputPortPath,
 } from '@/types/navigation';
+import { getIdentityDisplayName } from '@/utils/identity.ts';
 
 export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefined | null): string {
     switch (type) {
@@ -22,6 +23,8 @@ export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefin
             return t('User');
         case EventEntityType.Exploration:
             return t('Exploration');
+        case EventEntityType.Identity:
+            return t('Identity');
         default:
             return t('Unknown');
     }
@@ -45,6 +48,8 @@ export function getSubjectDisplayLabel(record: GetEventHistoryResponseItem): str
             return record.output_port?.name || '';
         case EventEntityType.Exploration:
             return record.exploration?.name || '';
+        case EventEntityType.Identity:
+            return record.identity ? getIdentityDisplayName(record.identity) : '';
     }
 }
 
@@ -66,6 +71,8 @@ export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): stri
             return record.output_port?.name || '';
         case EventEntityType.Exploration:
             return record.exploration?.name || '';
+        case EventEntityType.Identity:
+            return record.identity ? getIdentityDisplayName(record.identity) : '';
         default:
             return '';
     }
@@ -87,6 +94,8 @@ export function getEventReferenceEntityLinkPath(
             return null;
         case EventEntityType.Exploration:
             return createExplorationIdPath(id);
+        case EventEntityType.Identity:
+            return null;
         default:
             return null;
     }

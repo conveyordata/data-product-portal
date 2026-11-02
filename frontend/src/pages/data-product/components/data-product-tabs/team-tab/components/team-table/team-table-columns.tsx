@@ -3,16 +3,16 @@ import type { TFunction } from 'i18next';
 
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
 import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component';
-import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi';
 import { DecisionStatus, Prototype, Scope } from '@/types/roles';
+import type { UserDataProductRoleAssignment } from '@/utils/identity.ts';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductUsers: DataProductRoleAssignmentResponse[];
+    dataProductUsers: UserDataProductRoleAssignment[];
     onRemoveUserAccess: (assignmentId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
@@ -35,8 +35,8 @@ export const getDataProductUsersTableColumns = ({
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<DataProductRoleAssignmentResponse> => {
-    const sorter = new Sorter<DataProductRoleAssignmentResponse>();
+}: Props): TableColumnsType<UserDataProductRoleAssignment> => {
+    const sorter = new Sorter<UserDataProductRoleAssignment>();
     const numberOfOwners = dataProductUsers.filter(
         (assignment) => assignment.role?.prototype === Prototype.OWNER,
     ).length;
@@ -50,21 +50,21 @@ export const getDataProductUsersTableColumns = ({
         },
         {
             title: t('Name'),
-            dataIndex: 'user.first_name',
-            render: (_, { user }) => {
-                return <UserAvatarWithEmail user={user} />;
+            dataIndex: 'identity.first_name',
+            render: (_, { identity }) => {
+                return <UserAvatarWithEmail user={identity} />;
             },
             width: '50%',
             sorter: sorter.cascadedSorter(
-                sorter.stringSorter((assignment) => assignment.user.last_name),
-                sorter.stringSorter((assignment) => assignment.user.first_name),
+                sorter.stringSorter((assignment) => assignment.identity.last_name),
+                sorter.stringSorter((assignment) => assignment.identity.first_name),
             ),
             defaultSortOrder: 'ascend',
         },
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: Role, { id, decision }: DataProductRoleAssignmentResponse) => {
+            render: (role: Role, { id, decision }: UserDataProductRoleAssignment) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
@@ -102,14 +102,14 @@ export const getDataProductUsersTableColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }: DataProductRoleAssignmentResponse) => (
+            render: (_, { identity, id, decision }: UserDataProductRoleAssignment) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>
                             <Popconfirm
                                 title={t('Allow User')}
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
-                                    name: user.first_name,
+                                    name: identity.first_name,
                                 })}
                                 onConfirm={() => onAcceptAccessRequest(id)}
                                 placement="leftTop"
@@ -125,7 +125,7 @@ export const getDataProductUsersTableColumns = ({
                             <Popconfirm
                                 title={t('Remove User')}
                                 description={t('Are you sure you want to deny access to user {{name}}?', {
-                                    name: user.first_name,
+                                    name: identity.first_name,
                                 })}
                                 onConfirm={() => onRejectAccessRequest(id)}
                                 placement="leftTop"
@@ -143,7 +143,7 @@ export const getDataProductUsersTableColumns = ({
                         <Popconfirm
                             title={t('Remove User')}
                             description={t('Are you sure you want to remove {{name}} from the Data Product?', {
-                                name: user.first_name,
+                                name: identity.first_name,
                             })}
                             onConfirm={() => onRemoveUserAccess(id)}
                             placement="leftTop"

@@ -13,6 +13,8 @@ from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.explorations.model import Exploration
+from app.identities.model import Identity
+from app.identities.service import get_identity_display_name
 from app.users.model import User
 
 
@@ -42,6 +44,32 @@ def _backup_user_name_on_delete(mapper, connection, target):
             )
         )
         .values(deleted_target_identifier=target.email)
+    )
+
+
+@sql_event.listens_for(Identity, "before_delete", propagate=True)
+def _backup_identity_name_on_delete(mapper, connection, target):
+    display_name = get_identity_display_name(target)
+
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.subject_id == target.id,
+                EventModel.subject_type == EventEntityType.IDENTITY,
+            )
+        )
+        .values(deleted_subject_identifier=display_name)
+    )
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.target_id == target.id,
+                EventModel.target_type == EventEntityType.IDENTITY,
+            )
+        )
+        .values(deleted_target_identifier=display_name)
     )
 
 

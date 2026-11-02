@@ -35,7 +35,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
             try {
                 await requestAccessToDataProduct({
                     data_product_id: dataProductId,
-                    user_id: user.id,
+                    identity_id: user.id,
                     role_id: role_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has requested access to the Data Product'), type: 'success' });

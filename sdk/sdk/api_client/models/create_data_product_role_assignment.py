@@ -14,18 +14,18 @@ T = TypeVar("T", bound="CreateDataProductRoleAssignment")
 class CreateDataProductRoleAssignment:
     """
     Attributes:
-        user_id (UUID):
+        identity_id (UUID):
         role_id (UUID):
         data_product_id (UUID):
     """
 
-    user_id: UUID
+    identity_id: UUID
     role_id: UUID
     data_product_id: UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        user_id = str(self.user_id)
+        identity_id = str(self.identity_id)
 
         role_id = str(self.role_id)
 
@@ -35,7 +35,7 @@ class CreateDataProductRoleAssignment:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "user_id": user_id,
+                "identity_id": identity_id,
                 "role_id": role_id,
                 "data_product_id": data_product_id,
             }
@@ -46,14 +46,14 @@ class CreateDataProductRoleAssignment:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        user_id = UUID(d.pop("user_id"))
+        identity_id = UUID(d.pop("identity_id"))
 
         role_id = UUID(d.pop("role_id"))
 
         data_product_id = UUID(d.pop("data_product_id"))
 
         create_data_product_role_assignment = cls(
-            user_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
             data_product_id=data_product_id,
         )

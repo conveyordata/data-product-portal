@@ -4,6 +4,7 @@ import {
     RequestType_InputPort,
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
+import { identityMatchesSearch } from '@/utils/identity.ts';
 
 export function filterBySearch(requests: Request[], searchTerm: string): Request[] {
     if (!searchTerm) return requests;
@@ -31,10 +32,9 @@ export function filterBySearch(requests: Request[], searchTerm: string): Request
         // Check role assignment requests
         if (action.request_type === RequestType_DataProductRoleAssignment) {
             return (
-                action.user.first_name.toLowerCase().includes(lowerSearch) ||
-                action.user.last_name.toLowerCase().includes(lowerSearch) ||
-                action.user.email.toLowerCase().includes(lowerSearch) ||
-                action.role?.name.toLowerCase().includes(lowerSearch)
+                identityMatchesSearch(action.identity, lowerSearch) ||
+                action.role?.name.toLowerCase().includes(lowerSearch) ||
+                action.data_product.name.toLowerCase().includes(lowerSearch)
             );
         }
 

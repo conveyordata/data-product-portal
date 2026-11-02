@@ -820,13 +820,13 @@ func (s *DataProductRoleAssignmentResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.User.Validate(); err != nil {
+		if err := s.Identity.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "user",
+			Name:  "identity",
 			Error: err,
 		})
 	}
@@ -1582,6 +1582,8 @@ func (s EventEntityType) Validate() error {
 	case "technical_asset":
 		return nil
 	case "user":
+		return nil
+	case "identity":
 		return nil
 	case "exploration":
 		return nil
@@ -2443,6 +2445,24 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if value, ok := s.Identity.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "identity",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -3145,13 +3165,13 @@ func (s *GlobalRoleAssignmentResponse) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.User.Validate(); err != nil {
+		if err := s.Identity.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "user",
+			Name:  "identity",
 			Error: err,
 		})
 	}
@@ -3515,6 +3535,22 @@ func (s *HTTPValidationError) Validate() error {
 	return nil
 }
 
+func (s Identity) Validate() error {
+	switch s.Type {
+	case UserIdentityIdentity:
+		if err := s.UserIdentity.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case GroupIdentityIdentity:
+		return nil // no validation needed
+	case MachineUserIdentityIdentity:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
 func (s *IdentityBatchCreateError) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3867,7 +3903,7 @@ func (s *IdentityBatchDeleteRequest) Validate() error {
 	return nil
 }
 
-func (s IdentityType) Validate() error {
+func (s IdentityKind) Validate() error {
 	switch s {
 	case "user":
 		return nil
@@ -6304,6 +6340,41 @@ func (s *User) Validate() error {
 }
 
 func (s *UserCreate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:     0,
+			MinLengthSet:  false,
+			MaxLength:     0,
+			MaxLengthSet:  false,
+			Email:         true,
+			Hostname:      false,
+			Regex:         nil,
+			MinNumeric:    0,
+			MinNumericSet: false,
+			MaxNumeric:    0,
+			MaxNumericSet: false,
+		}).Validate(string(s.Email)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "email",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *UserIdentity) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}

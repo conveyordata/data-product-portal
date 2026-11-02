@@ -15,16 +15,16 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
-    json_user_id: str | Unset = UNSET
-    if not isinstance(user_id, Unset):
-        json_user_id = str(user_id)
-    params["user_id"] = json_user_id
+    json_identity_id: str | Unset = UNSET
+    if not isinstance(identity_id, Unset):
+        json_identity_id = str(identity_id)
+    params["identity_id"] = json_identity_id
 
     json_role_id: str | Unset = UNSET
     if not isinstance(role_id, Unset):
@@ -75,13 +75,13 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListGlobalRoleAssignmentsResponse]:
     """List Global Role Assignments
 
     Args:
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
 
     Raises:
@@ -93,7 +93,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
     )
 
@@ -107,13 +107,13 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ListGlobalRoleAssignmentsResponse | None:
     """List Global Role Assignments
 
     Args:
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
 
     Raises:
@@ -126,7 +126,7 @@ def sync(
 
     return sync_detailed(
         client=client,
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
     ).parsed
 
@@ -134,13 +134,13 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
 ) -> Response[HTTPValidationError | ListGlobalRoleAssignmentsResponse]:
     """List Global Role Assignments
 
     Args:
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
 
     Raises:
@@ -152,7 +152,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        user_id=user_id,
+        identity_id=identity_id,
         role_id=role_id,
     )
 
@@ -164,13 +164,13 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    user_id: UUID | Unset = UNSET,
+    identity_id: UUID | Unset = UNSET,
     role_id: UUID | Unset = UNSET,
 ) -> HTTPValidationError | ListGlobalRoleAssignmentsResponse | None:
     """List Global Role Assignments
 
     Args:
-        user_id (UUID | Unset):
+        identity_id (UUID | Unset):
         role_id (UUID | Unset):
 
     Raises:
@@ -184,7 +184,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
-            user_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
         )
     ).parsed

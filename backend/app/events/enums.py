@@ -9,6 +9,7 @@ class EventEntityType(str, Enum):
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"
+    IDENTITY = "identity"
     EXPLORATION = "exploration"
 
     @staticmethod

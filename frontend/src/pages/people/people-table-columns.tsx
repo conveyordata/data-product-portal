@@ -39,7 +39,7 @@ export const getPeopleTableColumns = ({
     users: UsersGet[];
     canAssignRole: boolean;
     allRoles: Role[];
-    onChange: (user_id: string, value: string, original: GlobalRoleAssignment | null) => void;
+    onChange: (identity_id: string, value: string, original: GlobalRoleAssignment | null) => void;
     changeCheckbox: (user_id: string, can_become_admin: boolean) => void;
 }): TableColumnsType<UsersGet> => {
     const sorter = new Sorter<UsersGet>();

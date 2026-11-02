@@ -61,7 +61,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         modifyGlobalRoleAssignment: {
@@ -69,7 +69,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         decideGlobalRoleAssignment: {
@@ -77,7 +77,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         deleteGlobalRoleAssignment: {

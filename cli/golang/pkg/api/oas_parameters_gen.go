@@ -379,15 +379,15 @@ type LinkOutputPortToTechnicalAssetParams struct {
 // ListDataProductRoleAssignmentsParams is parameters of list_data_product_role_assignments operation.
 type ListDataProductRoleAssignmentsParams struct {
 	DataProductID OptUUID           `json:",omitempty,omitzero"`
-	UserID        OptUUID           `json:",omitempty,omitzero"`
+	IdentityID    OptUUID           `json:",omitempty,omitzero"`
 	RoleID        OptUUID           `json:",omitempty,omitzero"`
 	Decision      OptDecisionStatus `json:",omitempty,omitzero"`
 }
 
 // ListGlobalRoleAssignmentsParams is parameters of list_global_role_assignments operation.
 type ListGlobalRoleAssignmentsParams struct {
-	UserID OptUUID `json:",omitempty,omitzero"`
-	RoleID OptUUID `json:",omitempty,omitzero"`
+	IdentityID OptUUID `json:",omitempty,omitzero"`
+	RoleID     OptUUID `json:",omitempty,omitzero"`
 }
 
 // ListOutputPortRoleAssignmentsParams is parameters of list_output_port_role_assignments operation.

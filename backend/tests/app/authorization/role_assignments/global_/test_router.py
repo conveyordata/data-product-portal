@@ -1,14 +1,18 @@
 from typing import TYPE_CHECKING
 
+import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
+from app.identities.type import IdentityType
 from app.settings import settings
 from tests.factories import (
     GlobalRoleAssignmentFactory,
+    GroupFactory,
+    MachineUserFactory,
     OutputPortFactory,
     RoleFactory,
     UserFactory,
@@ -19,43 +23,93 @@ if TYPE_CHECKING:
     from app.users.schema import User
 
 ENDPOINT = "/api/v2/authz/role_assignments/global"
+IDENTITY_CASES = [
+    pytest.param(UserFactory, IdentityType.USER, "email", id="user"),
+    pytest.param(GroupFactory, IdentityType.GROUP, "display_name", id="group"),
+    pytest.param(
+        MachineUserFactory, IdentityType.MACHINE_USER, "display_name", id="machine_user"
+    ),
+]
 
 
 class TestGlobalRoleAssignmentsRouter:
-    def test_list_assignments(self, client: TestClient):
-        user: User = UserFactory()
+    @pytest.mark.parametrize(
+        ("identity_factory", "identity_type", "detail_field"),
+        IDENTITY_CASES,
+    )
+    def test_list_assignments__identity(
+        self,
+        client: TestClient,
+        identity_factory,
+        identity_type: IdentityType,
+        detail_field: str,
+    ):
+        identity = identity_factory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            identity_id=user.id, role_id=role.id
+            identity_id=identity.id,
+            role_id=role.id,
         )
-        response = client.get(f"{ENDPOINT}")
+
+        response = client.get(
+            ENDPOINT,
+            params={"identity_id": str(identity.id)},
+        )
 
         assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert len(data["role_assignments"]) == 1
-        assert data["role_assignments"][0]["id"] == str(assignment.id)
+        assignments = response.json()["role_assignments"]
+        assert len(assignments) == 1
 
-    def test_create_assignment(self, client: TestClient):
+        response_assignment = assignments[0]
+        response_identity = response_assignment["identity"]
+
+        assert response_assignment["id"] == str(assignment.id)
+        assert response_identity["id"] == str(identity.id)
+        assert response_identity["type"] == identity_type.value
+        assert response_identity["external_id"] == identity.external_id
+        assert response_identity[detail_field] == str(getattr(identity, detail_field))
+        assert response_assignment["role"]["id"] == str(role.id)
+
+    @pytest.mark.parametrize(
+        ("identity_factory", "identity_type", "detail_field"),
+        IDENTITY_CASES,
+    )
+    def test_create_assignment__identity(
+        self,
+        client: TestClient,
+        identity_factory,
+        identity_type: IdentityType,
+        detail_field: str,
+    ):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        authz_role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        authorization_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
-        user: User = UserFactory()
+        GlobalRoleAssignmentFactory(
+            identity_id=me.id,
+            role_id=authorization_role.id,
+        )
+        identity = identity_factory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         response = client.post(
-            f"{ENDPOINT}",
+            ENDPOINT,
             json={
-                "user_id": str(user.id),
+                "identity_id": str(identity.id),
                 "role_id": str(role.id),
             },
         )
-        assert response.status_code == status.HTTP_200_OK
 
-        data = response.json()
-        assert data["user"]["id"] == str(user.id)
-        assert data["role"]["id"] == str(role.id)
+        assert response.status_code == status.HTTP_200_OK
+        assignment = response.json()
+        response_identity = assignment["identity"]
+
+        assert response_identity["id"] == str(identity.id)
+        assert response_identity["type"] == identity_type.value
+        assert response_identity["external_id"] == identity.external_id
+        assert response_identity[detail_field] == str(getattr(identity, detail_field))
+        assert assignment["role"]["id"] == str(role.id)
 
     def test_become_admin(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
@@ -117,7 +171,7 @@ class TestGlobalRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}",
             json={
-                "user_id": str(user.id),
+                "identity_id": str(user.id),
                 "role_id": "admin",
             },
         )

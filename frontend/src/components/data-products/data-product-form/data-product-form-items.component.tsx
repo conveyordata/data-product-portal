@@ -187,7 +187,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 tooltip={t('The owners of the Data Product')}
                 rules={[
                     {
-                        required: true,
+                        required: mode === 'create',
                         message: t('Please select at least one owner for the Data Product'),
                     },
                 ]}

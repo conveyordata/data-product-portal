@@ -19,16 +19,16 @@ T = TypeVar("T", bound="CreateGlobalRoleAssignment")
 class CreateGlobalRoleAssignment:
     """
     Attributes:
-        user_id (UUID):
+        identity_id (UUID):
         role_id (Literal['admin'] | UUID):
     """
 
-    user_id: UUID
+    identity_id: UUID
     role_id: Literal["admin"] | UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        user_id = str(self.user_id)
+        identity_id = str(self.identity_id)
 
         role_id: Literal["admin"] | str
         if isinstance(self.role_id, UUID):
@@ -40,7 +40,7 @@ class CreateGlobalRoleAssignment:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "user_id": user_id,
+                "identity_id": identity_id,
                 "role_id": role_id,
             }
         )
@@ -50,7 +50,7 @@ class CreateGlobalRoleAssignment:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        user_id = UUID(d.pop("user_id"))
+        identity_id = UUID(d.pop("identity_id"))
 
         def _parse_role_id(data: object) -> Literal["admin"] | UUID:
             try:
@@ -71,7 +71,7 @@ class CreateGlobalRoleAssignment:
         role_id = _parse_role_id(d.pop("role_id"))
 
         create_global_role_assignment = cls(
-            user_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
         )
 

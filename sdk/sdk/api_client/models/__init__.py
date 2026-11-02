@@ -202,6 +202,7 @@ from .graph import Graph
 from .group_create import GroupCreate
 from .group_create_response import GroupCreateResponse
 from .group_get import GroupGet
+from .group_identity import GroupIdentity
 from .group_member_identity_get import GroupMemberIdentityGet
 from .group_members_add import GroupMembersAdd
 from .group_members_remove import GroupMembersRemove
@@ -257,6 +258,7 @@ from .list_output_port_role_assignments_response import (
 from .machine_user_create import MachineUserCreate
 from .machine_user_create_response import MachineUserCreateResponse
 from .machine_user_get import MachineUserGet
+from .machine_user_identity import MachineUserIdentity
 from .machine_user_update import MachineUserUpdate
 from .machine_user_update_response import MachineUserUpdateResponse
 from .machine_users_get_response import MachineUsersGetResponse
@@ -420,6 +422,7 @@ from .url_response import URLResponse
 from .user import User
 from .user_create import UserCreate
 from .user_create_response import UserCreateResponse
+from .user_identity import UserIdentity
 from .user_input_port import UserInputPort
 from .users_get import UsersGet
 from .validation_error import ValidationError
@@ -588,6 +591,7 @@ __all__ = (
     "GroupCreate",
     "GroupCreateResponse",
     "GroupGet",
+    "GroupIdentity",
     "GroupMemberIdentityGet",
     "GroupMembersAdd",
     "GroupMembershipGet",
@@ -623,6 +627,7 @@ __all__ = (
     "MachineUserCreate",
     "MachineUserCreateResponse",
     "MachineUserGet",
+    "MachineUserIdentity",
     "MachineUsersGetResponse",
     "MachineUserUpdate",
     "MachineUserUpdateResponse",
@@ -754,6 +759,7 @@ __all__ = (
     "User",
     "UserCreate",
     "UserCreateResponse",
+    "UserIdentity",
     "UserInputPort",
     "UsersGet",
     "ValidationError",

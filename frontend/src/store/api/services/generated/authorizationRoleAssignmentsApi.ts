@@ -31,7 +31,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/authz/role_assignments/global`,
         params: {
-          user_id: queryArg.userId,
+          identity_id: queryArg.identityId,
           role_id: queryArg.roleId,
         },
       }),
@@ -92,7 +92,7 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/authz/role_assignments/data_product`,
         params: {
           data_product_id: queryArg.dataProductId,
-          user_id: queryArg.userId,
+          identity_id: queryArg.identityId,
           role_id: queryArg.roleId,
           decision: queryArg.decision,
         },
@@ -205,7 +205,7 @@ export type CreateGlobalRoleAssignmentApiArg = CreateGlobalRoleAssignment;
 export type ListGlobalRoleAssignmentsApiResponse =
   /** status 200 Successful Response */ ListGlobalRoleAssignmentsResponse;
 export type ListGlobalRoleAssignmentsApiArg = {
-  userId?: string;
+  identityId?: string;
   roleId?: string;
 };
 export type DeleteGlobalRoleAssignmentApiResponse =
@@ -236,7 +236,7 @@ export type ListDataProductRoleAssignmentsApiResponse =
   /** status 200 Successful Response */ ListDataProductRoleAssignmentsResponse;
 export type ListDataProductRoleAssignmentsApiArg = {
   dataProductId?: string;
-  userId?: string;
+  identityId?: string;
   roleId?: string;
   decision?: DecisionStatus;
 };
@@ -298,7 +298,19 @@ export type HttpValidationError = {
 export type BecomeAdmin = {
   expiry: string;
 };
-export type User = {
+export type GroupIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "group";
+};
+export type MachineUserIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "machine_user";
+};
+export type UserIdentity = {
   id: string;
   email: string;
   external_id: string;
@@ -307,7 +319,18 @@ export type User = {
   has_seen_tour: boolean;
   can_become_admin: boolean;
   admin_expiry?: string | null;
+  type: "user";
 };
+export type Identity =
+  | ({
+      type: "group";
+    } & GroupIdentity)
+  | ({
+      type: "machine_user";
+    } & MachineUserIdentity)
+  | ({
+      type: "user";
+    } & UserIdentity);
 export type Scope = "dataset" | "data_product" | "domain" | "global";
 export type AuthorizationAction =
   | 101
@@ -368,9 +391,19 @@ export type Role = {
   prototype: Prototype;
 };
 export type DecisionStatus = "approved" | "pending" | "denied";
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
 export type GlobalRoleAssignmentResponse = {
   id: string;
-  user: User;
+  identity: Identity;
   role: Role;
   decision: DecisionStatus;
   requested_on: string | null;
@@ -379,7 +412,7 @@ export type GlobalRoleAssignmentResponse = {
   decided_by: User | null;
 };
 export type CreateGlobalRoleAssignment = {
-  user_id: string;
+  identity_id: string;
   role_id: string | "admin";
 };
 export type ListGlobalRoleAssignmentsResponse = {
@@ -428,7 +461,7 @@ export type DataProduct = {
 export type DataProductRoleAssignmentResponse = {
   id: string;
   data_product: DataProduct;
-  user: User;
+  identity: Identity;
   role: Role | null;
   decision: DecisionStatus;
   requested_on: string | null;
@@ -443,12 +476,12 @@ export type ListDataProductRoleAssignmentsResponse = {
   role_assignments: DataProductRoleAssignmentResponse[];
 };
 export type CreateDataProductRoleAssignment = {
-  user_id: string;
+  identity_id: string;
   role_id: string;
   data_product_id: string;
 };
 export type RequestDataProductRoleAssignment = {
-  user_id: string;
+  identity_id: string;
   role_id: string;
   data_product_id: string;
 };

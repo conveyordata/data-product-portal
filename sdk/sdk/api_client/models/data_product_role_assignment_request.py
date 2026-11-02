@@ -19,8 +19,11 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.data_product import DataProduct
+    from ..models.group_identity import GroupIdentity
+    from ..models.machine_user_identity import MachineUserIdentity
     from ..models.role import Role
     from ..models.user import User
+    from ..models.user_identity import UserIdentity
 
 
 T = TypeVar("T", bound="DataProductRoleAssignmentRequest")
@@ -32,7 +35,7 @@ class DataProductRoleAssignmentRequest:
     Attributes:
         id (UUID):
         data_product (DataProduct):
-        user (User):
+        identity (GroupIdentity | MachineUserIdentity | UserIdentity):
         role (None | Role):
         decision (DecisionStatus):
         requested_on (datetime.datetime | None):
@@ -44,7 +47,7 @@ class DataProductRoleAssignmentRequest:
 
     id: UUID
     data_product: DataProduct
-    user: User
+    identity: GroupIdentity | MachineUserIdentity | UserIdentity
     role: None | Role
     decision: DecisionStatus
     requested_on: datetime.datetime | None
@@ -57,14 +60,22 @@ class DataProductRoleAssignmentRequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.group_identity import GroupIdentity  # noqa: PLC0415
         from ..models.role import Role  # noqa: PLC0415
         from ..models.user import User  # noqa: PLC0415
+        from ..models.user_identity import UserIdentity  # noqa: PLC0415
 
         id = str(self.id)
 
         data_product = self.data_product.to_dict()
 
-        user = self.user.to_dict()
+        identity: dict[str, Any]
+        if isinstance(self.identity, UserIdentity):
+            identity = self.identity.to_dict()
+        elif isinstance(self.identity, GroupIdentity):
+            identity = self.identity.to_dict()
+        else:
+            identity = self.identity.to_dict()
 
         role: dict[str, Any] | None
         if isinstance(self.role, Role):
@@ -106,7 +117,7 @@ class DataProductRoleAssignmentRequest:
             {
                 "id": id,
                 "data_product": data_product,
-                "user": user,
+                "identity": identity,
                 "role": role,
                 "decision": decision,
                 "requested_on": requested_on,
@@ -123,15 +134,43 @@ class DataProductRoleAssignmentRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product import DataProduct  # noqa: PLC0415
+        from ..models.group_identity import GroupIdentity  # noqa: PLC0415
+        from ..models.machine_user_identity import MachineUserIdentity  # noqa: PLC0415
         from ..models.role import Role  # noqa: PLC0415
         from ..models.user import User  # noqa: PLC0415
+        from ..models.user_identity import UserIdentity  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
         data_product = DataProduct.from_dict(d.pop("data_product"))
 
-        user = User.from_dict(d.pop("user"))
+        def _parse_identity(
+            data: object,
+        ) -> GroupIdentity | MachineUserIdentity | UserIdentity:
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_identity_type_0 = UserIdentity.from_dict(data)
+
+                return componentsschemas_identity_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_identity_type_1 = GroupIdentity.from_dict(data)
+
+                return componentsschemas_identity_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            if not isinstance(data, dict):
+                raise TypeError()
+            componentsschemas_identity_type_2 = MachineUserIdentity.from_dict(data)
+
+            return componentsschemas_identity_type_2
+
+        identity = _parse_identity(d.pop("identity"))
 
         def _parse_role(data: object) -> None | Role:
             if data is None:
@@ -223,7 +262,7 @@ class DataProductRoleAssignmentRequest:
         data_product_role_assignment_request = cls(
             id=id,
             data_product=data_product,
-            user=user,
+            identity=identity,
             role=role,
             decision=decision,
             requested_on=requested_on,
