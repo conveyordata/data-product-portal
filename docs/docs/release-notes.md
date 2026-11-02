@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### bugfixes
+
+- **[API/UI]**: The Output Port graph no longer fails for consumers of an Output Port of a Hidden Data Product. They see its linked Technical Assets, as on the Output Port details, but not the Hidden Data Product itself.
+
 ## 0.8.1
 
 ### breaking changes
