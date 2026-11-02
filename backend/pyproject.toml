@@ -16,7 +16,7 @@ readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = "^26.2.0"
@@ -94,7 +94,7 @@ ty = "uvx ty check"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 up = "docker compose up -d postgresql"
 down = "docker compose down postgresql"
-poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --upgrade"
+poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade"
 loadtest = "locust -f loadtest/locustfile.py"
 
 [tool.mypy]
