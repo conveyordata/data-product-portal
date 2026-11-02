@@ -1,7 +1,11 @@
+import { PostHogProvider } from '@posthog/react';
 import { HttpResponse, http } from 'msw';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataProductForm } from '@/components/data-products/data-product-form/data-product-form.component.tsx';
-import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
+import { NewDataProductForm } from '@/pages/cart/components/new-data-product-form.tsx';
+import { DataProductVisibility, type GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
@@ -19,8 +23,6 @@ import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
 import { Prototype } from '@/types/roles';
 
-vi.mock('@posthog/react', () => ({ usePostHog: () => ({ capture: vi.fn() }) }));
-
 const savedProduct: GetDataProductResponse = {
     ...mockDataProducts[0],
     about: '',
@@ -31,7 +33,9 @@ const savedProduct: GetDataProductResponse = {
 
 function renderForm(mode: 'create' | 'edit') {
     return renderWithProviders(
-        <DataProductForm mode={mode} dataProductId={mode === 'edit' ? savedProduct.id : undefined} />,
+        <PostHogProvider client={posthog}>
+            <DataProductForm mode={mode} dataProductId={mode === 'edit' ? savedProduct.id : undefined} />
+        </PostHogProvider>,
         {
             routerProps: { initialEntries: ['/'] },
             currentUser: mockUsers[0],
@@ -56,8 +60,9 @@ async function fillRequiredFields() {
     await userEvent.type(screen.getByRole('textbox', { name: /^Description/ }), 'A product with saved environments.');
 }
 
-describe('DataProductForm environments', () => {
+describe('DataProductForm', () => {
     beforeEach(() => {
+        vi.spyOn(posthog, 'capture').mockImplementation(() => undefined);
         allowAllAuth();
         mockGetEnvironments();
         mockGetDomains(mock_domains);
@@ -76,6 +81,92 @@ describe('DataProductForm environments', () => {
                 }),
             ),
         );
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        localStorage.clear();
+    });
+
+    describe.each([
+        { flow: 'Product Studio', event: PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED, cart: false },
+        { flow: 'cart checkout', event: PosthogEvents.CART_CHECKOUT_COMPLETED_NEW_DATA_PRODUCT, cart: true },
+    ])('$flow visibility tracking', ({ event, cart }) => {
+        async function prepareForm(visibility: DataProductVisibility) {
+            if (cart) {
+                renderWithProviders(
+                    <PostHogProvider client={posthog}>
+                        <NewDataProductForm />
+                    </PostHogProvider>,
+                    {
+                        routerProps: { initialEntries: ['/'] },
+                        currentUser: mockUsers[0],
+                        preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                    },
+                );
+            } else {
+                renderForm('create');
+            }
+            await getEnvironmentPicker();
+            await fillRequiredFields();
+            if (cart) {
+                await userEvent.type(screen.getByRole('textbox', { name: 'Business justification' }), 'Analysis');
+            }
+            if (visibility === DataProductVisibility.Hidden) {
+                await userEvent.click(screen.getByText('Hidden'));
+            }
+        }
+
+        async function submitHiddenForm() {
+            await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+            const confirmation = await screen.findByRole('tooltip');
+            await userEvent.click(within(confirmation).getByRole('button', { name: 'Create' }));
+        }
+
+        it.each([DataProductVisibility.Discoverable, DataProductVisibility.Hidden])(
+            'tracks %s visibility after successful creation',
+            async (visibility) => {
+                server.use(http.post('*/api/v2/data_products', () => HttpResponse.json({ id: 'created-product' })));
+                await prepareForm(visibility);
+                expect(posthog.capture).not.toHaveBeenCalled();
+                if (visibility === DataProductVisibility.Hidden) {
+                    await submitHiddenForm();
+                } else {
+                    await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+                }
+                await waitFor(() =>
+                    expect(posthog.capture).toHaveBeenCalledExactlyOnceWith(
+                        event,
+                        cart ? { visibility, cartSize: 1 } : { visibility },
+                    ),
+                );
+            },
+        );
+
+        it('does not track failed Hidden Data Product creation', async () => {
+            server.use(
+                http.post('*/api/v2/data_products', () =>
+                    HttpResponse.json({ detail: 'Creation failed' }, { status: 500 }),
+                ),
+            );
+            await prepareForm(DataProductVisibility.Hidden);
+            await submitHiddenForm();
+            await screen.findByText(
+                cart ? 'Failed to create Data Product. Please try again.' : 'Failed to create Data Product',
+            );
+            expect(posthog.capture).not.toHaveBeenCalled();
+        });
+
+        it('does not track cancelled Hidden Data Product creation', async () => {
+            const save = vi.fn(() => HttpResponse.json({ id: 'created-product' }));
+            server.use(http.post('*/api/v2/data_products', save));
+            await prepareForm(DataProductVisibility.Hidden);
+            await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+            const confirmation = await screen.findByRole('tooltip');
+            await userEvent.click(within(confirmation).getByRole('button', { name: 'Cancel' }));
+            expect(save).not.toHaveBeenCalled();
+            expect(posthog.capture).not.toHaveBeenCalled();
+        });
     });
 
     it('prefills global defaults independently of Domain changes', async () => {
