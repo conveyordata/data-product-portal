@@ -94,7 +94,7 @@ ty = "uvx ty check"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 up = "docker compose up -d postgresql"
 down = "docker compose down postgresql"
-poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.13 --upgrade"
+poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade"
 loadtest = "locust -f loadtest/locustfile.py"
 
 [tool.mypy]
