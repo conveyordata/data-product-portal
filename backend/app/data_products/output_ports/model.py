@@ -230,7 +230,10 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_output_port_table, back_populates="output_ports", lazy="selectin"
+        secondary=tag_output_port_table,
+        back_populates="output_ports",
+        lazy="selectin",
+        passive_deletes=True,
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",

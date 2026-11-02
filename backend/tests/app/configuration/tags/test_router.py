@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from app.authorization.roles.schema import Scope
@@ -62,6 +64,11 @@ class TestTagsRouter:
         tags = self.get_tags(client)
         assert tags.status_code == 200
         assert len(tags.json()["tags"]) == 0
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_tag__not_found(self, client):
+        response = self.remove_tag(client, uuid4())
+        assert response.status_code == 404
 
     @pytest.mark.usefixtures("admin")
     def test_remove_tag_coupled_with_dataset(self, client):
