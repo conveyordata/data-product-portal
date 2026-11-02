@@ -17,7 +17,7 @@
         "cypress:open": "cypress open",
         "cypress:run": "cypress run",
         "biome": "biome check --error-on-warnings && npm run typecheck && npm run validate-translations",
-        "biome:fix": "biome check --write --error-on-warnings && npm run typecheck && npm run validate-translations",
+        "biome:fix": "biome check --write --error-on-warnings && npm run typecheck && npm run extract-translations",
         "biome:migrate": "biome migrate --write",
         "typecheck": "tsc --strict --noEmit",
         "extract-translations": "npx i18next-cli extract",
