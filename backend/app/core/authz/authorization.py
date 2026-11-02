@@ -68,7 +68,9 @@ def _has_access_through_consumer_role(
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
         self._reloading = False
-        self._adapter = sqlalchemy_adapter.Adapter(database.get_url())
+        # Share the application engine so connection-time authentication (see
+        # app.database.database.apply_auth) applies to the policy store as well.
+        self._adapter = sqlalchemy_adapter.Adapter(database.engine)
         self._enforcer: SyncedEnforcer = self._initialize(self._adapter)
         self._cache: Cache = TTLCache(
             maxsize=settings.AUTHORIZER_CACHE_SIZE,
