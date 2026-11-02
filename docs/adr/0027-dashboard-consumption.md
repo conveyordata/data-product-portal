@@ -97,9 +97,10 @@ A dashboard that already exists can be registered as a Consumption; Portal then 
 
 * **Team or organisation-wide dashboard.** Finance creates a Consumption "Sales attribution", states its purpose and requests the Sales Output Port. The Sales owner approves once. End users ask to join an audience, and the Consumption owner approves.
 * **Dashboard on own data.** A dashboard that only the team owning the data reads, such as a quality dashboard, is a Technical Asset of a type that cannot be shared, inside its Data Product. It reads with the Data Product's identity, needs no request and no audience, and is listed as an asset of the Data Product. This works today. It becomes a Consumption once end users outside the team need to see it. This assumes the Provisioner lets a Data Product's team members read the Data Product's own data.
-* **Application, agent or integration.** A Consumption whose audience holds the service principals it reads with, plus viewers when an app or agent reads on their behalf. An integration that moves data to an operational system or an external party is a Consumption; if other teams build on the target through Portal, it publishes data and is a Data Product.
+* **Application deployed by a Data Product.** A web app that a Data Product's team builds and deploys keeps living in that Data Product. Once end users outside the team need it, the team creates a Consumption that links to the Data Product that deploys it and registers the app. Its Input Ports on the team's own Output Ports are approved automatically (see "Same owner").
+* **Application, agent or integration.** A Consumption whose Technical Asset reads with a machine user, or with each viewer when an app or agent reads on their behalf. An integration that moves data to an operational system or an external party is a Consumption; if other teams build on the target through Portal, it publishes data and is a Data Product.
 * **Exploration.** An Exploration (see "Exploration, Consumption and Data Product").
-* **Only listed.** A Consumption whose audience holds only the identity it reads with. Portal has the lineage, and the organisation decides whether it governs more.
+* **Only listed.** A Consumption without audiences, whose Technical Asset reads with its machine user. Portal has the lineage, and the organisation decides whether it governs more.
 
 ### Combining data
 
@@ -117,8 +118,7 @@ When several Consumptions repeat the same join or logic, it should move upstream
 ### Audiences
 
 * An audience belongs to one Consumption and is deleted with it. Reuse comes from putting the same Group from the identity provider in several audiences; Portal keeps Groups flat ([ADR-0023](./0023-external-identities-group-based-auth.md)), so an audience is not a Group of Groups.
-* Members are users, Groups and machine users. Every identity that reads through a Consumption is an audience member; a Consumption has no identity of its own. This meets the third principle.
-* A machine user in an audience may not write the data into storage that others read. That would be publishing without a Data Product. This is enforced by policy and visible in lineage.
+* Members are users, Groups and machine users.
 * The Consumption's owners create audiences, link them to Input Ports, add members and approve requests to join.
 * The Output Port owner approves the Consumption's Input Port once, following the Output Port's Access Function as today. From then on the grants of an audience's Input Ports follow its members. There is no cap on an audience and no approval per member by the Output Port owner; their control is revoking the Input Port.
 * Membership of a Group follows the identity provider. A change to a Group triggers a reconcile of the Consumptions it sits in.
@@ -129,7 +129,7 @@ When several Consumptions repeat the same join or logic, it should move upstream
 Sensitive data is split with Output Ports, not inside the Consumption.
 For example, the Sales Data Product publishes "Customers" and "Customers PII", and the Revenue dashboard holds an Input Port on each.
 Audience "Sales" is linked to the "Customers" Input Port, and audience "Compliance" to both.
-Everyone opens the same dashboard, and only Compliance sees the personal data.
+Everyone opens the same dashboard, and with viewer identity only Compliance sees the personal data.
 
 ```mermaid
 flowchart LR
@@ -155,12 +155,42 @@ flowchart LR
     A2 ---|added by Consumption owner| G[Group]
 ```
 
+### Roles and data grants
+
+A person who uses a Consumption can need two separate permissions:
+
+* **Open the asset**: a role on the Consumption's Technical Asset, for example an app role or the audience of a Power BI app.
+* **Read the data**: the grants of an Input Port on an Output Port.
+
+| Role on the Technical Asset | Who |
+|---|---|
+| Admin | The Consumption's owner |
+| Contributor | The Consumption's team members |
+| Reader | The members of its audiences |
+
+An audience always gets the reader role and is always linked to the Input Ports whose data its members see.
+The Technical Asset states which identity it reads the data with, and that decides who gets the grants:
+
+| | Viewer identity | Owner identity |
+|---|---|---|
+| Who reads the data | Each person who views | One machine user, named on the Technical Asset |
+| Audience members get | The reader role and the grants of their audience's Input Ports | Only the reader role |
+| The machine user gets | Nothing | The grants of all the Consumption's Input Ports |
+| Link between audience and Input Port | Gives the grants | Shows in lineage which data the audience sees |
+| Split by Output Port per audience | Enforced by the data platform | Needs separate Technical Assets or the BI tool's own row-level security |
+
+Every identity that reads data through a Consumption is either an audience member or the machine user of one of its Technical Assets. This meets the third principle.
+The machine user may not write the data into storage that others read. That would be publishing without a Data Product. This is enforced by policy and visible in lineage.
+The provisioning event carries each audience with its members, its reader role and its linked Input Ports, and each Technical Asset with its identity and machine user.
+Which roles each type of Technical Asset offers, and how they map onto a tool, belongs to the later ADR on tools and assets.
+
 ### What gets provisioned
 
 | | Data Product | Exploration | Consumption |
 |---|---|---|---|
-| Identity | Its own | Its owner | Its audience members |
-| Grants from Input Ports | Yes | Yes, time-bound | Yes, to audience members |
+| Identity | Its own | Its owner | Its audience members or the machine user of its Technical Asset |
+| Grants from Input Ports | Yes | Yes, time-bound | Yes, to audience members or the machine user |
+| Roles on its Technical Assets | No | No | Admin, contributor and reader |
 | Schema for shared data, pipelines that write tables | Yes | No | No |
 | Output Ports, data contracts, data quality | Yes | No | No |
 | Private storage nobody else reads | Its own schema | Scratch space where the owner writes tables | Working storage only, as Technical Assets: import cache, app state, vector index, staging folder |
@@ -192,11 +222,24 @@ When the requester already holds approve rights on the Output Port, the request 
 This is the permission the existing "grant directly" endpoint checks.
 It applies to Data Products too: today a Data Product requesting its own team's Output Port goes to pending and the team approves itself.
 
+### Migration
+
+A person reads data in only three ways:
+
+1. Through an Exploration.
+2. As a team member of the Data Product that owns the data.
+3. As an audience member of a Consumption.
+
+Every direct access that a person or Group has today moves to one of these three.
+An app or dashboard with direct assignments becomes a Consumption; the people and Groups assigned to it become its audience.
+An Exploration is the safe temporary landing, as it is today, until the access finds its purpose.
+There is no catch-all Consumption for access without a purpose.
+
 ### Confirmation
 
 * A Consumption is a new kind of the shared base model, owned by a user or Group, that holds Input Ports and has audiences, and never has Output Ports.
-* Persons never hold an Input Port; every identity that reads through a Consumption is an audience member.
-* Audience members receive the grants of the Input Ports their audience is linked to.
+* Persons never hold an Input Port; every identity that reads through a Consumption is an audience member or the machine user of its Technical Asset.
+* Audience members get the reader role on the Technical Asset; with viewer identity they also receive the grants of the Input Ports their audience is linked to.
 * Lineage shows the Output Port owner which audience is linked to which of its Output Ports.
 * Requests from someone who holds approve rights on the Output Port are approved automatically, for Consumptions and Data Products.
 * A dashboard that only the owning team reads stays a not-shareable Technical Asset in its Data Product.
@@ -329,7 +372,7 @@ The first draft compared seven options and three ways to share a dashboard. They
 | Dashboard as an Exploration | Explorations are a lifecycle stage, personal and short-lived. |
 | Group as requester | Groups are audience members; a Group has no purpose of its own. |
 | Persons request the Output Port directly | Rejected: a person would hold the Input Port. Persons join audiences instead. |
-| Recorded exposure, no access management | A Consumption whose audience holds only the identity it reads with. |
+| Recorded exposure, no access management | A Consumption without audiences, whose Technical Asset reads with its machine user. |
 | Consumption as a new concept | Option 1. |
 | Sharing through an Output Port on the Consumption | Rejected: sharing a dashboard is not publishing data. |
 | Sharing through audiences | Kept: the audiences above. |
