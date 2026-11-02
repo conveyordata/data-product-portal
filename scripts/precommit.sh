@@ -8,9 +8,19 @@ if ! git diff --quiet; then
     exit 1
 fi
 
-venv=backend/.venv
-[[ -d $venv ]] || venv="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/backend/.venv"
-VIRTUAL_ENV="$(cd "$venv" && pwd)" || exit 1
+venv_of() {
+    if [[ -d $1/.venv ]]; then
+        echo "$1/.venv"
+    else
+        (cd "$1" && poetry env info --path 2>/dev/null)
+    fi
+}
+VIRTUAL_ENV="$(venv_of "$PWD/backend")"
+[[ -n $VIRTUAL_ENV ]] || VIRTUAL_ENV="$(venv_of "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/backend")"
+if [[ -z $VIRTUAL_ENV ]]; then
+    echo "No backend environment found: run poetry install in backend/." >&2
+    exit 1
+fi
 export VIRTUAL_ENV PATH="$VIRTUAL_ENV/bin:$PATH" PYTHONPATH="$PWD/backend" OTEL_SDK_DISABLED=true
 
 untracked() { git ls-files --others --exclude-standard; }

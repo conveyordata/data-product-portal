@@ -20,9 +20,9 @@ for page in "$@"; do
 done
 
 skill="$(cd "$(dirname "$0")" && pwd)"
+playwright="$(npx -y -p playwright@1.56.0 -c 'which playwright')"
 shoot() {
-    npx -y -p playwright@1.56.0 -c \
-        "NODE_PATH=\$(dirname \$(dirname \$(which playwright))) node '$skill/shoot.cjs' '$1' '$out' '$2' ${pages[*]}"
+    NODE_PATH="$(dirname "$(dirname "$playwright")")" node "$skill/shoot.cjs" "$1" "$out" "$2" "${pages[@]}"
 }
 
 shoot http://localhost:3000 ""
