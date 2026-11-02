@@ -1,4 +1,4 @@
-import { ExportOutlined } from '@ant-design/icons';
+import { ExportOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Flex, Space, Tag, Tooltip, Typography } from 'antd';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -8,16 +8,17 @@ import { formatQualityStatus, getQualityStatusColor, getQualityStatusIcon } from
 const { Text } = Typography;
 
 type QualityBadgeProps = {
-    quality_status: DataQualityStatus;
+    status?: DataQualityStatus | null;
     createdAt?: string;
     detailsUrl?: string;
 };
 
-export function QualityBadge({ quality_status, createdAt, detailsUrl }: QualityBadgeProps) {
+export function QualityBadge({ status, createdAt, detailsUrl }: QualityBadgeProps) {
     const { t } = useTranslation();
 
-    const icon = getQualityStatusIcon(quality_status);
-    const color = getQualityStatusColor(quality_status);
+    const icon = status ? getQualityStatusIcon(status) : <MinusCircleOutlined />;
+    const color = status ? getQualityStatusColor(status) : 'default';
+    const label = status ? formatQualityStatus(status, t) : t('No data');
 
     const tag = (
         <Tag color={color} variant="outlined" style={{ padding: '4px 10px', minWidth: '9em' }}>
@@ -26,7 +27,7 @@ export function QualityBadge({ quality_status, createdAt, detailsUrl }: QualityB
                     <Space size={4} align="baseline">
                         {icon}
                         <Text strong style={{ color: 'inherit' }}>
-                            {formatQualityStatus(quality_status, t)}
+                            {label}
                         </Text>
                     </Space>
                     {detailsUrl ? (
@@ -45,7 +46,7 @@ export function QualityBadge({ quality_status, createdAt, detailsUrl }: QualityB
         </Tag>
     );
 
-    if (createdAt === undefined) {
+    if (!detailsUrl) {
         return tag;
     }
 

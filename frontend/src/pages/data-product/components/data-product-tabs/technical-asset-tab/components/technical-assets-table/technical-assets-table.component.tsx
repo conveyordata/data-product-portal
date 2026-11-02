@@ -1,6 +1,9 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
+import { QueryList } from '@/components/query-list/query-list.component.tsx';
 import { TechnicalAssetCard } from '@/components/technical-assets/technical-asset-card/technical-asset-card.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
@@ -17,8 +20,8 @@ type Props = {
 
 export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
-    const { data: { technical_assets: technicalAssets = [] } = {} } =
-        useGetDataProductTechnicalAssetsQuery(dataProductId);
+    const technicalAssetsQuery = useGetDataProductTechnicalAssetsQuery(dataProductId);
+    const { data: { technical_assets: technicalAssets = [] } = {} } = technicalAssetsQuery;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
     const { isVisible, handleOpen, handleClose } = useModal();
     const { data: access } = useCheckAccessQuery(
@@ -28,7 +31,7 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
         },
         { skip: !dataProductId },
     );
-    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return technicalAssets;
@@ -72,29 +75,31 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
                 <Input.Search
                     placeholder={t('Search Technical Assets by name or namespace')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Flex>
 
-            {filteredDataOutputs.map((technicalAsset) => (
-                <TechnicalAssetCard
-                    key={technicalAsset.id}
-                    technicalAsset={technicalAsset}
-                    dataProductId={dataProductId}
-                    onDragStart={() => handleDragStart(technicalAsset.id)}
-                    onDragEnd={handleDragEnd}
-                />
-            ))}
-
-            {filteredDataOutputs.length === 0 && (
-                <Flex justify="center">
-                    <Typography.Text type="secondary">
-                        {searchTerm
-                            ? t('No Technical Assets found matching your search')
-                            : t('No Technical Assets found')}
-                    </Typography.Text>
-                </Flex>
-            )}
+            <QueryList
+                query={technicalAssetsQuery}
+                items={filteredDataOutputs}
+                renderItem={(technicalAsset) => (
+                    <TechnicalAssetCard
+                        key={technicalAsset.id}
+                        technicalAsset={technicalAsset}
+                        dataProductId={dataProductId}
+                        onDragStart={() => handleDragStart(technicalAsset.id)}
+                        onDragEnd={handleDragEnd}
+                    />
+                )}
+                subject={t('Technical Assets')}
+                emptyState={{
+                    icon: <TechnicalAssetOutlined />,
+                    title: t('No Technical Assets yet'),
+                    description: t('Add a Technical Asset to describe where the data of this Data Product lives.'),
+                }}
+                filter={searchFilter(searchTerm, setSearchTerm)}
+            />
 
             {isVisible && (
                 <AddTechnicalAssetPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />

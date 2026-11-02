@@ -9,6 +9,7 @@
 ## Prerequisites
 
 ### Configuration (config.local.js file)
+
 Both for local execution and local development, you need to specify some configuration arguments.
 All configuration values for this project are read from a `config.local.js` file in the frontend folder.
 You can use the following template to get started:
@@ -60,7 +61,6 @@ const config = (() => {
         POSTHOG_ENABLED: false,
     };
 })();
-
 ```
 
 ## Running the front end locally for development
@@ -76,6 +76,7 @@ npm run dev
 ```
 
 ## Linting and Formatting
+
 This project has been set up using [biome](https://biomejs.dev) for linting and formatting.
 The configuration file is called [biome.json](biome.json).
 For ease of use we advise you to configure your IDE to use the above-mentioned files automatically on format or save actions.
@@ -90,6 +91,7 @@ npm run biome:fix
 ```
 
 ## Translations
+
 Static frontend translations are managed by using [i18next](https://www.i18next.com/).
 Currently, the only language available is English, but this can be extended over time.
 The English value of the translatable labels is deliberately being used as the translation key for ease of use.
@@ -103,39 +105,39 @@ Use the `t` function from the useTranslation hook in your components or hooks:
 import { useTranslation } from 'react-i18next';
 
 const MyComponent = () => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-    <div>
-      <h1>{t('key')}</h1>
-      <p>{t('key2')}</p>
-    </div>
-  );
+    return (
+        <div>
+            <h1>{t('key')}</h1>
+            <p>{t('key2')}</p>
+        </div>
+    );
 };
 
 const MyHook = () => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return {
-    key: t('key'),
-    key2: t('key2'),
-  };
+    return {
+        key: t('key'),
+        key2: t('key2'),
+    };
 };
 ```
 
 #### Using the i18n object
 
 Use the `i18n` object directly inside utility functions.
-  When using this method, make sure to import the `i18n` object
-  from your i18n configuration file.
-  To successfully consume your utility function, make sure that it is being consumed
-  inside a functional component or hook.
+When using this method, make sure to import the `i18n` object
+from your i18n configuration file.
+To successfully consume your utility function, make sure that it is being consumed
+inside a functional component or hook.
 
 ```tsx
 import { i18n } from '@/i18n';
 
 const myUtilityFunction = () => {
-  return i18n.t('key');
+    return i18n.t('key');
 };
 
 export default myUtilityFunction;
@@ -159,8 +161,8 @@ All extracted keys will have an empty string as value by default. You can add th
 
 ```json
 {
-  "key": "value",
-  "key2": "value2"
+    "key": "value",
+    "key2": "value2"
 }
 ```
 
@@ -170,14 +172,14 @@ Use the key in your code to display the translated value.
 import { useTranslation } from 'react-i18next';
 
 const MyComponent = () => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-          <div>
+    return (
+        <div>
             <h1>{t('key')}</h1> {/* Displays 'value' */}
             <p>{t('key2')}</p> {/* Displays 'value2' */}
-          </div>
-  );
+        </div>
+    );
 };
 
 export default MyComponent;
@@ -191,13 +193,13 @@ You can interpolate variables in translations by using the `t` function from the
 import { useTranslation } from 'react-i18next';
 
 const MyComponent = () => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-          <div>
+    return (
+        <div>
             <h1>{t('Welcome, {{name}}', { name: 'John' })}</h1> {/* Displays 'Welcome, John' */}
-          </div>
-  );
+        </div>
+    );
 };
 
 export default MyComponent;
@@ -207,7 +209,7 @@ And in the JSON locales files, you can define the translation with the variable 
 
 ```json
 {
-  "Welcome, {{name}}": "Welcome, {{name}}"
+    "Welcome, {{name}}": "Welcome, {{name}}"
 }
 ```
 
@@ -231,27 +233,27 @@ const supportedLanguages = [languageEn, languageDe]; // <-- pass the new languag
 export const defaultLanguage = languageEn;
 
 i18n
-        // pass the i18n instance to react-i18next.
-        .use(I18NextHttpBackend)
-        .use(initReactI18next)
-        // init i18next
-        // for all options read: https://www.i18next.com/overview/configuration-options
-        .init({
-          lng: defaultLanguage,
-          fallbackLng: defaultLanguage,
-          supportedLngs: supportedLanguages,
-          nsSeparator: false,
-          keySeparator: false,
-          missingKeyNoValueFallbackToKey: true,
-          interpolation: {
+    // pass the i18n instance to react-i18next.
+    .use(I18NextHttpBackend)
+    .use(initReactI18next)
+    // init i18next
+    // for all options read: https://www.i18next.com/overview/configuration-options
+    .init({
+        lng: defaultLanguage,
+        fallbackLng: defaultLanguage,
+        supportedLngs: supportedLanguages,
+        nsSeparator: false,
+        keySeparator: false,
+        missingKeyNoValueFallbackToKey: true,
+        interpolation: {
             escapeValue: false, // not needed for react as it escapes by default
-          },
-          react: {
+        },
+        react: {
             useSuspense: true,
-          },
-          returnEmptyString: false,
-        })
-        .catch(() => null);
+        },
+        returnEmptyString: false,
+    })
+    .catch(() => null);
 
 export default i18n;
 ```
@@ -266,19 +268,19 @@ import { useTranslation } from 'react-i18next';
 import i18n, { languageDe, languageEn } from '@/i18n';
 
 const MyComponent = () => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  const switchLanguage = (language) => {
-    i18n.changeLanguage(language);
-  };
+    const switchLanguage = (language) => {
+        i18n.changeLanguage(language);
+    };
 
-  return (
-          <div>
+    return (
+        <div>
             <button onClick={() => switchLanguage(languageEn)}>English</button>
             <button onClick={() => switchLanguage(languageDe)}>Deutsch</button>
             <h1>{t('key')}</h1>
-          </div>
-  );
+        </div>
+    );
 };
 
 export default MyComponent;
@@ -297,12 +299,12 @@ relevant i18n events such as loaded translations, language changes, loaded names
 const isDevMode = import.meta.env.MODE === 'development';
 
 i18n
+    // ...
+    .init({
         // ...
-        .init({
-          // ...
-          debug: isDevMode, // <-- Enable debug mode when in development mode
-          //   ...
-        })
+        debug: isDevMode, // <-- Enable debug mode when in development mode
+        //   ...
+    });
 // ...
 
 export default i18n;
@@ -313,10 +315,10 @@ the [react-i18next documentation](https://react.i18next.com/getting-started).
 
 
 ## Data Tracking
+
 This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
 
 To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
-
 - By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
 - By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
 
@@ -328,28 +330,19 @@ At the moment, it only captures the following:
 - tab changes
 - pageviews
 - search queries (for datasets, etc.)
-All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
+  All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [React]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-
 [React-url]: https://reactjs.org/
-
-[Ant-Design]:https://img.shields.io/badge/-AntDesign-%230170FE?style=for-the-badge&logo=ant-design&logoColor=white
-
-[Ant-Design-url]:https://ant.design
-
-[Vite]:https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white
-
-[Vite-url]:https://vitejs.dev/
-
-[Typescript]:https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white
-
-[Typescript-url]:https://www.typescriptlang.org
-
+[Ant-Design]: https://img.shields.io/badge/-AntDesign-%230170FE?style=for-the-badge&logo=ant-design&logoColor=white
+[Ant-Design-url]: https://ant.design
+[Vite]: https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vitejs.dev/
+[Typescript]: https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white
+[Typescript-url]: https://www.typescriptlang.org
 [Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
-
 [Docker-url]: https://www.docker.com

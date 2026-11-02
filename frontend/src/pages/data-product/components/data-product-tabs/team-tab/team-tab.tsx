@@ -2,6 +2,7 @@ import { Button, Flex, Input } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
@@ -39,9 +40,10 @@ export function TeamTab({ dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductQuery(dataProductId);
-    const { data: roleAssignments, isFetching } = useListDataProductRoleAssignmentsQuery({
+    const roleAssignmentsQuery = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,
     });
+    const { data: roleAssignments, isFetching } = roleAssignmentsQuery;
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
 
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -87,13 +89,19 @@ export function TeamTab({ dataProductId }: Props) {
                     <Input.Search
                         placeholder={t('Search users by email or name')}
                         allowClear
+                        value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
                         {t('Add User')}
                     </Button>
                 </Flex>
-                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
+                <TeamTable
+                    dataProductId={dataProductId}
+                    dataProductUsers={filteredUsers}
+                    roleAssignmentsQuery={roleAssignmentsQuery}
+                    filter={searchFilter(searchTerm, setSearchTerm)}
+                />
             </Flex>
             {isVisible && (
                 <UserPopup

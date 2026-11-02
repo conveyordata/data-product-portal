@@ -45,7 +45,7 @@ describe('DataProductsTab', () => {
         expect(screen.getByText('Customer Insights')).toBeInTheDocument();
     });
 
-    it('shows empty state when there are no data products', async () => {
+    it('shows the "yet" empty state for an empty default "My Data Products" view', async () => {
         setupMocks([]);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
@@ -53,7 +53,7 @@ describe('DataProductsTab', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Ready to build your first Data Product?')).toBeInTheDocument();
+            expect(screen.getByText('No Data Products yet')).toBeInTheDocument();
         });
     });
 

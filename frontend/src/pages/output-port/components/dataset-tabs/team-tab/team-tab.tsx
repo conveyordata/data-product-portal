@@ -2,6 +2,7 @@ import { Button, Flex, Input } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
@@ -42,9 +43,10 @@ export function TeamTab({ datasetId, dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataset } = useGetOutputPortQuery({ id: datasetId, dataProductId });
-    const { data: roleAssignments, isFetching } = useListOutputPortRoleAssignmentsQuery({
+    const roleAssignmentsQuery = useListOutputPortRoleAssignmentsQuery({
         outputPortId: datasetId,
     });
+    const { data: roleAssignments, isFetching } = roleAssignmentsQuery;
     const [addUserToDataset, { isLoading: isAddingUser }] = useCreateOutputPortRoleAssignmentMutation();
 
     const { data: { roles: DATASET_ROLES = [] } = {}, isFetching: isLoadingRoles } = useGetRolesQuery(Scope.DATASET);
@@ -88,13 +90,20 @@ export function TeamTab({ datasetId, dataProductId }: Props) {
                     <Input.Search
                         placeholder={t('Search users by email or name')}
                         allowClear
+                        value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
                         {t('Add User')}
                     </Button>
                 </Flex>
-                <TeamTable datasetId={datasetId} datasetUsers={filteredUsers} dataProductId={dataProductId} />
+                <TeamTable
+                    datasetId={datasetId}
+                    datasetUsers={filteredUsers}
+                    roleAssignmentsQuery={roleAssignmentsQuery}
+                    dataProductId={dataProductId}
+                    filter={searchFilter(searchTerm, setSearchTerm)}
+                />
             </Flex>
             {isVisible && (
                 <UserPopup

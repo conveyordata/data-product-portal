@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { FlagOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -15,7 +17,8 @@ import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.compon
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
-    const { data: dataProductLifecycles = undefined, isFetching } = useGetDataProductsLifecyclesQuery();
+    const lifecyclesQuery = useGetDataProductsLifecyclesQuery();
+    const { data: dataProductLifecycles = undefined } = lifecyclesQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCyclesGetItem | undefined>(undefined);
@@ -61,11 +64,17 @@ export function DataProductLifecyclesTable() {
                     {t('Add Lifecycle')}
                 </Button>
             </Flex>
-            <Table<DataProductLifeCyclesGetItem>
+            <ListTable<DataProductLifeCyclesGetItem>
+                query={lifecyclesQuery}
                 dataSource={dataProductLifecycles?.data_product_life_cycles}
                 columns={columns}
+                subject={t('Lifecycles')}
+                emptyState={{
+                    icon: <FlagOutlined />,
+                    title: t('No Lifecycles yet'),
+                    description: t('Lifecycles show how far along a Data Product is, from draft to ready.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 size="small"
             />

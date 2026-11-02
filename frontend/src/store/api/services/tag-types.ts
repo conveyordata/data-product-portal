@@ -26,7 +26,6 @@ export enum TagTypes {
     OutputPortRoleAssignments = 'OutputPortRoleAssignments',
     Domain = 'Domain',
     TechnicalAsset = 'TechnicalAsset',
-    Graph = 'Graph',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
     PlatformServiceConfig = 'PlatformServiceConfig',

@@ -8,6 +8,7 @@ permissions:
   issues: read
   pull-requests: read
 timeout-minutes: 90
+runs-on: ubuntu-24.04
 sandbox:
   agent:
     runtime: docker-sudo-iptables

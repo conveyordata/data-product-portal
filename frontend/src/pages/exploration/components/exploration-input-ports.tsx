@@ -14,8 +14,8 @@ type Props = {
     explorationId: string;
 };
 export const ExplorationInputPorts = ({ explorationId }: Props) => {
-    const { data: { input_ports: inputPorts = [] } = {}, isFetching: loadingInputPorts } =
-        useGetExplorationInputPortsQuery(explorationId);
+    const inputPortsQuery = useGetExplorationInputPortsQuery(explorationId);
+    const { data: { input_ports: inputPorts = [] } = {} } = inputPortsQuery;
     const currentUser = useSelector(selectCurrentUser);
     const { data: exploration } = useGetExplorationQuery(explorationId);
 
@@ -51,7 +51,7 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
 
     return (
         <InputPortTab
-            loadingInputPorts={loadingInputPorts}
+            query={inputPortsQuery}
             canRequestAccess={isOwner}
             canRemoveAccess={isOwner}
             inputPorts={inputPorts}

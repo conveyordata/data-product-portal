@@ -22,16 +22,16 @@ sidebar_position: 200
 - **[Provisioner]**: Domains can be provisioned. The portal sends a `domain.event` webhook when a Domain is created, updated or deleted, Domains support finalizers (`POST /api/v2/configuration/domains/{id}/finalizers` and `DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}`), and the SDK has a `ResourceType.DOMAIN` reconciler.
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
+- **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
 
 ### bugfixes
 
 - **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
 - **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
-
-### bugfixes
-
+- **[API]**: Authorization checks the id the endpoint acts on. Before, a user with rights on one Data Product could act on another by passing the first id in the query string, for example to delete it or to add Role Assignments to it. An id with the same name elsewhere in the request is now ignored, and an id that cannot be read is denied with a 403.
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+- **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
 
 ## 0.8.0
 

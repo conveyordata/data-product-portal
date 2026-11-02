@@ -1,19 +1,20 @@
 import { Bar } from '@ant-design/charts';
 import { useTranslation } from 'react-i18next';
 
+import type { EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
 import { ChartCard } from './chart-card';
 import type { ColorScaleConfig, ConsumerTotal } from './chart-data.utils';
 
 type QueriesPerConsumerChartProps = {
     data: ConsumerTotal[];
-    isLoading: boolean;
+    query: EmptyStateQuery;
     hasData: boolean;
     colorScaleConfig: ColorScaleConfig;
 };
 
 export default function QueriesPerConsumerChart({
     data,
-    isLoading,
+    query,
     hasData,
     colorScaleConfig,
 }: QueriesPerConsumerChartProps) {
@@ -43,12 +44,7 @@ export default function QueriesPerConsumerChart({
     };
 
     return (
-        <ChartCard
-            title={t('Queries per Consumer')}
-            isLoading={isLoading}
-            hasData={hasData}
-            emptyDescription={t('No usage data available for this time range')}
-        >
+        <ChartCard title={t('Queries per Consumer')} query={query} hasData={hasData}>
             <Bar {...config} />
         </ChartCard>
     );

@@ -32,6 +32,9 @@ class ResizeObserverStub {
 }
 globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
+Range.prototype.getClientRects = () => document.createElement('div').getClientRects();
+Range.prototype.getBoundingClientRect = () => new DOMRect();
+
 beforeAll(() => {
     const { getComputedStyle } = window;
     window.getComputedStyle = (elt) => getComputedStyle(elt);

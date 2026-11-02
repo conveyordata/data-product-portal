@@ -20,7 +20,7 @@ type TestStorePreloadedState = {
     cart?: { DatasetIds: string[] };
 };
 
-function createTestStore() {
+export function createTestStore() {
     const store = configureStore({
         reducer: {
             auth: authSlice,
@@ -53,6 +53,7 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
         }
     }
 
+    // biome-ignore lint/correctness/noComponentHookFactories: closes over a per-test store, see https://redux.js.org/usage/writing-tests#setting-up-a-reusable-test-render-function
     const Wrapper = ({ children }: { children: ReactNode }) => {
         return (
             <Provider store={store}>

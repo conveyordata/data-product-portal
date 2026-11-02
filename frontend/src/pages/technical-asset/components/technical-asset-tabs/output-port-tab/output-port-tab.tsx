@@ -1,6 +1,7 @@
 import { Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
 import {
     type OutputPortLink,
@@ -36,9 +37,15 @@ export function OutputPortTab({ technicalAssetId, dataProductId }: Props) {
             <Input.Search
                 placeholder={t('Search Output Ports by name')}
                 allowClear
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <DatasetTable dataProductId={dataProductId} dataOutputId={technicalAssetId} datasets={filteredDatasets} />
+            <DatasetTable
+                dataProductId={dataProductId}
+                dataOutputId={technicalAssetId}
+                datasets={filteredDatasets}
+                filter={searchFilter(searchTerm, setSearchTerm)}
+            />
         </Flex>
     );
 }

@@ -1,7 +1,9 @@
-import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { Flex, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { EmptyStateFilter, EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -22,8 +24,10 @@ type Props = {
     datasetId: string;
     dataProductId: string;
     datasetUsers: OutputPortRoleAssignmentResponse[];
+    roleAssignmentsQuery: EmptyStateQuery;
+    filter?: EmptyStateFilter;
 };
-export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
+export function TeamTable({ datasetId, datasetUsers, dataProductId, roleAssignmentsQuery, filter }: Props) {
     const { t } = useTranslation();
     const { data: dataset, isLoading: isFetchingDataset } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteOutputPortRoleAssignmentMutation();
@@ -136,13 +140,21 @@ export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<OutputPortRoleAssignmentResponse>
-                loading={isFetchingDataset || isRemovingUser}
-                className={styles.teamListTable}
-                columns={columns}
+            <ListTable<OutputPortRoleAssignmentResponse>
+                query={roleAssignmentsQuery}
                 dataSource={datasetUsers}
-                rowKey={({ id }) => id}
+                columns={columns}
+                subject={t('team members')}
+                emptyState={{
+                    icon: <TeamOutlined />,
+                    title: t('No team members yet'),
+                    description: t('Add people to share ownership of this Output Port with them.'),
+                }}
+                loading={isFetchingDataset || isRemovingUser}
                 onChange={onChange}
+                filter={filter}
+                className={styles.teamListTable}
+                rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],

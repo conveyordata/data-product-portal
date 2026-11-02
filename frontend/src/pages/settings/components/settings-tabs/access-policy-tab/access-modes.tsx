@@ -1,7 +1,9 @@
-import { Button, Flex, Popconfirm, Table } from 'antd';
+import { SafetyCertificateOutlined } from '@ant-design/icons';
+import { Button, Flex, Popconfirm } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import AccessModesModal from '@/pages/settings/components/settings-tabs/access-policy-tab/access-modes-modal.tsx';
 import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
@@ -20,7 +22,8 @@ import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 export default function AccessModes() {
     const { t } = useTranslation();
-    const { data: { access_modes = [] } = {}, isFetching } = useGetAccessModesQuery();
+    const accessModesQuery = useGetAccessModesQuery();
+    const { data: { access_modes = [] } = {} } = accessModesQuery;
     const sorter = new Sorter<AccessModeWithType>();
     const { data: { plugins = [] } = {} } = useGetPluginsQuery();
     const [deleteAccessMode, { isLoading: isDeleting }] = useDeleteAccessModeMutation();
@@ -87,7 +90,8 @@ export default function AccessModes() {
                     </Button>
                 }
             />
-            <Table<AccessModeWithType>
+            <ListTable<AccessModeWithType>
+                query={accessModesQuery}
                 dataSource={access_modes}
                 columns={[
                     {
@@ -158,8 +162,13 @@ export default function AccessModes() {
                         },
                     },
                 ]}
+                subject={t('Access Modes')}
+                emptyState={{
+                    icon: <SafetyCertificateOutlined />,
+                    title: t('No Access Modes yet'),
+                    description: t('Access Modes describe how people may use the data they are granted.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 pagination={{ hideOnSinglePage: true }}
                 size="small"
             />

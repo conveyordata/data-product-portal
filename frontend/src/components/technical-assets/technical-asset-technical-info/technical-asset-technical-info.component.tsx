@@ -1,6 +1,8 @@
-import { Table, type TableColumnsType } from 'antd';
+import type { TableColumnsType } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TechnicalAssetOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import {
     type TechnicalInfo,
     useGetTechnicalAssetQuery,
@@ -16,7 +18,8 @@ type Props = {
 
 export function TechnicalAssetTechnicalInfo({ technicalAssetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: technicalASset, isLoading } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
+    const technicalAssetQuery = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
+    const { data: technicalASset } = technicalAssetQuery;
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
     const technicalInfo = technicalASset?.technical_info || [];
     const info_column =
@@ -31,11 +34,18 @@ export function TechnicalAssetTechnicalInfo({ technicalAssetId, dataProductId }:
     }, [t, info_column]);
 
     return (
-        <Table<TechnicalInfo>
-            loading={isLoading || isLoadingMetadata}
-            className={styles.dataOutputListTable}
-            columns={columns}
+        <ListTable<TechnicalInfo>
+            query={technicalAssetQuery}
             dataSource={technicalInfo}
+            columns={columns}
+            subject={t('technical information')}
+            emptyState={{
+                icon: <TechnicalAssetOutlined />,
+                title: t('No technical information yet'),
+                description: t('Connection details appear here per environment once this asset is provisioned.'),
+            }}
+            loading={isLoadingMetadata}
+            className={styles.dataOutputListTable}
             rowKey={(info) => info.environment_id}
             pagination={false}
             rowClassName={styles.tableRow}

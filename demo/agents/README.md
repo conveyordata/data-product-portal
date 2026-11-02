@@ -129,6 +129,11 @@ After creation, the portal shows three data products, each with:
 | Sales Transaction Ledger    | Sales     | `sales-transaction-ledger`    | `sales_transaction_ledger_user`    |
 | Customer Demographic Master | Marketing | `customer-demographic-master` | `customer_demographic_master_user` |
 
+Each output port also has a published data model and a data quality summary. Open an output port and select
+Data Model to show its tables and columns, including the traps the agents are taught to avoid: amounts stored in cents,
+abbreviated column names, the `is_retired` filter and the stale `calculated_total`. The quality badge shows Success for
+Inventory Snapshot and Customer Demographic Master, and a Warning for Sales Transaction Ledger.
+
 Each agent can only query its own schema. Try asking the **Inventory Snapshot** agent:
 > *"How many camping items do we currently have in stock?"*
 

@@ -51,7 +51,7 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await screen.findByText(/Your cart is currently empty/);
+            await screen.findByText(/Your cart is empty/);
         });
     });
     describe('Cart should support existing data products', () => {
@@ -594,7 +594,7 @@ describe('Cart', () => {
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id, []);
 
-            const CartWithRoutes = () => (
+            const cartWithRoutes = (
                 <Routes>
                     <Route
                         path="/cart"
@@ -609,7 +609,7 @@ describe('Cart', () => {
                 </Routes>
             );
 
-            renderWithProviders(<CartWithRoutes />, {
+            renderWithProviders(cartWithRoutes, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],

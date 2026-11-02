@@ -24,6 +24,9 @@ _Avoid_: Dataset link
 A Data Product that has an approved Input Port on a given Output Port.
 _Avoid_: Consumer (when the Data Product is meant, not a user)
 
+**About**:
+The long-form, rich-text description of a Data Product or Output Port, edited by its owners.
+
 ### Visibility and access
 
 **Visibility**:
