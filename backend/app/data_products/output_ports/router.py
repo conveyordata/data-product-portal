@@ -15,7 +15,7 @@ from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, OutputPortResolver
-from app.core.authz.resolvers import DataProductResolver, EmptyResolver
+from app.core.authz.resolvers import DataProductResolver
 from app.data_products.output_ports.contract.router import (
     router as contract_router,
 )
@@ -177,7 +177,11 @@ def get_output_ports_event_history(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.GLOBAL__CREATE_OUTPUT_PORT, EmptyResolver)
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_OUTPUT_PORT,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
         ),
     ],
 )

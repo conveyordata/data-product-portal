@@ -32,6 +32,7 @@ class AuthorizationAction(IntEnum):
     VALUE_313 = 313
     VALUE_314 = 314
     VALUE_315 = 315
+    VALUE_316 = 316
     VALUE_401 = 401
     VALUE_402 = 402
     VALUE_403 = 403

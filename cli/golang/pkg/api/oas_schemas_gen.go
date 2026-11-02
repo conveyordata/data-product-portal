@@ -772,6 +772,7 @@ const (
 	AuthorizationAction313 AuthorizationAction = 313
 	AuthorizationAction314 AuthorizationAction = 314
 	AuthorizationAction315 AuthorizationAction = 315
+	AuthorizationAction316 AuthorizationAction = 316
 	AuthorizationAction401 AuthorizationAction = 401
 	AuthorizationAction402 AuthorizationAction = 402
 	AuthorizationAction403 AuthorizationAction = 403
@@ -825,6 +826,7 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction313,
 		AuthorizationAction314,
 		AuthorizationAction315,
+		AuthorizationAction316,
 		AuthorizationAction401,
 		AuthorizationAction402,
 		AuthorizationAction403,

@@ -333,6 +333,8 @@ func (s AuthorizationAction) Validate() error {
 		return nil
 	case 315:
 		return nil
+	case 316:
+		return nil
 	case 401:
 		return nil
 	case 402:

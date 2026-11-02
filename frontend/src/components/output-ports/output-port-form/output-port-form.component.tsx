@@ -340,7 +340,13 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT });
+    const { data: create_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_OUTPUT_PORT,
+        },
+        { skip: mode !== 'create' || !dataProductId },
+    );
     const { data: update_access } = useCheckAccessQuery(
         {
             resource: outputPortId,

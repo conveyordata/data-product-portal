@@ -218,7 +218,7 @@ INSERT INTO public.data_product_types (id, name, description, icon_key, created_
 INSERT INTO public.data_product_types (id, name, description, icon_key, created_on, updated_on, deleted_at) VALUES ('{{ analytics_type_id }}'::uuid, 'Analytics', 'Data products that provide analysis, metrics, or aggregated insights to support business decisions.', 'ANALYTICS', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- ...existing platform service configs...
-INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY[303, 309, 310, 311, 312, 313, 314], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
+INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY[303, 309, 310, 311, 312, 313, 314, 316], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
 
 INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('{{ product_member_id }}'::uuid, 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY[313, 314, 315], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
 
