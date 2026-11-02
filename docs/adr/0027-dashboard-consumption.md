@@ -175,7 +175,7 @@ The Technical Asset states which identity it reads the data with, and that decid
 |---|---|---|
 | Who reads the data | Each person who views | One machine user, named on the Technical Asset |
 | Audience members get | The reader role and the grants of their audience's Input Ports | Only the reader role |
-| The machine user gets | Nothing | The grants of all the Consumption's Input Ports |
+| The machine user gets | Nothing | The grants of the Input Ports its Technical Asset reads |
 | Link between audience and Input Port | Gives the grants | Shows in lineage which data the audience sees |
 | Split by Output Port per audience | Enforced by the data platform | Needs separate Technical Assets or the BI tool's own row-level security |
 
@@ -183,6 +183,27 @@ Every identity that reads data through a Consumption is either an audience membe
 The machine user may not write the data into storage that others read. That would be publishing without a Data Product. This is enforced by policy and visible in lineage.
 The provisioning event carries each audience with its members, its reader role and its linked Input Ports, and each Technical Asset with its identity and machine user.
 Which roles each type of Technical Asset offers, and how they map onto a tool, belongs to the later ADR on tools and assets.
+
+#### Example: one dashboard, personal data for some
+
+The Revenue dashboard above holds an Input Port on "Customers" and one on "Customers PII".
+Audience "Sales" is linked to "Customers", audience "Compliance" to both.
+The Sales Data Product also has a row filter in the data platform on both Output Ports: a person sees only the customers of their own region.
+
+Two levels decide what a person sees:
+
+1. **Which Output Ports**: their audience, managed by the Consumption owner in Portal.
+2. **Which rows and columns**: row filters and column masks on the Output Port, managed by the Output Port owner in the data platform (out of scope of this ADR).
+
+| Option | A Sales member in region North sees | A Compliance member in region South sees | Why |
+|---|---|---|---|
+| Viewer identity | Customers of North, without personal data | Customers of South, with personal data | Each person queries with their own grants, so both levels apply per person. |
+| Owner identity | All customers of all regions, with personal data | The same | The machine user reads both Output Ports and is not filtered by region. Every reader sees what the machine user sees. |
+| Owner identity, with the BI tool's row-level security | What the dashboard's own rules allow | What the dashboard's own rules allow | The Consumption owner rebuilds both levels in the BI tool. The data platform's filters no longer protect the data. |
+| Owner identity, one Technical Asset per audience | All regions, without personal data | All regions, with personal data | Each asset has its own machine user and Input Ports. The split by Output Port holds, the row filter does not. |
+
+Use viewer identity when readers must see different data.
+Owner identity fits when every reader may see everything the Consumption reads, such as an application with one purpose or an integration.
 
 ### What gets provisioned
 
