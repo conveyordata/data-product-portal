@@ -917,6 +917,181 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/announcements": {
+      "get": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Get Output Port Announcements",
+        "operationId": "get_output_port_announcements",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnnouncementsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Create Output Port Announcement",
+        "operationId": "create_output_port_announcement",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnnouncement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAnnouncementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/announcements/{announcement_id}": {
+      "delete": {
+        "tags": [
+          "Data Products - Output ports"
+        ],
+        "summary": "Remove Output Port Announcement",
+        "operationId": "remove_output_port_announcement",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "announcement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Announcement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports": {
       "get": {
         "tags": [
@@ -10471,6 +10646,66 @@
         ],
         "title": "AccessResponse"
       },
+      "Announcement": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AnnouncementType"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "output_port_id",
+          "type",
+          "title",
+          "message",
+          "author",
+          "created_at"
+        ],
+        "title": "Announcement"
+      },
+      "AnnouncementType": {
+        "type": "string",
+        "enum": [
+          "action_needed",
+          "warning",
+          "info"
+        ],
+        "title": "AnnouncementType"
+      },
       "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest": {
         "properties": {
           "technical_asset_id": {
@@ -11175,6 +11410,40 @@
           "data"
         ],
         "title": "CloudEvent_TechnicalAssetEvent"
+      },
+      "CreateAnnouncement": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/AnnouncementType"
+          },
+          "title": {
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__1"
+          },
+          "message": {
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__2"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "message"
+        ],
+        "title": "CreateAnnouncement"
+      },
+      "CreateAnnouncementResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateAnnouncementResponse"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -13475,7 +13744,8 @@
           "output_port",
           "technical_asset",
           "user",
-          "exploration"
+          "exploration",
+          "announcement"
         ],
         "title": "EventEntityType"
       },
@@ -13646,6 +13916,22 @@
           "platforms"
         ],
         "title": "GetAllPlatformsResponse"
+      },
+      "GetAnnouncementsResponse": {
+        "properties": {
+          "announcements": {
+            "items": {
+              "$ref": "#/components/schemas/Announcement"
+            },
+            "type": "array",
+            "title": "Announcements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "announcements"
+        ],
+        "title": "GetAnnouncementsResponse"
       },
       "GetDataProductInputPortsResponse": {
         "properties": {
@@ -14849,10 +15135,10 @@
       "GroupCreate": {
         "properties": {
           "external_id": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "type": "object",
@@ -15023,7 +15309,7 @@
       "GroupUpdate": {
         "properties": {
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "additionalProperties": false,
@@ -15102,10 +15388,10 @@
             "items": {
               "properties": {
                 "external_id": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 },
                 "display_name": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 }
               },
               "type": "object",
@@ -15133,10 +15419,10 @@
             "items": {
               "properties": {
                 "external_id": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 },
                 "display_name": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 }
               },
               "type": "object",
@@ -15684,10 +15970,10 @@
       "MachineUserCreate": {
         "properties": {
           "external_id": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "type": "object",
@@ -15738,7 +16024,7 @@
       "MachineUserUpdate": {
         "properties": {
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "additionalProperties": false,
@@ -15987,11 +16273,6 @@
         ],
         "title": "NodeType"
       },
-      "NonEmptyStr": {
-        "type": "string",
-        "minLength": 1,
-        "title": "NonEmptyStr"
-      },
       "OIDCTokenResponse": {
         "properties": {
           "access_token": {
@@ -16162,7 +16443,7 @@
       "OutputPortAccessTypeCreate": {
         "properties": {
           "name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "description": {
             "type": "string",
@@ -16183,7 +16464,7 @@
       "OutputPortAccessTypeUpdate": {
         "properties": {
           "name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "description": {
             "type": "string",
@@ -19656,6 +19937,23 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "app__shared__schema__NonEmptyStr__1": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__1"
+      },
+      "app__shared__schema__NonEmptyStr__2": {
+        "type": "string",
+        "maxLength": 500,
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__2"
+      },
+      "app__shared__schema__NonEmptyStr__3": {
+        "type": "string",
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__3"
       },
       "TechnicalAssetPlugin": {
         "properties": {

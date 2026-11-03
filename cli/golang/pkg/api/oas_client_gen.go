@@ -174,6 +174,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/configuration/output_port_access_types
 	CreateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeCreate) (CreateOutputPortAccessTypeRes, error)
+	// CreateOutputPortAnnouncement invokes create_output_port_announcement operation.
+	//
+	// Create Output Port Announcement.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements
+	CreateOutputPortAnnouncement(ctx context.Context, request *CreateAnnouncement, params CreateOutputPortAnnouncementParams) (CreateOutputPortAnnouncementRes, error)
 	// CreateOutputPortRoleAssignment invokes create_output_port_role_assignment operation.
 	//
 	// Create Output Port Role Assignment.
@@ -534,6 +540,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/output_port_access_types
 	GetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (GetOutputPortAccessTypesRes, error)
+	// GetOutputPortAnnouncements invokes get_output_port_announcements operation.
+	//
+	// Get Output Port Announcements.
+	//
+	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements
+	GetOutputPortAnnouncements(ctx context.Context, params GetOutputPortAnnouncementsParams) (GetOutputPortAnnouncementsRes, error)
 	// GetOutputPortCuratedQueries invokes get_output_port_curated_queries operation.
 	//
 	// Get Output Port Curated Queries.
@@ -834,6 +846,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/configuration/output_port_access_types/{id}
 	RemoveOutputPortAccessType(ctx context.Context, params RemoveOutputPortAccessTypeParams) (RemoveOutputPortAccessTypeRes, error)
+	// RemoveOutputPortAnnouncement invokes remove_output_port_announcement operation.
+	//
+	// Remove Output Port Announcement.
+	//
+	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements/{announcement_id}
+	RemoveOutputPortAnnouncement(ctx context.Context, params RemoveOutputPortAnnouncementParams) (RemoveOutputPortAnnouncementRes, error)
 	// RemoveOutputPortAsInputPort invokes remove_output_port_as_input_port operation.
 	//
 	// Remove Output Port As Input Port.
@@ -2667,6 +2685,90 @@ func (c *Client) sendCreateOutputPortAccessType(ctx context.Context, request *Ou
 	}()
 
 	result, err := decodeCreateOutputPortAccessTypeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateOutputPortAnnouncement invokes create_output_port_announcement operation.
+//
+// Create Output Port Announcement.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements
+func (c *Client) CreateOutputPortAnnouncement(ctx context.Context, request *CreateAnnouncement, params CreateOutputPortAnnouncementParams) (CreateOutputPortAnnouncementRes, error) {
+	res, err := c.sendCreateOutputPortAnnouncement(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateOutputPortAnnouncement(ctx context.Context, request *CreateAnnouncement, params CreateOutputPortAnnouncementParams) (res CreateOutputPortAnnouncementRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/announcements"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateOutputPortAnnouncementRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateOutputPortAnnouncementResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6284,6 +6386,87 @@ func (c *Client) sendGetOutputPortAccessTypes(ctx context.Context, params GetOut
 	return result, nil
 }
 
+// GetOutputPortAnnouncements invokes get_output_port_announcements operation.
+//
+// Get Output Port Announcements.
+//
+// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements
+func (c *Client) GetOutputPortAnnouncements(ctx context.Context, params GetOutputPortAnnouncementsParams) (GetOutputPortAnnouncementsRes, error) {
+	res, err := c.sendGetOutputPortAnnouncements(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetOutputPortAnnouncements(ctx context.Context, params GetOutputPortAnnouncementsParams) (res GetOutputPortAnnouncementsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/announcements"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetOutputPortAnnouncementsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetOutputPortCuratedQueries invokes get_output_port_curated_queries operation.
 //
 // Get Output Port Curated Queries.
@@ -9762,6 +9945,105 @@ func (c *Client) sendRemoveOutputPortAccessType(ctx context.Context, params Remo
 	}()
 
 	result, err := decodeRemoveOutputPortAccessTypeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveOutputPortAnnouncement invokes remove_output_port_announcement operation.
+//
+// Remove Output Port Announcement.
+//
+// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/announcements/{announcement_id}
+func (c *Client) RemoveOutputPortAnnouncement(ctx context.Context, params RemoveOutputPortAnnouncementParams) (RemoveOutputPortAnnouncementRes, error) {
+	res, err := c.sendRemoveOutputPortAnnouncement(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveOutputPortAnnouncement(ctx context.Context, params RemoveOutputPortAnnouncementParams) (res RemoveOutputPortAnnouncementRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/announcements/"
+	{
+		// Encode "announcement_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "announcement_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.AnnouncementID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveOutputPortAnnouncementResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

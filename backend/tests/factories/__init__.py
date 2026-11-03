@@ -3,6 +3,7 @@ from tests import test_session
 from .access_duration import AccessDurationFactory
 from .access_mode import AccessModeFactory
 from .access_mode import fake as access_mode_fake
+from .announcement import AnnouncementFactory
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
@@ -66,6 +67,7 @@ def reset_unique_fakers() -> None:
 
 factories = [
     AccessModeFactory,
+    AnnouncementFactory,
     AccessDurationFactory,
     TechnicalAssetOutputPortAssociationFactory,
     DataProductFactory,
