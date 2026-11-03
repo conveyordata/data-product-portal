@@ -32,7 +32,13 @@ function notification(event: GetEventHistoryResponseItem): GetUserNotificationsR
     };
 }
 
-export function announcementNotification(id: string, outputPortId: string, title: string) {
+export function announcementNotification(
+    id: string,
+    outputPortId: string,
+    title: string,
+    type: AnnouncementType = AnnouncementType.Warning,
+    createdOn = '2026-10-26T10:00:00',
+) {
     return notification({
         id,
         name: EventType.ANNOUNCEMENT_CREATED,
@@ -41,7 +47,7 @@ export function announcementNotification(id: string, outputPortId: string, title
         target_id: `announcement-${id}`,
         target_type: EventEntityType.Announcement,
         actor_id: 'producer-user',
-        created_on: '2026-10-26T10:00:00',
+        created_on: createdOn,
         output_port: {
             id: outputPortId,
             name: `Output Port ${outputPortId}`,
@@ -60,7 +66,7 @@ export function announcementNotification(id: string, outputPortId: string, title
         announcement: {
             id: `announcement-${id}`,
             output_port_id: outputPortId,
-            type: AnnouncementType.Warning,
+            type,
             title,
             message: 'Details on https://status.example.com/incident',
             author: null,
