@@ -689,8 +689,8 @@ type UpdateDomainRes interface {
 	updateDomainRes()
 }
 
-type UpdateEnvironmentIsGlobalRes interface {
-	updateEnvironmentIsGlobalRes()
+type UpdateEnvironmentRes interface {
+	updateEnvironmentRes()
 }
 
 type UpdateGroupRes interface {
@@ -727,6 +727,10 @@ type UpdateRoleRes interface {
 
 type UpdateTagRes interface {
 	updateTagRes()
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationRes interface {
+	updateTechnicalAssetEnvironmentConfigurationRes()
 }
 
 type UpdateTechnicalAssetRes interface {

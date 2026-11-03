@@ -233,6 +233,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 		s.NotConfigured.SetTo(val)
 	}
 	{
+		var defaultVal0 []EnvironmentUIMetadata
+		s.EnvironmentUIMetadata = defaultVal0
+	}
+	{
 		val := string("Resulting path")
 		s.ResultLabel.SetTo(val)
 	}

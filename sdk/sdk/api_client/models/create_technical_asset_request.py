@@ -14,6 +14,9 @@ if TYPE_CHECKING:
     from ..models.create_technical_asset_request_configuration import (
         CreateTechnicalAssetRequestConfiguration,
     )
+    from ..models.create_technical_asset_request_environment_values import (
+        CreateTechnicalAssetRequestEnvironmentValues,
+    )
 
 
 T = TypeVar("T", bound="CreateTechnicalAssetRequest")
@@ -35,6 +38,7 @@ class CreateTechnicalAssetRequest:
             a future version.
         technical_mapping (None | TechnicalMapping | Unset):
         access_mode_ids (list[UUID] | Unset):
+        environment_values (CreateTechnicalAssetRequestEnvironmentValues | Unset):
     """
 
     name: str
@@ -47,6 +51,7 @@ class CreateTechnicalAssetRequest:
     source_aligned: bool | None | Unset = UNSET
     technical_mapping: None | TechnicalMapping | Unset = UNSET
     access_mode_ids: list[UUID] | Unset = UNSET
+    environment_values: CreateTechnicalAssetRequestEnvironmentValues | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -100,6 +105,10 @@ class CreateTechnicalAssetRequest:
                 access_mode_ids_item = str(access_mode_ids_item_data)
                 access_mode_ids.append(access_mode_ids_item)
 
+        environment_values: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.environment_values, Unset):
+            environment_values = self.environment_values.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -121,6 +130,8 @@ class CreateTechnicalAssetRequest:
             field_dict["technical_mapping"] = technical_mapping
         if access_mode_ids is not UNSET:
             field_dict["access_mode_ids"] = access_mode_ids
+        if environment_values is not UNSET:
+            field_dict["environment_values"] = environment_values
 
         return field_dict
 
@@ -128,6 +139,9 @@ class CreateTechnicalAssetRequest:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.create_technical_asset_request_configuration import (
             CreateTechnicalAssetRequestConfiguration,  # noqa: PLC0415
+        )
+        from ..models.create_technical_asset_request_environment_values import (
+            CreateTechnicalAssetRequestEnvironmentValues,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
@@ -217,6 +231,15 @@ class CreateTechnicalAssetRequest:
 
                 access_mode_ids.append(access_mode_ids_item)
 
+        _environment_values = d.pop("environment_values", UNSET)
+        environment_values: CreateTechnicalAssetRequestEnvironmentValues | Unset
+        if isinstance(_environment_values, Unset):
+            environment_values = UNSET
+        else:
+            environment_values = CreateTechnicalAssetRequestEnvironmentValues.from_dict(
+                _environment_values
+            )
+
         create_technical_asset_request = cls(
             name=name,
             description=description,
@@ -228,6 +251,7 @@ class CreateTechnicalAssetRequest:
             source_aligned=source_aligned,
             technical_mapping=technical_mapping,
             access_mode_ids=access_mode_ids,
+            environment_values=environment_values,
         )
 
         create_technical_asset_request.additional_properties = d

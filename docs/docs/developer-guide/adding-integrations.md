@@ -233,6 +233,127 @@ To try your migrations before you ship them, run `python -m app.db_tool migrate`
 
 If you ever uninstall a plugin, its table stays in the database. The migration step will then stop with an error, because it finds migrations for a plugin that is no longer there. Reinstall the plugin, or remove its rows from the `alembic_version` table if you don't need its history anymore. The migration step also stops while technical assets of that plugin still exist, because the portal can't load them without it. Delete those technical assets first.
 
+### Settings per environment
+
+Some fields could differ per environment, for example, the size of a database in `development` and `production`. Mark them by moving them out of the plugin class into a second model and schema. Every other field keeps one value for the whole technical asset. A per-environment field holds exactly one value for each environment of the Data Product. There is no base value and no inheritance. The [PostgreSQL plugin](https://github.com/conveyordata/data-product-portal/tree/main/plugins/portal_plugins/postgresql) is an example.
+
+The model extends `BaseTechnicalAssetEnvironmentConfiguration`, which adds the `configuration_id` and `environment_id` primary key columns. The schema points to it from `Meta.orm_model`, and the plugin class links the schema through `environment_configuration`:
+
+```python
+class PostgreSQLEnvironmentConfiguration(BaseTechnicalAssetEnvironmentConfiguration):
+    __tablename__ = "postgresql_environment_configurations"
+
+    engine_version: Mapped[str] = mapped_column(String, nullable=False)
+    size: Mapped[str] = mapped_column(String, nullable=False)
+    storage_gb: Mapped[int] = mapped_column(Integer, nullable=False)
+    instance_name: Mapped[str] = mapped_column(String, nullable=False)
+
+
+class PostgreSQLEnvironmentConfigurationSchema(EnvironmentSettings):
+    engine_version: EngineVersion = env_field(...)
+    size: Size = env_field(...)
+    storage_gb: StorageGb = env_field(...)
+    instance_name: str = env_field(...)
+
+    class Meta:
+        orm_model = PostgreSQLEnvironmentConfigurationModel
+
+
+class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
+    environment_configuration: ClassVar[type[EnvironmentSettings]] = PostgreSQLEnvironmentConfigurationSchema
+```
+
+Create the table in a migration like any other plugin table, see [Migrations](#migrations). The portal owns the rows: it creates them, deletes them when an environment is removed from the Data Product, and reads and writes them through the API.
+
+#### Options and defaults
+
+Each setting is one field on the schema, declared with `env_field`. What you declare decides what the user sees in the Environment Settings table:
+
+| The user should... | Field type | `type=` | Also give |
+| --- | --- | --- | --- |
+| pick from a list | an `Enum` | `UIElementType.Select` (dropdown) or `UIElementType.Radio` | `options`: one `SelectOption` per `Enum` member |
+| tick a box | `bool` | `UIElementType.Checkbox` | |
+| type a value | `str`, `int`, ... | `UIElementType.String` | |
+
+The `label` of a `SelectOption` is what the user reads, and its `value` is what gets stored. Pass `tooltip=` to show a help icon next to the setting's name. Every per-environment field needs a value in every Environment: `Optional[...]` isn't supported yet. If a field doesn't match a row of this table, for example a dropdown without options, the portal won't start and the error names the field.
+
+Store a list setting in a `String` or `Integer` column, not a database enum. Adding an option then only means adding it to the `Enum` and to `options`.
+
+Next, say what each Environment starts with and what it can't pick:
+
+- `default`: the starting value in every Environment.
+- `default_per_environment`: a different starting value for the Environments you list.
+- `disabled_per_environment`: options the user sees but can't pick in the Environments you list. Hovering one tells the user to contact their administrator if they expected it.
+
+Environments are listed by acronym, such as `dev` or `prd`. An Environment you don't list gets `default`, with nothing disabled.
+
+```python
+class Size(str, Enum):
+    small = "small"
+    medium = "medium"
+    large = "large"
+
+
+class PostgreSQLEnvironmentConfigurationSchema(EnvironmentSettings):
+    size: Size = env_field(
+        label="Size",
+        type=UIElementType.Select,
+        options=[
+            SelectOption(label="Small", value=Size.small),
+            SelectOption(label="Medium", value=Size.medium),
+            SelectOption(label="Large", value=Size.large),
+        ],
+        default=Size.small,
+        default_per_environment={
+            "prd": Size.medium,
+        },
+        disabled_per_environment={
+            "dev": {Size.large},
+        },
+    )
+    instance_name: str = env_field(
+        label="Instance name",
+        type=UIElementType.String,
+        default="{database:.16}-{schema:.36}-{environment}",
+        default_per_environment={
+            "prd": "{database:.16}-{schema:.36}",
+        },
+    )
+```
+
+A string default can contain `{environment}`, the environment acronym, and `{field}` placeholders that refer to the plugin's shared fields, such as `{database}`. Add `:.N` to keep only the first N characters, such as `{schema:.36}`, so a default stays within a length limit. The form fills them in live until the user edits the cell, and the portal renders them the same way on the server when the values are left out.
+
+Defaults are copied into each cell once: when the technical asset is created, and when an environment is added to the Data Product. Changing a default later doesn't touch existing technical assets. Defaults must be valid: if one doesn't parse, uses a disabled option or can't be rendered, the request fails with a 422.
+
+#### Validation
+
+The portal rejects unknown environments and fields, values that don't fit the schema, and options that are disabled. It only checks disabled options on cells that changed in the current save, so disabling an option doesn't break technical assets that already use it. To retire an option, disable it everywhere rather than removing it from the `Enum`. Removing it makes stored values invalid, so only do that together with a migration that rewrites them. A missing environment in the submitted values is an error.
+
+For your own checks, override `validate_environment_configuration`. It receives the values of all environments at once, keyed by environment id, so it can check across environments, and it gets a database session for lookups. Raise `EnvironmentConfigurationError` with one `EnvironmentFieldError` per problem. The form shows each one on its cell. The PostgreSQL plugin uses it to check the `instance_name` of every environment: its format, that no other environment of the same technical asset uses it, and that no other PostgreSQL technical asset uses it. `context.technical_asset.id` is empty on create and holds the technical asset on update, which is how the lookup skips the rows of the technical asset being saved:
+
+```python
+def validate_environment_configuration(self, values, context, db):
+    errors = [
+        EnvironmentFieldError(
+            environment_id=environment_id,
+            field="instance_name",
+            message="Instance name is already used by another Technical Asset",
+        )
+        for environment_id, cell in values.items()
+        if instance_name_exists(db, cell["instance_name"], context.technical_asset.id)
+    ]
+    if errors:
+        raise EnvironmentConfigurationError(errors)
+```
+
+It runs on create and on every save, whatever the technical mapping. `validate_configuration` stays as it is for the shared fields. Slow checks, such as a database lookup, belong here. A save starts a provisioning run that can't be cancelled safely, so catch problems before it.
+
+#### Adding the fields to an existing plugin
+
+When you add per-environment fields to a plugin that already has technical assets, your migration has to write the values that are actually deployed for every existing technical asset in every environment of its Data Product. The portal never fills in defaults for existing technical assets, because a wrong default would change running infrastructure. If a row is missing, reading the technical asset fails with an error instead of falling back to a default.
+
+The [PostgreSQL migration](https://github.com/conveyordata/data-product-portal/blob/main/plugins/portal_plugins/postgresql/versions/postgresql_0002_environment.py) creates the table and then backfills it with one `INSERT ... SELECT` over the existing configurations and the environments of their Data Products. It uses the plugin's defaults because that is what was deployed before. Replace them with your real values if your assets differ.
+
 ### Settings
 
 If your plugin needs settings, such as the URL of the tool a link points to, read them from environment variables in your own package. The portal's settings only hold what the portal itself needs. [Pydantic settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) is already installed with the portal:

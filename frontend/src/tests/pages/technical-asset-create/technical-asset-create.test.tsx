@@ -1,6 +1,7 @@
 import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup.js';
 import { delay, HttpResponse, http } from 'msw';
-import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
+import { Route, Routes } from 'react-router';
+import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-asset-create.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
@@ -30,7 +31,17 @@ const defaultMocks = () => {
     mockAccessModesHttp();
 };
 
-describe('TechnicalAssetPopup', async () => {
+const renderPage = () =>
+    renderWithProviders(
+        <Routes>
+            <Route path="/studio/:dataProductId/technical-assets/new" element={<TechnicalAssetCreate debounce={0} />} />
+            <Route path="/studio/:dataProductId/:dataOutputId" element={<div>Technical asset detail</div>} />
+            <Route path="/studio/:dataProductId" element={<div>Data Product page</div>} />
+        </Routes>,
+        { routerProps: { initialEntries: [`/studio/${mockDataProducts[0].id}/technical-assets/new`] } },
+    );
+
+describe('TechnicalAssetCreate', async () => {
     const fillInS3 = async (user: UserEvent) => {
         await user.click(screen.getByLabelText(/aws/i));
         await user.click(screen.getByLabelText(/s3/i));
@@ -59,15 +70,7 @@ describe('TechnicalAssetPopup', async () => {
         mockCreateTechnicalAsset(mockDataProducts[0].id);
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        const mockCloseFunction = vi.fn();
-        renderWithProviders(
-            <AddTechnicalAssetPopup
-                onClose={mockCloseFunction}
-                isOpen
-                dataProductId={mockDataProducts[0].id}
-                debounce={0}
-            />,
-        );
+        renderPage();
 
         await fillInNameAndDescription(user);
         await fillInS3(user);
@@ -75,7 +78,7 @@ describe('TechnicalAssetPopup', async () => {
         const createButton = screen.getByRole('button', { name: /Create/i });
         await user.click(createButton);
 
-        await waitFor(() => expect(mockCloseFunction).toHaveBeenCalled());
+        expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
     }, 15000);
 
     it('should be able to select multiple access modes and choose specific modes', async () => {
@@ -83,15 +86,7 @@ describe('TechnicalAssetPopup', async () => {
         mockCreateTechnicalAsset(mockDataProducts[0].id);
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        const mockCloseFunction = vi.fn();
-        renderWithProviders(
-            <AddTechnicalAssetPopup
-                onClose={mockCloseFunction}
-                isOpen
-                dataProductId={mockDataProducts[0].id}
-                debounce={0}
-            />,
-        );
+        renderPage();
 
         await fillInNameAndDescription(user);
         await fillInS3(user);
@@ -104,7 +99,7 @@ describe('TechnicalAssetPopup', async () => {
         const createButton = screen.getByRole('button', { name: /Create/i });
         await user.click(createButton);
 
-        await waitFor(() => expect(mockCloseFunction).toHaveBeenCalled());
+        expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
     }, 15000);
 
     it('should not show access mode choice when no access mode matches the selected technical asset type', async () => {
@@ -119,9 +114,7 @@ describe('TechnicalAssetPopup', async () => {
         ]);
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        renderWithProviders(
-            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
-        );
+        renderPage();
 
         await fillInNameAndDescription(user);
 
@@ -144,9 +137,7 @@ describe('TechnicalAssetPopup', async () => {
         );
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        renderWithProviders(
-            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
-        );
+        renderPage();
 
         await fillInNameAndDescription(user);
         await fillInGitHub(user);
@@ -165,9 +156,7 @@ describe('TechnicalAssetPopup', async () => {
         );
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        renderWithProviders(
-            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
-        );
+        renderPage();
 
         await fillInNameAndDescription(user);
         await fillInS3(user);
@@ -181,15 +170,7 @@ describe('TechnicalAssetPopup', async () => {
         defaultMocks();
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        const mockCloseFunction = vi.fn();
-        renderWithProviders(
-            <AddTechnicalAssetPopup
-                onClose={mockCloseFunction}
-                isOpen
-                dataProductId={mockDataProducts[0].id}
-                debounce={0}
-            />,
-        );
+        renderPage();
 
         const nameInput = screen.getByLabelText(/name/i);
         await waitFor(() => expect(nameInput).not.toBeDisabled());
@@ -199,6 +180,30 @@ describe('TechnicalAssetPopup', async () => {
 
         expect(await screen.findByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
         expect(screen.getByText('Please provide a description for the Technical Asset')).toBeInTheDocument();
-        expect(mockCloseFunction).not.toHaveBeenCalled();
+        expect(screen.queryByText('Technical asset detail')).not.toBeInTheDocument();
+    }, 15000);
+
+    it('should render the page title and the Technical Asset Type', async () => {
+        defaultMocks();
+
+        renderPage();
+
+        expect(await screen.findByText('New Technical Asset')).toBeInTheDocument();
+        await waitFor(() => expect(screen.getByLabelText(/name/i)).not.toBeDisabled());
+
+        expect(screen.getByText('Technical Asset Type')).toBeInTheDocument();
+    }, 15000);
+
+    it('should go back to the Data Product when cancelling', async () => {
+        defaultMocks();
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        const cancelButton = await screen.findByRole('button', { name: /Cancel/i });
+        await waitFor(() => expect(cancelButton).not.toBeDisabled());
+        await user.click(cancelButton);
+
+        expect(await screen.findByText('Data Product page')).toBeInTheDocument();
     }, 15000);
 });

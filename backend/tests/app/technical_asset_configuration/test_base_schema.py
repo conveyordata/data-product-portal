@@ -1,10 +1,19 @@
 from base64 import b64decode
-from typing import ClassVar
+from enum import Enum
+from typing import ClassVar, Optional
 
+import pytest
+from pydantic import create_model
+
+from app.configuration.environments.model import Environment
 from app.technical_asset_configuration.base_schema import (
+    EnvironmentSettings,
     PlatformMetadata,
+    SelectOption,
     TechnicalAssetPlugin,
+    env_field,
 )
+from app.technical_asset_configuration.enums import UIElementType
 
 
 class PluginWithBundledIcon(TechnicalAssetPlugin):
@@ -51,3 +60,68 @@ def test_get_icon_data_uri__reads_the_icon_once_per_plugin():
 
     assert first == second
     assert PluginWithBundledIcon.get_icon_data_uri.cache_info().hits == 1
+
+
+class Colour(str, Enum):
+    red = "red"
+    blue = "blue"
+
+
+COLOUR_OPTIONS = [
+    SelectOption(label="Red", value=Colour.red),
+    SelectOption(label="Blue", value=Colour.blue),
+]
+
+
+def declare(annotation, **declaration):
+    return create_model(
+        "Declared",
+        __base__=EnvironmentSettings,
+        value=(annotation, env_field(label="Value", **declaration)),
+    )
+
+
+class TestEnvironmentSettings:
+    @pytest.mark.parametrize(
+        ("annotation", "declaration"),
+        [
+            (str, {"type": UIElementType.Select, "options": COLOUR_OPTIONS}),
+            (Colour, {"type": UIElementType.Select}),
+            (Colour, {"type": UIElementType.Select, "options": COLOUR_OPTIONS[:1]}),
+            (
+                Colour,
+                {"type": UIElementType.Radio, "options": COLOUR_OPTIONS * 2},
+            ),
+            (Colour, {"type": UIElementType.String}),
+            (str, {"type": UIElementType.String, "options": COLOUR_OPTIONS}),
+            (str, {"type": UIElementType.Checkbox}),
+            (Optional[str], {"type": UIElementType.String}),
+            (
+                Optional[Colour],
+                {"type": UIElementType.Select, "options": COLOUR_OPTIONS},
+            ),
+        ],
+    )
+    def test_init_subclass__rejects_mismatched_declaration(
+        self, annotation, declaration
+    ):
+        with pytest.raises(TypeError, match="Declared.value"):
+            declare(annotation, default=None, **declaration)
+
+    def test_ui_metadata__uses_declared_control_and_labels(self):
+        settings = declare(
+            Colour,
+            type=UIElementType.Radio,
+            options=COLOUR_OPTIONS,
+            default=Colour.red,
+            disabled_per_environment={"dev": {Colour.blue}},
+        )
+
+        [element] = settings.ui_metadata(Environment(acronym="dev"))
+
+        assert element.type == UIElementType.Radio
+        assert element.radio.initial_value == "red"
+        assert [
+            (option.label, option.value, option.disabled)
+            for option in element.radio.options
+        ] == [("Red", "red", False), ("Blue", "blue", True)]

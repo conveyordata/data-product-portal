@@ -94,6 +94,16 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/history`,
       }),
     }),
+    updateTechnicalAssetEnvironmentConfiguration: build.mutation<
+      UpdateTechnicalAssetEnvironmentConfigurationApiResponse,
+      UpdateTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environment_configuration`,
+        method: "PUT",
+        body: queryArg.technicalAssetEnvironmentConfigurationUpdate,
+      }),
+    }),
     updateTechnicalAssetStatus: build.mutation<
       UpdateTechnicalAssetStatusApiResponse,
       UpdateTechnicalAssetStatusApiArg
@@ -157,7 +167,7 @@ export type CreateTechnicalAssetApiArg = {
   createTechnicalAssetRequest: CreateTechnicalAssetRequest;
 };
 export type GetTechnicalAssetApiResponse =
-  /** status 200 Successful Response */ GetTechnicalAssetsResponseItem;
+  /** status 200 Successful Response */ GetTechnicalAssetResponse;
 export type GetTechnicalAssetApiArg = {
   dataProductId: string;
   id: string;
@@ -180,6 +190,13 @@ export type GetTechnicalAssetEventHistoryApiResponse =
 export type GetTechnicalAssetEventHistoryApiArg = {
   dataProductId: string;
   id: string;
+};
+export type UpdateTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ UpdateTechnicalAssetResponse;
+export type UpdateTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  id: string;
+  technicalAssetEnvironmentConfigurationUpdate: TechnicalAssetEnvironmentConfigurationUpdate;
 };
 export type UpdateTechnicalAssetStatusApiResponse =
   /** status 200 Successful Response */ any;
@@ -246,6 +263,7 @@ export type EnvironmentGetItem = {
   context: string;
   is_default?: boolean;
   is_global?: boolean;
+  position?: number | null;
 };
 export type DataProductEnvironment = {
   environment_id: string;
@@ -331,6 +349,41 @@ export type CreateTechnicalAssetRequest = {
   technical_mapping?: TechnicalMapping | null;
   access_mode_ids?: string[];
   tag_ids: string[];
+  environment_values?: {
+    [key: string]: {
+      [key: string]: any;
+    };
+  };
+};
+export type GetTechnicalAssetResponse = {
+  id: string;
+  name: string;
+  description: string;
+  namespace: string;
+  owner_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
+  status: TechnicalAssetStatus;
+  technical_mapping: TechnicalMapping;
+  access_modes: AccessMode[];
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+  owner: DataProduct;
+  environments: DataProductEnvironment[];
+  output_port_links: OutputPortLink[];
+  tags: Tag[];
+  environment_values: {
+    [key: string]: {
+      [key: string]: any;
+    };
+  };
+  /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
+  sourceAligned: boolean;
+  result_string: string;
+  technical_info: TechnicalInfo[];
 };
 export type UpdateTechnicalAssetResponse = {
   id: string;
@@ -412,6 +465,13 @@ export type GetEventHistoryResponseItem = {
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
+};
+export type TechnicalAssetEnvironmentConfigurationUpdate = {
+  environment_values: {
+    [key: string]: {
+      [key: string]: any;
+    };
+  };
 };
 export type TechnicalAssetStatusUpdate = {
   status: TechnicalAssetStatus;
@@ -515,6 +575,7 @@ export const {
   useUpdateTechnicalAssetMutation,
   useGetTechnicalAssetEventHistoryQuery,
   useLazyGetTechnicalAssetEventHistoryQuery,
+  useUpdateTechnicalAssetEnvironmentConfigurationMutation,
   useUpdateTechnicalAssetStatusMutation,
   useGetTechnicalAssetGraphDataQuery,
   useLazyGetTechnicalAssetGraphDataQuery,

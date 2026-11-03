@@ -1,4 +1,4 @@
-import { ProductOutlined, SettingOutlined } from '@ant-design/icons';
+import { EditOutlined, ProductOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,6 +65,13 @@ export function TechnicalAsset() {
         { skip: !dataProduct },
     );
     const canEdit = edit_access?.allowed || false;
+    const { data: updateAccess } = useCheckAccessQuery(
+        {
+            resource: dataProduct?.id,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+        },
+        { skip: !dataProduct },
+    );
 
     function navigateToEditPage() {
         if (canEdit && dataOutputId && dataOutput && !isLoading) {
@@ -95,7 +102,7 @@ export function TechnicalAsset() {
                     {canEdit && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
-                                icon={<SettingOutlined />}
+                                icon={<EditOutlined />}
                                 tooltip={t('Edit Technical Asset')}
                                 onClick={navigateToEditPage}
                             />
@@ -116,8 +123,9 @@ export function TechnicalAsset() {
                             environments={dataOutput.environments}
                         />
                         <TechnicalAssetTabs
-                            technicalAssetId={dataOutput.id}
+                            technicalAsset={dataOutput}
                             dataProductId={dataProductId}
+                            canEdit={updateAccess?.allowed || false}
                             isLoading={isLoading}
                         />
                     </Flex>

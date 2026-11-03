@@ -39,7 +39,10 @@ from .role_assignment_global import GlobalRoleAssignmentFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
 from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
-from .technical_asset_configuration import TechnicalAssetConfigurationFactory
+from .technical_asset_configuration import (
+    SizingTechnicalAssetConfigurationFactory,
+    TechnicalAssetConfigurationFactory,
+)
 from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
@@ -94,6 +97,7 @@ factories = [
     PlatformServiceConfigFactory,
     RoleFactory,
     TechnicalAssetConfigurationFactory,
+    SizingTechnicalAssetConfigurationFactory,
     TagFactory,
     UserFactory,
     TechnicalAssetFactory,
