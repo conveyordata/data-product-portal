@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from app.configuration.data_product_types.enums import DataProductIconKey
@@ -53,6 +55,11 @@ class TestDataProductTypesRouter:
         data_product_type = DataProductTypeFactory()
         response = self.remove_data_product_type(client, data_product_type.id)
         assert response.status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_data_product_type__not_found(self, client):
+        response = self.remove_data_product_type(client, uuid4())
+        assert response.status_code == 404
 
     @pytest.mark.usefixtures("admin")
     def test_remove_data_product_type_coupled_data_product(self, client):

@@ -1,7 +1,9 @@
 import asyncio as _asyncio
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
+from fastapi import HTTPException
 
 from app.core.auth.credentials import AWSCredentials
 from portal_plugins.glue.mcp_tools import _fetch_aws_credentials
@@ -89,6 +91,23 @@ class TestFetchAwsCredentials:
 
         assert result.AccessKeyId == "AKIA..."
         assert result.SessionToken == "token"
+
+
+class TestGetGlueDatabase:
+    def test_raises_when_technical_asset_not_found(self, session):
+        asset_id = uuid4()
+        with (
+            patch(
+                "portal_plugins.glue.mcp_tools.TechnicalAssetService.get_technical_asset_by_id",
+                side_effect=HTTPException(404, "Technical asset not found"),
+            ) as get_technical_asset_by_id,
+            pytest.raises(HTTPException, match="Technical asset not found"),
+        ):
+            _call_get_glue_database(
+                environment="prod", technical_asset_id=str(asset_id), db=session
+            )
+
+        get_technical_asset_by_id.assert_called_once_with(asset_id)
 
 
 class TestListGlueTables:
@@ -355,6 +374,10 @@ def _get_tools():
             tool_obj = _asyncio.run(mcp.get_tool(t.name))
             _TOOLS[t.name] = tool_obj.fn
     return _TOOLS
+
+
+def _call_get_glue_database(**kwargs):
+    return _get_tools()["get_glue_database"](**kwargs)
 
 
 def _call_list_glue_tables(**kwargs):

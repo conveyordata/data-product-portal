@@ -5,7 +5,7 @@ import pytest
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.roles.schema import Scope
-from app.authorization.service import OUTPUT_PORT_READER_ROLE
+from app.authorization.service import OUTPUT_PORT_READER_ROLE, AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
@@ -651,6 +651,34 @@ class TestOutputPortRouter:
             "isMain": True,
             "type": "outputPortNode",
         }
+
+    @pytest.mark.parametrize(
+        "visibility",
+        [DataProductVisibility.DISCOVERABLE, DataProductVisibility.HIDDEN],
+    )
+    def test_get_output_port_graph_data__member_sees_technical_asset_owner(
+        self, client, session, visibility
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        dp = DataProductFactory(visibility=visibility)
+        DataProductRoleAssignmentFactory(
+            data_product_id=dp.id,
+            identity_id=user.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        output_port = OutputPortFactory(
+            data_product=dp, access_function=OutputPortAccessFunction.PRIVATE
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(output_port=output_port)
+        AuthorizationService(session).reload_enforcer()
+
+        response = client.get(
+            f"{ENDPOINT.format(dp.id)}/{output_port.id}/graph", params={"level": 3}
+        )
+
+        assert response.status_code == 200, response.text
+        edges = {(edge["source"], edge["target"]) for edge in response.json()["edges"]}
+        assert (f"{dp.id}_2", str(link.technical_asset.id)) in edges
 
     def test_get_output_port_graph_data_hidden_consumer(self, client):
         output_port = OutputPortFactory()

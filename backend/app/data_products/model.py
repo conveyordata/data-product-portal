@@ -32,7 +32,11 @@ from app.core.webhooks.events import (
     DataProductEvent,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import Base, ensure_exists
+from app.database.database import (
+    SKIP_DATA_PRODUCT_VISIBILITY_FILTER,
+    Base,
+    ensure_exists,
+)
 from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
 from app.shared.model import utcnow
@@ -81,6 +85,13 @@ def _visibility_filter_for_user(user_id: uuid.UUID):
 
 
 def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
+    return or_(
+        cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
+        _visible_data_product_exists(cls.id, user_id),
+    )
+
+
+def _visible_data_product_exists(data_product_id, user_id: uuid.UUID):
     # This filter is nested inside a subquery, so it must be expressed purely in
     # terms of Core tables. The ORM variant above refers to DataProduct, whose id
     # is shared with abstract_data_products through joined table inheritance, and
@@ -96,10 +107,9 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
         .correlate_except(memberships)
     )
 
-    return or_(
-        cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
+    return (
         select(data_products.c.id)
-        .where(data_products.c.id == cls.id)
+        .where(data_products.c.id == data_product_id)
         .where(
             or_(
                 data_products.c.visibility != DataProductVisibility.HIDDEN,
@@ -119,7 +129,7 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
             )
         )
         .correlate_except(data_products)
-        .exists(),
+        .exists()
     )
 
 
@@ -168,7 +178,10 @@ class DataProduct(
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table, back_populates="data_products", lazy="raise"
+        secondary=tag_data_product_table,
+        back_populates="data_products",
+        lazy="raise",
+        passive_deletes=True,
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         back_populates="data_product",
@@ -238,7 +251,7 @@ def enforce_hidden_data_product_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.execution_options.get("skip_data_product_visibility_filter"):
+    if execute_state.execution_options.get(SKIP_DATA_PRODUCT_VISIBILITY_FILTER):
         return
 
     # The current user is only set while serving a request. Everything else
@@ -257,6 +270,11 @@ def enforce_hidden_data_product_filter(execute_state):
         with_loader_criteria(
             AbstractDataProduct,
             lambda cls: _visibility_filter_for_abstract_data_product(cls, user_id),
+            include_aliases=True,
+        ),
+        with_loader_criteria(
+            TechnicalAsset,
+            lambda cls: _visible_data_product_exists(cls.owner_id, user_id),
             include_aliases=True,
         ),
     )

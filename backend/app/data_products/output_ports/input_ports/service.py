@@ -40,7 +40,7 @@ from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
-from app.database.database import UNFILTERED
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
 from app.events.enums import EventEntityType, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
@@ -169,7 +169,7 @@ class InputPortService:
             data_product_id,
             output_port_id,
             consuming_data_product_id,
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         pending_request = current_link.pending_request
         if pending_request is None:
@@ -197,7 +197,7 @@ class InputPortService:
                 "type": str(consuming_data_product.abstract_data_product_type.value),
             },
         )
-        # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
+        # We don't return the raw model, as it might contain sensitive information. See `SKIP_DATA_PRODUCT_VISIBILITY_FILTER`
         # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
         return RedactedInputPort.of(current_link, pending_request.requested_by_id)
 
@@ -214,7 +214,7 @@ class InputPortService:
             data_product_id,
             output_port_id,
             consuming_data_product_id,
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         target = current_link.pending_request
         if target is None:
@@ -229,7 +229,7 @@ class InputPortService:
         target.decision = InputPortRequestDecision.DENIED
         current_link.recompute_status()
 
-        # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
+        # We don't return the raw model, as it might contain sensitive information. See `SKIP_DATA_PRODUCT_VISIBILITY_FILTER`
         # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
         return RedactedInputPort.of(
             current_link, current_link.latest_request.requested_by_id
@@ -247,7 +247,7 @@ class InputPortService:
             data_product_id,
             output_port_id,
             consuming_data_product_id,
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         target = current_link.active_grant
         if target is None:
@@ -275,7 +275,7 @@ class InputPortService:
             data_product_id,
             output_port_id,
             consuming_data_product_id,
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         result = RedactedInputPort.of(
             current_link, current_link.latest_request.requested_by_id
@@ -359,7 +359,7 @@ class InputPortService:
                     InputPortModel.requests
                 ),
             ),
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         if not output_port:
             raise output_port_not_found_exception(output_port_id)
@@ -471,7 +471,7 @@ class InputPortService:
         # We skip visibility because we will redact manually
         requests = (
             self.db.scalars(
-                query, execution_options={"skip_data_product_visibility_filter": True}
+                query, execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True}
             )
             .unique()
             .all()

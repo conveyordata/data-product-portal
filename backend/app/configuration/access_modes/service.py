@@ -12,6 +12,7 @@ from app.configuration.access_modes.schema_request import (
     AccessModeUpdate,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
+from app.database.database import UNFILTERED
 from app.database.deps import get_db_session
 from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from app.technical_asset_configuration.service import PluginService
@@ -77,7 +78,8 @@ class AccessModeService:
                     TechnicalAssetConfiguration.configuration_type.in_(
                         asset_types_being_removed
                     ),
-                )
+                ),
+                execution_options=UNFILTERED,
             )
             input_port_requests_count = self.db.scalar(
                 select(count(InputPortRequest.id))
@@ -108,7 +110,8 @@ class AccessModeService:
             .join(TechnicalAsset.configuration)
             .filter(
                 TechnicalAsset.access_modes.any(AccessMode.id == id),
-            )
+            ),
+            execution_options=UNFILTERED,
         )
         input_port_requests_count = self.db.scalar(
             select(count(InputPortRequest.id))

@@ -39,6 +39,6 @@ class TagService:
         return UpdateTagResponse(id=id)
 
     def remove_tag(self, id: UUID) -> None:
-        tag = self.db.get(TagModel, id)
+        tag = ensure_tag_exists(id, self.db)
         self.db.delete(tag)
         self.db.flush()

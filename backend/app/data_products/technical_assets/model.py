@@ -1,10 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from fastapi import HTTPException, status
 from sqlalchemy import Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy.orm import Mapped, foreign, relationship
 
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
     from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
 from app.configuration.tags.model import Tag, tag_technical_asset_table
-from app.database.database import Base, ensure_exists
+from app.database.database import Base
 from app.shared.model import BaseORM
 
 
@@ -32,10 +31,14 @@ class TechnicalAssetAccessMode(Base, BaseORM):
     __tablename__ = "technical_asset_access_modes"
 
     technical_asset_id = Column(
-        UUID(as_uuid=True), ForeignKey("data_outputs.id"), primary_key=True
+        UUID(as_uuid=True),
+        ForeignKey("data_outputs.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     access_mode_id = Column(
-        UUID(as_uuid=True), ForeignKey("access_modes.id"), primary_key=True
+        UUID(as_uuid=True),
+        ForeignKey("access_modes.id", ondelete="NO ACTION"),
+        primary_key=True,
     )
 
 
@@ -74,6 +77,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         secondary=tag_technical_asset_table,
         back_populates="technical_assets",
         lazy="selectin",
+        passive_deletes=True,
     )
 
     environment_configurations: Mapped[
@@ -91,6 +95,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         secondary="technical_asset_access_modes",
         order_by="AccessMode.name",
         lazy="selectin",
+        passive_deletes=True,
     )
 
     def to_event(self) -> TechnicalAssetEvent:
@@ -98,20 +103,3 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
             id=self.id,
             data_product_id=self.owner_id,
         )
-
-
-def ensure_technical_asset_exists(
-    technical_asset_id: UUID,
-    db: Session,
-    data_product_id: Optional[UUID] = None,
-    **kwargs,
-) -> TechnicalAsset:
-    asset: TechnicalAsset = ensure_exists(
-        technical_asset_id, db, TechnicalAsset, **kwargs
-    )
-    if data_product_id is not None and asset.owner_id != data_product_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Required item {technical_asset_id} does not exist",
-        )
-    return asset

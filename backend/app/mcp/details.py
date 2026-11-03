@@ -12,7 +12,6 @@ from app.data_products.output_ports.schema_response import GetOutputPortResponse
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
-from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
@@ -44,10 +43,8 @@ def get_technical_asset_details(
     technical_asset_id: str,
     db: Session = Depends(get_user_db_session),
 ) -> dict[str, Any]:
-    do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-    technical_asset = TechnicalAssetService(db).get_technical_asset(
-        do.owner_id,
-        id=UUID(technical_asset_id),
+    technical_asset = TechnicalAssetService(db).get_technical_asset_by_id(
+        UUID(technical_asset_id)
     )
     return GetTechnicalAssetsResponseItem.model_validate(technical_asset).model_dump()
 
