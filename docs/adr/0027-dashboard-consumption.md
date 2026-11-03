@@ -48,6 +48,7 @@ Other tools let persons request access directly (Purview, Collibra, Unity Catalo
 | Application, agent or integration | An application, an agent, or an integration that moves data to another system inside or outside the organisation, reading with a service principal. |
 | Exploration | A time-boxed exploration that may grow into a dashboard later on. |
 | Dashboard on own data | The team that owns a Data Product builds a dashboard on its own Output Port. |
+| Application deployed by a Data Product | The team that owns a Data Product builds and deploys a web app on its own data, used by end users outside the team. |
 
 ## Decision Drivers
 
@@ -100,7 +101,8 @@ A dashboard that already exists can be registered as a Consumption; Portal then 
 * **Application deployed by a Data Product.** A web app that a Data Product's team builds and deploys keeps living in that Data Product. Once end users outside the team need it, the team creates a Consumption and registers the app as its Technical Asset. The Consumption connects to the Data Product only through Input Ports on its Output Ports, which are approved automatically (see "Same owner").
 * **Application, agent or integration.** A Consumption whose Technical Asset reads with the Consumption's identity, or with each viewer when an app or agent reads on their behalf. An integration that moves data to an operational system or an external party is a Consumption; if other teams build on the target through Portal, it publishes data and is a Data Product.
 * **Exploration.** An Exploration (see "Exploration, Consumption and Data Product").
-* **Only listed.** A Consumption without audiences, whose Technical Asset reads with the Consumption's identity. Portal has the lineage, and the organisation decides whether it governs more.
+
+Any Consumption can also be only listed: it has no audiences, and its Technical Asset reads with the Consumption's identity. Portal has the lineage, and the organisation decides whether it governs more.
 
 ### Combining data
 
