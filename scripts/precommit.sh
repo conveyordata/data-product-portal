@@ -8,20 +8,24 @@ if ! git diff --quiet; then
     exit 1
 fi
 
-venv_of() {
-    if [[ -d $1/.venv ]]; then
-        echo "$1/.venv"
-    else
-        (cd "$1" && poetry env info --path 2>/dev/null)
-    fi
+candidates() {
+    for dir in "$PWD/backend" "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/backend"; do
+        [[ -d $dir/.venv ]] && echo "$dir/.venv"
+        (cd "$dir" && poetry env list --full-path 2>/dev/null | cut -d' ' -f1)
+    done
 }
-VIRTUAL_ENV="$(venv_of "$PWD/backend")"
-[[ -n $VIRTUAL_ENV ]] || VIRTUAL_ENV="$(venv_of "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/backend")"
+VIRTUAL_ENV=""
+while read -r env; do
+    if [[ -n $env ]] && (cd backend && VIRTUAL_ENV=$env poetry run true) >/dev/null 2>&1; then
+        VIRTUAL_ENV=$env
+        break
+    fi
+done < <(candidates)
 if [[ -z $VIRTUAL_ENV ]]; then
-    echo "No backend environment found: run poetry install in backend/." >&2
+    echo "No backend environment matches backend/pyproject.toml: run poetry install in backend/." >&2
     exit 1
 fi
-export VIRTUAL_ENV PATH="$VIRTUAL_ENV/bin:$PATH" PYTHONPATH="$PWD/backend" OTEL_SDK_DISABLED=true
+export VIRTUAL_ENV PATH="$VIRTUAL_ENV/bin:$PATH" PYTHONPATH="$PWD/backend:$PWD/plugins" OTEL_SDK_DISABLED=true
 
 untracked() { git ls-files --others --exclude-standard; }
 before="$(untracked)"
