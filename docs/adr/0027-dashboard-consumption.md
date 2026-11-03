@@ -7,6 +7,16 @@
 Portal models two things that hold an Input Port on an Output Port: a Data Product and an Exploration ([ADR-0016](./0016-light-weight-data-products.md)).
 Both are kinds of the same base model, and the Input Port references that base model ([ADR-0021](./0021-input-ports-and-input-port-requests.md)).
 A person never holds an Input Port; a person only requests one on behalf of a Data Product or an Exploration.
+This requester rule is not written down anywhere.
+It protects three things, and this ADR states it as three principles:
+
+1. Purposeful: every Input Port has a holder with a stated purpose.
+2. Ownership: someone who answers for it.
+3. Identity: an identity the Provisioner can grant to.
+
+"Never a person" follows from those three principles.
+Explorations already show that a person may consume when wrapped in a container with a purpose and a lifecycle.
+Other tools let persons request access directly (Purview, Collibra, Unity Catalog, Witboost); Portal keeps the rule.
 
 Many consumers produce nothing: a Power BI dashboard for a team, an organisation-wide report, an application or an AI agent, an integration that moves data to another system.
 Today such a consumer must be modelled as a Data Product, which brings Output Ports, data contracts and a team it does not need, or as an Exploration, which has a single user as owner, cannot be shared and is short-lived.
@@ -15,8 +25,8 @@ They cannot discover a dashboard, ask to see it, or be granted the data it shows
 
 How a dashboard reads its data decides who needs access:
 
-* **Owner identity**: the dashboard reads with its own technical identity. Only that identity needs a grant on the Output Port.
-* **Viewer identity**: the dashboard reads with the identity of each person viewing it (e.g. Power BI single sign-on to Databricks). Every end user needs a grant on the Output Port.
+* **Technical identity**: the dashboard reads with its own technical identity, such as a service principal. Only that identity needs a grant on the Output Port, and every reader sees what the dashboard shows.
+* **Viewer identity**: the dashboard reads with the identity of each person viewing it (e.g. Power BI single sign-on to Databricks). Every end user needs a grant on the Output Port, and the data platform's row filters and column masks apply per person.
 
 The question is how Portal models a consumer that only consumes, the identities that read through it and their access.
 
@@ -25,19 +35,6 @@ The question is how Portal models a consumer that only consumes, the identities 
 * **Consumption**: working name for a consumer that only consumes, such as a dashboard, an application, an agent, a notebook or an integration. See the open question on its name.
 * **End user**: one person who reads a Consumption without being on a team that owns data.
 * **Audience**: a set of identities (users, Groups and machine users, see [ADR-0023](./0023-external-identities-group-based-auth.md)) that read through a Consumption, linked to the Consumption's Technical Assets they open. A Consumption can have several audiences, for example one that opens a dashboard with personal data and one that opens a dashboard without.
-
-### The requester rule
-
-The rule "only a Data Product or Exploration requests an Output Port, never a person" is not written down anywhere.
-It protects three things, and this ADR states it in that form of three principles:
-
-1. Purposeful: every Input Port has a holder with a stated purpose.
-2. Ownership: someone who answers for it.
-3. Identity: an identity the Provisioner can grant to.
-
-"Never a person" as a direct consumer of a Data Product follows from those three principles.
-Explorations already show that a person may consume when wrapped in a container with a purpose and a lifecycle.
-Other tools let persons request access directly (Purview, Collibra, Unity Catalog, Witboost); Portal keeps the rule.
 
 ### Scenarios
 
@@ -52,7 +49,7 @@ Other tools let persons request access directly (Purview, Collibra, Unity Catalo
 
 ## Decision Drivers
 
-1. Both owner identity and viewer identity are supported.
+1. Both technical identity and viewer identity are supported.
 2. The three principles of the requester rule hold.
 3. End users discover a dashboard in Portal and request access without joining a team.
 4. The Output Port owner sees who reads and why, with lineage to the dashboard, and can revoke access.
@@ -68,7 +65,7 @@ Other tools let persons request access directly (Purview, Collibra, Unity Catalo
 * Mapping Power BI objects (workspace, semantic model, report, app) onto Portal concepts. This belongs to a later ADR on tools and assets.
 * Deciding whether an Output Port is single-technology. That gets its own ADR; a dashboard is never an Output Port, whatever that decision.
 * How an Exploration is promoted to a Consumption or a Data Product. The principles are below; the mechanics are a separate effort.
-* Column masks and row filters inside the data platform. The data platform enforces them on group membership; Portal only manages who is in which audience. Splitting what each viewer sees only works with viewer identity, or with owner identity plus the BI tool's own row-level security.
+* Column masks and row filters inside the data platform. The data platform enforces them on group membership; Portal only manages who is in which audience.
 * Sharing with external parties or the public: provisioning identities for external parties (such as Delta Sharing recipients or partner accounts), approving sharing outside the organisation, and public data without an identity. That needs a separate ADR. External readers of a dashboard already fit as audience members when the identity provider has them as guest users.
 
 ## Considered Options
@@ -85,11 +82,10 @@ Seven options from the first draft were folded into these four; Appendix C lists
 **Chosen option:** *Option 1: Consumption as a separate concept*, with *Option 2: Consumer-aligned kind of Data Product* as the alternative for the team vote.
 Both handle every scenario the same way; they differ in naming, positioning and the upgrade path (see the comparison below).
 
-A Consumption only consumes.
-Publishing data that others build on makes it a Data Product: a Power BI semantic model that other teams reuse belongs in a Data Product.
+Publishing data that others build on makes a consumer a Data Product: a Power BI semantic model that other teams reuse belongs in a Data Product.
 A Consumption that later needs to publish means creating a Data Product; that is the main cost of Option 1.
 A Consumption has a kind (dashboard, application, agent, notebook, integration); the technology lives on its Technical Assets, of types that cannot be shared.
-Its owner is a user or Group, the same ownership model as a Data Product. Machine users are technically allowed as owner but discouraged.
+Machine users are technically allowed as owner but discouraged.
 It is built as a new kind of the base model that Data Product and Exploration share, which gives it Input Ports, time-bound access and events.
 Portal is the source of truth for a Consumption's Input Ports and audiences, and provisions its Technical Assets where a Provisioner supports them.
 A dashboard that already exists can be registered as a Consumption; Portal then governs only its data connections and audiences.
@@ -121,8 +117,8 @@ When several Consumptions repeat the same join or logic, it should move upstream
 * An audience is linked to the Technical Assets its members open, not to Input Ports. One audience can open several Technical Assets, so joining it once gives access to all of them.
 * An audience belongs to one Consumption and is deleted with it. Reuse comes from putting the same Group from the identity provider in several audiences; Portal keeps Groups flat ([ADR-0023](./0023-external-identities-group-based-auth.md)), so an audience is not a Group of Groups.
 * Members are users, Groups and machine users.
-* The Consumption's owners create audiences, link them to Technical Assets, add members and approve requests to join.
-* The Output Port owner approves the Consumption's Input Port once, following the Output Port's Access Function as today. From then on, members of an audience that opens a Technical Asset with viewer identity get the grants of the Input Ports that asset declares. There is no cap on an audience and no approval per member by the Output Port owner; their control is revoking the Input Port.
+* The Consumption's owners create audiences, add members and approve requests to join.
+* The Output Port owner approves the Consumption's Input Port once, following the Output Port's Access Function as today. There is no cap on an audience and no approval per member by the Output Port owner; their control is revoking the Input Port.
 * Membership of a Group follows the identity provider. A change to a Group triggers a reconcile of the Consumptions it sits in.
 * Through lineage the Output Port owner sees the Consumption, its purpose, and its audiences with their Groups, machine users and individual end users. Members of a Group are not expanded.
 * Membership is permanent until removed.
@@ -165,12 +161,12 @@ A Consumption has access to all the data of its Input Ports, the way a Data Prod
 Its Technical Assets use that data as they like; the Consumption's team decides what a dashboard shows.
 An audience only decides who opens which Technical Asset: the Consumption's owner is admin of its Technical Assets, its team members are contributors, and the members of the audiences linked to an asset are its readers.
 
-Each Technical Asset queries the data in one of two ways, set on the asset:
+Each Technical Asset reads with technical identity or viewer identity (see "Context and Problem Statement"), set on the asset:
 
-* **With its own technical identity.** That identity gets the grants of the Consumption's Input Ports, and every reader sees what the asset shows.
-* **With each viewer's identity.** Each reader queries as themselves, so they need the grants personally, and the data platform's row filters and column masks apply per person. The asset declares which Input Ports it reads, and its readers get only those grants.
+* **Technical identity**: the asset's identity gets the grants of the Consumption's Input Ports.
+* **Viewer identity**: the asset declares which Input Ports it reads, and its readers get only those grants.
 
-One asset can't do both; giving readers different identities means two assets. Appendix D works this out for one dashboard.
+Appendix D works out what each reader sees for one dashboard.
 A Technical Asset's identity may not write the data into storage that others read, because that would be publishing without a Data Product.
 Which roles each type of Technical Asset offers, and how they map onto a tool, belongs to the later ADR on tools and assets.
 
@@ -185,7 +181,7 @@ A person reads data in only three ways:
 Every direct access that a person or Group has today moves to one of these three: an app or dashboard with direct assignments becomes a Consumption with those people and Groups as its audience, and an Exploration is the safe temporary landing until the access finds its purpose.
 There is no catch-all Consumption for access without a purpose.
 
-An Exploration is a personal, short-lived starting point that can grow, one way and by its owner, into a Consumption or a Data Product; a Consumption is never promoted to a Data Product.
+An Exploration is a personal, short-lived starting point that can grow, one way and by its owner, into a Consumption or a Data Product.
 Promotion never extends access silently: the Output Port owner approves the Input Ports again. How promotion works is out of scope; Appendix E compares the three.
 
 ### Same owner
@@ -342,11 +338,11 @@ Two levels decide what a person sees:
 | Option | A Sales member in region North sees | A Compliance member in region South sees | Why |
 |---|---|---|---|
 | Viewer identity | Customers of North, without personal data | Customers of South, with personal data | Each person queries with their own grants, so both levels apply per person. |
-| Owner identity | All regions, without personal data | All regions, with personal data | Each dashboard's technical identity reads both Output Ports and is not filtered by region. The split holds only because "Revenue" doesn't show personal data; the row filter does not apply. |
-| Owner identity, with the BI tool's row-level security | What the dashboard's own rules allow | What the dashboard's own rules allow | The Consumption owner rebuilds the row filter in the BI tool. The data platform's filter no longer protects the data. |
+| Technical identity | All regions, without personal data | All regions, with personal data | Each dashboard's technical identity reads both Output Ports and is not filtered by region. The split holds only because "Revenue" doesn't show personal data; the row filter does not apply. |
+| Technical identity, with the BI tool's row-level security | What the dashboard's own rules allow | What the dashboard's own rules allow | The Consumption owner rebuilds the row filter in the BI tool. The data platform's filter no longer protects the data. |
 
 Use viewer identity when readers must see different data.
-Owner identity fits when every reader may see everything the Consumption reads, such as an application with one purpose or an integration.
+Technical identity fits when every reader may see everything the Consumption reads, such as an application with one purpose or an integration.
 
 ## Appendix E: Exploration, Consumption and Data Product
 
