@@ -112,7 +112,7 @@ When several Consumptions repeat the same join or logic, it should move upstream
 
 ### Audiences
 
-* An audience is linked to the Technical Assets its members open. One audience can open several Technical Assets, so joining it once gives access to all of them.
+* An audience opens one or more of the Consumption's Technical Assets; whoever joins it can open all of them.
 * An audience belongs to one Consumption and is deleted with it. Reuse comes from putting the same Group from the identity provider in several audiences; Portal keeps Groups flat ([ADR-0023](./0023-external-identities-group-based-auth.md)), so an audience is not a Group of Groups.
 * Members are users, Groups and machine users.
 * The Consumption's owners create audiences, add members and approve requests to join.
