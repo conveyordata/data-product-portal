@@ -18,6 +18,7 @@ import { OutputPort } from '@/pages/output-port/output-port.page.tsx';
 import { OutputPortEdit } from '@/pages/output-port-edit/output-port-edit.page.tsx';
 import { PeoplePage } from '@/pages/people/people-table.component.tsx';
 import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
+import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-asset-create.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.DataOutputEdit,
                                 element: <TechnicalAssetEdit />,
+                            },
+                            {
+                                path: ApplicationPaths.TechnicalAssetNew,
+                                element: <TechnicalAssetCreate />,
                             },
                             {
                                 path: ApplicationPaths.DataProductNew,

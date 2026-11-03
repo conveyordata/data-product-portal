@@ -11,6 +11,7 @@ name = "test_app"
 
 FAKE_PLUGINS = {
     "FakeTechnicalAssetConfiguration": "tests.fixtures.fake_plugin.schema:FakeTechnicalAssetConfiguration",
+    "SizingTechnicalAssetConfiguration": "tests.fixtures.sizing_plugin.schema:SizingTechnicalAssetConfiguration",
     "FakeLinkPlugin": "tests.fixtures.fake_plugin.schema:FakeLinkPlugin",
 }
 

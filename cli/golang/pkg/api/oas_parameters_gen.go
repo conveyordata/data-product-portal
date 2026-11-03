@@ -694,8 +694,8 @@ type UpdateDomainParams struct {
 	ID uuid.UUID
 }
 
-// UpdateEnvironmentIsGlobalParams is parameters of update_environment_is_global operation.
-type UpdateEnvironmentIsGlobalParams struct {
+// UpdateEnvironmentParams is parameters of update_environment operation.
+type UpdateEnvironmentParams struct {
 	ID uuid.UUID
 }
 
@@ -750,6 +750,12 @@ type UpdateTagParams struct {
 
 // UpdateTechnicalAssetParams is parameters of update_technical_asset operation.
 type UpdateTechnicalAssetParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// UpdateTechnicalAssetEnvironmentConfigurationParams is parameters of update_technical_asset_environment_configuration operation.
+type UpdateTechnicalAssetEnvironmentConfigurationParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }

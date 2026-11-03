@@ -973,8 +973,8 @@ func encodeUpdateDomainRequest(
 	return nil
 }
 
-func encodeUpdateEnvironmentIsGlobalRequest(
-	req *EnvironmentUpdateGlobal,
+func encodeUpdateEnvironmentRequest(
+	req *EnvironmentUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -1115,6 +1115,20 @@ func encodeUpdateTagRequest(
 
 func encodeUpdateTechnicalAssetRequest(
 	req *TechnicalAssetUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateTechnicalAssetEnvironmentConfigurationRequest(
+	req *TechnicalAssetEnvironmentConfigurationUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

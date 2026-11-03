@@ -52,3 +52,23 @@ class BaseTechnicalAssetConfiguration(TechnicalAssetConfiguration):
         ForeignKey("data_output_configurations.id", ondelete="CASCADE"),
         primary_key=True,
     )
+
+
+class BaseTechnicalAssetEnvironmentConfiguration(Base, BaseORM):
+    """
+    Abstract base class for a plugin's per-environment table.
+    Holds one row per technical asset configuration and Environment.
+    """
+
+    __abstract__ = True
+
+    configuration_id: Mapped[UUID] = Column(
+        UUID(as_uuid=True),
+        ForeignKey("data_output_configurations.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    environment_id: Mapped[UUID] = Column(
+        UUID(as_uuid=True),
+        ForeignKey("environments.id", ondelete="CASCADE"),
+        primary_key=True,
+    )

@@ -20,6 +20,7 @@ export enum ApplicationPaths {
     MarketplaceCart = '/marketplace/cart',
     OutputPort = '/studio/:dataProductId/output-port/:datasetId',
     OutputPortEdit = '/studio/:dataProductId/output-port/:datasetId/edit',
+    TechnicalAssetNew = '/studio/:dataProductId/technical-assets/new',
     DataOutput = '/studio/:dataProductId/:dataOutputId',
     DataOutputEdit = '/studio/:dataProductId/:dataOutputId/edit',
     Explorer = '/explorer',
@@ -61,6 +62,10 @@ export function createDataOutputIdPath(
         ':dataOutputId',
         encodeURIComponent(dataOutputId),
     )}?tab=${tabKey}`;
+}
+
+export function createTechnicalAssetNewPath(dataProductId: string) {
+    return ApplicationPaths.TechnicalAssetNew.replace(':dataProductId', encodeURIComponent(dataProductId));
 }
 
 export function createMarketplaceOutputPortPath(

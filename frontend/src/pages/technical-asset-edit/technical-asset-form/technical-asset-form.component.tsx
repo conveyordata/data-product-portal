@@ -1,6 +1,10 @@
-import { Button, Form, type FormProps, Input, Popconfirm, Select, Skeleton, Space } from 'antd';
+import { Button, Flex, Form, type FormProps, Input, Popconfirm, Select, Skeleton, Space } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { EnvironmentChangesModal } from '@/components/environment-settings/environment-changes-modal.component';
+import { EnvironmentSettingsFields } from '@/components/environment-settings/environment-settings-section.component';
+import { useEnvironmentSettings } from '@/components/environment-settings/use-environment-settings';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -39,6 +43,8 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
     const [updateTechnicalAsset, { isLoading: isUpdating }] = useUpdateTechnicalAssetMutation();
     const [deleteTechnicalAsset, { isLoading: isArchiving }] = useRemoveTechnicalAssetMutation();
     const [form] = Form.useForm<TechnicalAssetsCreateForm>();
+    const environmentSettings = useEnvironmentSettings(dataProductId, currentTechnicalAsset);
+    const [pendingValues, setPendingValues] = useState<TechnicalAssetsCreateForm>();
 
     const { data: update_access } = useCheckAccessQuery(
         {
@@ -80,7 +86,15 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
         }
     };
 
-    const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = async (values) => {
+    const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = (values) => {
+        if (environmentSettings.changedEnvironments.length > 0) {
+            setPendingValues(values);
+            return;
+        }
+        save(values);
+    };
+
+    const save = async (values: TechnicalAssetsCreateForm) => {
         try {
             if (technicalAssetId && currentTechnicalAsset) {
                 if (!canEdit) {
@@ -88,6 +102,10 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
                     return;
                 }
 
+                if (environmentSettings.changedEnvironments.length > 0 && !(await environmentSettings.save())) {
+                    setPendingValues(undefined);
+                    return;
+                }
                 const response = await updateTechnicalAsset({
                     id: technicalAssetId,
                     dataProductId: currentTechnicalAsset.owner_id,
@@ -192,45 +210,65 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
+            {environmentSettings.metadata.length > 0 && (
+                <Form.Item label={t('Environment Settings')}>
+                    <EnvironmentSettingsFields
+                        settings={environmentSettings}
+                        disabled={isLoading || !canEdit || environmentSettings.isSaving}
+                    />
+                </Form.Item>
+            )}
+            <EnvironmentChangesModal
+                open={pendingValues !== undefined}
+                environments={environmentSettings.environments}
+                changes={environmentSettings.changes}
+                loading={isUpdating || environmentSettings.isSaving}
+                onConfirm={() => pendingValues && save(pendingValues)}
+                onCancel={() => setPendingValues(undefined)}
+            />
             <Form.Item>
-                <Space>
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType="submit"
-                        loading={isUpdating}
-                        disabled={isLoading || !canEdit}
-                    >
-                        {mode === 'edit' ? t('Edit') : t('Create')}
-                    </Button>
-                    <Button
-                        className={styles.formButton}
-                        type="default"
-                        onClick={onCancel}
-                        loading={isUpdating}
-                        disabled={isLoading || !canEdit}
-                    >
-                        {t('Cancel')}
-                    </Button>
-                    {canDelete && (
-                        <Popconfirm
-                            title={t('Are you sure you want to delete this Technical Asset?')}
-                            onConfirm={handleDeleteTechnicalAsset}
-                            okText={t('Yes')}
-                            cancelText={t('No')}
-                        >
-                            <Button
-                                className={styles.formButton}
-                                type="default"
-                                danger
-                                loading={isArchiving}
-                                disabled={isLoading}
+                <Flex justify="space-between">
+                    <div>
+                        {canDelete && (
+                            <Popconfirm
+                                title={t('Are you sure you want to delete this Technical Asset?')}
+                                onConfirm={handleDeleteTechnicalAsset}
+                                okText={t('Yes')}
+                                cancelText={t('No')}
                             >
-                                {t('Delete')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                </Space>
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    danger
+                                    loading={isArchiving}
+                                    disabled={isLoading}
+                                >
+                                    {t('Delete')}
+                                </Button>
+                            </Popconfirm>
+                        )}
+                    </div>
+                    <Space>
+                        <Button
+                            className={styles.formButton}
+                            type="default"
+                            onClick={onCancel}
+                            loading={isUpdating}
+                            disabled={isLoading || !canEdit}
+                        >
+                            {t('Cancel')}
+                        </Button>
+                        <Button
+                            className={styles.formButton}
+                            type="primary"
+                            htmlType="submit"
+                            loading={isUpdating}
+                            disabled={isLoading || !canEdit}
+                        >
+                            {t('Save')}
+                        </Button>
+                    </Space>
+                </Flex>
             </Form.Item>
         </Form>
     );

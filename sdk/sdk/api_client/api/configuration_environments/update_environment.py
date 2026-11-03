@@ -8,7 +8,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.environment import Environment
-from ...models.environment_update_global import EnvironmentUpdateGlobal
+from ...models.environment_update import EnvironmentUpdate
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -16,7 +16,7 @@ from ...types import Response
 def _get_kwargs(
     id: UUID,
     *,
-    body: EnvironmentUpdateGlobal,
+    body: EnvironmentUpdate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -69,13 +69,13 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: EnvironmentUpdateGlobal,
+    body: EnvironmentUpdate,
 ) -> Response[Environment | HTTPValidationError]:
-    """Update Environment Is Global
+    """Update Environment
 
     Args:
         id (UUID):
-        body (EnvironmentUpdateGlobal):
+        body (EnvironmentUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,13 +101,13 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: EnvironmentUpdateGlobal,
+    body: EnvironmentUpdate,
 ) -> Environment | HTTPValidationError | None:
-    """Update Environment Is Global
+    """Update Environment
 
     Args:
         id (UUID):
-        body (EnvironmentUpdateGlobal):
+        body (EnvironmentUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,13 +128,13 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: EnvironmentUpdateGlobal,
+    body: EnvironmentUpdate,
 ) -> Response[Environment | HTTPValidationError]:
-    """Update Environment Is Global
+    """Update Environment
 
     Args:
         id (UUID):
-        body (EnvironmentUpdateGlobal):
+        body (EnvironmentUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -158,13 +158,13 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: EnvironmentUpdateGlobal,
+    body: EnvironmentUpdate,
 ) -> Environment | HTTPValidationError | None:
-    """Update Environment Is Global
+    """Update Environment
 
     Args:
         id (UUID):
-        body (EnvironmentUpdateGlobal):
+        body (EnvironmentUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
