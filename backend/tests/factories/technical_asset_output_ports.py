@@ -18,6 +18,8 @@ class TechnicalAssetOutputPortAssociationFactory(
 
     id = factory.Faker("uuid4")
     status = DecisionStatus.APPROVED
-    technical_asset = factory.SubFactory(TechnicalAssetFactory)
     output_port = factory.SubFactory(OutputPortFactory)
+    technical_asset = factory.SubFactory(
+        TechnicalAssetFactory, owner=factory.SelfAttribute("..output_port.data_product")
+    )
     requested_by = factory.SubFactory(UserFactory)

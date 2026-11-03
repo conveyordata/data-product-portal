@@ -1,11 +1,16 @@
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import asc, select
+from sqlalchemy import asc, delete, select
 from sqlalchemy.orm import Session
 
 from app.configuration.tags.model import Tag as TagModel
-from app.configuration.tags.model import ensure_tag_exists
+from app.configuration.tags.model import (
+    ensure_tag_exists,
+    tag_data_product_table,
+    tag_output_port_table,
+    tag_technical_asset_table,
+)
 from app.configuration.tags.schema_request import TagCreate, TagUpdate
 from app.configuration.tags.schema_response import (
     CreateTagResponse,
@@ -39,6 +44,13 @@ class TagService:
         return UpdateTagResponse(id=id)
 
     def remove_tag(self, id: UUID) -> None:
+        # The visibility filters hide some tagged rows from the ORM's cascade.
+        for table in (
+            tag_data_product_table,
+            tag_output_port_table,
+            tag_technical_asset_table,
+        ):
+            self.db.execute(delete(table).where(table.c.tag_id == id))
         tag = self.db.get(TagModel, id)
         self.db.delete(tag)
         self.db.flush()

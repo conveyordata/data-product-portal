@@ -1,10 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from fastapi import HTTPException, status
 from sqlalchemy import Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy.orm import Mapped, foreign, relationship
 
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
     from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
 from app.configuration.tags.model import Tag, tag_technical_asset_table
-from app.database.database import Base, ensure_exists
+from app.database.database import Base
 from app.shared.model import BaseORM
 
 
@@ -98,20 +97,3 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
             id=self.id,
             data_product_id=self.owner_id,
         )
-
-
-def ensure_technical_asset_exists(
-    technical_asset_id: UUID,
-    db: Session,
-    data_product_id: Optional[UUID] = None,
-    **kwargs,
-) -> TechnicalAsset:
-    asset: TechnicalAsset = ensure_exists(
-        technical_asset_id, db, TechnicalAsset, **kwargs
-    )
-    if data_product_id is not None and asset.owner_id != data_product_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Required item {technical_asset_id} does not exist",
-        )
-    return asset

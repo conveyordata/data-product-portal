@@ -5,7 +5,6 @@ from .resolvers import (
     DataProductResolver,
     OutputPortResolver,
     TechnicalAssetOutputPortAssociationResolver,
-    TechnicalAssetResolver,
 )
 
 REDACTION_VALUE = "Redacted"
@@ -14,7 +13,6 @@ __all__ = (
     "Action",
     "Authorization",
     "TechnicalAssetOutputPortAssociationResolver",
-    "TechnicalAssetResolver",
     "DataProductOutputPortAssociationResolver",
     "DataProductResolver",
     "OutputPortResolver",

@@ -21,6 +21,9 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.technical_assets.model import (
+    TechnicalAsset as TechnicalAssetModel,
+)
 from app.data_products.technical_assets.service import ensure_technical_asset_shareable
 from app.groups.service import GroupService
 from app.users.schema import User
@@ -58,8 +61,14 @@ class TechnicalAssetOutputPortService:
                 OutputPort.id
                 == TechnicalAssetOutputPortAssociationModel.output_port_id,
             )
+            .join(
+                TechnicalAssetModel,
+                TechnicalAssetModel.id
+                == TechnicalAssetOutputPortAssociationModel.technical_asset_id,
+            )
             .where(
                 OutputPort.data_product_id == data_product_id,
+                TechnicalAssetModel.owner_id == data_product_id,
             )
         )
         if not current_link:
