@@ -107,6 +107,33 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.body,
       }),
     }),
+    getOutputPortAnnouncements: build.query<
+      GetOutputPortAnnouncementsApiResponse,
+      GetOutputPortAnnouncementsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/announcements`,
+      }),
+    }),
+    createOutputPortAnnouncement: build.mutation<
+      CreateOutputPortAnnouncementApiResponse,
+      CreateOutputPortAnnouncementApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/announcements`,
+        method: "POST",
+        body: queryArg.createAnnouncement,
+      }),
+    }),
+    removeOutputPortAnnouncement: build.mutation<
+      RemoveOutputPortAnnouncementApiResponse,
+      RemoveOutputPortAnnouncementApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/announcements/${queryArg.announcementId}`,
+        method: "DELETE",
+      }),
+    }),
     getDataProductOutputPorts: build.query<
       GetDataProductOutputPortsApiResponse,
       GetDataProductOutputPortsApiArg
@@ -289,6 +316,26 @@ export type IngestOutputPortContractYamlApiArg = {
   body: {
     file: Blob;
   };
+};
+export type GetOutputPortAnnouncementsApiResponse =
+  /** status 200 Successful Response */ GetAnnouncementsResponse;
+export type GetOutputPortAnnouncementsApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type CreateOutputPortAnnouncementApiResponse =
+  /** status 200 Successful Response */ CreateAnnouncementResponse;
+export type CreateOutputPortAnnouncementApiArg = {
+  dataProductId: string;
+  id: string;
+  createAnnouncement: CreateAnnouncement;
+};
+export type RemoveOutputPortAnnouncementApiResponse =
+  /** status 200 Successful Response */ any;
+export type RemoveOutputPortAnnouncementApiArg = {
+  dataProductId: string;
+  id: string;
+  announcementId: string;
 };
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
@@ -499,6 +546,38 @@ export type SchemaObjectRequest = {
 export type BitolContractRequest = {
   schema?: SchemaObjectRequest[];
 };
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
+export type Announcement = {
+  id: string;
+  output_port_id: string;
+  type: AnnouncementType;
+  title: string;
+  message: string;
+  author: User | null;
+  created_at: string;
+};
+export type GetAnnouncementsResponse = {
+  announcements: Announcement[];
+};
+export type CreateAnnouncementResponse = {
+  id: string;
+};
+export type AppSharedSchemaNonEmptyStr1 = string;
+export type AppSharedSchemaNonEmptyStr2 = string;
+export type CreateAnnouncement = {
+  type: AnnouncementType;
+  title: AppSharedSchemaNonEmptyStr1;
+  message: AppSharedSchemaNonEmptyStr2;
+};
 export type OutputPortAccessType = {
   id: string;
   name: string;
@@ -630,16 +709,6 @@ export type OutputPortUpdate = {
   lifecycle_id?: string | null;
   tag_ids: string[];
 };
-export type User = {
-  id: string;
-  email: string;
-  external_id: string;
-  first_name: string;
-  last_name: string;
-  has_seen_tour: boolean;
-  can_become_admin: boolean;
-  admin_expiry?: string | null;
-};
 export type DataProductType = {
   id: string;
   name: string;
@@ -739,6 +808,11 @@ export enum DataQualityStatus {
   Error = "error",
   Unknown = "unknown",
 }
+export enum AnnouncementType {
+  ActionNeeded = "action_needed",
+  Warning = "warning",
+  Info = "info",
+}
 export enum OutputPortStatus {
   Pending = "pending",
   Active = "active",
@@ -782,6 +856,7 @@ export enum EventEntityType {
   TechnicalAsset = "technical_asset",
   User = "user",
   Exploration = "exploration",
+  Announcement = "announcement",
 }
 export enum AbstractDataProductStatus {
   Pending = "pending",
@@ -820,6 +895,10 @@ export const {
   useLazyGetOutputPortSchemaQuery,
   useIngestOutputPortContractMutation,
   useIngestOutputPortContractYamlMutation,
+  useGetOutputPortAnnouncementsQuery,
+  useLazyGetOutputPortAnnouncementsQuery,
+  useCreateOutputPortAnnouncementMutation,
+  useRemoveOutputPortAnnouncementMutation,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,

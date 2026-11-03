@@ -478,6 +478,7 @@ export enum EventEntityType {
   TechnicalAsset = "technical_asset",
   User = "user",
   Exploration = "exploration",
+  Announcement = "announcement",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

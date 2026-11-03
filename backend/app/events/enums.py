@@ -10,6 +10,7 @@ class EventEntityType(str, Enum):
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"
     EXPLORATION = "exploration"
+    ANNOUNCEMENT = "announcement"
 
     @staticmethod
     def for_consumer(
@@ -61,3 +62,6 @@ class EventType(str, Enum):
     DATASET_ROLE_ASSIGNMENT_DENIED = "dataset_role_assignment_denied"
 
     INPUT_PORT_EXPIRING_SOON = "input_port_expiring_soon"
+
+    ANNOUNCEMENT_CREATED = "announcement_created"
+    ANNOUNCEMENT_REMOVED = "announcement_removed"

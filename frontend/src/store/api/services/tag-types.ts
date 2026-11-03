@@ -38,6 +38,7 @@ export enum TagTypes {
     MyRequests = 'MyRequests',
     AccessDuration = 'AccessDuration',
     AccessMode = 'AccessMode',
+    Announcements = 'Announcements',
 }
 
 export const STATIC_TAG_ID = {
