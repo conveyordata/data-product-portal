@@ -21,10 +21,11 @@
 .close-button {
     padding: 0;
     margin-left: globals.$spacing-m;
-    margin-right: globals.$spacing-m;
 }
 
 .notification-items {
+    padding-right: globals.$spacing-m;
+    max-width: 32rem;
     max-height: 80vh;
     overflow: hidden;
     overflow-y: auto;
