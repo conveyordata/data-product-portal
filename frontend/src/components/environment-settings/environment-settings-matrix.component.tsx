@@ -59,7 +59,7 @@ export function EnvironmentSettingsMatrix({
                     "This option can't be selected in this Environment. Contact your administrator if you expected it to be available.",
                 )}
             >
-                <span>{option.label}</span>
+                <div>{option.label}</div>
             </Tooltip>
         ) : (
             option.label
