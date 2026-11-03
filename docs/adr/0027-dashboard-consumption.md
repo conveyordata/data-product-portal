@@ -277,6 +277,7 @@ It applies to Data Products too: today a Data Product requesting its own team's 
    * A Consumption has a Visibility like a Data Product ([ADR-0022](./0022-data-product-visibility.md)), so a personal dashboard stays out of search. This is the leaning.
    * The cart is for Input Port requests; joining an audience is a different flow.
 5. **Organisation policy.** Whether a dashboard is only listed or also governed is decided per Consumption by its owner. Should an organisation be able to require listing or governance through Portal, for example for every dashboard that uses viewer identity?
+6. **Moving a Technical Asset.** A dashboard or app that a Data Product's team built for itself must be rebuilt in a Consumption once end users outside the team need it. Should Portal move the Technical Asset from the Data Product to a Consumption instead, keeping the underlying resource? The Consumption would get Input Ports on the Output Ports the asset reads, approved automatically (see "Same owner"), and an asset that also reads internal tables could not move until they are published as an Output Port.
 
 ## Appendix A: How others name it
 
