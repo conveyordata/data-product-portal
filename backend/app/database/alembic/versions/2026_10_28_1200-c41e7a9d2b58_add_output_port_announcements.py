@@ -1,7 +1,7 @@
 """Add output port announcements
 
 Revision ID: c41e7a9d2b58
-Revises: a9203b7e41cd
+Revises: 7b1e4d2c9a05
 Create Date: 2026-10-28 12:00:00.000000
 
 """
@@ -15,7 +15,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "c41e7a9d2b58"
-down_revision: Union[str, None] = "a9203b7e41cd"
+down_revision: Union[str, None] = "7b1e4d2c9a05"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
