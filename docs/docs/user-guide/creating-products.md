@@ -66,7 +66,7 @@ Technical assets are linked to and owned by a single **Data Product**.
 
 The output port describes which technical assets your data product exposes through a common interface.
 It is the missing link when you want to share the data-product's data with other data products.
-For more information about output ports, take a look at the concept page describing [Output Ports](../concepts/output-ports.md).
+For more information about output ports, take a look at the concept page describing [Output Ports](../concepts/output-ports/output-ports.md).
 
 ### How to Create an output port
 
@@ -123,7 +123,7 @@ For more information about input ports, take a look at the concept page describi
 
 ## Managing access over time
 
-Once an Input Port is approved, access may be **permanent** or **time-bound**, depending on the Output Port owner's [Access Duration Policy](../concepts/output-ports.md#access-duration-policy).
+Once an Input Port is approved, access may be **permanent** or **time-bound**, depending on the Output Port owner's [Access Duration Policy](../concepts/output-ports/output-ports.md#access-duration-policy).
 
 - **Expiring soon**: When a time-bound grant is nearing its end, the Input Port shows an **Expiring soon** tag and a **Renew Access** button. Renewing submits a fresh request without losing the history of the current grant.
 - **Cancel Request**: Withdraws a request you made that is still pending a decision.
