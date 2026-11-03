@@ -4,13 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz import (
-    Action,
-    Authorization,
-    DataProductResolver,
-    TechnicalAssetResolver,
-)
-from app.data_products.technical_assets.model import ensure_technical_asset_exists
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
@@ -105,7 +99,7 @@ def get_technical_asset_event_history(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> GetEventHistoryResponse:
-    ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
+    TechnicalAssetService(db).get_technical_asset(data_product_id, id)
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItem.model_validate(event)
@@ -132,7 +126,8 @@ def get_technical_asset_event_history(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
-                TechnicalAssetResolver,
+                DataProductResolver,
+                object_id="data_product_id",
             )
         ),
     ],
@@ -179,7 +174,8 @@ def remove_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                TechnicalAssetResolver,
+                DataProductResolver,
+                object_id="data_product_id",
             )
         ),
     ],
@@ -219,7 +215,8 @@ def update_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                TechnicalAssetResolver,
+                DataProductResolver,
+                object_id="data_product_id",
             )
         ),
     ],

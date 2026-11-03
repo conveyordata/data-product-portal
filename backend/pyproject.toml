@@ -1,6 +1,6 @@
 [project]
 name = "data-product-portal"
-version = "0.8.0"
+version = "0.8.1"
 description = "Data Product Portal core"
 
 [build-system]
@@ -9,14 +9,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-product-portal"
-version = "0.8.0"
+version = "0.8.1"
 description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = "^26.2.0"
@@ -45,7 +45,7 @@ asyncpg = ">=0.31,<0.33"
 cachetools = "^7.1.8"
 greenlet = "^3.5.5"
 h11 = "^0.16.0"
-fastmcp = "4.1.3"
+fastmcp = "4.1.4"
 posthog = "^7.53.0"
 authlib = "1.9.1"
 fastembed = ">=0.8,<0.10"
@@ -94,7 +94,7 @@ ty = "uvx ty check"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 up = "docker compose up -d postgresql"
 down = "docker compose down postgresql"
-poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --upgrade"
+poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade"
 loadtest = "locust -f loadtest/locustfile.py"
 
 [tool.mypy]

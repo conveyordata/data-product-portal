@@ -31,7 +31,6 @@ from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
@@ -168,6 +167,12 @@ class TechnicalAssetService:
             )
         self._filter_environment_configurations_by_data_product([technical_asset])
         return technical_asset
+
+    def get_technical_asset_by_id(self, id: UUID) -> TechnicalAssetModel:
+        owner_id = self.db.scalar(
+            select(TechnicalAssetModel.owner_id).where(TechnicalAssetModel.id == id)
+        )
+        return self.get_technical_asset(owner_id, id)
 
     def create_technical_asset(
         self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
@@ -335,9 +340,7 @@ class TechnicalAssetService:
     def update_technical_asset(
         self, data_product_id: UUID, id: UUID, technical_asset: TechnicalAssetUpdate
     ) -> UpdateTechnicalAssetResponse:
-        current_technical_asset = ensure_technical_asset_exists(
-            id, self.db, data_product_id=data_product_id
-        )
+        current_technical_asset = self.get_technical_asset(data_product_id, id)
         update_technical_asset = technical_asset.model_dump(exclude_unset=True)
 
         for k, v in update_technical_asset.items():
@@ -351,7 +354,7 @@ class TechnicalAssetService:
         return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
-        ensure_technical_asset_exists(id, self.db, data_product_id=data_product_id)
+        self.get_technical_asset(data_product_id, id)
         graph = DataProductService(self.db).get_graph_data(data_product_id, level)
 
         for node in graph.nodes:

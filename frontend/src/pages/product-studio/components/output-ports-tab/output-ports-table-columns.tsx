@@ -4,7 +4,7 @@ import { ConsumersIcon } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { OutputPortAccessIcon } from '@/components/output-ports/output-port-access-icon/output-port-access-icon.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
-import { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
+import type { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
@@ -93,9 +93,7 @@ export const getOutputPortTableColumns = ({
         {
             title: t('Quality'),
             dataIndex: 'quality_status',
-            render: (quality_status?: DataQualityStatus) => (
-                <QualityBadge quality_status={quality_status ?? DataQualityStatus.Unknown} />
-            ),
+            render: (quality_status?: DataQualityStatus | null) => <QualityBadge status={quality_status} />,
             width: '10%',
         },
     ];

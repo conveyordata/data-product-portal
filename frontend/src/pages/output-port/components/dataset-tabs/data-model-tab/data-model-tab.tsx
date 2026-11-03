@@ -1,4 +1,4 @@
-import { DatabaseOutlined, UploadOutlined } from '@ant-design/icons';
+import { FileTextOutlined, UploadOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { UploadProps } from 'antd';
 import { Button, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
@@ -161,7 +161,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
     if (schemaObjects.length === 0) {
         return (
             <EmptyState
-                icon={<DatabaseOutlined />}
+                icon={<FileTextOutlined />}
                 title={t('No Data Model published yet')}
                 description={
                     canUpload
@@ -220,7 +220,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                     locale={{
                         emptyText: (
                             <EmptyState
-                                icon={<DatabaseOutlined />}
+                                icon={<FileTextOutlined />}
                                 title={t('No columns defined')}
                                 description={t('This table is published without column level detail.')}
                             />

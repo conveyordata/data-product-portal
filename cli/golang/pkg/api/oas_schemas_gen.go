@@ -632,6 +632,142 @@ type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
 
+// Ref: #/components/schemas/Announcement
+type Announcement struct {
+	ID           uuid.UUID        `json:"id"`
+	OutputPortID uuid.UUID        `json:"output_port_id"`
+	Type         AnnouncementType `json:"type"`
+	Title        string           `json:"title"`
+	Message      string           `json:"message"`
+	Author       NilUser          `json:"author"`
+	CreatedAt    time.Time        `json:"created_at"`
+}
+
+// GetID returns the value of ID.
+func (s *Announcement) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *Announcement) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetType returns the value of Type.
+func (s *Announcement) GetType() AnnouncementType {
+	return s.Type
+}
+
+// GetTitle returns the value of Title.
+func (s *Announcement) GetTitle() string {
+	return s.Title
+}
+
+// GetMessage returns the value of Message.
+func (s *Announcement) GetMessage() string {
+	return s.Message
+}
+
+// GetAuthor returns the value of Author.
+func (s *Announcement) GetAuthor() NilUser {
+	return s.Author
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Announcement) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Announcement) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *Announcement) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetType sets the value of Type.
+func (s *Announcement) SetType(val AnnouncementType) {
+	s.Type = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Announcement) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetMessage sets the value of Message.
+func (s *Announcement) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetAuthor sets the value of Author.
+func (s *Announcement) SetAuthor(val NilUser) {
+	s.Author = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Announcement) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// Ref: #/components/schemas/AnnouncementType
+type AnnouncementType string
+
+const (
+	AnnouncementTypeActionNeeded AnnouncementType = "action_needed"
+	AnnouncementTypeWarning      AnnouncementType = "warning"
+	AnnouncementTypeInfo         AnnouncementType = "info"
+)
+
+// AllValues returns all AnnouncementType values.
+func (AnnouncementType) AllValues() []AnnouncementType {
+	return []AnnouncementType{
+		AnnouncementTypeActionNeeded,
+		AnnouncementTypeWarning,
+		AnnouncementTypeInfo,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AnnouncementType) MarshalText() ([]byte, error) {
+	switch s {
+	case AnnouncementTypeActionNeeded:
+		return []byte(s), nil
+	case AnnouncementTypeWarning:
+		return []byte(s), nil
+	case AnnouncementTypeInfo:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AnnouncementType) UnmarshalText(data []byte) error {
+	switch AnnouncementType(data) {
+	case AnnouncementTypeActionNeeded:
+		*s = AnnouncementTypeActionNeeded
+		return nil
+	case AnnouncementTypeWarning:
+		*s = AnnouncementTypeWarning
+		return nil
+	case AnnouncementTypeInfo:
+		*s = AnnouncementTypeInfo
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type AppSharedSchemaNonEmptyStr1 string
+
+type AppSharedSchemaNonEmptyStr2 string
+
+type AppSharedSchemaNonEmptyStr3 string
+
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -772,6 +908,7 @@ const (
 	AuthorizationAction313 AuthorizationAction = 313
 	AuthorizationAction314 AuthorizationAction = 314
 	AuthorizationAction315 AuthorizationAction = 315
+	AuthorizationAction316 AuthorizationAction = 316
 	AuthorizationAction401 AuthorizationAction = 401
 	AuthorizationAction402 AuthorizationAction = 402
 	AuthorizationAction403 AuthorizationAction = 403
@@ -825,6 +962,7 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction313,
 		AuthorizationAction314,
 		AuthorizationAction315,
+		AuthorizationAction316,
 		AuthorizationAction401,
 		AuthorizationAction402,
 		AuthorizationAction403,
@@ -949,6 +1087,60 @@ func (s *CancelInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
 }
 
 func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes() {}
+
+// Ref: #/components/schemas/CreateAnnouncement
+type CreateAnnouncement struct {
+	Type    AnnouncementType            `json:"type"`
+	Title   AppSharedSchemaNonEmptyStr1 `json:"title"`
+	Message AppSharedSchemaNonEmptyStr2 `json:"message"`
+}
+
+// GetType returns the value of Type.
+func (s *CreateAnnouncement) GetType() AnnouncementType {
+	return s.Type
+}
+
+// GetTitle returns the value of Title.
+func (s *CreateAnnouncement) GetTitle() AppSharedSchemaNonEmptyStr1 {
+	return s.Title
+}
+
+// GetMessage returns the value of Message.
+func (s *CreateAnnouncement) GetMessage() AppSharedSchemaNonEmptyStr2 {
+	return s.Message
+}
+
+// SetType sets the value of Type.
+func (s *CreateAnnouncement) SetType(val AnnouncementType) {
+	s.Type = val
+}
+
+// SetTitle sets the value of Title.
+func (s *CreateAnnouncement) SetTitle(val AppSharedSchemaNonEmptyStr1) {
+	s.Title = val
+}
+
+// SetMessage sets the value of Message.
+func (s *CreateAnnouncement) SetMessage(val AppSharedSchemaNonEmptyStr2) {
+	s.Message = val
+}
+
+// Ref: #/components/schemas/CreateAnnouncementResponse
+type CreateAnnouncementResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateAnnouncementResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateAnnouncementResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*CreateAnnouncementResponse) createOutputPortAnnouncementRes() {}
 
 // Ref: #/components/schemas/CreateDataProductLifeCycleResponse
 type CreateDataProductLifeCycleResponse struct {
@@ -4196,6 +4388,7 @@ const (
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
 	EventEntityTypeExploration    EventEntityType = "exploration"
+	EventEntityTypeAnnouncement   EventEntityType = "announcement"
 )
 
 // AllValues returns all EventEntityType values.
@@ -4206,6 +4399,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
 		EventEntityTypeExploration,
+		EventEntityTypeAnnouncement,
 	}
 }
 
@@ -4221,6 +4415,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeUser:
 		return []byte(s), nil
 	case EventEntityTypeExploration:
+		return []byte(s), nil
+	case EventEntityTypeAnnouncement:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4244,6 +4440,9 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 		return nil
 	case EventEntityTypeExploration:
 		*s = EventEntityTypeExploration
+		return nil
+	case EventEntityTypeAnnouncement:
+		*s = EventEntityTypeAnnouncement
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4465,6 +4664,23 @@ func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 }
 
 func (*GetAllPlatformsResponse) getAllPlatformsRes() {}
+
+// Ref: #/components/schemas/GetAnnouncementsResponse
+type GetAnnouncementsResponse struct {
+	Announcements []Announcement `json:"announcements"`
+}
+
+// GetAnnouncements returns the value of Announcements.
+func (s *GetAnnouncementsResponse) GetAnnouncements() []Announcement {
+	return s.Announcements
+}
+
+// SetAnnouncements sets the value of Announcements.
+func (s *GetAnnouncementsResponse) SetAnnouncements(val []Announcement) {
+	s.Announcements = val
+}
+
+func (*GetAnnouncementsResponse) getOutputPortAnnouncementsRes() {}
 
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
@@ -5099,6 +5315,7 @@ type GetEventHistoryResponseItem struct {
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
 	Exploration              OptNilExploration     `json:"exploration"`
+	Announcement             OptNilAnnouncement    `json:"announcement"`
 }
 
 // GetID returns the value of ID.
@@ -5186,6 +5403,11 @@ func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
 	return s.Exploration
 }
 
+// GetAnnouncement returns the value of Announcement.
+func (s *GetEventHistoryResponseItem) GetAnnouncement() OptNilAnnouncement {
+	return s.Announcement
+}
+
 // SetID sets the value of ID.
 func (s *GetEventHistoryResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5269,6 +5491,11 @@ func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset
 // SetExploration sets the value of Exploration.
 func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
 	s.Exploration = val
+}
+
+// SetAnnouncement sets the value of Announcement.
+func (s *GetEventHistoryResponseItem) SetAnnouncement(val OptNilAnnouncement) {
+	s.Announcement = val
 }
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
@@ -6209,27 +6436,27 @@ func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
 
 // Ref: #/components/schemas/GroupCreate
 type GroupCreate struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *GroupCreate) GetExternalID() NonEmptyStr {
+func (s *GroupCreate) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupCreate) GetDisplayName() NonEmptyStr {
+func (s *GroupCreate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *GroupCreate) SetExternalID(val NonEmptyStr) {
+func (s *GroupCreate) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupCreate) SetDisplayName(val NonEmptyStr) {
+func (s *GroupCreate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -6427,16 +6654,16 @@ func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
 
 // Ref: #/components/schemas/GroupUpdate
 type GroupUpdate struct {
-	DisplayName NonEmptyStr `json:"display_name"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupUpdate) GetDisplayName() NonEmptyStr {
+func (s *GroupUpdate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupUpdate) SetDisplayName(val NonEmptyStr) {
+func (s *GroupUpdate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -6551,6 +6778,7 @@ func (*HTTPValidationError) createGroupsBatchRes()                        {}
 func (*HTTPValidationError) createMachineUserRes()                        {}
 func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
+func (*HTTPValidationError) createOutputPortAnnouncementRes()             {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
@@ -6610,6 +6838,7 @@ func (*HTTPValidationError) getMachineUserRes()                           {}
 func (*HTTPValidationError) getMachineUsersRes()                          {}
 func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
 func (*HTTPValidationError) getOutputPortAccessTypesRes()                 {}
+func (*HTTPValidationError) getOutputPortAnnouncementsRes()               {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -6658,6 +6887,7 @@ func (*HTTPValidationError) removeGroupMembersRes()                       {}
 func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
 func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) removeOutputPortAccessTypeRes()               {}
+func (*HTTPValidationError) removeOutputPortAnnouncementRes()             {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
 func (*HTTPValidationError) removeRoleRes()                               {}
@@ -6753,27 +6983,27 @@ func (s *IdentityBatchCreateRequestGroupCreate) SetItems(val []IdentityBatchCrea
 }
 
 type IdentityBatchCreateRequestGroupCreateItemsItem struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() NonEmptyStr {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() NonEmptyStr {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -6793,27 +7023,27 @@ func (s *IdentityBatchCreateRequestMachineUserCreate) SetItems(val []IdentityBat
 }
 
 type IdentityBatchCreateRequestMachineUserCreateItemsItem struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() NonEmptyStr {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() NonEmptyStr {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7411,27 +7641,27 @@ func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes()
 
 // Ref: #/components/schemas/MachineUserCreate
 type MachineUserCreate struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *MachineUserCreate) GetExternalID() NonEmptyStr {
+func (s *MachineUserCreate) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserCreate) GetDisplayName() NonEmptyStr {
+func (s *MachineUserCreate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *MachineUserCreate) SetExternalID(val NonEmptyStr) {
+func (s *MachineUserCreate) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserCreate) SetDisplayName(val NonEmptyStr) {
+func (s *MachineUserCreate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7493,16 +7723,16 @@ func (*MachineUserGet) getMachineUserRes() {}
 
 // Ref: #/components/schemas/MachineUserUpdate
 type MachineUserUpdate struct {
-	DisplayName NonEmptyStr `json:"display_name"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserUpdate) GetDisplayName() NonEmptyStr {
+func (s *MachineUserUpdate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserUpdate) SetDisplayName(val NonEmptyStr) {
+func (s *MachineUserUpdate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7942,8 +8172,6 @@ func (o NilUser) Or(d User) User {
 	return d
 }
 
-type NonEmptyStr string
-
 // OIDC token endpoint response.
 // Ref: #/components/schemas/OIDCTokenResponse
 type OIDCTokenResponse struct {
@@ -8298,6 +8526,74 @@ func (o OptNilAccessMode) Get() (v AccessMode, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilAccessMode) Or(d AccessMode) AccessMode {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilAnnouncement returns new OptNilAnnouncement with value set to v.
+func NewOptNilAnnouncement(v Announcement) OptNilAnnouncement {
+	return OptNilAnnouncement{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilAnnouncement is optional nullable Announcement.
+type OptNilAnnouncement struct {
+	Value Announcement
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilAnnouncement was set.
+func (o OptNilAnnouncement) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilAnnouncement) Reset() {
+	var v Announcement
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilAnnouncement) SetTo(v Announcement) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilAnnouncement) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilAnnouncement) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Announcement
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAnnouncement) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilAnnouncement) Get() (v Announcement, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilAnnouncement) Or(d Announcement) Announcement {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10714,13 +11010,13 @@ func (s *OutputPortAccessType) SetAccessFunction(val OutputPortAccessFunction) {
 
 // Ref: #/components/schemas/OutputPortAccessTypeCreate
 type OutputPortAccessTypeCreate struct {
-	Name           NonEmptyStr              `json:"name"`
-	Description    OptString                `json:"description"`
-	AccessFunction OutputPortAccessFunction `json:"access_function"`
+	Name           AppSharedSchemaNonEmptyStr3 `json:"name"`
+	Description    OptString                   `json:"description"`
+	AccessFunction OutputPortAccessFunction    `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeCreate) GetName() NonEmptyStr {
+func (s *OutputPortAccessTypeCreate) GetName() AppSharedSchemaNonEmptyStr3 {
 	return s.Name
 }
 
@@ -10735,7 +11031,7 @@ func (s *OutputPortAccessTypeCreate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeCreate) SetName(val NonEmptyStr) {
+func (s *OutputPortAccessTypeCreate) SetName(val AppSharedSchemaNonEmptyStr3) {
 	s.Name = val
 }
 
@@ -10751,13 +11047,13 @@ func (s *OutputPortAccessTypeCreate) SetAccessFunction(val OutputPortAccessFunct
 
 // Ref: #/components/schemas/OutputPortAccessTypeUpdate
 type OutputPortAccessTypeUpdate struct {
-	Name           NonEmptyStr              `json:"name"`
-	Description    OptString                `json:"description"`
-	AccessFunction OutputPortAccessFunction `json:"access_function"`
+	Name           AppSharedSchemaNonEmptyStr3 `json:"name"`
+	Description    OptString                   `json:"description"`
+	AccessFunction OutputPortAccessFunction    `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeUpdate) GetName() NonEmptyStr {
+func (s *OutputPortAccessTypeUpdate) GetName() AppSharedSchemaNonEmptyStr3 {
 	return s.Name
 }
 
@@ -10772,7 +11068,7 @@ func (s *OutputPortAccessTypeUpdate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeUpdate) SetName(val NonEmptyStr) {
+func (s *OutputPortAccessTypeUpdate) SetName(val AppSharedSchemaNonEmptyStr3) {
 	s.Name = val
 }
 
@@ -12258,6 +12554,10 @@ func (*RemoveInputPortForExplorationOKApplicationJSON) removeInputPortForExplora
 type RemoveOutputPortAccessTypeOKApplicationJSON jx.Raw
 
 func (*RemoveOutputPortAccessTypeOKApplicationJSON) removeOutputPortAccessTypeRes() {}
+
+type RemoveOutputPortAnnouncementOKApplicationJSON jx.Raw
+
+func (*RemoveOutputPortAnnouncementOKApplicationJSON) removeOutputPortAnnouncementRes() {}
 
 type RemoveOutputPortAsInputPortOKApplicationJSON jx.Raw
 

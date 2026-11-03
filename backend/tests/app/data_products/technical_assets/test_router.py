@@ -10,6 +10,7 @@ from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProduct, DataProductEnvironment
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
@@ -588,7 +589,7 @@ class TestTechnicalAssetsRouter:
         data_product = session.get(
             DataProduct,
             str(technical_asset_payload["owner_id"]),
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         TechnicalAssetFactory(
             namespace=technical_asset_payload["namespace"], owner=data_product

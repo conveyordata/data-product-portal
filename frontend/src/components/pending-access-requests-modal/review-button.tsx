@@ -1,4 +1,3 @@
-import { EyeOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { Request } from '@/types/request-types/request-types.tsx';
@@ -13,9 +12,8 @@ export function ReviewButton({ action, onReview }: Props) {
 
     return (
         <Button
-            type="primary"
+            type="link"
             size="small"
-            icon={<EyeOutlined />}
             onClick={(e) => {
                 e.stopPropagation();
                 onReview(action);

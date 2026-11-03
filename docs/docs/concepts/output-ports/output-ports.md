@@ -7,7 +7,7 @@ sidebar_position: 4
 # Output Ports
 
 **Output Ports** are the abstraction used by Data Products to share technical assets with the outside world in a structured way.
-They can be thought of as a logical grouping of **[Technical Assets](./technical-assets)** that serve as the primary unit of data access and sharing in the portal.
+They can be thought of as a logical grouping of **[Technical Assets](../technical-assets.md)** that serve as the primary unit of data access and sharing in the portal.
 
 They allow **data consumers** (other Data Products) to request and consume governed collections of data.
 
@@ -51,6 +51,6 @@ Output Ports enable **composability**: the output of one Data Product becomes th
 
 Within the Data Product Portal UI **Output Ports** are always represented as **Diamonds**
 
-![Dataset Example](./img/dataset.png)
+![Dataset Example](../img/dataset.png)
 
 ---

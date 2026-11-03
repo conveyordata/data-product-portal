@@ -3,6 +3,9 @@ from uuid import UUID
 
 from pydantic import NaiveDatetime
 
+from app.data_products.output_ports.announcements.schema_response import (
+    Announcement,
+)
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
@@ -30,6 +33,7 @@ class GetEventHistoryResponseItem(ORMModel):
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
     exploration: Optional[Exploration] = None
+    announcement: Optional[Announcement] = None
 
 
 class GetEventHistoryResponse(ORMModel):

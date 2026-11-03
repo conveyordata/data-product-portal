@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.8.1
+
 ### breaking changes
 
 - **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
@@ -14,25 +16,30 @@ sidebar_position: 200
 - **[API]**: Creating a Domain requires a `namespace`. It must be unique among Domains and cannot be changed afterwards. Existing Domains get a namespace derived from their name; a numeric suffix is added when two names collide, and a Domain whose name has no usable characters gets its id as namespace.
 - **[API]**: Deleting a Domain that has finalizers returns `202` and marks it as `deleting` until every finalizer is removed. A `deleting` Domain cannot be updated or assigned to Data Products or Explorations; the database enforces the assignment rule too. If a write made directly in the database still leaves the Domain in use when its last finalizer is removed, the deletion is cancelled and the Domain is active again.
 - **[API]**: Namespaces made only of dots (`.`, `..`) are rejected for every resource, so they can never resolve to a parent path when used to name infrastructure. Existing namespaces are not changed.
+- **[API/UI]**: Adding an Output Port is now a Data Product permission instead of a global one, so only users and groups with a role on that Data Product can add Output Ports to it. The upgrade removes the global permission from every role and grants the new one to every Data Product role that can add Technical Assets, such as Owner.
 - **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
 - **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
 
 ### features
 
+- **[UI]**: Data Product creation events in PostHog now include visibility, allowing Hidden Data Product adoption to be measured for both Product Studio and cart checkout.
 - **[Provisioner]**: Domains can be provisioned. The portal sends a `domain.event` webhook when a Domain is created, updated or deleted, Domains support finalizers (`POST /api/v2/configuration/domains/{id}/finalizers` and `DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}`), and the SDK has a `ResourceType.DOMAIN` reconciler.
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
 - **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
+- **[API/UI]**: Producing teams can post [Announcements](./concepts/output-ports/announcements.md) on an Output Port. Members of its Consuming Data Products and owners of its consuming Explorations are notified, and the top of the Home page shows their pending requests and Announcements.
 
 ### bugfixes
 
 - **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
 - **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
-
-### bugfixes
-
+- **[API]**: Authorization checks the id the endpoint acts on. Before, a user with rights on one Data Product could act on another by passing the first id in the query string, for example to delete it or to add Role Assignments to it. An id with the same name elsewhere in the request is now ignored, and an id that cannot be read is denied with a 403.
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+- **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
+- **[MCP]**: Search, Data Product analytics and the marketplace overview no longer fail when a Hidden Data Product owns Technical Assets. Technical Assets of Hidden Data Products are now left out for users who can't see the Data Product, also in the Technical Asset details and Glue tools.
+- **[API]**: Configuration managers who are not admins can delete a tag that is used by a Hidden Data Product, a private Output Port or a Technical Asset they can't see. Before, the deletion failed.
+- **[API/UI]**: The Output Port graph no longer fails for consumers of an Output Port of a Hidden Data Product. They see its linked Technical Assets, as on the Output Port details, but not the Hidden Data Product itself.
 
 ## 0.8.0
 

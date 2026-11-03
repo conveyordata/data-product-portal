@@ -1,10 +1,18 @@
 import pytest
 
+from app.authorization.roles.schema import Scope
+from app.core.authz import Action
+from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.settings import settings
 from tests.factories import (
     DataProductFactory,
+    GlobalRoleAssignmentFactory,
     OutputPortFactory,
+    RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
+    UserFactory,
 )
 
 ENDPOINT = "/api/v2/configuration/tags"
@@ -13,6 +21,16 @@ ENDPOINT = "/api/v2/configuration/tags"
 @pytest.fixture
 def tags_payload():
     return {"value": "Test"}
+
+
+@pytest.fixture
+def configuration_manager():
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    role = RoleFactory(
+        scope=Scope.GLOBAL, permissions=[Action.GLOBAL__UPDATE_CONFIGURATION]
+    )
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+    return user
 
 
 class TestTagsRouter:
@@ -65,6 +83,32 @@ class TestTagsRouter:
         TechnicalAssetFactory(tags=[tag])
         response = self.remove_tag(client, tag.id)
         assert response.status_code == 200
+
+    @pytest.mark.usefixtures("configuration_manager")
+    @pytest.mark.parametrize(
+        "tag_holder",
+        [
+            lambda tag: DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN, tags=[tag]
+            ),
+            lambda tag: OutputPortFactory(
+                access_function=OutputPortAccessFunction.PRIVATE, tags=[tag]
+            ),
+            lambda tag: TechnicalAssetFactory(
+                owner=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+                tags=[tag],
+            ),
+        ],
+        ids=["hidden_data_product", "private_output_port", "hidden_technical_asset"],
+    )
+    def test_remove_tag__coupled_with_entity_hidden_from_user(self, client, tag_holder):
+        tag = TagFactory()
+        tag_holder(tag)
+
+        response = self.remove_tag(client, tag.id)
+
+        assert response.status_code == 200, response.json()
+        assert self.get_tags(client).json()["tags"] == []
 
     def test_create_tag_admin_only(self, tags_payload, client):
         response = self.create_tag(client, tags_payload)

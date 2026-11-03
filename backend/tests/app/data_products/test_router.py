@@ -557,6 +557,23 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
+    def test_remove_data_product__conflicting_query_id(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        allowed = DataProductFactory()
+        target = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+            data_product_id=allowed.id,
+        )
+        response = client.delete(f"{ENDPOINT}/{target.id}", params={"id": allowed.id})
+        assert response.status_code == 403
+        assert client.get(f"{ENDPOINT}/{target.id}").status_code == 200
+
     def test_remove_data_product_with_finalizers_returns_202(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(finalizers=["some-system"])
@@ -1364,6 +1381,24 @@ class TestDataProductsRouter:
         assert str(producer.id) not in {
             node["data"]["id"] for node in response.json()["nodes"]
         }
+
+    def test_get_output_port_graph_data__consumer_sees_technical_asset_of_hidden_producer(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(output_port=output_port)
+
+        response = client.get(
+            f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}/graph",
+            params={"level": 3},
+        )
+
+        assert response.status_code == 200, response.text
+        node_ids = {node["data"]["id"] for node in response.json()["nodes"]}
+        assert str(link.technical_asset.id) in node_ids
+        assert str(producer.id) not in node_ids
 
     def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
         self, client, session

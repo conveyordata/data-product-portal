@@ -28,13 +28,13 @@ Examples of actions include:
 
 **Global Actions:**
 - `GLOBAL__CREATE_DATAPRODUCT` - Create new data products
-- `GLOBAL__CREATE_OUTPUT_PORT` - Create new output ports
 - `GLOBAL__UPDATE_CONFIGURATION` - Modify platform configuration
 - `GLOBAL__CREATE_USER` - Add users to the platform
 - `GLOBAL__CREATE_GROUP` - Add groups to the platform
 - `GLOBAL__CREATE_MACHINE_USER` - Add machine users to the platform
 
 **Data Product Actions:**
+- `DATA_PRODUCT__CREATE_OUTPUT_PORT` - Add output ports to the data product
 - `DATA_PRODUCT__UPDATE_PROPERTIES` - Modify data product metadata
 - `DATA_PRODUCT__UPDATE_SETTINGS` - Change data product settings
 - `DATA_PRODUCT__CREATE_USER` - Add team members

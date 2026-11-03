@@ -8,7 +8,9 @@ import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProduct
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
+import { graphTags } from '@/store/api/services/tags/graphTags.ts';
 import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
+import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
 
@@ -120,7 +122,17 @@ api.enhanceEndpoints({
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
-                { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+                ...requestListTags,
+            ],
+        },
+        requestDataProductRoleAssignment: {
+            invalidatesTags: (result, _, { data_product_id }) => [
+                { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProductRoleAssignments, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProductRoleAssignments, id: result?.id },
+                { type: TagTypes.DataProduct, id: data_product_id },
+                { type: TagTypes.History, id: data_product_id },
+                ...requestListTags,
             ],
         },
         deleteDataProductRoleAssignment: {
@@ -142,6 +154,15 @@ api.enhanceEndpoints({
                 { type: TagTypes.History, id: result?.output_port?.id },
             ],
         },
+        requestOutputPortRoleAssignment: {
+            invalidatesTags: (result, _, { output_port_id }) => [
+                { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.OutputPortRoleAssignments, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.OutputPortRoleAssignments, id: result?.id },
+                { type: TagTypes.OutputPort, id: output_port_id },
+                { type: TagTypes.History, id: output_port_id },
+            ],
+        },
         modifyOutputPortRoleAssignment: {
             invalidatesTags: (result) => [
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
@@ -160,7 +181,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.UserOutputPorts, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPort, id: result?.output_port?.id },
                 { type: TagTypes.History, id: result?.output_port?.id },
-                { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             ],
         },
         deleteOutputPortRoleAssignment: {
@@ -327,7 +347,7 @@ api.enhanceEndpoints({
         ...explorationTags,
         ...configurationAccessDurationsTags,
         ...configurationAccessModesTags,
-        ...configurationAccessModesTags,
         ...outputPortSearchTags,
+        ...graphTags,
     },
 });
