@@ -75,8 +75,6 @@ The question is how Portal models a consumer that only consumes, the identities 
 * **Option 3: Output Port with audiences**: the producing Data Product adds a dashboard as an Output Port with audiences. It is always owned by the producer.
 * **Option 4: Audiences on every Data Product**: no new concept or kind; any Data Product can have audiences.
 
-Appendix C lists other approaches and how this ADR handles them.
-
 ## Decision Outcome
 
 **Chosen option:** *Option 1: Consumption as a separate concept*, with *Option 2: Consumer-aligned kind of Data Product* as the alternative for the team vote.
@@ -166,7 +164,7 @@ Each Technical Asset reads with technical identity or viewer identity (see "Cont
 * **Technical identity**: the asset's identity gets the grants of the Consumption's Input Ports.
 * **Viewer identity**: the asset declares which Input Ports it reads, and its readers get only those grants.
 
-Appendix D works out what each reader sees for one dashboard.
+Appendix C works out what each reader sees for one dashboard.
 A Technical Asset's identity may not write the data into storage that others read, because that would be publishing without a Data Product.
 Which roles each type of Technical Asset offers, and how they map onto a tool, belongs to the later ADR on tools and assets.
 
@@ -182,7 +180,7 @@ Every direct access that a person or Group has today moves to one of these three
 There is no catch-all Consumption for access without a purpose.
 
 An Exploration is a personal, short-lived starting point that can grow, one way and by its owner, into a Consumption or a Data Product.
-Promotion never extends access silently: the Output Port owner approves the Input Ports again. How promotion works is out of scope; Appendix E compares the three.
+Promotion never extends access silently: the Output Port owner approves the Input Ports again. How promotion works is out of scope; Appendix D compares the three.
 
 ### Same owner
 
@@ -308,20 +306,7 @@ These come from the tools in Appendix A and could be added to a Consumption late
 * Portal as the access front door, through the request redirect of Unity Catalog and the access message of Power BI apps.
 * Usage statistics on a dashboard (DataHub), and flagging Consumptions that repeat the same combination of Output Ports as a candidate for a Data Product.
 
-## Appendix C: Other approaches
-
-| Approach | How this ADR handles it |
-|---|---|
-| Dashboard in its own Data Product | Option 2 without the restriction on Output Ports; heavy for a team that produces nothing. |
-| Dashboard inside an existing Data Product | For dashboards that only the owning team reads. |
-| Dashboard as an Exploration | Explorations are a lifecycle stage, personal and short-lived. |
-| Group as requester | Groups are audience members; a Group has no purpose of its own. |
-| Persons request the Output Port directly | Rejected: a person would hold the Input Port. Persons join audiences. |
-| Recorded exposure, no access management | A Consumption without audiences, whose Technical Asset reads with its own technical identity. |
-| Sharing through an Output Port on the Consumption | Rejected: sharing a dashboard is not publishing data. |
-| The BI tool manages readers | Rejected: Portal's record drifts and revocation leaves Portal. |
-
-## Appendix D: Example: personal data for some readers
+## Appendix C: Example: personal data for some readers
 
 The Revenue Consumption from "Audiences" has a dashboard "Revenue" that reads "Customers", opened by audience "Sales", and a dashboard "Revenue with PII" that reads "Customers" and "Customers PII", opened by audience "Compliance".
 The Sales Data Product also has a row filter in the data platform on both Output Ports: a person sees only the customers of their own region.
@@ -340,7 +325,7 @@ Two levels decide what a person sees:
 Use viewer identity when readers must see different data.
 Technical identity fits when every reader may see everything the Consumption reads, such as an application with one purpose or an integration.
 
-## Appendix E: Exploration, Consumption and Data Product
+## Appendix D: Exploration, Consumption and Data Product
 
 | | Exploration | Consumption | Data Product |
 |---|---|---|---|
