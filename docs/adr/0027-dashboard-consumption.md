@@ -75,7 +75,7 @@ The question is how Portal models a consumer that only consumes, the identities 
 * **Option 3: Output Port with audiences**: the producing Data Product adds a dashboard as an Output Port with audiences. It is always owned by the producer.
 * **Option 4: Audiences on every Data Product**: no new concept or kind; any Data Product can have audiences.
 
-Seven options from the first draft were folded into these four; Appendix C lists them and why.
+Appendix C lists other approaches and how this ADR handles them.
 
 ## Decision Outcome
 
@@ -114,7 +114,7 @@ When several Consumptions repeat the same join or logic, it should move upstream
 
 ### Audiences
 
-* An audience is linked to the Technical Assets its members open, not to Input Ports. One audience can open several Technical Assets, so joining it once gives access to all of them.
+* An audience is linked to the Technical Assets its members open. One audience can open several Technical Assets, so joining it once gives access to all of them.
 * An audience belongs to one Consumption and is deleted with it. Reuse comes from putting the same Group from the identity provider in several audiences; Portal keeps Groups flat ([ADR-0023](./0023-external-identities-group-based-auth.md)), so an audience is not a Group of Groups.
 * Members are users, Groups and machine users.
 * The Consumption's owners create audiences, add members and approve requests to join.
@@ -194,7 +194,7 @@ It applies to Data Products too: today a Data Product requesting its own team's 
 
 * A Consumption is a new kind of the shared base model, owned by a user or Group, that holds Input Ports and has audiences, and never has Output Ports.
 * Persons never hold an Input Port; every identity that reads through a Consumption is an audience member or the technical identity of one of its Technical Assets.
-* Audiences are linked to Technical Assets, not to Input Ports. Their members get the reader role on those Technical Assets.
+* Audiences are linked to Technical Assets. Their members get the reader role on those Technical Assets.
 * Each Technical Asset reads with its own technical identity, which gets the grants of the Consumption's Input Ports, or with each viewer's. With viewer identity it declares which Input Ports it reads, and its readers get only those grants.
 * Lineage shows the Output Port owner the Consumptions that read its Output Ports and their audiences.
 * Requests from someone who holds approve rights on the Output Port are approved automatically, for Consumptions and Data Products.
@@ -308,21 +308,17 @@ These come from the tools in Appendix A and could be added to a Consumption late
 * Portal as the access front door, through the request redirect of Unity Catalog and the access message of Power BI apps.
 * Usage statistics on a dashboard (DataHub), and flagging Consumptions that repeat the same combination of Output Ports as a candidate for a Data Product.
 
-## Appendix C: Options from the first draft
+## Appendix C: Other approaches
 
-The first draft compared seven options and three ways to share a dashboard. They are folded into the decision above:
-
-| First-draft option | Where it went |
+| Approach | How this ADR handles it |
 |---|---|
 | Dashboard in its own Data Product | Option 2 without the restriction on Output Ports; heavy for a team that produces nothing. |
-| Dashboard inside an existing Data Product | Kept for dashboards that only the owning team reads. |
+| Dashboard inside an existing Data Product | For dashboards that only the owning team reads. |
 | Dashboard as an Exploration | Explorations are a lifecycle stage, personal and short-lived. |
 | Group as requester | Groups are audience members; a Group has no purpose of its own. |
-| Persons request the Output Port directly | Rejected: a person would hold the Input Port. Persons join audiences instead. |
+| Persons request the Output Port directly | Rejected: a person would hold the Input Port. Persons join audiences. |
 | Recorded exposure, no access management | A Consumption without audiences, whose Technical Asset reads with its own technical identity. |
-| Consumption as a new concept | Option 1. |
 | Sharing through an Output Port on the Consumption | Rejected: sharing a dashboard is not publishing data. |
-| Sharing through audiences | Kept: the audiences above. |
 | The BI tool manages readers | Rejected: Portal's record drifts and revocation leaves Portal. |
 
 ## Appendix D: Example: personal data for some readers
