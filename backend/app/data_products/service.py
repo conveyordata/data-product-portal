@@ -60,6 +60,9 @@ from app.data_products.schema_response import (
     GetDataProductResponse,
     UpdateDataProductResponse,
 )
+from app.data_products.technical_assets.environment_configuration_service import (
+    TechnicalAssetEnvironmentConfigurationService,
+)
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -414,6 +417,9 @@ class DataProductService(AbstractDataProductService):
         ]
         data_product.environments.extend(additions)
         self.db.flush()
+        TechnicalAssetEnvironmentConfigurationService(self.db).add_environments(
+            data_product, [item.environment for item in additions]
+        )
         context.queue_events(
             [
                 DataProductEnvironmentAddedEvent(

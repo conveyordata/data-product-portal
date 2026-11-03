@@ -376,6 +376,7 @@ Depending on how your reconciler works either `input_port_reconcile_target` can 
 (default) or `InputPortReconcilerTarget.PRODUCER`. The default is usually the right choice, but if your provisioner
 needs to manage the connection via the producer instead of the consumer's, you can set it to `PRODUCER`.
 
+
 ### When a technical asset is added or removed from an output port, I want every consumer to be reconciled.
 
 We generally recommend against this pattern, see the recommended pattern in the [FAQ above](#how-should-i-handle-input-port-and-technical-asset-changes).

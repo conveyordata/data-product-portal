@@ -84,6 +84,12 @@ from .create_technical_asset_request import CreateTechnicalAssetRequest
 from .create_technical_asset_request_configuration import (
     CreateTechnicalAssetRequestConfiguration,
 )
+from .create_technical_asset_request_environment_values import (
+    CreateTechnicalAssetRequestEnvironmentValues,
+)
+from .create_technical_asset_request_environment_values_additional_property import (
+    CreateTechnicalAssetRequestEnvironmentValuesAdditionalProperty,
+)
 from .create_technical_asset_response import CreateTechnicalAssetResponse
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
@@ -156,7 +162,8 @@ from .environment_configs_get import EnvironmentConfigsGet
 from .environment_configs_get_item import EnvironmentConfigsGetItem
 from .environment_get_item import EnvironmentGetItem
 from .environment_platform_config_get import EnvironmentPlatformConfigGet
-from .environment_update_global import EnvironmentUpdateGlobal
+from .environment_ui_metadata import EnvironmentUIMetadata
+from .environment_update import EnvironmentUpdate
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
 from .expiring_soon_threshold_response import ExpiringSoonThresholdResponse
@@ -193,6 +200,16 @@ from .get_output_port_access_durations_response import (
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
+from .get_technical_asset_response import GetTechnicalAssetResponse
+from .get_technical_asset_response_configuration import (
+    GetTechnicalAssetResponseConfiguration,
+)
+from .get_technical_asset_response_environment_values import (
+    GetTechnicalAssetResponseEnvironmentValues,
+)
+from .get_technical_asset_response_environment_values_additional_property import (
+    GetTechnicalAssetResponseEnvironmentValuesAdditionalProperty,
+)
 from .get_technical_assets_response import GetTechnicalAssetsResponse
 from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
 from .get_technical_assets_response_item_configuration import (
@@ -388,6 +405,15 @@ from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
 from .technical_asset_configuration import TechnicalAssetConfiguration
+from .technical_asset_environment_configuration_update import (
+    TechnicalAssetEnvironmentConfigurationUpdate,
+)
+from .technical_asset_environment_configuration_update_environment_values import (
+    TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues,
+)
+from .technical_asset_environment_configuration_update_environment_values_additional_property import (
+    TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesAdditionalProperty,
+)
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
@@ -491,6 +517,8 @@ __all__ = (
     "CreateTagResponse",
     "CreateTechnicalAssetRequest",
     "CreateTechnicalAssetRequestConfiguration",
+    "CreateTechnicalAssetRequestEnvironmentValues",
+    "CreateTechnicalAssetRequestEnvironmentValuesAdditionalProperty",
     "CreateTechnicalAssetResponse",
     "DatabricksConfig",
     "DatabricksEnvironmentPlatformConfiguration",
@@ -554,7 +582,8 @@ __all__ = (
     "EnvironmentGetItem",
     "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
-    "EnvironmentUpdateGlobal",
+    "EnvironmentUIMetadata",
+    "EnvironmentUpdate",
     "EventEntityType",
     "ExpiringSoonThresholdResponse",
     "Exploration",
@@ -586,6 +615,10 @@ __all__ = (
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
+    "GetTechnicalAssetResponse",
+    "GetTechnicalAssetResponseConfiguration",
+    "GetTechnicalAssetResponseEnvironmentValues",
+    "GetTechnicalAssetResponseEnvironmentValuesAdditionalProperty",
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
     "GetTechnicalAssetsResponseItemConfiguration",
@@ -729,6 +762,9 @@ __all__ = (
     "TagUpdate",
     "TechnicalAsset",
     "TechnicalAssetConfiguration",
+    "TechnicalAssetEnvironmentConfigurationUpdate",
+    "TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues",
+    "TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesAdditionalProperty",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortRequest",

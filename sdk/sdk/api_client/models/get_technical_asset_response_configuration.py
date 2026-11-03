@@ -6,27 +6,29 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="EnvironmentUpdateGlobal")
+T = TypeVar("T", bound="GetTechnicalAssetResponseConfiguration")
 
 
 @_attrs_define
-class EnvironmentUpdateGlobal:
-    """
-    Attributes:
-        is_global (bool):
+class GetTechnicalAssetResponseConfiguration:
+    """Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+    /v2/plugins/{name}/form.
+
+        Attributes:
+            name (str):
     """
 
-    is_global: bool
+    name: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        is_global = self.is_global
+        name = self.name
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "is_global": is_global,
+                "name": name,
             }
         )
 
@@ -35,14 +37,14 @@ class EnvironmentUpdateGlobal:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        is_global = d.pop("is_global")
+        name = d.pop("name")
 
-        environment_update_global = cls(
-            is_global=is_global,
+        get_technical_asset_response_configuration = cls(
+            name=name,
         )
 
-        environment_update_global.additional_properties = d
-        return environment_update_global
+        get_technical_asset_response_configuration.additional_properties = d
+        return get_technical_asset_response_configuration
 
     @property
     def additional_keys(self) -> list[str]:

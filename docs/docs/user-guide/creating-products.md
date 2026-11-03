@@ -47,16 +47,18 @@ Technical assets are linked to and owned by a single **Data Product**.
 
 1. **Go to the Data Product that will expose the technical assets**.
 2. **Go to the Output Ports Tab**.
-3. **Click 'Add a technical Asset'**: You will need to have the correct access rights on the **Data Product** to be able to do this action.
+3. **Click 'Add a technical Asset'**: This opens the New Technical Asset page. You will need to have the correct access rights on the **Data Product** to be able to do this action.
 4. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
    - **Description**
    - **Technical Mapping** Choose between *Default* and *Custom* (see [Technical mapping](#technical-mapping) below).
-   - **Technology** Choose from one of the enabled technologies within your organization.
+   - **Technical Asset Type** Choose from one of the enabled technologies within your organization.
    - **Technology specific information** Add some technical information such as database name and schema, prefix paths, ... This depends on the chosen technology.
+   - **Environment Settings** Only for technologies that have settings per Environment, see [Settings per Environment](#settings-per-environment).
 5. **Save Your Data Output**: Click **Create** to add the data output to your product.
 
 ![Data Output Creation](./img/technical-asset-modal.png)
+
 
 ### Technical mapping
 

@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import pytest
 
@@ -147,6 +148,79 @@ class TestEnvironmentsRouter:
 
         response = self.update_environment_is_global(client, env_obj.id, False)
         assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_environments__orders_by_name_when_no_position_set(self, client):
+        for name in ["tst", "prd", "dev"]:
+            EnvironmentFactory(name=name)
+
+        assert self.environment_names(client) == ["dev", "prd", "tst"]
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_environments__orders_by_position(self, client):
+        for name, position in [("dev", 3), ("tst", 1), ("prd", 2)]:
+            EnvironmentFactory(name=name, position=position)
+
+        assert self.environment_names(client) == ["tst", "prd", "dev"]
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_environments__orders_unset_positions_last_by_name(self, client):
+        EnvironmentFactory(name="aaa")
+        EnvironmentFactory(name="prd", position=2)
+        EnvironmentFactory(name="bbb")
+        EnvironmentFactory(name="dev", position=1)
+
+        assert self.environment_names(client) == ["dev", "prd", "aaa", "bbb"]
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment_position__sets_and_clears_position(self, client):
+        env_obj = EnvironmentFactory()
+
+        response = self.update_environment_position(client, env_obj.id, 5)
+        assert response.status_code == 200
+        assert response.json()["position"] == 5
+
+        response = self.update_environment_position(client, env_obj.id, None)
+        assert response.status_code == 200
+        assert response.json()["position"] is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment__keeps_fields_not_sent(self, client):
+        env_obj = EnvironmentFactory(is_global=True, position=3)
+
+        response = self.update_environment_position(client, env_obj.id, 1)
+        assert response.json()["is_global"] is True
+
+        response = self.update_environment_is_global(client, env_obj.id, False)
+        assert response.json()["position"] == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment__rejects_null_is_global(self, client):
+        env_obj = EnvironmentFactory()
+
+        response = self.update_environment_is_global(client, env_obj.id, None)
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment_position__not_found(self, client):
+        response = self.update_environment_position(client, uuid.uuid4(), 1)
+        assert response.status_code == 404
+
+    def test_update_environment_position_forbidden(self, client):
+        env_obj = EnvironmentFactory()
+
+        response = self.update_environment_position(client, env_obj.id, 1)
+        assert response.status_code == 403
+
+    @staticmethod
+    def environment_names(client):
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        return [env["name"] for env in response.json()["environments"]]
+
+    @staticmethod
+    def update_environment_position(client, environment_id, position):
+        return client.patch(f"{ENDPOINT}/{environment_id}", json={"position": position})
 
     @staticmethod
     def get_environment_by_id(client, environment_id):
