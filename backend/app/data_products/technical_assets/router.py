@@ -264,6 +264,55 @@ def update_technical_asset_environment_configuration(
     return result
 
 
+@router.post(
+    "/{id}/environment_configuration/validate",
+    responses={
+        404: {
+            "description": "Technical asset not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Technical asset id not found"}
+                }
+            },
+        },
+        422: {
+            "description": "Invalid environment configuration",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "environment_id": "random environment id",
+                                "field": "size",
+                                "message": "Option is not allowed in this environment",
+                            }
+                        ]
+                    }
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
+def validate_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    environment_configuration: TechnicalAssetEnvironmentConfigurationUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    TechnicalAssetService(db).validate_technical_asset_environment_configuration(
+        data_product_id, id, environment_configuration
+    )
+
+
 @router.put(
     "/{id}/status",
     responses={

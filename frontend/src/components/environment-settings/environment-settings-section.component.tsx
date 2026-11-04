@@ -66,8 +66,11 @@ export function EnvironmentSettingsSection({ dataProductId, technicalAsset, canE
                         </Button>
                         <Button
                             type="primary"
-                            disabled={settings.changedEnvironments.length === 0}
-                            onClick={() => setConfirmOpen(true)}
+                            disabled={settings.changedEnvironments.length === 0 || settings.errors.length > 0}
+                            loading={settings.isValidating}
+                            onClick={async () => {
+                                if (await settings.validateNow()) setConfirmOpen(true);
+                            }}
                         >
                             {t('Save')}
                         </Button>

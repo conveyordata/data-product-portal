@@ -7,4 +7,10 @@ describe('dataProductTechnicalAssetsTags', () => {
             suppressErrorToast: true,
         });
     });
+
+    it('suppresses the generic toast when validating Environment Settings', () => {
+        expect(dataProductTechnicalAssetsTags.validateTechnicalAssetEnvironmentConfiguration.extraOptions).toEqual({
+            suppressErrorToast: true,
+        });
+    });
 });

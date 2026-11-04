@@ -42,6 +42,11 @@ ROUTES: list[tuple[str, str, Callable[[UUID], Any]]] = [
     ("PUT", ASSET, lambda _: {"name": "x", "description": "x", "tag_ids": []}),
     ("PUT", f"{ASSET}/status", lambda _: {"status": "pending"}),
     ("PUT", f"{ASSET}/environment_configuration", lambda _: {"environment_values": {}}),
+    (
+        "POST",
+        f"{ASSET}/environment_configuration/validate",
+        lambda _: {"environment_values": {}},
+    ),
     ("DELETE", ASSET, lambda _: None),
     ("POST", f"{LINK}/add", _link_request_body),
     ("DELETE", f"{LINK}/remove", _link_request_body),

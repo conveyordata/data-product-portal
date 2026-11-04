@@ -748,3 +748,7 @@ type UpdateThemeSettingsRes interface {
 type ValidateResourceNameRes interface {
 	validateResourceNameRes()
 }
+
+type ValidateTechnicalAssetEnvironmentConfigurationRes interface {
+	validateTechnicalAssetEnvironmentConfigurationRes()
+}

@@ -16357,6 +16357,21 @@ func (s *UsersGet) SetGlobalRole(val NilGlobalRoleAssignmentResponse) {
 	s.GlobalRole = val
 }
 
+type ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
 // Ref: #/components/schemas/ValidationError
 type ValidationError struct {
 	Loc   []ValidationErrorLocItem `json:"loc"`
