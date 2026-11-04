@@ -122,6 +122,13 @@ def put_values(client, asset, values):
     )
 
 
+def validate_values(client, asset, values):
+    return client.post(
+        f"{ENDPOINT.format(asset.owner_id)}/{asset.id}/environment_configuration/validate",
+        json={"environment_values": values},
+    )
+
+
 def get_asset(client, asset_id, data_product):
     return client.get(f"{ENDPOINT.format(data_product.id)}/{asset_id}")
 
@@ -487,6 +494,61 @@ class TestUpdateEnvironmentConfiguration:
         )
 
         assert response.status_code in (403, 404)
+
+
+class TestValidateEnvironmentConfiguration:
+    def test_validate_technical_asset_environment_configuration__accepts_without_saving(
+        self, client, member, data_product, stored_asset, dev, prd, capture_events
+    ):
+        before = get_asset(client, stored_asset.id, data_product).json()[
+            "environment_values"
+        ]
+
+        response = validate_values(
+            client,
+            stored_asset,
+            {
+                str(dev.id): {"size": "medium", "replicas": 3, "label": "l"},
+                str(prd.id): {"size": "large", "replicas": 4, "label": "l"},
+            },
+        )
+
+        assert response.status_code == 200, response.text
+        assert (
+            get_asset(client, stored_asset.id, data_product).json()[
+                "environment_values"
+            ]
+            == before
+        )
+        assert_event_not_in_queue("technical_asset.event", capture_events)
+
+    def test_validate_technical_asset_environment_configuration__rejects_disabled_option(
+        self, client, member, stored_asset, dev, prd
+    ):
+        response = validate_values(
+            client,
+            stored_asset,
+            {
+                str(dev.id): {"size": "large", "replicas": 1, "label": "l"},
+                str(prd.id): {"size": "medium", "replicas": 2, "label": "l"},
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == [
+            {
+                "environment_id": str(dev.id),
+                "field": "size",
+                "message": "Option is not allowed in this environment",
+            }
+        ]
+
+    def test_validate_technical_asset_environment_configuration__requires_update_permission(
+        self, client, stored_asset
+    ):
+        response = validate_values(client, stored_asset, {})
+
+        assert response.status_code == 403
 
 
 class TestDataProductEnvironments:

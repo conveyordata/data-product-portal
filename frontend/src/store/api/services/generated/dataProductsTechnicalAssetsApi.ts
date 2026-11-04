@@ -104,6 +104,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.technicalAssetEnvironmentConfigurationUpdate,
       }),
     }),
+    validateTechnicalAssetEnvironmentConfiguration: build.mutation<
+      ValidateTechnicalAssetEnvironmentConfigurationApiResponse,
+      ValidateTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environment_configuration/validate`,
+        method: "POST",
+        body: queryArg.technicalAssetEnvironmentConfigurationUpdate,
+      }),
+    }),
     updateTechnicalAssetStatus: build.mutation<
       UpdateTechnicalAssetStatusApiResponse,
       UpdateTechnicalAssetStatusApiArg
@@ -194,6 +204,13 @@ export type GetTechnicalAssetEventHistoryApiArg = {
 export type UpdateTechnicalAssetEnvironmentConfigurationApiResponse =
   /** status 200 Successful Response */ UpdateTechnicalAssetResponse;
 export type UpdateTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  id: string;
+  technicalAssetEnvironmentConfigurationUpdate: TechnicalAssetEnvironmentConfigurationUpdate;
+};
+export type ValidateTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ any;
+export type ValidateTechnicalAssetEnvironmentConfigurationApiArg = {
   dataProductId: string;
   id: string;
   technicalAssetEnvironmentConfigurationUpdate: TechnicalAssetEnvironmentConfigurationUpdate;
@@ -576,6 +593,7 @@ export const {
   useGetTechnicalAssetEventHistoryQuery,
   useLazyGetTechnicalAssetEventHistoryQuery,
   useUpdateTechnicalAssetEnvironmentConfigurationMutation,
+  useValidateTechnicalAssetEnvironmentConfigurationMutation,
   useUpdateTechnicalAssetStatusMutation,
   useGetTechnicalAssetGraphDataQuery,
   useLazyGetTechnicalAssetGraphDataQuery,

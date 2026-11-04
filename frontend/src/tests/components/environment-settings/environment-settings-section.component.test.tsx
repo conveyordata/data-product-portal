@@ -51,6 +51,7 @@ function mockPlugins(requests: unknown[] = []) {
             requests.push(await request.json());
             return HttpResponse.json({ id: 'ta-1' });
         }),
+        http.post('*/technical_assets/ta-1/environment_configuration/validate', () => HttpResponse.json(null)),
     );
 }
 
@@ -99,6 +100,51 @@ describe('EnvironmentSettingsSection', () => {
         await userEvent.click(await screen.findByRole('button', { name: 'Save Changes' }));
 
         expect(await screen.findByText('Large is not allowed')).toBeInTheDocument();
+    });
+
+    it('validates a change without saving it', async () => {
+        const saves: unknown[] = [];
+        mockPlugins(saves);
+        server.use(
+            http.post('*/technical_assets/ta-1/environment_configuration/validate', () =>
+                HttpResponse.json(
+                    { detail: [{ environment_id: 'env-prd', field: 'size', message: 'Large is not allowed' }] },
+                    { status: 422 },
+                ),
+            ),
+        );
+        renderWithProviders(
+            <EnvironmentSettingsSection dataProductId="dp-1" technicalAsset={technicalAsset} canEdit />,
+        );
+
+        await userEvent.click(await screen.findByLabelText('Size env-prd'));
+        await userEvent.click(await screen.findByTitle('large'));
+
+        expect(await screen.findByText('Large is not allowed', {}, { timeout: 2000 })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+        expect(saves).toEqual([]);
+    });
+
+    it('checks before opening the confirmation when Save is clicked right after a change', async () => {
+        mockPlugins();
+        server.use(
+            http.post('*/technical_assets/ta-1/environment_configuration/validate', () =>
+                HttpResponse.json(
+                    { detail: [{ environment_id: 'env-prd', field: 'size', message: 'Large is not allowed' }] },
+                    { status: 422 },
+                ),
+            ),
+        );
+        renderWithProviders(
+            <EnvironmentSettingsSection dataProductId="dp-1" technicalAsset={technicalAsset} canEdit />,
+        );
+
+        await userEvent.click(await screen.findByLabelText('Size env-prd'));
+        await userEvent.click(await screen.findByTitle('large'));
+        await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+        expect(await screen.findByText('Large is not allowed')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Save Changes' })).not.toBeInTheDocument();
     });
 
     it('is read-only without update permission', async () => {

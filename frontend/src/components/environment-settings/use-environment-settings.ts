@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDebouncedCallback } from 'use-debounce';
 import {
     type GetTechnicalAssetResponse,
     useUpdateTechnicalAssetEnvironmentConfigurationMutation,
+    useValidateTechnicalAssetEnvironmentConfigurationMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { dispatchMessage } from '@/utils/feedback';
@@ -19,6 +21,7 @@ export type EnvironmentSettingsAsset = Pick<
 >;
 
 const NO_VALUES: EnvironmentValues = {};
+const VALIDATE_DEBOUNCE = 500;
 
 export function useEnvironmentSettings(dataProductId: string, technicalAsset: EnvironmentSettingsAsset | undefined) {
     const { t } = useTranslation();
@@ -26,7 +29,9 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
     const [update, { isLoading: isSaving }] = useUpdateTechnicalAssetEnvironmentConfigurationMutation();
     const stored: EnvironmentValues = technicalAsset?.environment_values ?? NO_VALUES;
     const [values, setValues] = useState<EnvironmentValues>(stored);
+    const [validate, { isLoading: isValidating }] = useValidateTechnicalAssetEnvironmentConfigurationMutation();
     const [errors, setErrors] = useState<EnvironmentSettingsError[]>([]);
+    const latestCheck = useRef(0);
 
     useEffect(() => setValues(stored), [stored]);
 
@@ -43,6 +48,42 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
     const changes = useMemo(() => computeChanges(metadata, stored, values), [metadata, stored, values]);
     const changedEnvironments = environments.filter((e) => changes[e.id]?.length);
 
+    const runCheck = async (submitted: EnvironmentValues): Promise<boolean> => {
+        if (!technicalAsset) return false;
+        const id = ++latestCheck.current;
+        try {
+            await validate({
+                dataProductId,
+                id: technicalAsset.id,
+                technicalAssetEnvironmentConfigurationUpdate: { environment_values: submitted },
+            }).unwrap();
+            if (id === latestCheck.current) setErrors([]);
+            return true;
+        } catch (error) {
+            const cellErrors = getEnvironmentSettingsErrors(error);
+            if (id === latestCheck.current) setErrors(cellErrors);
+            return cellErrors.length === 0;
+        }
+    };
+
+    const check = useDebouncedCallback(runCheck, VALIDATE_DEBOUNCE);
+
+    const validateNow = (): Promise<boolean> => {
+        check.cancel();
+        return runCheck(values);
+    };
+
+    const hasChanges = changedEnvironments.length > 0;
+    useEffect(() => {
+        if (hasChanges) {
+            check(values);
+        } else {
+            check.cancel();
+            latestCheck.current++;
+            setErrors([]);
+        }
+    }, [values, hasChanges, check]);
+
     const reset = () => {
         setValues(stored);
         setErrors([]);
@@ -50,6 +91,8 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
 
     const save = async (): Promise<boolean> => {
         if (!technicalAsset) return false;
+        check.cancel();
+        latestCheck.current++;
         try {
             await update({
                 dataProductId,
@@ -80,5 +123,7 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
         reset,
         save,
         isSaving,
+        validateNow,
+        isValidating,
     };
 }

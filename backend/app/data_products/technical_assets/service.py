@@ -260,6 +260,16 @@ class TechnicalAssetService:
         queue_event(technical_asset.to_event())
         return UpdateTechnicalAssetResponse(id=technical_asset.id)
 
+    def validate_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        update: TechnicalAssetEnvironmentConfigurationUpdate,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).validate(
+            self.get_technical_asset(data_product_id, id), update.environment_values
+        )
+
     def remove_technical_asset(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
