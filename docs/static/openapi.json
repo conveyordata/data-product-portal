@@ -5055,6 +5055,83 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/environment_configuration/validate": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Validate Technical Asset Environment Configuration",
+        "operationId": "validate_technical_asset_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TechnicalAssetEnvironmentConfigurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Technical asset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical asset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid environment configuration",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "environment_id": "random environment id",
+                      "field": "size",
+                      "message": "Option is not allowed in this environment"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/technical_assets/{id}/status": {
       "put": {
         "tags": [

@@ -86,9 +86,9 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
         }
     };
 
-    const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = (values) => {
+    const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = async (values) => {
         if (environmentSettings.changedEnvironments.length > 0) {
-            setPendingValues(values);
+            if (await environmentSettings.validateNow()) setPendingValues(values);
             return;
         }
         save(values);
@@ -262,8 +262,8 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
                             className={styles.formButton}
                             type="primary"
                             htmlType="submit"
-                            loading={isUpdating}
-                            disabled={isLoading || !canEdit}
+                            loading={isUpdating || environmentSettings.isValidating}
+                            disabled={isLoading || !canEdit || environmentSettings.errors.length > 0}
                         >
                             {t('Save')}
                         </Button>

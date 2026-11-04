@@ -83,25 +83,15 @@ class TechnicalAssetEnvironmentConfigurationService:
             self._add_row(plugin, configuration_id, environment_id, environment_values)
         self.db.flush()
 
+    def validate(
+        self, technical_asset: TechnicalAssetModel, submitted: EnvironmentValues
+    ) -> None:
+        self._validated_submission(technical_asset, submitted)
+
     def replace(
         self, technical_asset: TechnicalAssetModel, submitted: EnvironmentValues
     ) -> None:
-        plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
-        if plugin.environment_configuration is None:
-            raise self._no_environment_configuration()
-        configuration = plugin.model_validate(technical_asset.configuration)
-        context = self._context(technical_asset)
-        rows, stored = self._load(plugin, technical_asset.configuration_id)
-        values = self._validated(
-            configuration,
-            context,
-            [
-                declaration.environment
-                for declaration in technical_asset.owner.environments
-            ],
-            submitted,
-            stored,
-        )
+        plugin, rows, values = self._validated_submission(technical_asset, submitted)
         for environment_id, environment_values in values.items():
             if (row := rows.get(environment_id)) is None:
                 self._add_row(
@@ -160,6 +150,25 @@ class TechnicalAssetEnvironmentConfigurationService:
             TechnicalMapping(technical_asset.technical_mapping),
             technical_asset.id,
         )
+
+    def _validated_submission(
+        self, technical_asset: TechnicalAssetModel, submitted: EnvironmentValues
+    ) -> tuple[type[TechnicalAssetPlugin], dict[UUID, Any], EnvironmentValues]:
+        plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
+        if plugin.environment_configuration is None:
+            raise self._no_environment_configuration()
+        rows, stored = self._load(plugin, technical_asset.configuration_id)
+        values = self._validated(
+            plugin.model_validate(technical_asset.configuration),
+            self._context(technical_asset),
+            [
+                declaration.environment
+                for declaration in technical_asset.owner.environments
+            ],
+            submitted,
+            stored,
+        )
+        return plugin, rows, values
 
     def _validated(
         self,
