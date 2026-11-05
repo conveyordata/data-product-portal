@@ -123,6 +123,14 @@ func (s *EnvironmentGetItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")

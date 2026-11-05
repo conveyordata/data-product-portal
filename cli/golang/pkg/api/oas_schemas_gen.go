@@ -8180,6 +8180,116 @@ func (s *ModifyOutputPortRoleAssignment) SetRoleID(val uuid.UUID) {
 	s.RoleID = val
 }
 
+// Ref: #/components/schemas/NewTechnicalAssetEnvironmentConfigurationValidation
+type NewTechnicalAssetEnvironmentConfigurationValidation struct {
+	Namespace string `json:"namespace"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration     NewTechnicalAssetEnvironmentConfigurationValidationConfiguration        `json:"configuration"`
+	TechnicalMapping  OptTechnicalMapping                                                     `json:"technical_mapping"`
+	EnvironmentValues OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues `json:"environment_values"`
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetConfiguration returns the value of Configuration.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetConfiguration() NewTechnicalAssetEnvironmentConfigurationValidationConfiguration {
+	return s.Configuration
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetTechnicalMapping() OptTechnicalMapping {
+	return s.TechnicalMapping
+}
+
+// GetEnvironmentValues returns the value of EnvironmentValues.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetEnvironmentValues() OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	return s.EnvironmentValues
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetConfiguration sets the value of Configuration.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetConfiguration(val NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) {
+	s.Configuration = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetTechnicalMapping(val OptTechnicalMapping) {
+	s.TechnicalMapping = val
+}
+
+// SetEnvironmentValues sets the value of EnvironmentValues.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetEnvironmentValues(val OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) {
+	s.EnvironmentValues = val
+}
+
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
+type NewTechnicalAssetEnvironmentConfigurationValidationConfiguration struct {
+	Name            string `json:"name"`
+	AdditionalProps NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional
+}
+
+// GetName returns the value of Name.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) GetName() string {
+	return s.Name
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) GetAdditionalProps() NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetName sets the value of Name.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) SetName(val string) {
+	s.Name = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) SetAdditionalProps(val NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional map[string]jx.Raw
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) init() NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues map[string]NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) init() NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	m := *s
+	if m == nil {
+		m = map[string]NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem{}
+		*s = m
+	}
+	return m
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem map[string]jx.Raw
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) init() NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // NewNilDataProductLifeCycle returns new NilDataProductLifeCycle with value set to v.
 func NewNilDataProductLifeCycle(v DataProductLifeCycle) NilDataProductLifeCycle {
 	return NilDataProductLifeCycle{
@@ -8872,6 +8982,54 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues returns new OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues with value set to v.
+func NewOptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues(v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	return OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues is optional NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues.
+type OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues struct {
+	Value NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues
+	Set   bool
+}
+
+// IsSet returns true if OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues was set.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) IsSet() bool {
+	return o.Set
+}
+
+// Reset unsets value.
+func (o *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Reset() {
+	var v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) SetTo(v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Get() (v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Or(d NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -11140,6 +11298,52 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTechnicalMapping returns new OptTechnicalMapping with value set to v.
+func NewOptTechnicalMapping(v TechnicalMapping) OptTechnicalMapping {
+	return OptTechnicalMapping{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTechnicalMapping is optional TechnicalMapping.
+type OptTechnicalMapping struct {
+	Value TechnicalMapping
+	Set   bool
+}
+
+// IsSet returns true if OptTechnicalMapping was set.
+func (o OptTechnicalMapping) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTechnicalMapping) Reset() {
+	var v TechnicalMapping
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTechnicalMapping) SetTo(v TechnicalMapping) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTechnicalMapping) Get() (v TechnicalMapping, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTechnicalMapping) Or(d TechnicalMapping) TechnicalMapping {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -16355,6 +16559,16 @@ func (s *UsersGet) SetAdminExpiry(val OptNilDateTime) {
 // SetGlobalRole sets the value of GlobalRole.
 func (s *UsersGet) SetGlobalRole(val NilGlobalRoleAssignmentResponse) {
 	s.GlobalRole = val
+}
+
+type ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
 }
 
 type ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw

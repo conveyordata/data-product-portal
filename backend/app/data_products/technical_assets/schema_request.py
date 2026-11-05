@@ -82,5 +82,12 @@ class TechnicalAssetEnvironmentConfigurationUpdate(ORMModel):
     environment_values: dict[UUID, dict[str, Any]]
 
 
+class NewTechnicalAssetEnvironmentConfigurationValidation(ORMModel):
+    namespace: str
+    configuration: DataOutputConfiguration
+    technical_mapping: TechnicalMapping = TechnicalMapping.Default
+    environment_values: dict[UUID, dict[str, Any]] = Field(default={})
+
+
 class TechnicalAssetStatusUpdate(ORMModel):
     status: TechnicalAssetStatus

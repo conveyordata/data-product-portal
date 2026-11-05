@@ -13,4 +13,10 @@ describe('dataProductTechnicalAssetsTags', () => {
             suppressErrorToast: true,
         });
     });
+
+    it('suppresses the generic toast when validating Environment Settings of a new Technical Asset', () => {
+        expect(dataProductTechnicalAssetsTags.validateNewTechnicalAssetEnvironmentConfiguration.extraOptions).toEqual({
+            suppressErrorToast: true,
+        });
+    });
 });

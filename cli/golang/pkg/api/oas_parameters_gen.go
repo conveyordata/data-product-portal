@@ -766,6 +766,11 @@ type UpdateTechnicalAssetStatusParams struct {
 	ID            uuid.UUID
 }
 
+// ValidateNewTechnicalAssetEnvironmentConfigurationParams is parameters of validate_new_technical_asset_environment_configuration operation.
+type ValidateNewTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+}
+
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
 type ValidateResourceNameParams struct {
 	ResourceName  string
