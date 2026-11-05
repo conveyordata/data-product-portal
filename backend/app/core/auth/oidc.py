@@ -68,18 +68,7 @@ class OIDCIdentity(BaseModel):
 
     @classmethod
     def from_claims(cls, claims: dict) -> "OIDCIdentity":
-        email = next(
-            (
-                value
-                for value in (
-                    claims.get("email"),
-                    claims.get("preferred_username"),
-                    claims.get("upn"),
-                )
-                if _is_email(value)
-            ),
-            None,
-        )
+        email = _first_email(claims)
         if not email:
             raise ValueError("token carries no email, preferred_username or upn claim")
         given_name = claims.get("given_name")
@@ -100,6 +89,14 @@ class OIDCIdentity(BaseModel):
             email=email,
             preferred_username=claims.get("preferred_username"),
         )
+
+
+def _first_email(claims: dict) -> Optional[str]:
+    for claim in ("email", "preferred_username", "upn"):
+        value = claims.get(claim)
+        if _is_email(value):
+            return value
+    return None
 
 
 def _is_email(value: object) -> bool:
