@@ -32,6 +32,23 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
+INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE = {
+    "description": "Invalid environment configuration",
+    "content": {
+        "application/json": {
+            "example": {
+                "detail": [
+                    {
+                        "environment_id": "random environment id",
+                        "field": "size",
+                        "message": "Option is not allowed in this environment",
+                    }
+                ]
+            }
+        }
+    },
+}
+
 router = APIRouter(
     tags=["Data Products - Technical assets"],
     prefix="/v2/data_products/{data_product_id}/technical_assets",
@@ -217,22 +234,7 @@ def update_technical_asset(
                 }
             },
         },
-        422: {
-            "description": "Invalid environment configuration",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "environment_id": "random environment id",
-                                "field": "size",
-                                "message": "Option is not allowed in this environment",
-                            }
-                        ]
-                    }
-                }
-            },
-        },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
     },
     dependencies=[
         Depends(
@@ -276,22 +278,7 @@ def update_technical_asset_environment_configuration(
                 }
             },
         },
-        422: {
-            "description": "Invalid environment configuration",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "environment_id": "random environment id",
-                                "field": "size",
-                                "message": "Option is not allowed in this environment",
-                            }
-                        ]
-                    }
-                }
-            },
-        },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
     },
     dependencies=[
         Depends(
@@ -425,22 +412,15 @@ def create_technical_asset(
 @router.post(
     "/environment_configuration/validate",
     responses={
-        422: {
-            "description": "Invalid environment configuration",
+        404: {
+            "description": "Data product not found",
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "environment_id": "random environment id",
-                                "field": "size",
-                                "message": "Option is not allowed in this environment",
-                            }
-                        ]
-                    }
+                    "example": {"detail": "Required item random id does not exist"}
                 }
             },
         },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
     },
     dependencies=[
         Depends(

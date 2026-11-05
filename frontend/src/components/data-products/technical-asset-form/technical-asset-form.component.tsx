@@ -110,6 +110,7 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     const technical_mapping = Form.useWatch('technical_mapping', form);
     const namespace = Form.useWatch('namespace', form);
     const sharedConfiguration = Form.useWatch('configuration', form);
+    const environmentValues = Form.useWatch('environment_values', form);
     const defaultEnvironmentValues = useMemo(
         () => buildDefaultValues(environmentMetadata, sharedConfiguration),
         [environmentMetadata, sharedConfiguration],
@@ -306,17 +307,22 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     }, debounce);
 
     const latestEnvironmentCheck = useRef(0);
-    const checkEnvironmentValues = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
-        if (!values.environment_values) return;
-        const check = ++latestEnvironmentCheck.current;
-        const setErrors = (errors: EnvironmentSettingsError[]) => {
-            if (check === latestEnvironmentCheck.current) {
-                setEnvironmentErrors(errors);
+    const checkEnvironmentValues = useDebouncedCallback(
+        async (
+            values: Pick<
+                CreateTechnicalAssetRequest,
+                'namespace' | 'technical_mapping' | 'configuration' | 'environment_values'
+            >,
+        ) => {
+            const check = ++latestEnvironmentCheck.current;
+            if (!values.environment_values) return;
+            try {
+                await form.validateFields(['configuration'], { validateOnly: true, recursive: true });
+            } catch {
+                return;
             }
-        };
-        form.validateFields(['configuration'], { validateOnly: true, recursive: true })
-            .then(() =>
-                validateEnvironmentValues({
+            try {
+                await validateEnvironmentValues({
                     dataProductId,
                     newTechnicalAssetEnvironmentConfigurationValidation: {
                         namespace: values.namespace ?? '',
@@ -324,11 +330,25 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                         configuration: values.configuration,
                         environment_values: values.environment_values,
                     },
-                }).unwrap(),
-            )
-            .then(() => setErrors([]))
-            .catch((error) => setErrors(getEnvironmentSettingsErrors(error)));
-    }, debounce);
+                }).unwrap();
+                if (check === latestEnvironmentCheck.current) setEnvironmentErrors([]);
+            } catch (error) {
+                const cellErrors = getEnvironmentSettingsErrors(error);
+                if (cellErrors.length > 0 && check === latestEnvironmentCheck.current) setEnvironmentErrors(cellErrors);
+            }
+        },
+        debounce,
+    );
+
+    useEffect(() => {
+        latestEnvironmentCheck.current++;
+        checkEnvironmentValues({
+            namespace,
+            technical_mapping,
+            configuration: sharedConfiguration,
+            environment_values: environmentValues,
+        });
+    }, [environmentValues, sharedConfiguration, namespace, technical_mapping, checkEnvironmentValues]);
 
     useEffect(() => {
         setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
@@ -341,8 +361,8 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         if (changed.configuration) {
             setResultString(values);
         }
-        if (changed.environment_values || changed.configuration) {
-            checkEnvironmentValues(values);
+        if (changed.environment_values) {
+            setEnvironmentErrors([]);
         }
     };
 
