@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 from warnings import deprecated, warn
 
@@ -28,6 +28,7 @@ class CreateTechnicalAssetRequest(ORMModel):
     )
     access_mode_ids: list[UUID] = Field(default=[])
     tag_ids: list[UUID]
+    environment_values: dict[UUID, dict[str, Any]] = Field(default={})
 
     @model_validator(mode="after")
     def handle_deprecated_sourceAligned(self):
@@ -75,6 +76,17 @@ class TechnicalAssetUpdate(ORMModel):
     name: str
     description: str
     tag_ids: list[UUID]
+
+
+class TechnicalAssetEnvironmentConfigurationUpdate(ORMModel):
+    environment_values: dict[UUID, dict[str, Any]]
+
+
+class NewTechnicalAssetEnvironmentConfigurationValidation(ORMModel):
+    namespace: str
+    configuration: DataOutputConfiguration
+    technical_mapping: TechnicalMapping = TechnicalMapping.Default
+    environment_values: dict[UUID, dict[str, Any]] = Field(default={})
 
 
 class TechnicalAssetStatusUpdate(ORMModel):

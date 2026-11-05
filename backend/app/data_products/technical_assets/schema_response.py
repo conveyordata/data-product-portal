@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 from uuid import UUID
 
 from pydantic import AliasPath, Field, computed_field
@@ -121,6 +121,10 @@ class GetTechnicalAssetsResponseItem(ORMModel):
 
     output_port_links: list[OutputPortLink]
     tags: list[Tag]
+
+
+class GetTechnicalAssetResponse(GetTechnicalAssetsResponseItem):
+    environment_values: dict[UUID, dict[str, Any]]
 
 
 class GetTechnicalAssetsResponse(ORMModel):

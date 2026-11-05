@@ -1,8 +1,16 @@
-import { Alert, Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Button, Col, Form, type FormProps, Input, Radio, Row, Select, Space, Typography } from 'antd';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { CardSelection } from '@/components/card-selection/card-selection.tsx';
+import {
+    buildDefaultValues,
+    type EnvironmentSettingsError,
+    type EnvironmentValues,
+    followDefaults,
+    getEnvironmentSettingsErrors,
+} from '@/components/environment-settings/environment-settings.helper';
+import { EnvironmentSettingsMatrix } from '@/components/environment-settings/environment-settings-matrix.component';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { TechnicalAssetPlatformTile } from '@/components/technical-assets/technical-asset-platform-tile/technical-asset-platform-tile.component';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
@@ -13,6 +21,7 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import {
     type CreateTechnicalAssetRequest,
     useCreateTechnicalAssetMutation,
+    useValidateNewTechnicalAssetEnvironmentConfigurationMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
@@ -27,6 +36,7 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
+import { showGenericErrorMessage } from '@/store/common/errors.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -39,9 +49,9 @@ const { TextArea } = Input;
 
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<CreateTechnicalAssetRequest> | null>;
     dataProductId: string;
-    modalCallbackOnSubmit: () => void;
+    onCreated: (technicalAssetId: string) => void;
+    onCancel: () => void;
     debounce?: number;
 };
 
@@ -53,7 +63,7 @@ type ServiceConfig = {
 
 type AccessModeType = 'single' | 'multiple';
 
-export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = 500 }: Props) {
+export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, debounce = 500 }: Props) {
     const { t } = useTranslation();
 
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
@@ -79,6 +89,16 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
         return uiMetadataGroups.find((meta) => meta.platform === selectedConfiguration.value.toLowerCase());
     }, [uiMetadataGroups, selectedConfiguration]);
+    const environments = useMemo(
+        () => currentDataProduct?.environments.map((e) => e.environment) ?? [],
+        [currentDataProduct],
+    );
+    const environmentMetadata = useMemo(() => {
+        const ids = new Set(environments.map((e) => e.id));
+        return pluginMetadata?.environment_ui_metadata?.filter((item) => ids.has(item.environment_id)) ?? [];
+    }, [pluginMetadata, environments]);
+    const [environmentErrors, setEnvironmentErrors] = useState<EnvironmentSettingsError[]>([]);
+    const [validateEnvironmentValues] = useValidateNewTechnicalAssetEnvironmentConfigurationMutation();
     const accessModesForSelectedPlugin = useMemo(() => {
         if (!pluginMetadata || !accessModes) {
             return [];
@@ -89,6 +109,13 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const [form] = Form.useForm();
     const technical_mapping = Form.useWatch('technical_mapping', form);
     const namespace = Form.useWatch('namespace', form);
+    const sharedConfiguration = Form.useWatch('configuration', form);
+    const environmentValues = Form.useWatch('environment_values', form);
+    const defaultEnvironmentValues = useMemo(
+        () => buildDefaultValues(environmentMetadata, sharedConfiguration),
+        [environmentMetadata, sharedConfiguration],
+    );
+    const previousDefaults = useRef<{ metadata: unknown; values: EnvironmentValues }>(undefined);
     const dataOutputNameValue = Form.useWatch('name', form);
 
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
@@ -152,13 +179,35 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         return map;
     }, [platformConfig]);
 
+    useEffect(() => {
+        const previous = previousDefaults.current;
+        const metadataChanged = previous?.metadata !== environmentMetadata;
+        form.setFieldValue(
+            'environment_values',
+            environmentMetadata.length === 0
+                ? undefined
+                : metadataChanged
+                  ? defaultEnvironmentValues
+                  : followDefaults(previous.values, defaultEnvironmentValues, form.getFieldValue('environment_values')),
+        );
+        if (metadataChanged) {
+            setEnvironmentErrors([]);
+        }
+        previousDefaults.current = { metadata: environmentMetadata, values: defaultEnvironmentValues };
+    }, [form, environmentMetadata, defaultEnvironmentValues]);
+
     const onSubmit: FormProps<CreateTechnicalAssetRequest>['onFinish'] = async (values) => {
         try {
-            await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
+            const { id } = await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
             dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
-            modalCallbackOnSubmit();
-            form.resetFields();
-        } catch (_e) {
+            onCreated(id);
+        } catch (e) {
+            const cellErrors = getEnvironmentSettingsErrors(e);
+            setEnvironmentErrors(cellErrors);
+            if (cellErrors.length > 0) {
+                return;
+            }
+            showGenericErrorMessage(e);
             const errorMessage = 'Failed to create Technical Asset';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
@@ -257,6 +306,50 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             .catch(() => setResult(undefined));
     }, debounce);
 
+    const latestEnvironmentCheck = useRef(0);
+    const checkEnvironmentValues = useDebouncedCallback(
+        async (
+            values: Pick<
+                CreateTechnicalAssetRequest,
+                'namespace' | 'technical_mapping' | 'configuration' | 'environment_values'
+            >,
+        ) => {
+            const check = ++latestEnvironmentCheck.current;
+            if (!values.environment_values) return;
+            try {
+                await form.validateFields(['configuration'], { validateOnly: true, recursive: true });
+            } catch {
+                return;
+            }
+            try {
+                await validateEnvironmentValues({
+                    dataProductId,
+                    newTechnicalAssetEnvironmentConfigurationValidation: {
+                        namespace: values.namespace ?? '',
+                        technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
+                        configuration: values.configuration,
+                        environment_values: values.environment_values,
+                    },
+                }).unwrap();
+                if (check === latestEnvironmentCheck.current) setEnvironmentErrors([]);
+            } catch (error) {
+                const cellErrors = getEnvironmentSettingsErrors(error);
+                if (cellErrors.length > 0 && check === latestEnvironmentCheck.current) setEnvironmentErrors(cellErrors);
+            }
+        },
+        debounce,
+    );
+
+    useEffect(() => {
+        latestEnvironmentCheck.current++;
+        checkEnvironmentValues({
+            namespace,
+            technical_mapping,
+            configuration: sharedConfiguration,
+            environment_values: environmentValues,
+        });
+    }, [environmentValues, sharedConfiguration, namespace, technical_mapping, checkEnvironmentValues]);
+
     useEffect(() => {
         setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
     }, [form, namespace, technical_mapping, setResultString]);
@@ -268,193 +361,232 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         if (changed.configuration) {
             setResultString(values);
         }
+        if (changed.environment_values) {
+            setEnvironmentErrors([]);
+        }
     };
 
     return (
-        <Form
-            form={form}
-            ref={formRef}
-            layout="vertical"
-            onFinish={onSubmit}
-            onFinishFailed={onSubmitFailed}
-            onValuesChange={onValuesChange}
-            autoComplete="off"
-            labelWrap
-            disabled={isLoading}
-        >
-            <Form.Item<TechnicalAssetsCreateForm>
-                name="name"
-                label={t('Name')}
-                tooltip={t('The name of your Technical Asset')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please provide the name of the Technical Asset'),
-                    },
-                ]}
-            >
-                <Input />
-            </Form.Item>
-            <ResourceNameFormItem
+        <>
+            <Typography.Title level={3}>{t('New Technical Asset')}</Typography.Title>
+            <Form
                 form={form}
-                tooltip={t('The namespace of the Technical Asset')}
-                max_length={constraints?.max_length}
-                canEditResourceName={canEditNamespace}
-                toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
-                validationRequired
-                validateResourceName={validateNamespaceCallback}
-            />
-            <Form.Item<TechnicalAssetsCreateForm>
-                name="description"
-                label={t('Description')}
-                tooltip={t('A description for your Technical Asset')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please provide a description for the Technical Asset'),
-                    },
-                    {
-                        max: MAX_DESCRIPTION_INPUT_LENGTH,
-                        message: t('Description must be less than {{length}} characters', {
-                            length: MAX_DESCRIPTION_INPUT_LENGTH,
-                        }),
-                    },
-                ]}
+                layout="vertical"
+                onFinish={onSubmit}
+                onFinishFailed={onSubmitFailed}
+                onValuesChange={onValuesChange}
+                autoComplete="off"
+                labelWrap
+                disabled={isLoading}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
-            </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm> name="tag_ids" label={t('Tags')} initialValue={[]}>
-                <Select
-                    tokenSeparators={[',']}
-                    placeholder={t('Select Technical Asset tags')}
-                    mode="multiple"
-                    options={tagSelectOptions}
-                    showSearch={{ filterOption: selectFilterOptionByLabel }}
+                <Form.Item<TechnicalAssetsCreateForm>
+                    name="name"
+                    label={t('Name')}
+                    tooltip={t('The name of your Technical Asset')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please provide the name of the Technical Asset'),
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+                <ResourceNameFormItem
+                    form={form}
+                    tooltip={t('The namespace of the Technical Asset')}
+                    max_length={constraints?.max_length}
+                    canEditResourceName={canEditNamespace}
+                    toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
+                    validationRequired
+                    validateResourceName={validateNamespaceCallback}
                 />
-            </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm>
-                name="technical_mapping"
-                label={t('Technical Mapping')}
-                required
-                tooltip={t(
-                    'Default mapping applies the platform’s standards to your asset. Choose Custom if your asset exists outside these standards and requires explicit configuration, which may be subject to manual approval before activation.',
-                )}
-                initialValue="default"
-            >
-                <Select allowClear={false} options={options} />
-            </Form.Item>
-
-            <Form.Item name="platform_id">
-                <Radio.Group>
-                    <Space wrap>
-                        {dataPlatforms.map((dataPlatform) => (
-                            <TechnicalAssetPlatformTile<string>
-                                key={dataPlatform.value}
-                                dataPlatform={dataPlatform}
-                                isDisabled={isLoading || isFetchingResultString}
-                                isSelected={dataPlatform === selectedDataPlatform}
-                                onTileClick={onDataPlatformClick}
-                                value={
-                                    platformConfig?.find(
-                                        (config) =>
-                                            config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
-                                    )?.platform.id ?? dataPlatform.value
-                                }
-                            />
-                        ))}
-                    </Space>
-                </Radio.Group>
-            </Form.Item>
-            <Form.Item name="service_id" hidden={selectedDataPlatform?.children?.length === 0}>
-                <Radio.Group>
-                    <Space wrap>
-                        {selectedDataPlatform?.children?.map((dataPlatform) => (
-                            <TechnicalAssetPlatformTile<string>
-                                key={dataPlatform.value}
-                                dataPlatform={dataPlatform}
-                                isDisabled={isLoading || isFetchingResultString}
-                                isSelected={dataPlatform === selectedConfiguration}
-                                onTileClick={onConfigurationClick}
-                                value={
-                                    platformServiceConfigMap.get(dataPlatform.value)?.service_id ?? dataPlatform.value
-                                }
-                            />
-                        ))}
-                    </Space>
-                </Radio.Group>
-            </Form.Item>
-            {currentDataProduct && pluginMetadata && (
-                <>
-                    {pluginMetadata.shareable === false && (
-                        <Form.Item>
-                            <Alert
-                                type="warning"
-                                showIcon
-                                title={t('Technical Assets of this type cannot be linked to an Output Port')}
-                            />
-                        </Form.Item>
-                    )}
-                    <TechnicalAssetConfigurationForm
-                        form={form}
-                        uiMetadataGroups={pluginMetadata.ui_metadata}
-                        namespace={currentDataProduct.namespace}
-                        technical_mapping={technical_mapping}
-                        configurationType={pluginMetadata.plugin}
-                        resultLabel={pluginMetadata.result_label ?? ''}
-                        resultTooltip={pluginMetadata.result_tooltip ?? ''}
+                <Form.Item<TechnicalAssetsCreateForm>
+                    name="description"
+                    label={t('Description')}
+                    tooltip={t('A description for your Technical Asset')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please provide a description for the Technical Asset'),
+                        },
+                        {
+                            max: MAX_DESCRIPTION_INPUT_LENGTH,
+                            message: t('Description must be less than {{length}} characters', {
+                                length: MAX_DESCRIPTION_INPUT_LENGTH,
+                            }),
+                        },
+                    ]}
+                >
+                    <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                </Form.Item>
+                <Form.Item<TechnicalAssetsCreateForm> name="tag_ids" label={t('Tags')} initialValue={[]}>
+                    <Select
+                        tokenSeparators={[',']}
+                        placeholder={t('Select Technical Asset tags')}
+                        mode="multiple"
+                        options={tagSelectOptions}
+                        showSearch={{ filterOption: selectFilterOptionByLabel }}
                     />
-                    {accessModesForSelectedPlugin.length > 0 && (
-                        <Form.Item<TechnicalAssetsCreateForm>
-                            name="access_mode_type"
-                            label={t('Access mode')}
-                            initialValue="single"
-                            rules={[{ required: true, message: t('Please select an access mode') }]}
+                </Form.Item>
+                <Form.Item<TechnicalAssetsCreateForm>
+                    name="technical_mapping"
+                    label={t('Technical Mapping')}
+                    required
+                    tooltip={t(
+                        'Default mapping applies the platform’s standards to your asset. Choose Custom if your asset exists outside these standards and requires explicit configuration, which may be subject to manual approval before activation.',
+                    )}
+                    initialValue="default"
+                >
+                    <Select allowClear={false} options={options} />
+                </Form.Item>
+
+                <Form.Item name="platform_id" label={t('Technical Asset Type')}>
+                    <Radio.Group>
+                        <Space wrap>
+                            {dataPlatforms.map((dataPlatform) => (
+                                <TechnicalAssetPlatformTile<string>
+                                    key={dataPlatform.value}
+                                    dataPlatform={dataPlatform}
+                                    isDisabled={isLoading || isFetchingResultString}
+                                    isSelected={dataPlatform === selectedDataPlatform}
+                                    onTileClick={onDataPlatformClick}
+                                    value={
+                                        platformConfig?.find(
+                                            (config) =>
+                                                config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
+                                        )?.platform.id ?? dataPlatform.value
+                                    }
+                                />
+                            ))}
+                        </Space>
+                    </Radio.Group>
+                </Form.Item>
+                <Form.Item name="service_id" hidden={selectedDataPlatform?.children?.length === 0}>
+                    <Radio.Group>
+                        <Space wrap>
+                            {selectedDataPlatform?.children?.map((dataPlatform) => (
+                                <TechnicalAssetPlatformTile<string>
+                                    key={dataPlatform.value}
+                                    dataPlatform={dataPlatform}
+                                    isDisabled={isLoading || isFetchingResultString}
+                                    isSelected={dataPlatform === selectedConfiguration}
+                                    onTileClick={onConfigurationClick}
+                                    value={
+                                        platformServiceConfigMap.get(dataPlatform.value)?.service_id ??
+                                        dataPlatform.value
+                                    }
+                                />
+                            ))}
+                        </Space>
+                    </Radio.Group>
+                </Form.Item>
+                {currentDataProduct && pluginMetadata && (
+                    <>
+                        {pluginMetadata.shareable === false && (
+                            <Form.Item>
+                                <Alert
+                                    type="warning"
+                                    showIcon
+                                    title={t('Technical Assets of this type cannot be linked to an Output Port')}
+                                />
+                            </Form.Item>
+                        )}
+                        <TechnicalAssetConfigurationForm
+                            form={form}
+                            uiMetadataGroups={pluginMetadata.ui_metadata}
+                            namespace={currentDataProduct.namespace}
+                            technical_mapping={technical_mapping}
+                            configurationType={pluginMetadata.plugin}
+                            resultLabel={pluginMetadata.result_label ?? ''}
+                            resultTooltip={pluginMetadata.result_tooltip ?? ''}
+                        />
+                        {environmentMetadata.length > 0 && (
+                            <Form.Item
+                                name="environment_values"
+                                label={t('Environment Settings')}
+                                tooltip={t(
+                                    'Each Environment of {{name}} keeps its own value. Defaults are filled in, so you only change what you need. You can edit these later.',
+                                    { name: currentDataProduct.name },
+                                )}
+                            >
+                                <EnvironmentSettingsMatrix
+                                    environments={environments}
+                                    metadata={environmentMetadata}
+                                    errors={environmentErrors}
+                                />
+                            </Form.Item>
+                        )}
+                        {accessModesForSelectedPlugin.length > 0 && (
+                            <Form.Item<TechnicalAssetsCreateForm>
+                                name="access_mode_type"
+                                label={t('Access mode')}
+                                initialValue="single"
+                                rules={[{ required: true, message: t('Please select an access mode') }]}
+                            >
+                                <CardSelection<AccessModeType>
+                                    style={{ padding: '4px' }}
+                                    options={[
+                                        {
+                                            value: 'single',
+                                            title: t('Single access mode'),
+                                            description: t(
+                                                'Assign one access level to all users who connect to this asset.',
+                                            ),
+                                        },
+                                        {
+                                            value: 'multiple',
+                                            title: t('Configure access modes'),
+                                            description: t(
+                                                "Define multiple access modes for this asset. You'll be able to create custom access levels with specific permissions, connection strings, and configurations.",
+                                            ),
+                                        },
+                                    ]}
+                                />
+                            </Form.Item>
+                        )}
+                        <Form.Item
+                            name="access_mode_ids"
+                            label={t('Access modes')}
+                            initialValue={[]}
+                            hidden={accessMode !== 'multiple'}
+                            dependencies={['access_mode_type']}
+                            rules={[
+                                {
+                                    validator: async (_, value) => {
+                                        if (accessMode === 'multiple' && (!value || value.length === 0)) {
+                                            return Promise.reject(
+                                                new Error(t('Please select at least one access mode')),
+                                            );
+                                        }
+                                    },
+                                },
+                            ]}
                         >
-                            <CardSelection<AccessModeType>
-                                style={{ padding: '4px' }}
-                                options={[
-                                    {
-                                        value: 'single',
-                                        title: t('Single access mode'),
-                                        description: t(
-                                            'Assign one access level to all users who connect to this asset.',
-                                        ),
-                                    },
-                                    {
-                                        value: 'multiple',
-                                        title: t('Configure access modes'),
-                                        description: t(
-                                            "Define multiple access modes for this asset. You'll be able to create custom access levels with specific permissions, connection strings, and configurations.",
-                                        ),
-                                    },
-                                ]}
+                            <AccessModeSelector
+                                accessModes={accessModesForSelectedPlugin}
+                                loading={isFetchingAccessModes}
+                                selectionMode="multiple"
                             />
                         </Form.Item>
-                    )}
-                    <Form.Item
-                        name="access_mode_ids"
-                        label={t('Access modes')}
-                        initialValue={[]}
-                        hidden={accessMode !== 'multiple'}
-                        dependencies={['access_mode_type']}
-                        rules={[
-                            {
-                                validator: async (_, value) => {
-                                    if (accessMode === 'multiple' && (!value || value.length === 0)) {
-                                        return Promise.reject(new Error(t('Please select at least one access mode')));
-                                    }
-                                },
-                            },
-                        ]}
-                    >
-                        <AccessModeSelector
-                            accessModes={accessModesForSelectedPlugin}
-                            loading={isFetchingAccessModes}
-                            selectionMode="multiple"
-                        />
-                    </Form.Item>
-                </>
-            )}
-        </Form>
+                    </>
+                )}
+                <Form.Item>
+                    <Row>
+                        <Col flex="auto" />
+                        <Col>
+                            <Space>
+                                <Button onClick={onCancel} disabled={isLoading}>
+                                    {t('Cancel')}
+                                </Button>
+                                <Button type="primary" htmlType="submit" loading={isCreating} disabled={isLoading}>
+                                    {t('Create')}
+                                </Button>
+                            </Space>
+                        </Col>
+                    </Row>
+                </Form.Item>
+            </Form>
+        </>
     );
 }

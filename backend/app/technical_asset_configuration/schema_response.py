@@ -1,4 +1,5 @@
 from typing import Optional, Sequence
+from uuid import UUID
 
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.base_schema import UIElementMetadata
@@ -17,9 +18,15 @@ class PlatformTile(ORMModel):
     show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options
 
 
+class EnvironmentUIMetadata(ORMModel):
+    environment_id: UUID
+    ui_metadata: Sequence[UIElementMetadata]
+
+
 class UIElementMetadataResponse(ORMModel):
     not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
+    environment_ui_metadata: Sequence[EnvironmentUIMetadata] = []
     plugin: str
     has_environments: bool
     result_label: str = "Resulting path"

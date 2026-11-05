@@ -6,43 +6,30 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="EnvironmentUpdateGlobal")
+T = TypeVar(
+    "T",
+    bound="NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesAdditionalProperty",
+)
 
 
 @_attrs_define
-class EnvironmentUpdateGlobal:
-    """
-    Attributes:
-        is_global (bool):
-    """
-
-    is_global: bool
+class NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesAdditionalProperty:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        is_global = self.is_global
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "is_global": is_global,
-            }
-        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        is_global = d.pop("is_global")
+        new_technical_asset_environment_configuration_validation_environment_values_additional_property = cls()
 
-        environment_update_global = cls(
-            is_global=is_global,
-        )
-
-        environment_update_global.additional_properties = d
-        return environment_update_global
+        new_technical_asset_environment_configuration_validation_environment_values_additional_property.additional_properties = d
+        return new_technical_asset_environment_configuration_validation_environment_values_additional_property
 
     @property
     def additional_keys(self) -> list[str]:

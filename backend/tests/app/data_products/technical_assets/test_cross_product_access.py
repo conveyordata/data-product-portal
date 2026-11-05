@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -33,19 +35,29 @@ def _link_request_body(technical_asset_id: UUID) -> dict[str, str]:
     return {"technical_asset_id": str(technical_asset_id)}
 
 
-ROUTES = [
+ROUTES: list[tuple[str, str, Callable[[UUID], Any]]] = [
     ("GET", ASSET, lambda _: None),
     ("GET", f"{ASSET}/history", lambda _: None),
     ("GET", f"{ASSET}/graph", lambda _: None),
     ("PUT", ASSET, lambda _: {"name": "x", "description": "x", "tag_ids": []}),
     ("PUT", f"{ASSET}/status", lambda _: {"status": "pending"}),
+    ("PUT", f"{ASSET}/environment_configuration", lambda _: {"environment_values": {}}),
+    (
+        "POST",
+        f"{ASSET}/environment_configuration/validate",
+        lambda _: {"environment_values": {}},
+    ),
     ("DELETE", ASSET, lambda _: None),
     ("POST", f"{LINK}/add", _link_request_body),
     ("DELETE", f"{LINK}/remove", _link_request_body),
     ("POST", f"{LINK}/approve_link_request", _link_request_body),
     ("POST", f"{LINK}/deny_link_request", _link_request_body),
 ]
-ROUTES_WITHOUT_TECHNICAL_ASSET_ID = {("GET", f"{ASSETS}/"), ("POST", f"{ASSETS}/")}
+ROUTES_WITHOUT_TECHNICAL_ASSET_ID = {
+    ("GET", f"{ASSETS}/"),
+    ("POST", f"{ASSETS}/"),
+    ("POST", f"{ASSETS}/environment_configuration/validate"),
+}
 
 
 def test_technical_asset_route__all_routes_covered():

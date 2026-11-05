@@ -193,7 +193,7 @@ class DataProduct(
     )
     environments: Mapped[list["DataProductEnvironment"]] = relationship(
         cascade="all, delete-orphan",
-        order_by="DataProductEnvironment.creation_date, DataProductEnvironment.environment_id",
+        order_by=lambda: DataProductEnvironment.display_order(),
         lazy="raise",
     )
 
@@ -235,6 +235,19 @@ class DataProductEnvironment(Base):
         DateTime(timezone=False), server_default=utcnow()
     )
     environment: Mapped[Environment] = relationship(lazy="joined")
+
+    @classmethod
+    def display_order(cls):
+        environment = select(Environment.position, Environment.name).where(
+            Environment.id == cls.environment_id
+        )
+        return (
+            environment.with_only_columns(Environment.position)
+            .scalar_subquery()
+            .asc()
+            .nulls_last(),
+            environment.with_only_columns(Environment.name).scalar_subquery(),
+        )
 
 
 def ensure_data_product_exists(

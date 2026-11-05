@@ -12,6 +12,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
+from app.core.context import queue_event
 from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
 )
@@ -28,11 +29,16 @@ from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
+from app.data_products.technical_assets.environment_configuration_service import (
+    TechnicalAssetEnvironmentConfigurationService,
+)
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
+    NewTechnicalAssetEnvironmentConfigurationValidation,
+    TechnicalAssetEnvironmentConfigurationUpdate,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
 )
@@ -187,17 +193,26 @@ class TechnicalAssetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        self.db.execute(
+            select(DataProductModel.id)
+            .where(DataProductModel.id == data_product_id)
+            .with_for_update()
+        )
+        context = self._new_asset_context(
+            data_product_id,
+            technical_asset.namespace,
+            technical_asset.technical_mapping or TechnicalMapping.Default,
+        )
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            technical_asset.configuration.validate_configuration(
-                PluginContext.build(
-                    ensure_data_product_exists(data_product_id, self.db),
-                    technical_asset.namespace,
-                    TechnicalMapping.Default,
-                ),
-                self.db,
-            )
+            technical_asset.configuration.validate_configuration(context, self.db)
+
+        environment_service = TechnicalAssetEnvironmentConfigurationService(self.db)
+        environment_values = environment_service.prepare_create(
+            technical_asset.configuration, context, technical_asset.environment_values
+        )
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()
+        technical_asset_schema.pop("environment_values")
         tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
         access_modes = self._get_access_modes(
             technical_asset_schema.pop("access_mode_ids", []),
@@ -215,7 +230,71 @@ class TechnicalAssetService:
         )
         self.db.add(model)
         self.db.flush()
+        environment_service.create(
+            model.configuration_id,
+            type(technical_asset.configuration),
+            environment_values,
+        )
         return model
+
+    def get_technical_asset_with_environment_values(
+        self, data_product_id: UUID, id: UUID
+    ) -> TechnicalAssetModel:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        technical_asset.environment_values = (  # type: ignore[attr-defined]
+            TechnicalAssetEnvironmentConfigurationService(self.db).get_values(
+                technical_asset
+            )
+        )
+        return technical_asset
+
+    def update_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        update: TechnicalAssetEnvironmentConfigurationUpdate,
+    ) -> UpdateTechnicalAssetResponse:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        TechnicalAssetEnvironmentConfigurationService(self.db).replace(
+            technical_asset, update.environment_values
+        )
+        queue_event(technical_asset.to_event())
+        return UpdateTechnicalAssetResponse(id=technical_asset.id)
+
+    def validate_new_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        validation: NewTechnicalAssetEnvironmentConfigurationValidation,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).prepare_create(
+            validation.configuration,
+            self._new_asset_context(
+                data_product_id, validation.namespace, validation.technical_mapping
+            ),
+            validation.environment_values,
+        )
+
+    def validate_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        update: TechnicalAssetEnvironmentConfigurationUpdate,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).validate(
+            self.get_technical_asset(data_product_id, id), update.environment_values
+        )
+
+    def _new_asset_context(
+        self,
+        data_product_id: UUID,
+        namespace: str,
+        technical_mapping: TechnicalMapping,
+    ) -> PluginContext:
+        return PluginContext.build(
+            ensure_data_product_exists(data_product_id, self.db),
+            namespace,
+            technical_mapping,
+        )
 
     def remove_technical_asset(
         self, data_product_id: UUID, id: UUID
