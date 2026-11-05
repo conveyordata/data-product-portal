@@ -401,6 +401,19 @@ class TestAuthorizeUserIdentitySource:
 
         assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
 
+    @pytest.mark.parametrize("email", ["", "anna@"])
+    def test_get_authenticated_user__userinfo_invalid_email_falls_back_to_claims(
+        self, idp, session, email
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+        body = {"sub": "entra-pairwise-sub-1", "name": "Anna van Dijk", "email": email}
+
+        with userinfo_returns(200, body):
+            log_in(bearer, session)
+
+        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
+
     def test_get_authenticated_user__known_user_skips_userinfo(self, idp, session):
         idp(audience=ENTRA_AUDIENCE)
         UserFactory(external_id="entra-pairwise-sub-1", email="anna@contoso.com")

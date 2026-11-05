@@ -64,3 +64,15 @@ class TestOIDCIdentity:
         )
 
         assert identity.email == "anna@contoso.com"
+
+    def test_from_claims__invalid_email_candidate_falls_through_to_upn(self):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "name": "Anna",
+                "preferred_username": "anna@",
+                "upn": "anna@contoso.com",
+            }
+        )
+
+        assert identity.email == "anna@contoso.com"

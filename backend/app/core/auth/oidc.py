@@ -4,7 +4,7 @@ from typing import Optional
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError, model_validator
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -56,7 +56,7 @@ class OIDCIdentity(BaseModel):
     name: str
     given_name: str
     family_name: str = ""
-    email: str
+    email: EmailStr
     username: Optional[str] = None
     preferred_username: Optional[str] = None
 
@@ -76,7 +76,7 @@ class OIDCIdentity(BaseModel):
                     claims.get("preferred_username"),
                     claims.get("upn"),
                 )
-                if isinstance(value, str) and "@" in value
+                if _is_email(value)
             ),
             None,
         )
@@ -100,3 +100,11 @@ class OIDCIdentity(BaseModel):
             email=email,
             preferred_username=claims.get("preferred_username"),
         )
+
+
+def _is_email(value: object) -> bool:
+    try:
+        TypeAdapter(EmailStr).validate_python(value)
+    except ValidationError:
+        return False
+    return True
