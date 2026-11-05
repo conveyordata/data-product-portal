@@ -22,31 +22,31 @@ def update_db_user(
     oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
 ) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
+    email_owner = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
+    if email_owner and email_owner is not db_user and (db_user or not link_by_email):
+        logger.warning("Identity email belongs to a user with another subject")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This email belongs to another account",
+        )
     if db_user:
         db_user.email = oidc_user.email
         db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
+    elif email_owner:
+        db_user = email_owner
+        db_user.external_id = oidc_user.sub
+        db_user.first_name = oidc_user.given_name
+        db_user.last_name = oidc_user.family_name
     else:
-        db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
-        if db_user and not link_by_email:
-            logger.warning("Access token email belongs to a user with another subject")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="This email belongs to another account",
-            )
-        if db_user:
-            db_user.external_id = oidc_user.sub
-            db_user.first_name = oidc_user.given_name
-            db_user.last_name = oidc_user.family_name
-        else:
-            created_user = UserCreate(
-                email=oidc_user.email,
-                external_id=oidc_user.sub,
-                first_name=oidc_user.given_name,
-                last_name=oidc_user.family_name,
-            )
-            db_user = UserModel(**created_user.model_dump())
-            db.add(db_user)
+        created_user = UserCreate(
+            email=oidc_user.email,
+            external_id=oidc_user.sub,
+            first_name=oidc_user.given_name,
+            last_name=oidc_user.family_name,
+        )
+        db_user = UserModel(**created_user.model_dump())
+        db.add(db_user)
 
     db.commit()
 
