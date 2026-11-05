@@ -19,7 +19,6 @@ def get_oidc():
 class JWTToken(BaseModel):
     sub: str
     token: str
-    # Validated claims of the access token, empty for API-key and default-user tokens.
     claims: dict[str, Any] = Field(default_factory=dict)
 
 
