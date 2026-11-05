@@ -21,6 +21,7 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import {
     type CreateTechnicalAssetRequest,
     useCreateTechnicalAssetMutation,
+    useValidateNewTechnicalAssetEnvironmentConfigurationMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
@@ -97,6 +98,7 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         return pluginMetadata?.environment_ui_metadata?.filter((item) => ids.has(item.environment_id)) ?? [];
     }, [pluginMetadata, environments]);
     const [environmentErrors, setEnvironmentErrors] = useState<EnvironmentSettingsError[]>([]);
+    const [validateEnvironmentValues] = useValidateNewTechnicalAssetEnvironmentConfigurationMutation();
     const accessModesForSelectedPlugin = useMemo(() => {
         if (!pluginMetadata || !accessModes) {
             return [];
@@ -303,6 +305,31 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
             .catch(() => setResult(undefined));
     }, debounce);
 
+    const latestEnvironmentCheck = useRef(0);
+    const checkEnvironmentValues = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        if (!values.environment_values) return;
+        const check = ++latestEnvironmentCheck.current;
+        const setErrors = (errors: EnvironmentSettingsError[]) => {
+            if (check === latestEnvironmentCheck.current) {
+                setEnvironmentErrors(errors);
+            }
+        };
+        form.validateFields(['configuration'], { validateOnly: true, recursive: true })
+            .then(() =>
+                validateEnvironmentValues({
+                    dataProductId,
+                    newTechnicalAssetEnvironmentConfigurationValidation: {
+                        namespace: values.namespace ?? '',
+                        technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
+                        configuration: values.configuration,
+                        environment_values: values.environment_values,
+                    },
+                }).unwrap(),
+            )
+            .then(() => setErrors([]))
+            .catch((error) => setErrors(getEnvironmentSettingsErrors(error)));
+    }, debounce);
+
     useEffect(() => {
         setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
     }, [form, namespace, technical_mapping, setResultString]);
@@ -314,8 +341,8 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         if (changed.configuration) {
             setResultString(values);
         }
-        if (changed.environment_values) {
-            setEnvironmentErrors([]);
+        if (changed.environment_values || changed.configuration) {
+            checkEnvironmentValues(values);
         }
     };
 

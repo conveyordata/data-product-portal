@@ -7,6 +7,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
+    NewTechnicalAssetEnvironmentConfigurationValidation,
     TechnicalAssetEnvironmentConfigurationUpdate,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
@@ -419,3 +420,43 @@ def create_technical_asset(
         data_product_id=technical_asset.owner_id, event_id=event_id
     )
     return CreateTechnicalAssetResponse(id=technical_asset.id)
+
+
+@router.post(
+    "/environment_configuration/validate",
+    responses={
+        422: {
+            "description": "Invalid environment configuration",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "environment_id": "random environment id",
+                                "field": "size",
+                                "message": "Option is not allowed in this environment",
+                            }
+                        ]
+                    }
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
+def validate_new_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    validation: NewTechnicalAssetEnvironmentConfigurationValidation,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    TechnicalAssetService(db).validate_new_technical_asset_environment_configuration(
+        data_product_id, validation
+    )

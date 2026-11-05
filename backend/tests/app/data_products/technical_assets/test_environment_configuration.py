@@ -129,6 +129,18 @@ def validate_values(client, asset, values):
     )
 
 
+def validate_new_values(client, data_product, values):
+    return client.post(
+        f"{ENDPOINT.format(data_product.id)}/environment_configuration/validate",
+        json={
+            "namespace": "asset-ns",
+            "technical_mapping": "custom",
+            "configuration": {"name": NAME, "path": "p"},
+            "environment_values": values,
+        },
+    )
+
+
 def get_asset(client, asset_id, data_product):
     return client.get(f"{ENDPOINT.format(data_product.id)}/{asset_id}")
 
@@ -249,7 +261,7 @@ class TestCreateTechnicalAsset:
             {
                 "environment_id": str(dev.id),
                 "field": None,
-                "message": "Value error, Too many replicas",
+                "message": "Too many replicas",
             }
         ]
 
@@ -547,6 +559,43 @@ class TestValidateEnvironmentConfiguration:
         self, client, stored_asset
     ):
         response = validate_values(client, stored_asset, {})
+
+        assert response.status_code == 403
+
+
+class TestValidateNewEnvironmentConfiguration:
+    def test_validate_new_technical_asset_environment_configuration__accepts_defaults_without_creating(
+        self, client, member, data_product, capture_events
+    ):
+        response = validate_new_values(client, data_product, {})
+
+        assert response.status_code == 200, response.text
+        assert (
+            client.get(ENDPOINT.format(data_product.id)).json()["technical_assets"]
+            == []
+        )
+        assert_event_not_in_queue("technical_asset.event", capture_events)
+
+    def test_validate_new_technical_asset_environment_configuration__rejects_disabled_option(
+        self, client, member, data_product, dev
+    ):
+        response = validate_new_values(
+            client, data_product, {str(dev.id): {"size": "large"}}
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == [
+            {
+                "environment_id": str(dev.id),
+                "field": "size",
+                "message": "Option is not allowed in this environment",
+            }
+        ]
+
+    def test_validate_new_technical_asset_environment_configuration__requires_create_permission(
+        self, client, data_product
+    ):
+        response = validate_new_values(client, data_product, {})
 
         assert response.status_code == 403
 

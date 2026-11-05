@@ -37,6 +37,7 @@ from app.data_products.technical_assets.model import (
 )
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
+    NewTechnicalAssetEnvironmentConfigurationValidation,
     TechnicalAssetEnvironmentConfigurationUpdate,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
@@ -197,8 +198,8 @@ class TechnicalAssetService:
             .where(DataProductModel.id == data_product_id)
             .with_for_update()
         )
-        context = PluginContext.build(
-            ensure_data_product_exists(data_product_id, self.db),
+        context = self._new_asset_context(
+            data_product_id,
             technical_asset.namespace,
             technical_asset.technical_mapping or TechnicalMapping.Default,
         )
@@ -260,6 +261,19 @@ class TechnicalAssetService:
         queue_event(technical_asset.to_event())
         return UpdateTechnicalAssetResponse(id=technical_asset.id)
 
+    def validate_new_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        validation: NewTechnicalAssetEnvironmentConfigurationValidation,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).prepare_create(
+            validation.configuration,
+            self._new_asset_context(
+                data_product_id, validation.namespace, validation.technical_mapping
+            ),
+            validation.environment_values,
+        )
+
     def validate_technical_asset_environment_configuration(
         self,
         data_product_id: UUID,
@@ -268,6 +282,18 @@ class TechnicalAssetService:
     ) -> None:
         TechnicalAssetEnvironmentConfigurationService(self.db).validate(
             self.get_technical_asset(data_product_id, id), update.environment_values
+        )
+
+    def _new_asset_context(
+        self,
+        data_product_id: UUID,
+        namespace: str,
+        technical_mapping: TechnicalMapping,
+    ) -> PluginContext:
+        return PluginContext.build(
+            ensure_data_product_exists(data_product_id, self.db),
+            namespace,
+            technical_mapping,
         )
 
     def remove_technical_asset(

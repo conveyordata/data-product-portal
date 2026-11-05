@@ -1169,6 +1169,20 @@ func encodeUpdateThemeSettingsRequest(
 	return nil
 }
 
+func encodeValidateNewTechnicalAssetEnvironmentConfigurationRequest(
+	req *NewTechnicalAssetEnvironmentConfigurationValidation,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeValidateTechnicalAssetEnvironmentConfigurationRequest(
 	req *TechnicalAssetEnvironmentConfigurationUpdate,
 	r *http.Request,

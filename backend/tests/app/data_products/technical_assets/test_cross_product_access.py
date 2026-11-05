@@ -53,7 +53,11 @@ ROUTES: list[tuple[str, str, Callable[[UUID], Any]]] = [
     ("POST", f"{LINK}/approve_link_request", _link_request_body),
     ("POST", f"{LINK}/deny_link_request", _link_request_body),
 ]
-ROUTES_WITHOUT_TECHNICAL_ASSET_ID = {("GET", f"{ASSETS}/"), ("POST", f"{ASSETS}/")}
+ROUTES_WITHOUT_TECHNICAL_ASSET_ID = {
+    ("GET", f"{ASSETS}/"),
+    ("POST", f"{ASSETS}/"),
+    ("POST", f"{ASSETS}/environment_configuration/validate"),
+}
 
 
 def test_technical_asset_route__all_routes_covered():

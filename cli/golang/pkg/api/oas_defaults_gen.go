@@ -139,6 +139,30 @@ func (s *GetDataProductsResponseItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *GetTechnicalAssetResponse) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *GetTechnicalAssetsResponseItem) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")
@@ -179,6 +203,14 @@ func (s *PlatformTile) setDefaults() {
 	{
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *RenderTechnicalAssetAccessPathRequest) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping = val
 	}
 }
 
@@ -239,6 +271,14 @@ func (s *SchemaPropertyResponse) setDefaults() {
 	{
 		val := bool(false)
 		s.Partitioned.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *TechnicalAsset) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping = val
 	}
 }
 

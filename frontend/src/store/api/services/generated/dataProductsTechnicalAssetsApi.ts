@@ -135,6 +135,16 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    validateNewTechnicalAssetEnvironmentConfiguration: build.mutation<
+      ValidateNewTechnicalAssetEnvironmentConfigurationApiResponse,
+      ValidateNewTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/environment_configuration/validate`,
+        method: "POST",
+        body: queryArg.newTechnicalAssetEnvironmentConfigurationValidation,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -228,6 +238,12 @@ export type GetTechnicalAssetGraphDataApiArg = {
   dataProductId: string;
   id: string;
   level?: number;
+};
+export type ValidateNewTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ any;
+export type ValidateNewTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  newTechnicalAssetEnvironmentConfigurationValidation: NewTechnicalAssetEnvironmentConfigurationValidation;
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -520,6 +536,20 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
+export type NewTechnicalAssetEnvironmentConfigurationValidation = {
+  namespace: string;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+  technical_mapping?: TechnicalMapping;
+  environment_values?: {
+    [key: string]: {
+      [key: string]: any;
+    };
+  };
+};
 export enum TechnicalAssetStatus {
   Pending = "pending",
   Active = "active",
@@ -597,4 +627,5 @@ export const {
   useUpdateTechnicalAssetStatusMutation,
   useGetTechnicalAssetGraphDataQuery,
   useLazyGetTechnicalAssetGraphDataQuery,
+  useValidateNewTechnicalAssetEnvironmentConfigurationMutation,
 } = injectedRtkApi;
