@@ -18,7 +18,9 @@ from app.users.schema_request import UserCreate
 SYSTEM_ACCOUNT_BOT_EXTERNAL_ID = "systemaccount_bot"
 
 
-def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
+def update_db_user(
+    oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
+) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
     if db_user:
         db_user.email = oidc_user.email
@@ -26,6 +28,12 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
         db_user.last_name = oidc_user.family_name
     else:
         db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
+        if db_user and not link_by_email:
+            logger.warning("Access token email belongs to a user with another subject")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="This email belongs to another account",
+            )
         if db_user:
             db_user.external_id = oidc_user.sub
             db_user.first_name = oidc_user.given_name
@@ -53,6 +61,11 @@ if settings.OIDC_ENABLED:
         return token
 
     def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing access token",
+            )
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
             raise HTTPException(
@@ -67,29 +80,48 @@ if settings.OIDC_ENABLED:
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session),
     ) -> User:
-        oidc_user = _identity_from_userinfo(token) or _identity_from_claims(token)
-        return update_db_user(oidc_user, token, db)
+        oidc_user = _identity_from_userinfo(token)
+        if oidc_user:
+            return update_db_user(oidc_user, token, db)
+        return update_db_user(
+            _identity_from_claims(token), token, db, link_by_email=False
+        )
 
     def _identity_from_userinfo(token: JWTToken) -> Optional[OIDCIdentity]:
         try:
             response = httpx.post(
                 url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
             )
-            response.raise_for_status()
+        except httpx.HTTPError as e:
+            logger.warning(f"Userinfo unreachable: {type(e).__name__}")
+            raise _identity_provider_unavailable()
+        if response.is_server_error:
+            logger.warning(f"Userinfo failed with status {response.status_code}")
+            raise _identity_provider_unavailable()
+        if response.is_client_error:
+            logger.debug(f"Userinfo rejected the access token: {response.status_code}")
+            return None
+        try:
             return OIDCIdentity.model_validate(response.json())
-        except (httpx.HTTPError, ValueError) as e:
-            logger.info(f"Userinfo unavailable, reading the access token claims: {e}")
+        except ValueError as e:
+            logger.debug(f"Userinfo returned no usable identity: {type(e).__name__}")
             return None
 
     def _identity_from_claims(token: JWTToken) -> OIDCIdentity:
         try:
             return OIDCIdentity.from_claims(token.claims)
         except (KeyError, ValueError) as e:
-            logger.warning(f"Access token lacks identity claims: {e}")
+            logger.warning(f"Access token lacks identity claims: {type(e).__name__}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Access token lacks identity claims",
             )
+
+    def _identity_provider_unavailable() -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Identity provider unavailable",
+        )
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)

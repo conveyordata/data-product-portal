@@ -27,10 +27,12 @@ sidebar_position: 200
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
 - **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
+- **[Auth]**: When the OIDC provider's userinfo endpoint rejects the access token or returns no email, the portal reads the user's name and email from the validated access token instead. Providers whose userinfo endpoint works keep the current behaviour; no configuration is needed.
 - **[API/UI]**: Producing teams can post [Announcements](./concepts/output-ports/announcements.md) on an Output Port. Members of its Consuming Data Products and owners of its consuming Explorations are notified, and the top of the Home page shows their pending requests and Announcements.
 
 ### bugfixes
 
+- **[Auth]**: A missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. An unreachable or failing userinfo endpoint returns a 503 instead of a 500.
 - **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
 - **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.

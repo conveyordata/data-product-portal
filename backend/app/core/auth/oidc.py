@@ -76,7 +76,7 @@ class OIDCIdentity(BaseModel):
                     claims.get("preferred_username"),
                     claims.get("upn"),
                 )
-                if value and "@" in value
+                if isinstance(value, str) and "@" in value
             ),
             None,
         )
@@ -86,9 +86,12 @@ class OIDCIdentity(BaseModel):
         family_name = claims.get("family_name") or ""
         if not given_name:
             display_name = claims.get("name") or email.split("@")[0]
-            head, _, tail = display_name.rpartition(" ")
-            given_name = head or tail
-            family_name = family_name or (tail if head else "")
+            if family_name and display_name.endswith(f" {family_name}"):
+                given_name = display_name.removesuffix(f" {family_name}")
+            else:
+                head, _, tail = display_name.rpartition(" ")
+                given_name = head or tail
+                family_name = family_name or (tail if head else "")
         return cls(
             sub=claims["sub"],
             name=claims.get("name") or given_name,
