@@ -89,7 +89,9 @@ Portal has been tested with AWS Cognito but should work with any OIDC provider.
 OIDC returns identity, refresh and access tokens.
 Providers may vary in the information they pass in tokens, and the application depends on this information, so integrating a new provider might require some code changes there as well.
 
-The claims our provider is required to pass are at least email, family_name and name. The given_name claim is used as the first name; if it is missing, name is used instead.
+The claims our provider is required to pass are at least email and name; family_name is used as the last name when present. The given_name claim is used as the first name; if it is missing, name is used instead.
+
+The backend asks the provider's userinfo endpoint for these claims when it loads the current user. If that endpoint rejects the access token or returns no email, which is the case for providers that issue access tokens for one audience only, the backend reads them from the validated access token instead. If the endpoint is unreachable or fails, the backend answers 503. The email is then taken from the first of email, preferred_username or upn that holds an address, and when given_name is missing, name is split on its last space into first and last name. Configure such a provider to add these claims to the access token. An identity read from the access token never links to an existing user by email, because those claims are not verified; a login whose email already belongs to another user is rejected.
 
 ### Cognito setup
 

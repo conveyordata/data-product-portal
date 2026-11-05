@@ -40,3 +40,27 @@ class TestOIDCIdentity:
             "jan.peeters",
             "jan.peeters@example.com",
         )
+
+    def test_from_claims__family_name_is_not_repeated_in_given_name(self):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "name": "Anna van Dijk",
+                "family_name": "van Dijk",
+                "email": "anna@contoso.com",
+            }
+        )
+
+        assert (identity.given_name, identity.family_name) == ("Anna", "van Dijk")
+
+    def test_from_claims__non_string_email_claims_are_skipped(self):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "name": "Anna",
+                "email": 42,
+                "upn": "anna@contoso.com",
+            }
+        )
+
+        assert identity.email == "anna@contoso.com"

@@ -229,14 +229,48 @@ class TestAuthorizeUserIdentitySource:
             "Builder",
         )
 
-    def test_get_authenticated_user__cognito_without_userinfo_is_rejected(
+    @pytest.mark.parametrize(
+        "outage",
+        [
+            pytest.param(
+                {
+                    "return_value": httpx.Response(
+                        503, json={}, request=httpx.Request("POST", USERINFO_URL)
+                    )
+                },
+                id="server-error",
+            ),
+            pytest.param(
+                {"side_effect": httpx.ConnectTimeout("timed out")}, id="timeout"
+            ),
+        ],
+    )
+    def test_get_authenticated_user__userinfo_outage_returns_503_and_keeps_user(
+        self, idp, session, outage
+    ):
+        idp(audience="portal")
+        user = UserFactory(external_id="other-sub", email="karel.userinfo@example.com")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+
+        with (
+            patch("app.core.auth.auth.httpx.post", **outage),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        assert stored_user(session, "keycloak-sub-1") is None
+        session.refresh(user)
+        assert user.external_id == "other-sub"
+
+    def test_get_authenticated_user__cognito_token_without_openid_scope_is_rejected(
         self, idp, session
     ):
         idp(audience=None)
-        bearer = sign(COGNITO_ACCESS_TOKEN)
+        bearer = sign({**COGNITO_ACCESS_TOKEN, "scope": "portal/api"})
 
         with (
-            userinfo_returns(503, {"error": "unavailable"}),
+            userinfo_returns(401, {"error": "invalid_token"}),
             pytest.raises(HTTPException) as exc_info,
         ):
             log_in(bearer, session)
@@ -267,16 +301,13 @@ class TestAuthorizeUserIdentitySource:
             "Userinfo",
         )
 
-    def test_get_authenticated_user__keycloak_falls_back_to_token_claims(
+    def test_get_authenticated_user__keycloak_falls_back_when_userinfo_rejects_token(
         self, idp, session
     ):
         idp(audience="portal")
         bearer = sign(KEYCLOAK_ACCESS_TOKEN)
 
-        with patch(
-            "app.core.auth.auth.httpx.post",
-            side_effect=httpx.ConnectError("connection refused"),
-        ):
+        with userinfo_returns(403, {"error": "insufficient_scope"}):
             log_in(bearer, session)
 
         user = stored_user(session, "keycloak-sub-1")
@@ -381,18 +412,37 @@ class TestAuthorizeUserIdentitySource:
         post.assert_not_called()
         assert user.email == "anna@contoso.com"
 
-    def test_get_authenticated_user__existing_email_links_new_subject(
+    def test_get_authenticated_user__userinfo_email_links_new_subject(
         self, idp, session
     ):
-        idp(audience=ENTRA_AUDIENCE)
-        existing = UserFactory(external_id="old-cognito-sub", email="anna@contoso.com")
-        bearer = sign(ENTRA_ACCESS_TOKEN)
+        idp(audience="portal")
+        existing = UserFactory(external_id="old-sub", email="karel@example.com")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+        body = {**KEYCLOAK_ACCESS_TOKEN, "email": "karel@example.com"}
 
-        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
+        with userinfo_returns(200, body):
             log_in(bearer, session)
 
         session.refresh(existing)
-        assert existing.external_id == "entra-pairwise-sub-1"
+        assert existing.external_id == "keycloak-sub-1"
+
+    def test_get_authenticated_user__token_claim_email_cannot_take_over_account(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        existing = UserFactory(external_id="admin-sub", email="anna@contoso.com")
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with (
+            userinfo_returns(401, {"error": "InvalidAuthenticationToken"}),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        session.refresh(existing)
+        assert existing.external_id == "admin-sub"
+        assert stored_user(session, "entra-pairwise-sub-1") is None
 
     @pytest.mark.parametrize(
         "bearer",
@@ -417,3 +467,12 @@ class TestAuthorizeUserIdentitySource:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         post.assert_not_called()
         assert stored_user(session, "entra-pairwise-sub-1") is None
+
+    def test_authorize_user__missing_access_token_is_rejected(self, idp, session):
+        idp(audience=ENTRA_AUDIENCE)
+        from app.core.auth.auth import authorize_user, secured_call
+
+        with pytest.raises(HTTPException) as exc_info:
+            authorize_user(token=secured_call(token=None), db=session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
