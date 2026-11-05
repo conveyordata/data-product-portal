@@ -457,6 +457,27 @@ class TestAuthorizeUserIdentitySource:
         assert existing.external_id == "admin-sub"
         assert stored_user(session, "entra-pairwise-sub-1") is None
 
+    def test_authorize_user__email_change_to_taken_address_is_rejected(
+        self, idp, session
+    ):
+        idp(audience="portal")
+        known = UserFactory(external_id="keycloak-sub-1", email="karel@example.com")
+        other = UserFactory(external_id="other-sub", email="taken@example.com")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+        body = {**KEYCLOAK_ACCESS_TOKEN, "email": "taken@example.com"}
+        from app.core.auth.auth import authorize_user, secured_call
+
+        with (
+            userinfo_returns(200, body),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            authorize_user(token=secured_call(token=bearer), db=session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        session.refresh(known)
+        session.refresh(other)
+        assert (known.email, other.email) == ("karel@example.com", "taken@example.com")
+
     @pytest.mark.parametrize(
         "bearer",
         [
