@@ -346,7 +346,7 @@ def validate_environment_configuration(self, values, context, db):
         raise EnvironmentConfigurationError(errors)
 ```
 
-It runs on create and on every save, whatever the technical mapping. `validate_configuration` stays as it is for the shared fields. Slow checks, such as a database lookup, belong here. A save starts a provisioning run that can't be cancelled safely, so catch problems before it.
+It runs on create and on every save, whatever the technical mapping. The form also runs it right after each change, through a check that saves nothing, so it must not write anything. A rule on a single cell can also be a pydantic `field_validator` on the settings class, and its message shows on the cell. Those validators also run when stored values are read, though, so making such a rule stricter later breaks loading existing technical assets. Put rules you might tighten, like the `instance_name` format, in `validate_environment_configuration`. `validate_configuration` stays as it is for the shared fields. Slow checks, such as a database lookup, belong here. A save starts a provisioning run that can't be cancelled safely, so catch problems before it.
 
 #### Adding the fields to an existing plugin
 

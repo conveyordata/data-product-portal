@@ -745,6 +745,10 @@ type UpdateThemeSettingsRes interface {
 	updateThemeSettingsRes()
 }
 
+type ValidateNewTechnicalAssetEnvironmentConfigurationRes interface {
+	validateNewTechnicalAssetEnvironmentConfigurationRes()
+}
+
 type ValidateResourceNameRes interface {
 	validateResourceNameRes()
 }

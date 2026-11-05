@@ -5266,6 +5266,63 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/technical_assets/environment_configuration/validate": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Validate New Technical Asset Environment Configuration",
+        "operationId": "validate_new_technical_asset_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewTechnicalAssetEnvironmentConfigurationValidation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid environment configuration",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "environment_id": "random environment id",
+                      "field": "size",
+                      "message": "Option is not allowed in this environment"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/configuration/domains": {
       "get": {
         "tags": [
@@ -16525,6 +16582,50 @@
           "my_requests"
         ],
         "title": "MyRequestsResponse"
+      },
+      "NewTechnicalAssetEnvironmentConfigurationValidation": {
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "configuration": {
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "title": "Configuration",
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping",
+            "default": "default"
+          },
+          "environment_values": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Environment Values",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "namespace",
+          "configuration"
+        ],
+        "title": "NewTechnicalAssetEnvironmentConfigurationValidation"
       },
       "Node": {
         "properties": {

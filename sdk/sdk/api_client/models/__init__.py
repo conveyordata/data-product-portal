@@ -286,6 +286,18 @@ from .modify_data_product_role_assignment import ModifyDataProductRoleAssignment
 from .modify_global_role_assignment import ModifyGlobalRoleAssignment
 from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
 from .my_requests_response import MyRequestsResponse
+from .new_technical_asset_environment_configuration_validation import (
+    NewTechnicalAssetEnvironmentConfigurationValidation,
+)
+from .new_technical_asset_environment_configuration_validation_configuration import (
+    NewTechnicalAssetEnvironmentConfigurationValidationConfiguration,
+)
+from .new_technical_asset_environment_configuration_validation_environment_values import (
+    NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues,
+)
+from .new_technical_asset_environment_configuration_validation_environment_values_additional_property import (
+    NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesAdditionalProperty,
+)
 from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
@@ -673,6 +685,10 @@ __all__ = (
     "ModifyGlobalRoleAssignment",
     "ModifyOutputPortRoleAssignment",
     "MyRequestsResponse",
+    "NewTechnicalAssetEnvironmentConfigurationValidation",
+    "NewTechnicalAssetEnvironmentConfigurationValidationConfiguration",
+    "NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues",
+    "NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesAdditionalProperty",
     "Node",
     "NodeData",
     "NodeType",

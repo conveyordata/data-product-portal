@@ -1167,6 +1167,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/configuration/theme_settings
 	UpdateThemeSettings(ctx context.Context, request *ThemeSettings) (UpdateThemeSettingsRes, error)
+	// ValidateNewTechnicalAssetEnvironmentConfiguration invokes validate_new_technical_asset_environment_configuration operation.
+	//
+	// Validate New Technical Asset Environment Configuration.
+	//
+	// POST /api/v2/data_products/{data_product_id}/technical_assets/environment_configuration/validate
+	ValidateNewTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *NewTechnicalAssetEnvironmentConfigurationValidation, params ValidateNewTechnicalAssetEnvironmentConfigurationParams) (ValidateNewTechnicalAssetEnvironmentConfigurationRes, error)
 	// ValidateResourceName invokes validate_resource_name operation.
 	//
 	// Validate Resource Name.
@@ -13667,6 +13673,71 @@ func (c *Client) sendUpdateThemeSettings(ctx context.Context, request *ThemeSett
 	}()
 
 	result, err := decodeUpdateThemeSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ValidateNewTechnicalAssetEnvironmentConfiguration invokes validate_new_technical_asset_environment_configuration operation.
+//
+// Validate New Technical Asset Environment Configuration.
+//
+// POST /api/v2/data_products/{data_product_id}/technical_assets/environment_configuration/validate
+func (c *Client) ValidateNewTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *NewTechnicalAssetEnvironmentConfigurationValidation, params ValidateNewTechnicalAssetEnvironmentConfigurationParams) (ValidateNewTechnicalAssetEnvironmentConfigurationRes, error) {
+	res, err := c.sendValidateNewTechnicalAssetEnvironmentConfiguration(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendValidateNewTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *NewTechnicalAssetEnvironmentConfigurationValidation, params ValidateNewTechnicalAssetEnvironmentConfigurationParams) (res ValidateNewTechnicalAssetEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/technical_assets/environment_configuration/validate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeValidateNewTechnicalAssetEnvironmentConfigurationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeValidateNewTechnicalAssetEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

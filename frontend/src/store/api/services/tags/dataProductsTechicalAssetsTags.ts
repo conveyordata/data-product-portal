@@ -149,6 +149,11 @@ export const dataProductTechnicalAssetsTags = {
             suppressErrorToast: true,
         },
     },
+    validateNewTechnicalAssetEnvironmentConfiguration: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
+    },
     getTechnicalAssetEventHistory: {
         providesTags: (_, __, { id }) => [
             {
