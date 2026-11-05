@@ -44938,6 +44938,48 @@ func (s *UsersGet) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON as json.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON from json.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON as json.
 func (s ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)

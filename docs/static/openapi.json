@@ -5304,6 +5304,16 @@
               }
             }
           },
+          "404": {
+            "description": "Data product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Required item random id does not exist"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Invalid environment configuration",
             "content": {

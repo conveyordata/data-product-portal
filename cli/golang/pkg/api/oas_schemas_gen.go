@@ -16561,6 +16561,11 @@ func (s *UsersGet) SetGlobalRole(val NilGlobalRoleAssignmentResponse) {
 	s.GlobalRole = val
 }
 
+type ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
+}
+
 type ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
 
 func (*ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {

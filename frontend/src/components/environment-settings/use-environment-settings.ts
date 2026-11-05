@@ -29,8 +29,9 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
     const [update, { isLoading: isSaving }] = useUpdateTechnicalAssetEnvironmentConfigurationMutation();
     const stored: EnvironmentValues = technicalAsset?.environment_values ?? NO_VALUES;
     const [values, setValues] = useState<EnvironmentValues>(stored);
-    const [validate, { isLoading: isValidating }] = useValidateTechnicalAssetEnvironmentConfigurationMutation();
+    const [validate] = useValidateTechnicalAssetEnvironmentConfigurationMutation();
     const [errors, setErrors] = useState<EnvironmentSettingsError[]>([]);
+    const [isValidating, setIsValidating] = useState(false);
     const latestCheck = useRef(0);
 
     useEffect(() => setValues(stored), [stored]);
@@ -61,27 +62,30 @@ export function useEnvironmentSettings(dataProductId: string, technicalAsset: En
             return true;
         } catch (error) {
             const cellErrors = getEnvironmentSettingsErrors(error);
+            if (cellErrors.length === 0) return true;
             if (id === latestCheck.current) setErrors(cellErrors);
-            return cellErrors.length === 0;
+            return false;
         }
     };
 
     const check = useDebouncedCallback(runCheck, VALIDATE_DEBOUNCE);
 
-    const validateNow = (): Promise<boolean> => {
+    const validateNow = async (): Promise<boolean> => {
         check.cancel();
-        return runCheck(values);
+        setIsValidating(true);
+        try {
+            return await runCheck(values);
+        } finally {
+            setIsValidating(false);
+        }
     };
 
     const hasChanges = changedEnvironments.length > 0;
     useEffect(() => {
-        if (hasChanges) {
-            check(values);
-        } else {
-            check.cancel();
-            latestCheck.current++;
-            setErrors([]);
-        }
+        check.cancel();
+        latestCheck.current++;
+        setErrors([]);
+        if (hasChanges) check(values);
     }, [values, hasChanges, check]);
 
     const reset = () => {

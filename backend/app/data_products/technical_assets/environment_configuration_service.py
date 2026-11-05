@@ -230,9 +230,7 @@ class TechnicalAssetEnvironmentConfigurationService:
                 EnvironmentFieldError(
                     environment_id=environment.id,
                     field=str(item["loc"][0]) if item["loc"] else None,
-                    message=str(item["ctx"]["error"])
-                    if item["type"] == "value_error"
-                    else item["msg"],
+                    message=str(item.get("ctx", {}).get("error", item["msg"])),
                 )
                 for item in error.errors()
             ]
