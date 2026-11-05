@@ -1,11 +1,21 @@
 import importlib
+import json
+import time
 from unittest.mock import patch
 
+import httpx
+import jwt as pyjwt
 import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException, status
+from jwt.algorithms import RSAAlgorithm
+from sqlalchemy import select
 
+from app.core.auth import jwt as jwt_module
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.settings import settings
+from app.users.model import User
+from tests.factories import UserFactory
 
 
 @pytest.fixture
@@ -97,3 +107,313 @@ class TestCoreAuthentication:
 
             mock_secured_call.assert_called_once_with(mock_jwt_token)
             assert result.sub == "test_user"
+
+
+ISSUER = "https://idp.example.com"
+USERINFO_URL = "https://idp.example.com/userinfo"
+KID = "test-kid"
+SIGNING_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+OTHER_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+
+@pytest.fixture
+def idp(monkeypatch, force_oidc_enabled):
+    def configure(audience):
+        jwk = json.loads(RSAAlgorithm.to_jwk(SIGNING_KEY.public_key()))
+        jwk["kid"] = KID
+        monkeypatch.setattr(
+            jwt_module.oidc, "jwks_keys", {"keys": [jwk]}, raising=False
+        )
+        monkeypatch.setattr(jwt_module.oidc, "authority", ISSUER, raising=False)
+        monkeypatch.setattr(jwt_module.oidc, "audience", audience, raising=False)
+        monkeypatch.setattr(
+            jwt_module.oidc, "userinfo_endpoint", USERINFO_URL, raising=False
+        )
+
+    return configure
+
+
+def sign(claims, key=SIGNING_KEY, expires_in=300):
+    now = int(time.time())
+    payload = {"iss": ISSUER, "iat": now, "exp": now + expires_in, **claims}
+    return "Bearer " + pyjwt.encode(
+        payload, key, algorithm="RS256", headers={"kid": KID}
+    )
+
+
+def userinfo_returns(status_code, body=None):
+    request = httpx.Request("POST", USERINFO_URL)
+    if isinstance(body, str):
+        response = httpx.Response(status_code, text=body, request=request)
+    else:
+        response = httpx.Response(status_code, json=body, request=request)
+    return patch("app.core.auth.auth.httpx.post", return_value=response)
+
+
+def log_in(bearer, session):
+    from app.core.auth.auth import api_key_authenticated, get_authenticated_user
+
+    token = api_key_authenticated(api_key=None, jwt_token=bearer)
+    return get_authenticated_user(token=token, db=session)
+
+
+def stored_user(session, external_id):
+    return session.scalar(select(User).where(User.external_id == external_id))
+
+
+COGNITO_ACCESS_TOKEN = {
+    "sub": "cognito-sub-1",
+    "cognito:groups": ["admins"],
+    "client_id": "cognito-client",
+    "origin_jti": "origin",
+    "event_id": "event",
+    "token_use": "access",
+    "scope": "openid profile email",
+    "auth_time": 1,
+    "jti": "jti",
+    "username": "bob",
+}
+KEYCLOAK_ACCESS_TOKEN = {
+    "sub": "keycloak-sub-1",
+    "aud": "portal",
+    "azp": "portal",
+    "typ": "Bearer",
+    "scope": "openid profile email",
+    "email_verified": True,
+    "name": "Karel Token",
+    "preferred_username": "karel",
+    "given_name": "Karel",
+    "family_name": "Token",
+    "email": "karel@example.com",
+}
+ENTRA_AUDIENCE = "00001111-aaaa-2222-bbbb-3333cccc4444"
+ENTRA_ACCESS_TOKEN = {
+    "sub": "entra-pairwise-sub-1",
+    "aud": ENTRA_AUDIENCE,
+    "azp": "5555eeee-6666-ffff-7777-8888aaaa9999",
+    "oid": "object-id-1",
+    "tid": "tenant-id-1",
+    "ver": "2.0",
+    "scp": "access_as_user",
+    "name": "Anna van Dijk",
+    "preferred_username": "anna@contoso.com",
+}
+
+
+class TestAuthorizeUserIdentitySource:
+    def test_get_authenticated_user__cognito_reads_identity_from_userinfo(
+        self, idp, session
+    ):
+        idp(audience=None)
+        bearer = sign(COGNITO_ACCESS_TOKEN)
+        body = {
+            "sub": "cognito-sub-1",
+            "email_verified": "true",
+            "email": "bob@example.com",
+            "name": "Bob Builder",
+            "given_name": "Bob",
+            "family_name": "Builder",
+            "username": "bob",
+        }
+
+        with userinfo_returns(200, body) as post:
+            log_in(bearer, session)
+
+        post.assert_called_once_with(
+            url=USERINFO_URL, headers={"Authorization": bearer}
+        )
+        user = stored_user(session, "cognito-sub-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "bob@example.com",
+            "Bob",
+            "Builder",
+        )
+
+    def test_get_authenticated_user__cognito_without_userinfo_is_rejected(
+        self, idp, session
+    ):
+        idp(audience=None)
+        bearer = sign(COGNITO_ACCESS_TOKEN)
+
+        with (
+            userinfo_returns(503, {"error": "unavailable"}),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert stored_user(session, "cognito-sub-1") is None
+
+    def test_get_authenticated_user__keycloak_prefers_userinfo_over_token_claims(
+        self, idp, session
+    ):
+        idp(audience="portal")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+        body = {
+            "sub": "keycloak-sub-1",
+            "name": "Karel Userinfo",
+            "given_name": "Karel",
+            "family_name": "Userinfo",
+            "email": "karel.userinfo@example.com",
+            "preferred_username": "karel",
+        }
+
+        with userinfo_returns(200, body):
+            log_in(bearer, session)
+
+        user = stored_user(session, "keycloak-sub-1")
+        assert (user.email, user.last_name) == (
+            "karel.userinfo@example.com",
+            "Userinfo",
+        )
+
+    def test_get_authenticated_user__keycloak_falls_back_to_token_claims(
+        self, idp, session
+    ):
+        idp(audience="portal")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+
+        with patch(
+            "app.core.auth.auth.httpx.post",
+            side_effect=httpx.ConnectError("connection refused"),
+        ):
+            log_in(bearer, session)
+
+        user = stored_user(session, "keycloak-sub-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "karel@example.com",
+            "Karel",
+            "Token",
+        )
+
+    def test_get_authenticated_user__entra_reads_identity_from_token_claims(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}) as post:
+            log_in(bearer, session)
+
+        post.assert_called_once()
+        user = stored_user(session, "entra-pairwise-sub-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "anna@contoso.com",
+            "Anna van",
+            "Dijk",
+        )
+
+    def test_get_authenticated_user__entra_uses_optional_name_and_email_claims(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        bearer = sign(
+            {
+                **ENTRA_ACCESS_TOKEN,
+                "given_name": "Anna",
+                "family_name": "van Dijk",
+                "email": "anna.vandijk@contoso.com",
+            }
+        )
+
+        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
+            log_in(bearer, session)
+
+        user = stored_user(session, "entra-pairwise-sub-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "anna.vandijk@contoso.com",
+            "Anna",
+            "van Dijk",
+        )
+
+    def test_get_authenticated_user__entra_skips_preferred_username_without_at(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        bearer = sign(
+            {
+                **ENTRA_ACCESS_TOKEN,
+                "preferred_username": "+3212345678",
+                "upn": "anna@contoso.com",
+            }
+        )
+
+        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
+            log_in(bearer, session)
+
+        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
+
+    def test_get_authenticated_user__entra_without_email_claim_is_rejected(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        claims = {**ENTRA_ACCESS_TOKEN, "preferred_username": "anna"}
+        bearer = sign(claims)
+
+        with (
+            userinfo_returns(401, {"error": "InvalidAuthenticationToken"}),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert stored_user(session, "entra-pairwise-sub-1") is None
+
+    def test_get_authenticated_user__userinfo_html_response_falls_back_to_claims(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with userinfo_returns(200, "<html>login</html>"):
+            log_in(bearer, session)
+
+        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
+
+    def test_get_authenticated_user__known_user_skips_userinfo(self, idp, session):
+        idp(audience=ENTRA_AUDIENCE)
+        UserFactory(external_id="entra-pairwise-sub-1", email="anna@contoso.com")
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with userinfo_returns(200, {}) as post:
+            user = log_in(bearer, session)
+
+        post.assert_not_called()
+        assert user.email == "anna@contoso.com"
+
+    def test_get_authenticated_user__existing_email_links_new_subject(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+        existing = UserFactory(external_id="old-cognito-sub", email="anna@contoso.com")
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
+            log_in(bearer, session)
+
+        session.refresh(existing)
+        assert existing.external_id == "entra-pairwise-sub-1"
+
+    @pytest.mark.parametrize(
+        "bearer",
+        [
+            pytest.param(sign(ENTRA_ACCESS_TOKEN, expires_in=-60), id="expired"),
+            pytest.param(sign({**ENTRA_ACCESS_TOKEN, "aud": "other"}), id="audience"),
+            pytest.param(sign(ENTRA_ACCESS_TOKEN, key=OTHER_KEY), id="signature"),
+            pytest.param("Bearer not-a-jwt", id="malformed"),
+        ],
+    )
+    def test_secured_call__invalid_token_is_rejected_before_userinfo(
+        self, idp, session, bearer
+    ):
+        idp(audience=ENTRA_AUDIENCE)
+
+        with (
+            userinfo_returns(200, {}) as post,
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        post.assert_not_called()
+        assert stored_user(session, "entra-pairwise-sub-1") is None

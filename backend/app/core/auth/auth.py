@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.api_key import secured_api_key
 from app.core.auth.jwt import JWTToken, JWTTokenValid
 from app.core.auth.oidc import OIDCIdentity
+from app.core.logging import logger
 from app.database.database import get_system_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
@@ -66,20 +67,29 @@ if settings.OIDC_ENABLED:
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session),
     ) -> User:
-        if settings.OIDC_IDENTITY_SOURCE == "token" and token.claims:
-            try:
-                oidc_user = OIDCIdentity.from_claims(token.claims)
-            except (KeyError, ValueError) as e:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Access token lacks identity claims: {e}",
-                )
-        else:
+        oidc_user = _identity_from_userinfo(token) or _identity_from_claims(token)
+        return update_db_user(oidc_user, token, db)
+
+    def _identity_from_userinfo(token: JWTToken) -> Optional[OIDCIdentity]:
+        try:
             response = httpx.post(
                 url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
             )
-            oidc_user = OIDCIdentity.model_validate(response.json())
-        return update_db_user(oidc_user, token, db)
+            response.raise_for_status()
+            return OIDCIdentity.model_validate(response.json())
+        except (httpx.HTTPError, ValueError) as e:
+            logger.info(f"Userinfo unavailable, reading the access token claims: {e}")
+            return None
+
+    def _identity_from_claims(token: JWTToken) -> OIDCIdentity:
+        try:
+            return OIDCIdentity.from_claims(token.claims)
+        except (KeyError, ValueError) as e:
+            logger.warning(f"Access token lacks identity claims: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token lacks identity claims",
+            )
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)

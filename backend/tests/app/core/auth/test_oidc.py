@@ -22,3 +22,21 @@ class TestOIDCIdentity:
         )
 
         assert identity.given_name == "Bob"
+
+    def test_from_claims__single_word_name_has_empty_family_name(self):
+        identity = OIDCIdentity.from_claims(
+            {"sub": "1", "name": "Prince", "email": "prince@example.com"}
+        )
+
+        assert (identity.given_name, identity.family_name) == ("Prince", "")
+
+    def test_from_claims__missing_name_uses_email_local_part(self):
+        identity = OIDCIdentity.from_claims(
+            {"sub": "1", "upn": "jan.peeters@example.com"}
+        )
+
+        assert (identity.name, identity.given_name, identity.email) == (
+            "jan.peeters",
+            "jan.peeters",
+            "jan.peeters@example.com",
+        )
