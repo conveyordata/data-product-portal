@@ -93,7 +93,7 @@ class OIDCIdentity(BaseModel):
         given_name = claims.get("given_name", "")
         family_name = claims.get("family_name") or ""
         if not given_name:
-            display_name = claims.get("name", "")
+            display_name = claims.get("name", "").strip(" ,")
             if family_name and display_name.endswith(f" {family_name}"):
                 given_name = display_name.removesuffix(f" {family_name}")
             elif "," in display_name:

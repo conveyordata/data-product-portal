@@ -63,7 +63,7 @@ class TestOIDCIdentity:
             pytest.param("van Dijk, Anna", ("Anna", "van Dijk"), id="comma-space"),
             pytest.param("Doe,Anna", ("Anna", "Doe"), id="comma"),
             pytest.param("Doe ,Anna", ("Anna", "Doe"), id="space-comma"),
-            pytest.param("Doe, ", ("anna", "Doe"), id="trailing-comma"),
+            pytest.param("Anna,", ("Anna", ""), id="trailing-comma"),
         ],
     )
     def test_from_claims__last_first_names_split_on_comma(self, name, expected):
@@ -72,6 +72,54 @@ class TestOIDCIdentity:
         )
 
         assert (identity.given_name, identity.family_name) == expected
+
+    def test_from_claims__non_string_name_claims_are_ignored(self):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "name": ["Anna"],
+                "given_name": 42,
+                "email": "anna@contoso.com",
+            },
+            "1",
+            "email",
+        )
+
+        assert (identity.given_name, identity.family_name) == ("anna", "")
+
+    @pytest.mark.parametrize("name", ["   ", ""])
+    def test_from_claims__blank_first_name_falls_back_to_email(self, name):
+        identity = OIDCIdentity.from_claims(
+            {"sub": "1", "name": name, "email": "anna@contoso.com"}, "1", "email"
+        )
+
+        assert identity.given_name == "anna"
+
+    @pytest.mark.parametrize(
+        ("given_name", "family_name", "name"),
+        [
+            pytest.param(" ", "Doe", "Anna Doe", id="blank-given-name"),
+            pytest.param("", " ", "Anna Doe", id="blank-family-name"),
+            pytest.param("", "Doe", "Anna Doe ", id="trailing-space-in-name"),
+            pytest.param("", "", "Anna  Doe", id="double-space-in-name"),
+        ],
+    )
+    def test_from_claims__whitespace_claims_still_split_name(
+        self, given_name, family_name, name
+    ):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "given_name": given_name,
+                "family_name": family_name,
+                "name": name,
+                "email": "a.d123@contoso.com",
+            },
+            "1",
+            "email",
+        )
+
+        assert (identity.given_name, identity.family_name) == ("Anna", "Doe")
 
     def test_from_claims__reads_only_the_configured_email_claim(self):
         identity = OIDCIdentity.from_claims(
