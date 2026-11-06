@@ -62,12 +62,14 @@ class OIDCIdentity(BaseModel):
 
     @model_validator(mode="before")
     def populate_username(cls, values):
+        if not isinstance(values, dict):
+            return values
         values["username"] = values.get("username") or values.get("preferred_username")
         values["given_name"] = values.get("given_name") or values.get("name")
         return values
 
     @classmethod
-    def from_claims(cls, claims: dict, email_claim: str) -> "OIDCIdentity":
+    def from_claims(cls, claims: dict, sub: str, email_claim: str) -> "OIDCIdentity":
         email = TypeAdapter(EmailStr).validate_python(claims.get(email_claim))
         given_name = claims.get("given_name")
         family_name = claims.get("family_name") or ""
@@ -80,7 +82,7 @@ class OIDCIdentity(BaseModel):
                 given_name = head or tail
                 family_name = family_name or (tail if head else "")
         return cls(
-            sub=claims["sub"],
+            sub=sub,
             name=claims.get("name") or given_name,
             given_name=given_name,
             family_name=family_name,

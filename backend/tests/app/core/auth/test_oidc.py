@@ -28,14 +28,14 @@ class TestOIDCIdentity:
 
     def test_from_claims__single_word_name_has_empty_family_name(self):
         identity = OIDCIdentity.from_claims(
-            {"sub": "1", "name": "Prince", "email": "prince@example.com"}, "email"
+            {"sub": "1", "name": "Prince", "email": "prince@example.com"}, "1", "email"
         )
 
         assert (identity.given_name, identity.family_name) == ("Prince", "")
 
     def test_from_claims__missing_name_uses_email_local_part(self):
         identity = OIDCIdentity.from_claims(
-            {"sub": "1", "upn": "jan.peeters@example.com"}, "upn"
+            {"sub": "1", "upn": "jan.peeters@example.com"}, "1", "upn"
         )
 
         assert (identity.name, identity.given_name, identity.email) == (
@@ -52,6 +52,7 @@ class TestOIDCIdentity:
                 "family_name": "van Dijk",
                 "email": "anna@contoso.com",
             },
+            "1",
             "email",
         )
 
@@ -65,6 +66,7 @@ class TestOIDCIdentity:
                 "email": "other@contoso.com",
                 "preferred_username": "anna@contoso.com",
             },
+            "1",
             "preferred_username",
         )
 
@@ -80,5 +82,6 @@ class TestOIDCIdentity:
                     "preferred_username": value,
                     "upn": "anna@contoso.com",
                 },
+                "1",
                 "preferred_username",
             )
