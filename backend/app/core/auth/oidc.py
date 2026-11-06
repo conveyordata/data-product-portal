@@ -87,6 +87,7 @@ class OIDCIdentity(BaseModel):
         email = claims.get(email_claim)
         if not is_address(email):
             raise ValueError(f"claim {email_claim} holds no email address")
+        claims = {k: v for k, v in claims.items() if isinstance(v, str)}
         given_name = claims.get("given_name")
         family_name = claims.get("family_name") or ""
         if not given_name:

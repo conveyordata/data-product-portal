@@ -274,6 +274,14 @@ class TestUserinfoIdentitySource:
             pytest.param(
                 {
                     "return_value": httpx.Response(
+                        429, request=httpx.Request("POST", USERINFO_URL)
+                    )
+                },
+                id="rate-limited",
+            ),
+            pytest.param(
+                {
+                    "return_value": httpx.Response(
                         302,
                         headers={"location": "/login"},
                         request=httpx.Request("POST", USERINFO_URL),
@@ -304,6 +312,7 @@ class TestUserinfoIdentitySource:
     @pytest.mark.parametrize(
         ("status_code", "body"),
         [
+            pytest.param(400, {"error": "invalid_request"}, id="bad-request"),
             pytest.param(401, {"error": "invalid_token"}, id="rejected"),
             pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
             pytest.param(200, "<html>login</html>", id="html"),

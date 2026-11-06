@@ -47,10 +47,10 @@ class JWTTokenValid:
                 audience=self.oidc.audience,
             )
         except ExpiredSignatureError:
-            self.logger.info("Access token rejected: expired")
+            self.logger.debug("Access token rejected: expired")
             return False
         except PyJWTError as e:
-            self.logger.info(f"Access token rejected: {e}")
+            self.logger.debug(f"Access token rejected: {e}")
             return False
         except Exception as e:
             self.logger.warning(f"Access token rejected, unexpected error: {e!r}")
