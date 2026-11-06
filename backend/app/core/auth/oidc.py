@@ -80,7 +80,7 @@ class OIDCIdentity(BaseModel):
     def require_address(cls, email: str) -> str:
         if not is_address(email):
             raise ValueError("email is not an address")
-        return email
+        return _email.validate_python(email)
 
     @classmethod
     def from_claims(cls, claims: dict, sub: str, email_claim: str) -> "OIDCIdentity":
