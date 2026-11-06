@@ -101,6 +101,7 @@ class OIDCIdentity(BaseModel):
                 head, _, tail = display_name.rpartition(" ")
                 given_name = head or tail
                 family_name = family_name or (tail if head else "")
+        given_name = given_name.strip() or email.split("@")[0]
         return cls(
             sub=sub,
             name=claims.get("name") or given_name,

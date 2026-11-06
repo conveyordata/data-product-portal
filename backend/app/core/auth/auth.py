@@ -30,7 +30,7 @@ def update_db_user(
     if db_user:
         if email_owner:
             logger.warning(
-                "New identity email belongs to another user; kept the old one"
+                f"Kept the email of user {db_user.id}: the new one belongs to another user"
             )
         else:
             db_user.email = oidc_user.email
@@ -123,7 +123,12 @@ if settings.OIDC_ENABLED:
             logger.warning(f"Userinfo failed with status {response.status_code}")
             raise _identity_provider_unavailable()
         try:
-            return OIDCIdentity.model_validate(response.json())
+            body = response.json()
+        except ValueError:
+            logger.warning("Userinfo answered with a body that is not JSON")
+            raise _identity_provider_unavailable()
+        try:
+            return OIDCIdentity.model_validate(body)
         except ValueError as e:
             logger.warning(f"Userinfo returned no usable identity: {type(e).__name__}")
             raise HTTPException(

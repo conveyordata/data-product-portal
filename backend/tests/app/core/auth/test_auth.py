@@ -274,6 +274,16 @@ class TestUserinfoIdentitySource:
             pytest.param(
                 {
                     "return_value": httpx.Response(
+                        200,
+                        text="<html>maintenance</html>",
+                        request=httpx.Request("POST", USERINFO_URL),
+                    )
+                },
+                id="html-page",
+            ),
+            pytest.param(
+                {
+                    "return_value": httpx.Response(
                         429, request=httpx.Request("POST", USERINFO_URL)
                     )
                 },
@@ -315,8 +325,7 @@ class TestUserinfoIdentitySource:
             pytest.param(400, {"error": "invalid_request"}, id="bad-request"),
             pytest.param(401, {"error": "invalid_token"}, id="rejected"),
             pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
-            pytest.param(200, "<html>login</html>", id="html"),
-            pytest.param(200, None, id="json-null"),
+            pytest.param(200, "null", id="json-null"),
             pytest.param(
                 200,
                 {"sub": "keycloak-sub-1", "name": "Karel", "email": "admin@localhost"},

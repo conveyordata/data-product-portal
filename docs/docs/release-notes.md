@@ -12,7 +12,7 @@ sidebar_position: 200
 
 ### bugfixes
 
-- **[Auth]**: A missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
+- **[Auth]**: When loading the current user, a missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
 
 ## 0.8.1
 
