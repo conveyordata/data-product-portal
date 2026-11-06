@@ -88,13 +88,23 @@ class TestOIDCIdentity:
 
         assert identity.given_name == "anna"
 
-    def test_from_claims__blank_given_name_uses_name_claim(self):
+    @pytest.mark.parametrize(
+        ("given_name", "family_name", "name"),
+        [
+            pytest.param(" ", "Doe", "Anna Doe", id="blank-given-name"),
+            pytest.param("", " ", "Anna Doe", id="blank-family-name"),
+            pytest.param("", "Doe", "Anna Doe ", id="trailing-space-in-name"),
+        ],
+    )
+    def test_from_claims__whitespace_claims_still_split_name(
+        self, given_name, family_name, name
+    ):
         identity = OIDCIdentity.from_claims(
             {
                 "sub": "1",
-                "given_name": " ",
-                "family_name": "Doe",
-                "name": "Anna Doe",
+                "given_name": given_name,
+                "family_name": family_name,
+                "name": name,
                 "email": "a.d123@contoso.com",
             },
             "1",
