@@ -3,11 +3,18 @@ on:
   pull_request:
     paths:
       - 'frontend/**'
+      - 'backend/**'
+      - 'plugins/**'
+      - 'Dockerfile'
+      - 'compose.yaml'
       - '.github/workflows/nightly-build.yml'
   schedule:
     - cron: '0 2 * * *'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   compose:
@@ -32,6 +39,14 @@ jobs:
           echo "Portal did not become healthy in time"
           docker compose logs
           exit 1
+      - name: Check all enabled plugins are installed
+        run: |
+          docker compose exec -T portal python -c "
+          from app.plugins.registry import plugin_registry
+          from app.settings import settings
+          missing = set(settings.ENABLED_PLUGINS) - {p.name for p in plugin_registry.discovered()}
+          assert not missing, f'Enabled plugins not installed: {sorted(missing)}'
+          "
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
