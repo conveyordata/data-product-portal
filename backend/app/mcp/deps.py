@@ -58,7 +58,9 @@ class PortalOIDCProxy(OIDCProxy):
                 if extracted.get(settings.OIDC_USER_ID_CLAIM):
                     logger.debug(
                         f"[MCP] Extracted upstream claims from {key}: "
-                        f"sub={extracted.get('sub')!r}, email={extracted.get('email')!r}"
+                        f"{settings.OIDC_USER_ID_CLAIM}="
+                        f"{extracted.get(settings.OIDC_USER_ID_CLAIM)!r}, "
+                        f"email={extracted.get('email')!r}"
                     )
                     return extracted
             except Exception as exc:

@@ -349,7 +349,7 @@ class TestUserinfoIdentitySource:
         session.refresh(existing)
         assert existing.external_id == "keycloak-sub-1"
 
-    def test_authorize_user__email_change_to_taken_address_is_rejected(
+    def test_authorize_user__email_change_to_taken_address_keeps_old_email(
         self, idp, session
     ):
         idp(audience="portal")
@@ -359,16 +359,14 @@ class TestUserinfoIdentitySource:
         body = {**KEYCLOAK_ACCESS_TOKEN, "email": "taken@example.com"}
         from app.core.auth.auth import authorize_user, secured_call
 
-        with (
-            userinfo_returns(200, body),
-            pytest.raises(HTTPException) as exc_info,
-        ):
-            authorize_user(token=secured_call(token=bearer), db=session)
+        with userinfo_returns(200, body):
+            user = authorize_user(token=secured_call(token=bearer), db=session)
 
-        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert user.id == known.id
         session.refresh(known)
         session.refresh(other)
         assert (known.email, other.email) == ("karel@example.com", "taken@example.com")
+        assert (known.first_name, known.last_name) == ("Karel", "Token")
 
 
 class TestAccessTokenIdentitySource:
@@ -451,6 +449,17 @@ class TestAccessTokenIdentitySource:
 
         assert stored_user(session, "object-id-1").email == "anna@contoso.com"
 
+    @pytest.mark.parametrize("value", [12345, ["object-id-1"], {"id": "1"}])
+    def test_secured_call__non_string_user_id_claim_is_rejected(
+        self, idp, session, value
+    ):
+        idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
+
+        with pytest.raises(HTTPException) as exc_info:
+            log_in(sign({**ENTRA_ACCESS_TOKEN, "oid": value}), session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
     def test_secured_call__token_without_user_id_claim_is_rejected(self, idp, session):
         idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
         claims = {k: v for k, v in ENTRA_ACCESS_TOKEN.items() if k != "oid"}
@@ -461,9 +470,16 @@ class TestAccessTokenIdentitySource:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert stored_user(session, "entra-pairwise-sub-1") is None
 
-    @pytest.mark.parametrize("verified", [True, "true"])
+    @pytest.mark.parametrize(
+        ("verified", "email"),
+        [
+            pytest.param(True, "anna@contoso.com", id="boolean"),
+            pytest.param("true", "anna@contoso.com", id="string"),
+            pytest.param(True, "anna@CONTOSO.COM", id="domain-case"),
+        ],
+    )
     def test_get_authenticated_user__verified_email_links_existing_user(
-        self, idp, session, verified
+        self, idp, session, verified, email
     ):
         idp(
             audience=ENTRA_AUDIENCE,
@@ -475,7 +491,7 @@ class TestAccessTokenIdentitySource:
         bearer = sign(
             {
                 **ENTRA_ACCESS_TOKEN,
-                "email": "anna@contoso.com",
+                "email": email,
                 "email_verified": verified,
             }
         )

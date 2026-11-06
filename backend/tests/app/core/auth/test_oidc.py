@@ -58,6 +58,15 @@ class TestOIDCIdentity:
 
         assert (identity.given_name, identity.family_name) == ("Anna", "van Dijk")
 
+    def test_from_claims__last_comma_first_name_is_split_on_comma(self):
+        identity = OIDCIdentity.from_claims(
+            {"sub": "1", "name": "van Dijk, Anna", "email": "anna@contoso.com"},
+            "1",
+            "email",
+        )
+
+        assert (identity.given_name, identity.family_name) == ("Anna", "van Dijk")
+
     def test_from_claims__reads_only_the_configured_email_claim(self):
         identity = OIDCIdentity.from_claims(
             {

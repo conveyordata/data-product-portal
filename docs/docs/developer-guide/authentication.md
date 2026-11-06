@@ -101,7 +101,7 @@ The backend reads the current user from one of two sources, set with `OIDC_IDENT
 
 Use `userinfo` for Cognito, whose access tokens carry no email. Keycloak works with both. With `userinfo`, a rejected access token or an answer without a valid email is a 401, and an unreachable or failing endpoint is a 503.
 
-Use `access_token` for providers whose userinfo endpoint does not accept the portal's access token, such as Microsoft Entra ID. When given_name is missing, name is split on its last space into first and last name. An identity read from the access token links to an existing user with the same email only when the token's `email` claim holds that address and `email_verified` is true; otherwise a login whose email already belongs to another user is rejected. For Entra ID, use:
+Use `access_token` for providers whose userinfo endpoint does not accept the portal's access token, such as Microsoft Entra ID. When given_name is missing, name is split into first and last name: on the comma for names written as "Last, First", otherwise on the last space. An identity read from the access token links to an existing user with the same email only when the token's `email` claim holds that address and `email_verified` is true; otherwise a login whose email already belongs to another user is rejected. For Entra ID, use:
 
 ```
 OIDC_IDENTITY_SOURCE=access_token
