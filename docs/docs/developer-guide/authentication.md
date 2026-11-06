@@ -109,7 +109,7 @@ OIDC_USER_ID_CLAIM=oid
 OIDC_EMAIL_CLAIM=preferred_username
 ```
 
-Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant. With the Helm chart, set these settings through `extraConfigMapValues`.
+Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant. Set `OIDC_AUDIENCE` to the audience of the portal's access token. The frontend still requests only `openid profile email`, and with those scopes Entra ID issues an access token for Microsoft Graph, not for the portal. Requesting the portal's API scope needs a frontend change that is not available yet. With the Helm chart, set these settings through `extraConfigMapValues`.
 
 ### Cognito setup
 

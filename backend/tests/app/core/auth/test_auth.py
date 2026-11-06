@@ -468,6 +468,30 @@ class TestAccessTokenIdentitySource:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert stored_user(session, "object-id-1") is None
 
+    def test_get_authenticated_user__email_domain_case_matches_existing_user(
+        self, idp, session
+    ):
+        idp(
+            audience=ENTRA_AUDIENCE,
+            source="access_token",
+            user_id_claim="oid",
+            email_claim="preferred_username",
+        )
+        existing = UserFactory(external_id="old-sub", email="anna@contoso.com")
+        bearer = sign(
+            {
+                **ENTRA_ACCESS_TOKEN,
+                "preferred_username": "anna@CONTOSO.COM",
+                "email": "anna@CONTOSO.COM",
+                "email_verified": True,
+            }
+        )
+
+        log_in(bearer, session)
+
+        session.refresh(existing)
+        assert existing.external_id == "object-id-1"
+
     def test_get_authenticated_user__configured_user_id_claim_replaces_sub(
         self, idp, session
     ):
