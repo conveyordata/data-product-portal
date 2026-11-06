@@ -308,6 +308,11 @@ class TestUserinfoIdentitySource:
             pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
             pytest.param(200, "<html>login</html>", id="html"),
             pytest.param(200, None, id="json-null"),
+            pytest.param(
+                200,
+                {"sub": "keycloak-sub-1", "name": "Karel", "email": "admin@localhost"},
+                id="email-the-portal-rejects",
+            ),
             pytest.param(200, {"sub": "keycloak-sub-1", "email": ""}, id="empty-email"),
             pytest.param(200, [], id="json-list"),
             pytest.param(

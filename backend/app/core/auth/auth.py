@@ -111,9 +111,6 @@ if settings.OIDC_ENABLED:
         except httpx.HTTPError as e:
             logger.warning(f"Userinfo unreachable: {type(e).__name__}")
             raise _identity_provider_unavailable()
-        if not response.is_success and not response.is_client_error:
-            logger.warning(f"Userinfo failed with status {response.status_code}")
-            raise _identity_provider_unavailable()
         if response.is_client_error:
             logger.warning(
                 f"Userinfo rejected the access token: {response.status_code}"
@@ -122,6 +119,9 @@ if settings.OIDC_ENABLED:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Userinfo rejected the access token",
             )
+        if not response.is_success:
+            logger.warning(f"Userinfo failed with status {response.status_code}")
+            raise _identity_provider_unavailable()
         try:
             return OIDCIdentity.model_validate(response.json())
         except ValueError as e:

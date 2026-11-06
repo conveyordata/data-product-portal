@@ -109,7 +109,7 @@ OIDC_USER_ID_CLAIM=oid
 OIDC_EMAIL_CLAIM=preferred_username
 ```
 
-Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant.
+Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant. With the Helm chart, set these settings through `extraConfigMapValues`.
 
 ### Cognito setup
 

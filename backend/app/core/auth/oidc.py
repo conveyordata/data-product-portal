@@ -4,7 +4,14 @@ from typing import Optional, TypeGuard
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    TypeAdapter,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -104,7 +111,11 @@ class OIDCIdentity(BaseModel):
 
 
 def is_address(value: object) -> TypeGuard[str]:
-    if not isinstance(value, str):
+    try:
+        _email.validate_python(value)
+    except ValidationError:
         return False
-    local, _, domain = value.rpartition("@")
-    return bool(local) and bool(domain) and " " not in value
+    return True
+
+
+_email = TypeAdapter(EmailStr)
