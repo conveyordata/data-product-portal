@@ -27,7 +27,7 @@ def _engine_with_password(password: str):
 def test_apply_auth__azure_mode_logs_in_with_a_fresh_token_per_connection(
     monkeypatch,
 ):
-    credential = FakeAzureCredential(token=settings.POSTGRES_PASSWORD)
+    credential = FakeAzureCredential(settings.POSTGRES_PASSWORD)
     monkeypatch.setattr(settings, "POSTGRES_AUTH_MODE", "azure")
     monkeypatch.setattr(database, "_azure_credential", lambda: credential)
     engine = _engine_with_password("not-the-password")
@@ -49,10 +49,22 @@ def test_apply_auth__password_mode_uses_the_password_from_the_url(monkeypatch):
         assert connection.exec_driver_sql("select 1").scalar() == 1
 
 
-def test_get_password__password_mode_returns_the_configured_password(monkeypatch):
-    monkeypatch.setattr(settings, "POSTGRES_PASSWORD", "secret")
+def test_apply_auth__azure_mode_keeps_the_password_of_another_server(monkeypatch):
+    credential = FakeAzureCredential("not-the-password")
+    monkeypatch.setattr(settings, "POSTGRES_AUTH_MODE", "azure")
+    monkeypatch.setattr(database, "_azure_credential", lambda: credential)
+    engine = create_engine(
+        make_url(database.get_url()).set(
+            host="127.0.0.1", password=settings.POSTGRES_PASSWORD
+        ),
+        poolclass=pool.NullPool,
+    )
 
-    assert database.get_password() == "secret"
+    database.apply_auth(engine)
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("select 1").scalar() == 1
+
+    assert credential.scopes == []
 
 
 def test_settings__password_mode_requires_a_password():

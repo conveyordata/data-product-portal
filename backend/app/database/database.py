@@ -52,10 +52,8 @@ def get_url(async_: bool = False) -> str:
     )
 
 
-def get_password() -> str:
-    if settings.POSTGRES_AUTH_MODE == "azure":
-        return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
-    return settings.POSTGRES_PASSWORD or ""
+def get_azure_token() -> str:
+    return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
 
 
 def apply_auth(target: Engine | type[Engine] = Engine) -> None:
@@ -64,16 +62,15 @@ def apply_auth(target: Engine | type[Engine] = Engine) -> None:
 
 
 def _set_password(dialect, conn_rec, cargs, cparams) -> None:
-    cparams["password"] = get_password()
+    if cparams.get("host") == settings.POSTGRES_SERVER:
+        cparams["password"] = get_azure_token()
 
 
 @lru_cache
 def _azure_credential() -> "DefaultAzureCredential":
     from azure.identity import DefaultAzureCredential
 
-    return DefaultAzureCredential(
-        managed_identity_client_id=settings.AZURE_PURPOSE_CLIENT_ID
-    )
+    return DefaultAzureCredential()
 
 
 apply_auth()
