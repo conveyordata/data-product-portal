@@ -85,11 +85,12 @@ if settings.OIDC_ENABLED:
         db: Session = Depends(get_system_db_session),
     ) -> User:
         if settings.OIDC_IDENTITY_SOURCE == "access_token":
+            oidc_user = _identity_from_claims(token)
             return update_db_user(
-                _identity_from_claims(token),
+                oidc_user,
                 token,
                 db,
-                link_by_email=_email_verified(token.claims),
+                link_by_email=_email_verified(token.claims, oidc_user.email),
             )
         return update_db_user(_identity_from_userinfo(token), token, db)
 
@@ -123,7 +124,9 @@ if settings.OIDC_ENABLED:
 
     def _identity_from_claims(token: JWTToken) -> OIDCIdentity:
         try:
-            return OIDCIdentity.from_claims(token.claims, settings.OIDC_EMAIL_CLAIM)
+            return OIDCIdentity.from_claims(
+                token.claims, token.sub, settings.OIDC_EMAIL_CLAIM
+            )
         except (KeyError, ValueError) as e:
             logger.warning(f"Access token lacks identity claims: {type(e).__name__}")
             raise HTTPException(
@@ -131,9 +134,9 @@ if settings.OIDC_ENABLED:
                 detail="Access token lacks identity claims",
             )
 
-    def _email_verified(claims: dict) -> bool:
+    def _email_verified(claims: dict, email: str) -> bool:
         verified = claims.get("email_verified")
-        return verified is True or verified == "true"
+        return claims.get("email") == email and (verified is True or verified == "true")
 
     def _identity_provider_unavailable() -> HTTPException:
         return HTTPException(

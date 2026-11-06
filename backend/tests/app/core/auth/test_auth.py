@@ -297,6 +297,8 @@ class TestUserinfoIdentitySource:
             pytest.param(401, {"error": "invalid_token"}, id="rejected"),
             pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
             pytest.param(200, "<html>login</html>", id="html"),
+            pytest.param(200, None, id="json-null"),
+            pytest.param(200, [], id="json-list"),
             pytest.param(
                 200, {"sub": "keycloak-sub-1", "name": "Karel"}, id="no-email"
             ),
@@ -434,6 +436,21 @@ class TestAccessTokenIdentitySource:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert stored_user(session, "object-id-1") is None
 
+    def test_get_authenticated_user__configured_user_id_claim_replaces_sub(
+        self, idp, session
+    ):
+        idp(
+            audience=ENTRA_AUDIENCE,
+            source="access_token",
+            user_id_claim="oid",
+            email_claim="preferred_username",
+        )
+        claims = {k: v for k, v in ENTRA_ACCESS_TOKEN.items() if k != "sub"}
+
+        log_in(sign(claims), session)
+
+        assert stored_user(session, "object-id-1").email == "anna@contoso.com"
+
     def test_secured_call__token_without_user_id_claim_is_rejected(self, idp, session):
         idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
         claims = {k: v for k, v in ENTRA_ACCESS_TOKEN.items() if k != "oid"}
@@ -455,7 +472,13 @@ class TestAccessTokenIdentitySource:
             email_claim="preferred_username",
         )
         existing = UserFactory(external_id="old-sub", email="anna@contoso.com")
-        bearer = sign({**ENTRA_ACCESS_TOKEN, "email_verified": verified})
+        bearer = sign(
+            {
+                **ENTRA_ACCESS_TOKEN,
+                "email": "anna@contoso.com",
+                "email_verified": verified,
+            }
+        )
 
         log_in(bearer, session)
 
@@ -469,6 +492,10 @@ class TestAccessTokenIdentitySource:
             pytest.param({"email_verified": False}, id="false"),
             pytest.param({"email_verified": "false"}, id="false-string"),
             pytest.param({"email_verified": 1}, id="not-a-boolean"),
+            pytest.param(
+                {"email_verified": True, "email": "attacker@example.com"},
+                id="verified-flag-for-another-address",
+            ),
         ],
     )
     def test_get_authenticated_user__unverified_email_cannot_take_over_account(

@@ -45,10 +45,17 @@ class PortalOIDCProxy(OIDCProxy):
                 claims = pyjwt.decode(raw, options={"verify_signature": False})
                 extracted = {
                     k: claims[k]
-                    for k in ("sub", "email", "name", "given_name", "family_name")
+                    for k in (
+                        "sub",
+                        settings.OIDC_USER_ID_CLAIM,
+                        "email",
+                        "name",
+                        "given_name",
+                        "family_name",
+                    )
                     if k in claims
                 }
-                if extracted.get("sub"):
+                if extracted.get(settings.OIDC_USER_ID_CLAIM):
                     logger.debug(
                         f"[MCP] Extracted upstream claims from {key}: "
                         f"sub={extracted.get('sub')!r}, email={extracted.get('email')!r}"
@@ -116,9 +123,12 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
     if not upstream_claims:
         raise ValueError("No upstream_claims found in access token")
 
-    sub = upstream_claims.get("sub")
+    sub = upstream_claims.get(settings.OIDC_USER_ID_CLAIM)
     if not sub:
-        raise ValueError(f"upstream_claims missing 'sub' claim: {upstream_claims!r}")
+        raise ValueError(
+            f"upstream_claims missing '{settings.OIDC_USER_ID_CLAIM}' claim: "
+            f"{upstream_claims!r}"
+        )
     logger.debug(f"[MCP] Resolving user from upstream_claims: sub={sub!r}")
 
     user_model = db.scalar(sa_select(UserModel).where(UserModel.external_id == sub))
