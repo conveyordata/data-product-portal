@@ -83,6 +83,12 @@ repos:
       entry: ./scripts/add_helm_version.sh
       language: script
       pass_filenames: false
+    - id: check-python-version
+      name: Check Python version pins match the backend
+      entry: ./scripts/check_python_version.sh
+      language: script
+      files: ^(backend/pyproject\.toml|backend/\.python-version|plugins/pyproject\.toml|Dockerfile|\.pre-commit-config\.yaml)$
+      pass_filenames: false
     - id: regen-openapi-spec
       name: Regen openapi spec
       entry: ./scripts/check_openapi_spec.sh
