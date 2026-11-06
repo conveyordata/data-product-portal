@@ -2,13 +2,12 @@ from typing import Annotated, Optional
 
 import httpx
 from fastapi import Depends, Header, HTTPException, status
-from pydantic import EmailStr, TypeAdapter, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
 from app.core.auth.jwt import JWTToken, JWTTokenValid
-from app.core.auth.oidc import OIDCIdentity
+from app.core.auth.oidc import OIDCIdentity, is_address
 from app.core.logging import logger
 from app.database.database import get_system_db_session
 from app.settings import settings
@@ -112,7 +111,7 @@ if settings.OIDC_ENABLED:
         except httpx.HTTPError as e:
             logger.warning(f"Userinfo unreachable: {type(e).__name__}")
             raise _identity_provider_unavailable()
-        if response.is_server_error:
+        if not response.is_success and not response.is_client_error:
             logger.warning(f"Userinfo failed with status {response.status_code}")
             raise _identity_provider_unavailable()
         if response.is_client_error:
@@ -137,7 +136,7 @@ if settings.OIDC_ENABLED:
             return OIDCIdentity.from_claims(
                 token.claims, token.sub, settings.OIDC_EMAIL_CLAIM
             )
-        except (KeyError, ValueError) as e:
+        except ValueError as e:
             logger.warning(f"Access token lacks identity claims: {type(e).__name__}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -148,10 +147,8 @@ if settings.OIDC_ENABLED:
         verified = claims.get("email_verified")
         if verified is not True and verified != "true":
             return False
-        try:
-            return TypeAdapter(EmailStr).validate_python(claims.get("email")) == email
-        except ValidationError:
-            return False
+        verified_email = claims.get("email")
+        return is_address(verified_email) and verified_email.lower() == email.lower()
 
     def _identity_provider_unavailable() -> HTTPException:
         return HTTPException(

@@ -1,5 +1,4 @@
 import pytest
-from pydantic import ValidationError
 
 from app.core.auth.oidc import OIDCIdentity
 
@@ -83,7 +82,7 @@ class TestOIDCIdentity:
 
     @pytest.mark.parametrize("value", [None, 42, "anna", "anna@"])
     def test_from_claims__configured_claim_without_email_is_rejected(self, value):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError, match="holds no email address"):
             OIDCIdentity.from_claims(
                 {
                     "sub": "1",
