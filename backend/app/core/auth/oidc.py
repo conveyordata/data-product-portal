@@ -1,10 +1,10 @@
 import os
 from enum import Enum
-from typing import Optional
+from typing import Optional, TypeGuard
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel, EmailStr, TypeAdapter, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -56,7 +56,7 @@ class OIDCIdentity(BaseModel):
     name: str
     given_name: str
     family_name: str = ""
-    email: EmailStr
+    email: str
     username: Optional[str] = None
     preferred_username: Optional[str] = None
 
@@ -68,9 +68,18 @@ class OIDCIdentity(BaseModel):
         values["given_name"] = values.get("given_name") or values.get("name")
         return values
 
+    @field_validator("email")
+    @classmethod
+    def require_address(cls, email: str) -> str:
+        if not is_address(email):
+            raise ValueError("email is not an address")
+        return email
+
     @classmethod
     def from_claims(cls, claims: dict, sub: str, email_claim: str) -> "OIDCIdentity":
-        email = TypeAdapter(EmailStr).validate_python(claims.get(email_claim))
+        email = claims.get(email_claim)
+        if not is_address(email):
+            raise ValueError(f"claim {email_claim} holds no email address")
         given_name = claims.get("given_name")
         family_name = claims.get("family_name") or ""
         if not given_name:
@@ -92,3 +101,10 @@ class OIDCIdentity(BaseModel):
             email=email,
             preferred_username=claims.get("preferred_username"),
         )
+
+
+def is_address(value: object) -> TypeGuard[str]:
+    if not isinstance(value, str):
+        return False
+    local, _, domain = value.rpartition("@")
+    return bool(local) and bool(domain) and " " not in value

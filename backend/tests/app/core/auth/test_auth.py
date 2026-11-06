@@ -271,6 +271,16 @@ class TestUserinfoIdentitySource:
             pytest.param(
                 {"side_effect": httpx.ConnectTimeout("timed out")}, id="timeout"
             ),
+            pytest.param(
+                {
+                    "return_value": httpx.Response(
+                        302,
+                        headers={"location": "/login"},
+                        request=httpx.Request("POST", USERINFO_URL),
+                    )
+                },
+                id="redirect",
+            ),
         ],
     )
     def test_get_authenticated_user__userinfo_outage_returns_503_and_keeps_user(
@@ -298,6 +308,7 @@ class TestUserinfoIdentitySource:
             pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
             pytest.param(200, "<html>login</html>", id="html"),
             pytest.param(200, None, id="json-null"),
+            pytest.param(200, {"sub": "keycloak-sub-1", "email": ""}, id="empty-email"),
             pytest.param(200, [], id="json-list"),
             pytest.param(
                 200, {"sub": "keycloak-sub-1", "name": "Karel"}, id="no-email"

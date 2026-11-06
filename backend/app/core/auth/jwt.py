@@ -50,7 +50,7 @@ class JWTTokenValid:
             self.logger.info("Access token rejected: expired")
             return False
         except PyJWTError as e:
-            self.logger.warning(f"Access token rejected: {e}")
+            self.logger.info(f"Access token rejected: {e}")
             return False
         except Exception as e:
             self.logger.warning(f"Access token rejected, unexpected error: {e!r}")
