@@ -67,7 +67,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
         from key_value.aio.stores.postgresql import PostgreSQLStore
 
-        from app.database.database import get_azure_token
+        from app.database.database import get_password
 
         oidc = get_oidc()
         client_storage = PostgreSQLStore(
@@ -75,7 +75,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
             port=settings.POSTGRES_PORT,
             database=settings.POSTGRES_DB,
             user=settings.POSTGRES_USER,
-            password=(lambda: asyncio.to_thread(get_azure_token))  # type: ignore[arg-type]
+            password=(lambda: asyncio.to_thread(get_password))  # type: ignore[arg-type]
             if settings.POSTGRES_AUTH_MODE == "azure"
             else settings.POSTGRES_PASSWORD or None,
         )

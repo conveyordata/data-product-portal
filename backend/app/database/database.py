@@ -52,18 +52,19 @@ def get_url(async_: bool = False) -> str:
     )
 
 
-def get_azure_token() -> str:
-    return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
-
-
-def apply_auth(target: Engine | type[Engine] = Engine) -> None:
+def get_password() -> str:
     if settings.POSTGRES_AUTH_MODE == "azure":
-        event.listen(target, "do_connect", _set_password)
+        return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
+    return settings.POSTGRES_PASSWORD or ""
+
+
+def apply_auth(engine: Engine) -> None:
+    if settings.POSTGRES_AUTH_MODE == "azure":
+        event.listen(engine, "do_connect", _set_password)
 
 
 def _set_password(dialect, conn_rec, cargs, cparams) -> None:
-    if cparams.get("host") == settings.POSTGRES_SERVER:
-        cparams["password"] = get_azure_token()
+    cparams["password"] = get_password()
 
 
 @lru_cache
@@ -72,8 +73,6 @@ def _azure_credential() -> "DefaultAzureCredential":
 
     return DefaultAzureCredential()
 
-
-apply_auth()
 
 engine = create_engine(
     get_url(),
@@ -85,6 +84,7 @@ engine = create_engine(
     pool_pre_ping=settings.DB_POOL_PRE_PING,
     pool_use_lifo=True,
 )
+apply_auth(engine)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 

@@ -49,32 +49,14 @@ def test_apply_auth__password_mode_uses_the_password_from_the_url(monkeypatch):
         assert connection.exec_driver_sql("select 1").scalar() == 1
 
 
-def test_apply_auth__azure_mode_keeps_the_password_of_another_server(monkeypatch):
-    credential = FakeAzureCredential("not-the-password")
-    monkeypatch.setattr(settings, "POSTGRES_AUTH_MODE", "azure")
-    monkeypatch.setattr(database, "_azure_credential", lambda: credential)
-    engine = create_engine(
-        make_url(database.get_url()).set(
-            host="127.0.0.1", password=settings.POSTGRES_PASSWORD
-        ),
-        poolclass=pool.NullPool,
-    )
-
-    database.apply_auth(engine)
-    with engine.connect() as connection:
-        assert connection.exec_driver_sql("select 1").scalar() == 1
-
-    assert credential.scopes == []
-
-
-def test_settings__password_mode_requires_a_password():
+def test_require_password_in_password_mode__rejects_a_missing_password():
     with pytest.raises(ValidationError, match="POSTGRES_PASSWORD is required"):
         Settings(POSTGRES_AUTH_MODE="password", POSTGRES_PASSWORD=None)
 
 
-def test_settings__password_mode_accepts_an_empty_password():
+def test_require_password_in_password_mode__accepts_an_empty_password():
     assert Settings(POSTGRES_AUTH_MODE="password", POSTGRES_PASSWORD="")
 
 
-def test_settings__azure_mode_needs_no_password():
+def test_require_password_in_password_mode__azure_mode_needs_no_password():
     assert Settings(POSTGRES_AUTH_MODE="azure", POSTGRES_PASSWORD=None)
