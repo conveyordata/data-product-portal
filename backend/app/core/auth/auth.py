@@ -111,7 +111,7 @@ if settings.OIDC_ENABLED:
         except httpx.HTTPError as e:
             logger.warning(f"Userinfo unreachable: {type(e).__name__}")
             raise _identity_provider_unavailable()
-        if response.is_client_error:
+        if response.status_code in (400, 401, 403):
             logger.warning(
                 f"Userinfo rejected the access token: {response.status_code}"
             )
