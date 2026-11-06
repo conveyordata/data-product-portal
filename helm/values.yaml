@@ -35,6 +35,8 @@ conveyor:
   api_key: conveyor_key
   secret: conveyor_secret
 database:
+  auth_mode: password
+  sslmode: ""
   password: pw
   dbname: data-product-portal
   port: "!!string 5432"

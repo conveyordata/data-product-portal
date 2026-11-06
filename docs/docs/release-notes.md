@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
+
 ## 0.8.1
 
 ### breaking changes
