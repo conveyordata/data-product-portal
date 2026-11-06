@@ -96,9 +96,10 @@ class OIDCIdentity(BaseModel):
             display_name = claims.get("name", "")
             if family_name and display_name.endswith(f" {family_name}"):
                 given_name = display_name.removesuffix(f" {family_name}")
-            elif ", " in display_name:
-                last, _, given_name = display_name.partition(", ")
-                family_name = family_name or last
+            elif "," in display_name:
+                last, _, first = display_name.partition(",")
+                given_name = first.strip()
+                family_name = family_name or last.strip()
             else:
                 head, _, tail = display_name.rpartition(" ")
                 given_name = head or tail
