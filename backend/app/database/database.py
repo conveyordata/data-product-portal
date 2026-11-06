@@ -58,9 +58,9 @@ def get_password() -> str:
     return settings.POSTGRES_PASSWORD or ""
 
 
-def apply_auth(engine: Engine) -> None:
+def apply_auth(target: Engine | type[Engine] = Engine) -> None:
     if settings.POSTGRES_AUTH_MODE == "azure":
-        event.listen(engine, "do_connect", _set_password)
+        event.listen(target, "do_connect", _set_password)
 
 
 def _set_password(dialect, conn_rec, cargs, cparams) -> None:
@@ -76,6 +76,8 @@ def _azure_credential() -> "DefaultAzureCredential":
     )
 
 
+apply_auth()
+
 engine = create_engine(
     get_url(),
     connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
@@ -86,7 +88,6 @@ engine = create_engine(
     pool_pre_ping=settings.DB_POOL_PRE_PING,
     pool_use_lifo=True,
 )
-apply_auth(engine)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
