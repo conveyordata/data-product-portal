@@ -21,7 +21,6 @@ class Settings(BaseSettings):
     DB_POOL_PRE_PING: bool = True
     DB_CONNECT_TIMEOUT_SECONDS: int = 5
     POSTGRES_AUTH_MODE: Literal["password", "azure"] = "password"
-    AZURE_PURPOSE_CLIENT_ID: Optional[str] = None
 
     HOST: str
 
