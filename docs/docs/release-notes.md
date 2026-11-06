@@ -6,6 +6,14 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
+
+### bugfixes
+
+- **[Auth]**: A missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
+
 ## 0.8.1
 
 ### breaking changes
@@ -27,12 +35,10 @@ sidebar_position: 200
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
 - **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
-- **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[API/UI]**: Producing teams can post [Announcements](./concepts/output-ports/announcements.md) on an Output Port. Members of its Consuming Data Products and owners of its consuming Explorations are notified, and the top of the Home page shows their pending requests and Announcements.
 
 ### bugfixes
 
-- **[Auth]**: A missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
 - **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
 - **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
