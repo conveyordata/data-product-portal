@@ -37,7 +37,7 @@
         "@dagrejs/dagre": "^2.0.4",
         "@fontsource/inter": "^5.3.0",
         "@posthog/react": "^1.11.3",
-        "@reduxjs/toolkit": "^2.13.0",
+        "@reduxjs/toolkit": "^2.14.0",
         "@tiptap/extension-heading": "^3.32.2",
         "@tiptap/extension-table": "^3.32.2",
         "@tiptap/extension-table-cell": "^3.32.2",
