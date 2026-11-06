@@ -80,7 +80,7 @@ class TestOIDCIdentity:
 
         assert (identity.given_name, identity.family_name) == ("anna", "")
 
-    @pytest.mark.parametrize("name", ["Doe, ", "   "])
+    @pytest.mark.parametrize("name", ["   ", ""])
     def test_from_claims__blank_first_name_falls_back_to_email(self, name):
         identity = OIDCIdentity.from_claims(
             {"sub": "1", "name": name, "email": "anna@contoso.com"}, "1", "email"
@@ -94,6 +94,7 @@ class TestOIDCIdentity:
             pytest.param(" ", "Doe", "Anna Doe", id="blank-given-name"),
             pytest.param("", " ", "Anna Doe", id="blank-family-name"),
             pytest.param("", "Doe", "Anna Doe ", id="trailing-space-in-name"),
+            pytest.param("", "", "Anna  Doe", id="double-space-in-name"),
         ],
     )
     def test_from_claims__whitespace_claims_still_split_name(
