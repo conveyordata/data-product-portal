@@ -87,17 +87,18 @@ class OIDCIdentity(BaseModel):
         email = claims.get(email_claim)
         if not is_address(email):
             raise ValueError(f"claim {email_claim} holds no email address")
-        claims = {k: v.strip() for k, v in claims.items() if isinstance(v, str)}
+        claims = {
+            k: " ".join(v.split()) for k, v in claims.items() if isinstance(v, str)
+        }
         given_name = claims.get("given_name", "")
         family_name = claims.get("family_name") or ""
         if not given_name:
             display_name = claims.get("name", "")
             if family_name and display_name.endswith(f" {family_name}"):
                 given_name = display_name.removesuffix(f" {family_name}")
-            elif "," in display_name:
-                last, _, first = display_name.partition(",")
-                given_name = first.strip()
-                family_name = family_name or last.strip()
+            elif ", " in display_name:
+                last, _, given_name = display_name.partition(", ")
+                family_name = family_name or last
             else:
                 head, _, tail = display_name.rpartition(" ")
                 given_name = head or tail
