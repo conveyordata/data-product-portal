@@ -2,6 +2,7 @@ from typing import Annotated, Optional
 
 import httpx
 from fastapi import Depends, Header, HTTPException, status
+from pydantic import EmailStr, TypeAdapter, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -22,18 +23,27 @@ def update_db_user(
     oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
 ) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
-    email_owner = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
-    if email_owner and email_owner is not db_user and (db_user or not link_by_email):
-        logger.warning("Identity email belongs to a user with another subject")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="This email belongs to another account",
+    email_owner = None
+    if not db_user or db_user.email != oidc_user.email:
+        email_owner = db.scalar(
+            select(UserModel).where(UserModel.email == oidc_user.email)
         )
     if db_user:
-        db_user.email = oidc_user.email
+        if email_owner:
+            logger.warning(
+                "New identity email belongs to another user; kept the old one"
+            )
+        else:
+            db_user.email = oidc_user.email
         db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
     elif email_owner:
+        if not link_by_email:
+            logger.warning("Identity email belongs to a user with another subject")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="This email belongs to another account",
+            )
         db_user = email_owner
         db_user.external_id = token.sub
         db_user.first_name = oidc_user.given_name
@@ -73,7 +83,7 @@ if settings.OIDC_ENABLED:
                 detail="Invalid or expired access token",
             )
         sub = jwt.valid_jwt_token.get(settings.OIDC_USER_ID_CLAIM)
-        if not sub:
+        if not sub or not isinstance(sub, str):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Access token lacks the user id claim",
@@ -136,7 +146,12 @@ if settings.OIDC_ENABLED:
 
     def _email_verified(claims: dict, email: str) -> bool:
         verified = claims.get("email_verified")
-        return claims.get("email") == email and (verified is True or verified == "true")
+        if verified is not True and verified != "true":
+            return False
+        try:
+            return TypeAdapter(EmailStr).validate_python(claims.get("email")) == email
+        except ValidationError:
+            return False
 
     def _identity_provider_unavailable() -> HTTPException:
         return HTTPException(
