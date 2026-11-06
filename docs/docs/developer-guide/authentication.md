@@ -96,7 +96,7 @@ The backend reads the current user from one of two sources, set with `OIDC_IDENT
 | Setting | Default | Meaning |
 |---|---|---|
 | `OIDC_IDENTITY_SOURCE` | `userinfo` | `userinfo` asks the provider's userinfo endpoint with the access token. `access_token` reads the claims of the validated access token and never calls userinfo. |
-| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. It is stored as the user's external id, so don't change it once users have logged in. |
+| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. It is stored as the user's external id, so don't change it once users have logged in. Use an id the provider sets and users can't change, such as `sub` or Entra's `oid`, never `email` or `preferred_username`: whoever controls that value controls the account. |
 | `OIDC_EMAIL_CLAIM` | `email` | The access token claim that holds the email address. Only used with `access_token`. |
 
 Use `userinfo` for Cognito, whose access tokens carry no email. Keycloak works with both. With `userinfo`, a rejected access token or an answer without a valid email is a 401, and an unreachable or failing endpoint is a 503.

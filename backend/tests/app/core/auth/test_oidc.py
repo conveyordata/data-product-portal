@@ -80,6 +80,14 @@ class TestOIDCIdentity:
 
         assert (identity.given_name, identity.family_name) == ("anna", "")
 
+    @pytest.mark.parametrize("name", ["Doe, ", "   "])
+    def test_from_claims__blank_first_name_falls_back_to_email(self, name):
+        identity = OIDCIdentity.from_claims(
+            {"sub": "1", "name": name, "email": "anna@contoso.com"}, "1", "email"
+        )
+
+        assert identity.given_name == "anna"
+
     def test_from_claims__reads_only_the_configured_email_claim(self):
         identity = OIDCIdentity.from_claims(
             {
