@@ -125,7 +125,10 @@ if settings.OIDC_ENABLED:
         try:
             body = response.json()
         except ValueError:
-            logger.warning("Userinfo answered with a body that is not JSON")
+            logger.warning(
+                "Userinfo answered with a body that is not JSON: "
+                f"{response.headers.get('content-type')}"
+            )
             raise _identity_provider_unavailable()
         try:
             return OIDCIdentity.model_validate(body)
