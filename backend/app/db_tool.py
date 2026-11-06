@@ -1,7 +1,6 @@
 from typing import Optional
 
 import typer
-from sqlalchemy import make_url
 from sqlalchemy_utils.functions import create_database, database_exists, drop_database
 
 from app.core.helpers.local import add_additional_env_vars
@@ -9,7 +8,7 @@ from app.core.helpers.local import add_additional_env_vars
 add_additional_env_vars()
 
 from app.core.logging import logger  # noqa: E402
-from app.database.database import engine, get_password, get_url  # noqa: E402
+from app.database.database import engine, get_url  # noqa: E402
 from app.plugins.migrations import (  # noqa: E402
     check_latest_migration_core,
     create_core_revision,
@@ -94,14 +93,13 @@ def init(
     Reinitialize the database from scratch.
     """
     if force:
-        url = make_url(get_url()).set(password=get_password())
-        if database_exists(url):
-            logger.info(f"Deleting current database {url}")
-            drop_database(url)
+        if database_exists(get_url()):
+            logger.info(f"Deleting current database {get_url()}")
+            drop_database(get_url())
         else:
             logger.info("Database does not exist, not deleting")
         logger.info("Initializing database")
-        create_database(url)
+        create_database(get_url())
         migrate()
 
         if seed_path:
