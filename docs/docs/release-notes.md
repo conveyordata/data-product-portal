@@ -6,6 +6,14 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
+
+### bugfixes
+
+- **[Auth]**: When loading the current user, a missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
+
 ## 0.8.1
 
 ### breaking changes

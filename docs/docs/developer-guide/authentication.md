@@ -89,7 +89,27 @@ Portal has been tested with AWS Cognito but should work with any OIDC provider.
 OIDC returns identity, refresh and access tokens.
 Providers may vary in the information they pass in tokens, and the application depends on this information, so integrating a new provider might require some code changes there as well.
 
-The claims our provider is required to pass are at least email, family_name and name. The given_name claim is used as the first name; if it is missing, name is used instead.
+With `userinfo`, the provider must return at least email and name; family_name is used as the last name when present, and given_name as the first name, with name as fallback. With `access_token`, only the claim named by `OIDC_EMAIL_CLAIM` is required; names come from given_name, family_name and name when present, and otherwise from the part of the email before the @.
+
+The backend reads the current user from one of two sources, set with `OIDC_IDENTITY_SOURCE`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `OIDC_IDENTITY_SOURCE` | `userinfo` | `userinfo` asks the provider's userinfo endpoint with the access token. `access_token` reads the claims of the validated access token and never calls userinfo. |
+| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. It is stored as the user's external id, so don't change it once users have logged in. Use an id the provider sets and users can't change, such as `sub` or Entra's `oid`, never `email` or `preferred_username`: whoever controls that value controls the account. |
+| `OIDC_EMAIL_CLAIM` | `email` | The access token claim that holds the email address. Only used with `access_token`. |
+
+Use `userinfo` for Cognito, whose access tokens carry no email. Keycloak works with both. With `userinfo`, a rejected access token or an answer without a valid email is a 401, and an unreachable or failing endpoint is a 503.
+
+Use `access_token` for providers whose userinfo endpoint does not accept the portal's access token, such as Microsoft Entra ID. When given_name is missing, name is split into first and last name: on the comma for names written as "Last, First", otherwise on the last space. An identity read from the access token links to an existing user with the same email only when the token's `email` claim holds that address and `email_verified` is true; otherwise a login whose email already belongs to another user is rejected. For Entra ID, use:
+
+```
+OIDC_IDENTITY_SOURCE=access_token
+OIDC_USER_ID_CLAIM=oid
+OIDC_EMAIL_CLAIM=preferred_username
+```
+
+Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant. Set `OIDC_AUDIENCE` to the audience of the portal's access token. The frontend still requests only `openid profile email`, and with those scopes Entra ID issues an access token for Microsoft Graph, not for the portal. Requesting the portal's API scope needs a frontend change that is not available yet. With the Helm chart, set these settings through `extraConfigMapValues`.
 
 ### Cognito setup
 
