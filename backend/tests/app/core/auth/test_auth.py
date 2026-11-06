@@ -118,7 +118,12 @@ OTHER_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 @pytest.fixture
 def idp(monkeypatch, force_oidc_enabled):
-    def configure(audience):
+    def configure(
+        audience, source="userinfo", user_id_claim="sub", email_claim="email"
+    ):
+        monkeypatch.setattr(settings, "OIDC_IDENTITY_SOURCE", source)
+        monkeypatch.setattr(settings, "OIDC_USER_ID_CLAIM", user_id_claim)
+        monkeypatch.setattr(settings, "OIDC_EMAIL_CLAIM", email_claim)
         jwk = json.loads(RSAAlgorithm.to_jwk(SIGNING_KEY.public_key()))
         jwk["kid"] = KID
         monkeypatch.setattr(
@@ -200,7 +205,7 @@ ENTRA_ACCESS_TOKEN = {
 }
 
 
-class TestAuthorizeUserIdentitySource:
+class TestUserinfoIdentitySource:
     def test_get_authenticated_user__cognito_reads_identity_from_userinfo(
         self, idp, session
     ):
@@ -227,6 +232,29 @@ class TestAuthorizeUserIdentitySource:
             "bob@example.com",
             "Bob",
             "Builder",
+        )
+
+    def test_get_authenticated_user__keycloak_uses_userinfo_over_token_claims(
+        self, idp, session
+    ):
+        idp(audience="portal")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+        body = {
+            "sub": "keycloak-sub-1",
+            "name": "Karel Userinfo",
+            "given_name": "Karel",
+            "family_name": "Userinfo",
+            "email": "karel.userinfo@example.com",
+            "preferred_username": "karel",
+        }
+
+        with userinfo_returns(200, body):
+            log_in(bearer, session)
+
+        user = stored_user(session, "keycloak-sub-1")
+        assert (user.email, user.last_name) == (
+            "karel.userinfo@example.com",
+            "Userinfo",
         )
 
     @pytest.mark.parametrize(
@@ -263,167 +291,47 @@ class TestAuthorizeUserIdentitySource:
         session.refresh(user)
         assert user.external_id == "other-sub"
 
-    def test_get_authenticated_user__cognito_token_without_openid_scope_is_rejected(
-        self, idp, session
+    @pytest.mark.parametrize(
+        ("status_code", "body"),
+        [
+            pytest.param(401, {"error": "invalid_token"}, id="rejected"),
+            pytest.param(403, {"error": "insufficient_scope"}, id="forbidden"),
+            pytest.param(200, "<html>login</html>", id="html"),
+            pytest.param(
+                200, {"sub": "keycloak-sub-1", "name": "Karel"}, id="no-email"
+            ),
+            pytest.param(
+                200,
+                {"sub": "keycloak-sub-1", "name": "Karel", "email": "karel@"},
+                id="invalid-email",
+            ),
+        ],
+    )
+    def test_get_authenticated_user__unusable_userinfo_is_rejected_without_fallback(
+        self, idp, session, status_code, body
     ):
-        idp(audience=None)
-        bearer = sign({**COGNITO_ACCESS_TOKEN, "scope": "portal/api"})
+        idp(audience="portal")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
 
         with (
-            userinfo_returns(401, {"error": "invalid_token"}),
+            userinfo_returns(status_code, body),
             pytest.raises(HTTPException) as exc_info,
         ):
             log_in(bearer, session)
 
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-        assert stored_user(session, "cognito-sub-1") is None
-
-    def test_get_authenticated_user__keycloak_prefers_userinfo_over_token_claims(
-        self, idp, session
-    ):
-        idp(audience="portal")
-        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
-        body = {
-            "sub": "keycloak-sub-1",
-            "name": "Karel Userinfo",
-            "given_name": "Karel",
-            "family_name": "Userinfo",
-            "email": "karel.userinfo@example.com",
-            "preferred_username": "karel",
-        }
-
-        with userinfo_returns(200, body):
-            log_in(bearer, session)
-
-        user = stored_user(session, "keycloak-sub-1")
-        assert (user.email, user.last_name) == (
-            "karel.userinfo@example.com",
-            "Userinfo",
-        )
-
-    def test_get_authenticated_user__keycloak_falls_back_when_userinfo_rejects_token(
-        self, idp, session
-    ):
-        idp(audience="portal")
-        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
-
-        with userinfo_returns(403, {"error": "insufficient_scope"}):
-            log_in(bearer, session)
-
-        user = stored_user(session, "keycloak-sub-1")
-        assert (user.email, user.first_name, user.last_name) == (
-            "karel@example.com",
-            "Karel",
-            "Token",
-        )
-
-    def test_get_authenticated_user__entra_reads_identity_from_token_claims(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        bearer = sign(ENTRA_ACCESS_TOKEN)
-
-        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}) as post:
-            log_in(bearer, session)
-
-        post.assert_called_once()
-        user = stored_user(session, "entra-pairwise-sub-1")
-        assert (user.email, user.first_name, user.last_name) == (
-            "anna@contoso.com",
-            "Anna van",
-            "Dijk",
-        )
-
-    def test_get_authenticated_user__entra_uses_optional_name_and_email_claims(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        bearer = sign(
-            {
-                **ENTRA_ACCESS_TOKEN,
-                "given_name": "Anna",
-                "family_name": "van Dijk",
-                "email": "anna.vandijk@contoso.com",
-            }
-        )
-
-        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
-            log_in(bearer, session)
-
-        user = stored_user(session, "entra-pairwise-sub-1")
-        assert (user.email, user.first_name, user.last_name) == (
-            "anna.vandijk@contoso.com",
-            "Anna",
-            "van Dijk",
-        )
-
-    def test_get_authenticated_user__entra_skips_preferred_username_without_at(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        bearer = sign(
-            {
-                **ENTRA_ACCESS_TOKEN,
-                "preferred_username": "+3212345678",
-                "upn": "anna@contoso.com",
-            }
-        )
-
-        with userinfo_returns(401, {"error": "InvalidAuthenticationToken"}):
-            log_in(bearer, session)
-
-        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
-
-    def test_get_authenticated_user__entra_without_email_claim_is_rejected(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        claims = {**ENTRA_ACCESS_TOKEN, "preferred_username": "anna"}
-        bearer = sign(claims)
-
-        with (
-            userinfo_returns(401, {"error": "InvalidAuthenticationToken"}),
-            pytest.raises(HTTPException) as exc_info,
-        ):
-            log_in(bearer, session)
-
-        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-        assert stored_user(session, "entra-pairwise-sub-1") is None
-
-    def test_get_authenticated_user__userinfo_html_response_falls_back_to_claims(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        bearer = sign(ENTRA_ACCESS_TOKEN)
-
-        with userinfo_returns(200, "<html>login</html>"):
-            log_in(bearer, session)
-
-        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
-
-    @pytest.mark.parametrize("email", ["", "anna@"])
-    def test_get_authenticated_user__userinfo_invalid_email_falls_back_to_claims(
-        self, idp, session, email
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        bearer = sign(ENTRA_ACCESS_TOKEN)
-        body = {"sub": "entra-pairwise-sub-1", "name": "Anna van Dijk", "email": email}
-
-        with userinfo_returns(200, body):
-            log_in(bearer, session)
-
-        assert stored_user(session, "entra-pairwise-sub-1").email == "anna@contoso.com"
+        assert stored_user(session, "keycloak-sub-1") is None
 
     def test_get_authenticated_user__known_user_skips_userinfo(self, idp, session):
-        idp(audience=ENTRA_AUDIENCE)
-        UserFactory(external_id="entra-pairwise-sub-1", email="anna@contoso.com")
-        bearer = sign(ENTRA_ACCESS_TOKEN)
+        idp(audience="portal")
+        UserFactory(external_id="keycloak-sub-1", email="karel@example.com")
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
 
         with userinfo_returns(200, {}) as post:
             user = log_in(bearer, session)
 
         post.assert_not_called()
-        assert user.email == "anna@contoso.com"
+        assert user.email == "karel@example.com"
 
     def test_get_authenticated_user__userinfo_email_links_new_subject(
         self, idp, session
@@ -438,24 +346,6 @@ class TestAuthorizeUserIdentitySource:
 
         session.refresh(existing)
         assert existing.external_id == "keycloak-sub-1"
-
-    def test_get_authenticated_user__token_claim_email_cannot_take_over_account(
-        self, idp, session
-    ):
-        idp(audience=ENTRA_AUDIENCE)
-        existing = UserFactory(external_id="admin-sub", email="anna@contoso.com")
-        bearer = sign(ENTRA_ACCESS_TOKEN)
-
-        with (
-            userinfo_returns(401, {"error": "InvalidAuthenticationToken"}),
-            pytest.raises(HTTPException) as exc_info,
-        ):
-            log_in(bearer, session)
-
-        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-        session.refresh(existing)
-        assert existing.external_id == "admin-sub"
-        assert stored_user(session, "entra-pairwise-sub-1") is None
 
     def test_authorize_user__email_change_to_taken_address_is_rejected(
         self, idp, session
@@ -478,6 +368,132 @@ class TestAuthorizeUserIdentitySource:
         session.refresh(other)
         assert (known.email, other.email) == ("karel@example.com", "taken@example.com")
 
+
+class TestAccessTokenIdentitySource:
+    def test_get_authenticated_user__entra_reads_identity_from_token_claims(
+        self, idp, session
+    ):
+        idp(
+            audience=ENTRA_AUDIENCE,
+            source="access_token",
+            user_id_claim="oid",
+            email_claim="preferred_username",
+        )
+        bearer = sign(ENTRA_ACCESS_TOKEN)
+
+        with userinfo_returns(200, {}) as post:
+            log_in(bearer, session)
+
+        post.assert_not_called()
+        user = stored_user(session, "object-id-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "anna@contoso.com",
+            "Anna van",
+            "Dijk",
+        )
+
+    def test_get_authenticated_user__entra_uses_optional_email_and_name_claims(
+        self, idp, session
+    ):
+        idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
+        bearer = sign(
+            {
+                **ENTRA_ACCESS_TOKEN,
+                "given_name": "Anna",
+                "family_name": "van Dijk",
+                "email": "anna.vandijk@contoso.com",
+            }
+        )
+
+        with userinfo_returns(200, {}):
+            log_in(bearer, session)
+
+        user = stored_user(session, "object-id-1")
+        assert (user.email, user.first_name, user.last_name) == (
+            "anna.vandijk@contoso.com",
+            "Anna",
+            "van Dijk",
+        )
+
+    @pytest.mark.parametrize(
+        "claims",
+        [
+            pytest.param({}, id="email-claim-missing"),
+            pytest.param({"email": "+3212345678"}, id="email-claim-not-an-address"),
+        ],
+    )
+    def test_get_authenticated_user__token_without_configured_email_is_rejected(
+        self, idp, session, claims
+    ):
+        idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
+        bearer = sign({**ENTRA_ACCESS_TOKEN, **claims})
+
+        with pytest.raises(HTTPException) as exc_info:
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert stored_user(session, "object-id-1") is None
+
+    def test_secured_call__token_without_user_id_claim_is_rejected(self, idp, session):
+        idp(audience=ENTRA_AUDIENCE, source="access_token", user_id_claim="oid")
+        claims = {k: v for k, v in ENTRA_ACCESS_TOKEN.items() if k != "oid"}
+
+        with pytest.raises(HTTPException) as exc_info:
+            log_in(sign(claims), session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert stored_user(session, "entra-pairwise-sub-1") is None
+
+    @pytest.mark.parametrize("verified", [True, "true"])
+    def test_get_authenticated_user__verified_email_links_existing_user(
+        self, idp, session, verified
+    ):
+        idp(
+            audience=ENTRA_AUDIENCE,
+            source="access_token",
+            user_id_claim="oid",
+            email_claim="preferred_username",
+        )
+        existing = UserFactory(external_id="old-sub", email="anna@contoso.com")
+        bearer = sign({**ENTRA_ACCESS_TOKEN, "email_verified": verified})
+
+        log_in(bearer, session)
+
+        session.refresh(existing)
+        assert existing.external_id == "object-id-1"
+
+    @pytest.mark.parametrize(
+        "claims",
+        [
+            pytest.param({}, id="missing"),
+            pytest.param({"email_verified": False}, id="false"),
+            pytest.param({"email_verified": "false"}, id="false-string"),
+            pytest.param({"email_verified": 1}, id="not-a-boolean"),
+        ],
+    )
+    def test_get_authenticated_user__unverified_email_cannot_take_over_account(
+        self, idp, session, claims
+    ):
+        idp(
+            audience=ENTRA_AUDIENCE,
+            source="access_token",
+            user_id_claim="oid",
+            email_claim="preferred_username",
+        )
+        existing = UserFactory(external_id="admin-sub", email="anna@contoso.com")
+        bearer = sign({**ENTRA_ACCESS_TOKEN, **claims})
+
+        with pytest.raises(HTTPException) as exc_info:
+            log_in(bearer, session)
+
+        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+        session.refresh(existing)
+        assert existing.external_id == "admin-sub"
+        assert stored_user(session, "object-id-1") is None
+
+
+class TestAccessTokenValidation:
+    @pytest.mark.parametrize("source", ["userinfo", "access_token"])
     @pytest.mark.parametrize(
         "bearer",
         [
@@ -487,10 +503,10 @@ class TestAuthorizeUserIdentitySource:
             pytest.param("Bearer not-a-jwt", id="malformed"),
         ],
     )
-    def test_secured_call__invalid_token_is_rejected_before_userinfo(
-        self, idp, session, bearer
+    def test_secured_call__invalid_token_is_rejected_before_identity_lookup(
+        self, idp, session, bearer, source
     ):
-        idp(audience=ENTRA_AUDIENCE)
+        idp(audience=ENTRA_AUDIENCE, source=source)
 
         with (
             userinfo_returns(200, {}) as post,

@@ -35,13 +35,13 @@ def update_db_user(
         db_user.last_name = oidc_user.family_name
     elif email_owner:
         db_user = email_owner
-        db_user.external_id = oidc_user.sub
+        db_user.external_id = token.sub
         db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
     else:
         created_user = UserCreate(
             email=oidc_user.email,
-            external_id=oidc_user.sub,
+            external_id=token.sub,
             first_name=oidc_user.given_name,
             last_name=oidc_user.family_name,
         )
@@ -72,22 +72,28 @@ if settings.OIDC_ENABLED:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired access token",
             )
-        return JWTToken(
-            sub=jwt.valid_jwt_token.get("sub"), token=token, claims=jwt.valid_jwt_token
-        )
+        sub = jwt.valid_jwt_token.get(settings.OIDC_USER_ID_CLAIM)
+        if not sub:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token lacks the user id claim",
+            )
+        return JWTToken(sub=sub, token=token, claims=jwt.valid_jwt_token)
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session),
     ) -> User:
-        oidc_user = _identity_from_userinfo(token)
-        if oidc_user:
-            return update_db_user(oidc_user, token, db)
-        return update_db_user(
-            _identity_from_claims(token), token, db, link_by_email=False
-        )
+        if settings.OIDC_IDENTITY_SOURCE == "access_token":
+            return update_db_user(
+                _identity_from_claims(token),
+                token,
+                db,
+                link_by_email=_email_verified(token.claims),
+            )
+        return update_db_user(_identity_from_userinfo(token), token, db)
 
-    def _identity_from_userinfo(token: JWTToken) -> Optional[OIDCIdentity]:
+    def _identity_from_userinfo(token: JWTToken) -> OIDCIdentity:
         try:
             response = httpx.post(
                 url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
@@ -99,23 +105,35 @@ if settings.OIDC_ENABLED:
             logger.warning(f"Userinfo failed with status {response.status_code}")
             raise _identity_provider_unavailable()
         if response.is_client_error:
-            logger.debug(f"Userinfo rejected the access token: {response.status_code}")
-            return None
+            logger.warning(
+                f"Userinfo rejected the access token: {response.status_code}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Userinfo rejected the access token",
+            )
         try:
             return OIDCIdentity.model_validate(response.json())
         except ValueError as e:
-            logger.debug(f"Userinfo returned no usable identity: {type(e).__name__}")
-            return None
+            logger.warning(f"Userinfo returned no usable identity: {type(e).__name__}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Userinfo returned no usable identity",
+            )
 
     def _identity_from_claims(token: JWTToken) -> OIDCIdentity:
         try:
-            return OIDCIdentity.from_claims(token.claims)
+            return OIDCIdentity.from_claims(token.claims, settings.OIDC_EMAIL_CLAIM)
         except (KeyError, ValueError) as e:
             logger.warning(f"Access token lacks identity claims: {type(e).__name__}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Access token lacks identity claims",
             )
+
+    def _email_verified(claims: dict) -> bool:
+        verified = claims.get("email_verified")
+        return verified is True or verified == "true"
 
     def _identity_provider_unavailable() -> HTTPException:
         return HTTPException(

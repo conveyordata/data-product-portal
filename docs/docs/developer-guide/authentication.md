@@ -91,7 +91,25 @@ Providers may vary in the information they pass in tokens, and the application d
 
 The claims our provider is required to pass are at least email and name; family_name is used as the last name when present. The given_name claim is used as the first name; if it is missing, name is used instead.
 
-The backend asks the provider's userinfo endpoint for these claims when it loads the current user. If that endpoint rejects the access token or returns no email, which is the case for providers that issue access tokens for one audience only, the backend reads them from the validated access token instead. If the endpoint is unreachable or fails, the backend answers 503. The email is then taken from the first of email, preferred_username or upn that holds an address, and when given_name is missing, name is split on its last space into first and last name. Configure such a provider to add these claims to the access token. An identity read from the access token never links to an existing user by email, because those claims are not verified; a login whose email already belongs to another user is rejected.
+The backend reads the current user from one of two sources, set with `OIDC_IDENTITY_SOURCE`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `OIDC_IDENTITY_SOURCE` | `userinfo` | `userinfo` asks the provider's userinfo endpoint with the access token. `access_token` reads the claims of the validated access token and never calls userinfo. |
+| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. It is stored as the user's external id, so don't change it once users have logged in. |
+| `OIDC_EMAIL_CLAIM` | `email` | The access token claim that holds the email address. Only used with `access_token`. |
+
+Use `userinfo` for Cognito, whose access tokens carry no email. Keycloak works with both. With `userinfo`, a rejected access token or an answer without a valid email is a 401, and an unreachable or failing endpoint is a 503.
+
+Use `access_token` for providers whose userinfo endpoint does not accept the portal's access token, such as Microsoft Entra ID. When given_name is missing, name is split on its last space into first and last name. An identity read from the access token links to an existing user with the same email only when the token has `email_verified` set to true; otherwise a login whose email already belongs to another user is rejected. For Entra ID, use:
+
+```
+OIDC_IDENTITY_SOURCE=access_token
+OIDC_USER_ID_CLAIM=oid
+OIDC_EMAIL_CLAIM=preferred_username
+```
+
+Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant.
 
 ### Cognito setup
 
