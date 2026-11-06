@@ -88,6 +88,21 @@ class TestOIDCIdentity:
 
         assert identity.given_name == "anna"
 
+    def test_from_claims__blank_given_name_uses_name_claim(self):
+        identity = OIDCIdentity.from_claims(
+            {
+                "sub": "1",
+                "given_name": " ",
+                "family_name": "Doe",
+                "name": "Anna Doe",
+                "email": "a.d123@contoso.com",
+            },
+            "1",
+            "email",
+        )
+
+        assert (identity.given_name, identity.family_name) == ("Anna", "Doe")
+
     def test_from_claims__reads_only_the_configured_email_claim(self):
         identity = OIDCIdentity.from_claims(
             {
