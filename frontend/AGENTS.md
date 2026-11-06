@@ -13,8 +13,9 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 -   **Types**: Ensure TypeScript interfaces strictly match the backend's OpenAPI schemas.
 -   **Minimal Fetching**: Only fetch the data a view actually needs from the backend; avoid over-fetching.
 -   **Async races**: Disable the control during an in-flight request instead of guarding against stale responses; use the RTK Query hook's `isLoading` instead of tracking it yourself.
--   **Localization**: Use `i18next` for all user-facing strings. No hardcoded text. Run `npm run extract-translations` after development.
--   **Code Quality**: Run `pre-commit` hooks before committing, never run biome or tsc directly
+-   **Localization**: Use `i18next` for all user-facing strings. No hardcoded text. The pre-commit hook extracts new keys into `public/locales/`.
+-   **Code Quality**: Run `scripts/precommit.sh` before committing, never run biome or tsc directly
+-   **Visual check**: For any change a user can see, load the `portal-design` skill before building, and look at the result with the `screenshot` skill (`--compare main`) before handing it over.
 -   **Testing**: Run `task test:frontend` (or `npm test run`). Tests live in `frontend/src/tests/`.
 -   **Quality**: When comparing values, if it is an ENUM always use that, avoid comparing against plain strings or number except if it is only used once and it is a default constant.
 -   **Styling**: Try to avoid using CSS colouring, use the theme token: const { token } = theme.useToken(); to fetch the colours you need.

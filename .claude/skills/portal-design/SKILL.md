@@ -57,10 +57,13 @@ Principle: a user scanning a list understands state and priority without opening
 Principle: the same interaction looks and behaves the same everywhere.
 
 - Buttons: one placement for edit, add, save and delete, and one rule for text, icon or icon plus text. Follow the existing buttons in `frontend/src/components/buttons/` and on comparable screens.
+- Row actions in compact lists (Home cards, the notification bell, the pending requests table) are text link buttons, `type="link" size="small"`, without an icon.
 - Modal for a quick single-step confirmation; a page for multi-step or data-heavy tasks; inline only for small edits.
 - One empty-state pattern: icon or illustration, explanation, primary action. Use `EmptyState` from `frontend/src/components/empty-state/`; for a table use `ListTable` from `frontend/src/components/list-table/`, which also handles loading, failed loads and column filters. Pass `filter` when the list can be searched or filtered, so an empty result is not presented as "nothing exists yet".
-- One table pattern: pagination placement, row density and action column position match the other list views.
+- One table pattern: `size="small"`, the total and pagination at the top right (`placement: ['topEnd']`, through `useTablePagination`), and the action column last, as in the Consumers and History tables.
 - Never introduce a new modal, form or table layout without checking for an existing one.
+
+- A block on Home owns its spacing: put the margin on the component itself, not on a wrapper in the page, so the page looks exactly like before when the block renders nothing.
 
 ## 6. Iconography
 
