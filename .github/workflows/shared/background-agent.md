@@ -4,7 +4,7 @@ env:
   FASTEMBED_CACHE_PATH: /tmp/gh-aw/fastembed
 runtimes:
   python:
-    version: "3.13"
+    version: "3.14"
 network:
   allowed:
     - defaults
