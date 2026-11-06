@@ -15,6 +15,7 @@ from cachetools import Cache, TTLCache, cachedmethod
 from casbin import SyncedEnforcer, util
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -68,9 +69,9 @@ def _has_access_through_consumer_role(
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
         self._reloading = False
-        # Share the application engine so connection-time authentication (see
-        # app.database.database.apply_auth) applies to the policy store as well.
-        self._adapter = sqlalchemy_adapter.Adapter(database.engine)
+        engine = create_engine(database.get_url())
+        database.apply_auth(engine)
+        self._adapter = sqlalchemy_adapter.Adapter(engine)
         self._enforcer: SyncedEnforcer = self._initialize(self._adapter)
         self._cache: Cache = TTLCache(
             maxsize=settings.AUTHORIZER_CACHE_SIZE,

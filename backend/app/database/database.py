@@ -1,6 +1,7 @@
 import time
 from contextlib import contextmanager
-from typing import Any, Generator, Type, TypeVar
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any, Generator, Type, TypeVar
 from urllib.parse import quote_plus
 from uuid import UUID
 
@@ -13,7 +14,12 @@ from app.settings import settings
 from app.shared.model import BaseORM
 from app.shared.schema import ORMModel
 
+if TYPE_CHECKING:
+    from azure.identity import DefaultAzureCredential
+
 OM = TypeVar("OM", bound=ORMModel)
+
+AZURE_POSTGRES_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
 
 SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER = "skip_output_port_access_function_filter"
 SKIP_DATA_PRODUCT_VISIBILITY_FILTER = "skip_data_product_visibility_filter"
@@ -38,7 +44,7 @@ def ensure_exists(
 
 def get_url(async_: bool = False) -> str:
     user = quote_plus(settings.POSTGRES_USER)
-    password = quote_plus(settings.POSTGRES_PASSWORD)
+    password = quote_plus(settings.POSTGRES_PASSWORD or "")
     return (
         f"postgresql{'+asyncpg' if async_ else ''}://{user}:"
         f"{password}@{settings.POSTGRES_SERVER}:"
@@ -46,46 +52,28 @@ def get_url(async_: bool = False) -> str:
     )
 
 
-def _entra_token_provider():
-    """Returns a callable producing a fresh Entra ID access token for Azure Database for PostgreSQL.
+def get_password() -> str:
+    if settings.POSTGRES_AUTH_MODE == "azure":
+        return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
+    return settings.POSTGRES_PASSWORD or ""
 
-    DefaultAzureCredential caches tokens until close to expiry, so calling it per connection is cheap.
-    """
-    from azure.identity import (
-        DefaultAzureCredential,  # optional dependency, only for entra mode
+
+def apply_auth(engine: Engine) -> None:
+    if settings.POSTGRES_AUTH_MODE == "azure":
+        event.listen(engine, "do_connect", _set_password)
+
+
+def _set_password(dialect, conn_rec, cargs, cparams) -> None:
+    cparams["password"] = get_password()
+
+
+@lru_cache
+def _azure_credential() -> "DefaultAzureCredential":
+    from azure.identity import DefaultAzureCredential
+
+    return DefaultAzureCredential(
+        managed_identity_client_id=settings.AZURE_PURPOSE_CLIENT_ID
     )
-
-    credential = DefaultAzureCredential(
-        managed_identity_client_id=settings.AZURE_PURPOSE_CLIENT_ID or None
-    )
-    scope = "https://ossrdbms-aad.database.windows.net/.default"
-
-    def token() -> str:
-        return credential.get_token(scope).token
-
-    return token
-
-
-def apply_auth(engine: Engine) -> Engine:
-    """Configures connection-time authentication on an engine according to the settings.
-
-    In ``entra`` mode a short-lived Entra ID token replaces the password on every new
-    connection, so pooled connections keep working after the token that opened them expired.
-    """
-    if settings.POSTGRES_SSLMODE:
-
-        @event.listens_for(engine, "do_connect")
-        def set_sslmode(dialect, conn_rec, cargs, cparams):
-            cparams.setdefault("sslmode", settings.POSTGRES_SSLMODE)
-
-    if settings.POSTGRES_AUTH_MODE == "entra":
-        get_token = _entra_token_provider()
-
-        @event.listens_for(engine, "do_connect")
-        def inject_entra_token(dialect, conn_rec, cargs, cparams):
-            cparams["password"] = get_token()
-
-    return engine
 
 
 engine = create_engine(

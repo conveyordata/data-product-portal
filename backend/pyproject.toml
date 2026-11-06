@@ -57,6 +57,7 @@ opentelemetry-instrumentation-fastapi = "^0.64b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
 opentelemetry-distro = "^0.64b0"
 pycasbin = "^2.8.0"
+azure-identity = "^1.27.0"
 
 [tool.poetry.group.plugins.dependencies]
 data-product-portal-plugins = { path = "../plugins", develop = true }

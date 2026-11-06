@@ -4,6 +4,7 @@ Kept in a separate module so both core portal tools and plugin tools can import
 these utilities without creating circular dependencies.
 """
 
+import asyncio
 from contextlib import contextmanager
 from typing import Any, Optional
 
@@ -66,10 +67,18 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
         from key_value.aio.stores.postgresql import PostgreSQLStore
 
-        from app.database.database import get_url
+        from app.database.database import get_password
 
         oidc = get_oidc()
-        client_storage = PostgreSQLStore(url=get_url())
+        client_storage = PostgreSQLStore(
+            host=settings.POSTGRES_SERVER,
+            port=settings.POSTGRES_PORT,
+            database=settings.POSTGRES_DB,
+            user=settings.POSTGRES_USER,
+            password=(lambda: asyncio.to_thread(get_password))  # type: ignore[arg-type]
+            if settings.POSTGRES_AUTH_MODE == "azure"
+            else settings.POSTGRES_PASSWORD or None,
+        )
         return PortalOIDCProxy(
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,

@@ -39,6 +39,27 @@ Requirements:
 
 We recommend using a managed database service.
 
+The backend logs in to the database in one of two ways, set with `POSTGRES_AUTH_MODE`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `POSTGRES_AUTH_MODE` | `password` | `password` sends `POSTGRES_PASSWORD`. `azure` asks Microsoft Entra ID for a short-lived token for every new connection and sends that as the password. |
+| `POSTGRES_PASSWORD` | | Required with `password`. Leave it empty to let the database driver read the password from the file in `PGPASSFILE`. Not used with `azure`. |
+| `AZURE_PURPOSE_CLIENT_ID` | | Only with `azure`. The client id of the user-assigned managed identity to log in with, when the host has more than one. |
+
+For Azure Database for PostgreSQL with Entra ID authentication, set `POSTGRES_USER` to the name of the managed identity's database role and use:
+
+```
+POSTGRES_AUTH_MODE=azure
+PGSSLMODE=require
+```
+
+In the Helm chart these are `database.auth_mode` and `database.sslmode`.
+
+For other token sources, such as HashiCorp Vault or a cloud IAM sidecar, let them write the password to a [password file](https://www.postgresql.org/docs/current/libpq-pgpass.html), point `PGPASSFILE` to it and leave `POSTGRES_PASSWORD` empty. The driver reads the file for every new connection, so a refreshed password is picked up without a restart.
+
+`PGSSLMODE` and `PGPASSFILE` are read by the database driver, not by the portal, so set them as environment variables of the backend container. A `.env` file does not reach the driver.
+
 #### Host
 
 A dedicated hostname is required for running a production setup of Portal.
