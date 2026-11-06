@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from app.core.auth.oidc import OIDCIdentity
 
 
@@ -25,14 +28,14 @@ class TestOIDCIdentity:
 
     def test_from_claims__single_word_name_has_empty_family_name(self):
         identity = OIDCIdentity.from_claims(
-            {"sub": "1", "name": "Prince", "email": "prince@example.com"}
+            {"sub": "1", "name": "Prince", "email": "prince@example.com"}, "email"
         )
 
         assert (identity.given_name, identity.family_name) == ("Prince", "")
 
     def test_from_claims__missing_name_uses_email_local_part(self):
         identity = OIDCIdentity.from_claims(
-            {"sub": "1", "upn": "jan.peeters@example.com"}
+            {"sub": "1", "upn": "jan.peeters@example.com"}, "upn"
         )
 
         assert (identity.name, identity.given_name, identity.email) == (
@@ -48,31 +51,34 @@ class TestOIDCIdentity:
                 "name": "Anna van Dijk",
                 "family_name": "van Dijk",
                 "email": "anna@contoso.com",
-            }
+            },
+            "email",
         )
 
         assert (identity.given_name, identity.family_name) == ("Anna", "van Dijk")
 
-    def test_from_claims__non_string_email_claims_are_skipped(self):
+    def test_from_claims__reads_only_the_configured_email_claim(self):
         identity = OIDCIdentity.from_claims(
             {
                 "sub": "1",
                 "name": "Anna",
-                "email": 42,
-                "upn": "anna@contoso.com",
-            }
+                "email": "other@contoso.com",
+                "preferred_username": "anna@contoso.com",
+            },
+            "preferred_username",
         )
 
         assert identity.email == "anna@contoso.com"
 
-    def test_from_claims__invalid_email_candidate_falls_through_to_upn(self):
-        identity = OIDCIdentity.from_claims(
-            {
-                "sub": "1",
-                "name": "Anna",
-                "preferred_username": "anna@",
-                "upn": "anna@contoso.com",
-            }
-        )
-
-        assert identity.email == "anna@contoso.com"
+    @pytest.mark.parametrize("value", [None, 42, "anna", "anna@"])
+    def test_from_claims__configured_claim_without_email_is_rejected(self, value):
+        with pytest.raises(ValidationError):
+            OIDCIdentity.from_claims(
+                {
+                    "sub": "1",
+                    "name": "Anna",
+                    "preferred_username": value,
+                    "upn": "anna@contoso.com",
+                },
+                "preferred_username",
+            )
