@@ -48,6 +48,12 @@ class TestResourceNamesRouter:
             ResourceNameValidityType.INVALID_CHARACTERS
         )
 
+    def test_validate_resource_name__trailing_newline(self, client: TestClient):
+        response = self.validate_namespace(client, "finance\n", "domain")
+        assert response.json()["validity"] == (
+            ResourceNameValidityType.INVALID_CHARACTERS
+        )
+
     @pytest.mark.parametrize("name", ["...", "-..-"])
     def test_sanitize_resource_name__dots_only_suggests_nothing(
         self, client: TestClient, name
