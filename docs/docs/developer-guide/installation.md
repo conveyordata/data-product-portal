@@ -60,6 +60,24 @@ For other token sources, such as HashiCorp Vault or a cloud IAM sidecar, let the
 
 `AZURE_CLIENT_ID`, `PGSSLMODE` and `PGPASSFILE` are read by the Azure SDK and the database driver, not by the portal, so set them as environment variables of the backend container. A `.env` file does not reach the driver.
 
+##### Switching an existing installation to Entra ID
+
+With a token, the portal logs in as a different database user: the managed identity's role instead of the password user. All existing tables belong to the password user, so the new role needs that user's rights before it can read data or run migrations. Switch in this order:
+
+1. In Azure, set the server's authentication to "PostgreSQL and Microsoft Entra authentication", so password and token logins both work while the portal restarts.
+2. As the Microsoft Entra administrator, connected to the `postgres` database, create the role for the managed identity:
+   ```sql
+   select * from pgaadauth_create_principal('<identity_name>', false, false);
+   ```
+3. As the server administrator, give the new role the rights of the old user:
+   ```sql
+   GRANT <old_portal_user> TO "<identity_name>";
+   ```
+4. Deploy the portal with `POSTGRES_AUTH_MODE=azure`, `POSTGRES_USER=<identity_name>` and `PGSSLMODE=require`.
+5. Once every portal pod runs the new settings, you can switch the server to "Microsoft Entra authentication only".
+
+To roll back before step 5, deploy with `POSTGRES_AUTH_MODE=password` and the old `POSTGRES_USER` and `POSTGRES_PASSWORD`.
+
 #### Host
 
 A dedicated hostname is required for running a production setup of Portal.
