@@ -13,6 +13,7 @@ sidebar_position: 200
 ### features
 
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
+- **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 
 ### bugfixes
 

@@ -2,13 +2,14 @@ from enum import Enum
 from functools import lru_cache
 from typing import Literal, Optional
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    POSTGRES_PASSWORD: str = ""
+    POSTGRES_PASSWORD: Optional[str] = None
     POSTGRES_DB: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -19,15 +20,8 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE_SECONDS: int = 1800
     DB_POOL_PRE_PING: bool = True
     DB_CONNECT_TIMEOUT_SECONDS: int = 5
-    # Database authentication mode:
-    #   "password": POSTGRES_PASSWORD is sent as-is (default)
-    #   "entra":    an Azure Entra ID access token is fetched with DefaultAzureCredential and used
-    #               as the password on every new connection (Azure Database for PostgreSQL with
-    #               Entra-only authentication). AZURE_PURPOSE_CLIENT_ID selects the user-assigned
-    #               managed identity when the host carries more than one identity.
-    POSTGRES_AUTH_MODE: Literal["password", "entra"] = "password"
+    POSTGRES_AUTH_MODE: Literal["password", "azure"] = "password"
     AZURE_PURPOSE_CLIENT_ID: Optional[str] = None
-    POSTGRES_SSLMODE: Optional[str] = None
 
     HOST: str
 
@@ -122,6 +116,14 @@ class Settings(BaseSettings):
     EXPIRING_SOON_THRESHOLD_DAYS: int = 14
 
     MAX_ITEMS_PER_BATCH_REQUEST: int = 50
+
+    @model_validator(mode="after")
+    def require_password_in_password_mode(self) -> "Settings":
+        if self.POSTGRES_AUTH_MODE == "password" and self.POSTGRES_PASSWORD is None:
+            raise ValueError(
+                "POSTGRES_PASSWORD is required when POSTGRES_AUTH_MODE is password"
+            )
+        return self
 
 
 class LogLevel(str, Enum):
