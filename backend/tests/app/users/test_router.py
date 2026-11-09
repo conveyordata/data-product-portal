@@ -564,7 +564,7 @@ class TestUsersRouter:
 
         assert response.status_code == 200, response.text
         assert [a["id"] for a in response.json()["pending_actions"]] == [str(link.id)]
-        assert output_port.data_product.name not in response.text
+        assert "owner" not in response.json()["pending_actions"][0]["technical_asset"]
 
     def test_get_current_user(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
