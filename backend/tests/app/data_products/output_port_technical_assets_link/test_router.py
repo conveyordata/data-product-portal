@@ -492,6 +492,18 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         assert response.status_code == 200
 
+    @pytest.mark.usefixtures("admin")
+    def test_deny_technical_asset_link__already_approved(self, client):
+        ds = OutputPortFactory()
+        link = TechnicalAssetOutputPortAssociationFactory(
+            output_port=ds, status=DecisionStatus.APPROVED
+        )
+
+        response = self.deny_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
+        )
+        assert response.status_code == 400
+
     def test_not_owner_cannot_deny_link(self, client):
         ds = OutputPortFactory()
         link = TechnicalAssetOutputPortAssociationFactory(

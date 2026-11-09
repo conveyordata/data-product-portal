@@ -63,10 +63,11 @@ class TechnicalAssetOutputPortService:
                 TechnicalAssetModel.owner_id == data_product_id,
             )
             .options(
-                contains_eager(TechnicalAssetOutputPortAssociationModel.technical_asset)
+                contains_eager(TechnicalAssetOutputPortAssociationModel.output_port),
+                contains_eager(
+                    TechnicalAssetOutputPortAssociationModel.technical_asset
+                ),
             ),
-            # Callers are authorized on the Output Port, which can belong to a
-            # Hidden Data Product the actor has no role on.
             execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         if not current_link:
@@ -87,16 +88,11 @@ class TechnicalAssetOutputPortService:
         output_port_id: UUID,
         actor: User,
     ) -> TechnicalAssetOutputPortAssociationModel:
-        current_link = self.get_link(
+        current_link = self._get_pending_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
             output_port_id=output_port_id,
         )
-        if current_link.status != DecisionStatus.PENDING:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Request can not be already approved or denied",
-            )
         ensure_technical_asset_shareable(current_link.technical_asset)
 
         current_link.status = DecisionStatus.APPROVED
@@ -113,7 +109,7 @@ class TechnicalAssetOutputPortService:
         output_port_id: UUID,
         actor: User,
     ) -> TechnicalAssetOutputPortAssociationModel:
-        current_link = self.get_link(
+        current_link = self._get_pending_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
             output_port_id=output_port_id,
@@ -186,7 +182,8 @@ class TechnicalAssetOutputPortService:
                         ),
                     )
                 )
-                .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on))
+                .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on)),
+                execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
             )
             .unique()
             .all()
@@ -204,3 +201,18 @@ class TechnicalAssetOutputPortService:
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]
+
+    def _get_pending_link(
+        self, *, data_product_id: UUID, technical_asset_id: UUID, output_port_id: UUID
+    ) -> TechnicalAssetOutputPortAssociationModel:
+        current_link = self.get_link(
+            data_product_id=data_product_id,
+            technical_asset_id=technical_asset_id,
+            output_port_id=output_port_id,
+        )
+        if current_link.status != DecisionStatus.PENDING:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Request can not be already approved or denied",
+            )
+        return current_link

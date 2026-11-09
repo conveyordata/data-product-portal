@@ -16,6 +16,7 @@ from app.configuration.data_product_lifecycles.schema_response import (
     DataProductLifeCyclesGetItem,
     UpdateDataProductLifeCycleResponse,
 )
+from app.database.database import ensure_exists
 
 
 class DataProductLifeCycleService:
@@ -49,7 +50,8 @@ class DataProductLifeCycleService:
         return UpdateDataProductLifeCycleResponse(id=id)
 
     def delete_data_product_lifecycle(self, lifecycle_id: UUID) -> None:
-        lifecycle = self.db.get(DataProductLifeCycleModel, lifecycle_id)
+        lifecycle: DataProductLifeCycleModel = ensure_exists(
+            lifecycle_id, self.db, DataProductLifeCycleModel
+        )
         self.db.delete(lifecycle)
         self.db.flush()
-        return

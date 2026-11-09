@@ -9,7 +9,7 @@
 
 ### Python
 
-- Install [Python 3.13](https://www.python.org/downloads) on your machine.
+- Install [Python 3.14](https://www.python.org/downloads) on your machine.
 
 ### Poetry
 

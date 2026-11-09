@@ -45,7 +45,7 @@ def test_many_relationships_use_lazy_raise(model):
 @pytest.mark.parametrize(
     "table", sorted(association_tables, key=lambda t: t.name), ids=lambda t: t.name
 )
-def test_association_table_foreign_keys_declare_ondelete(table):
+def test_association_table_foreign_keys__declare_ondelete(table):
     migrated = _migrated_ondelete(table.name)
     for foreign_key in table.foreign_keys:
         assert foreign_key.ondelete is not None, (
@@ -60,7 +60,7 @@ def test_association_table_foreign_keys_declare_ondelete(table):
 
 
 @pytest.mark.parametrize("relationship", association_relationships, ids=str)
-def test_association_relationships_use_passive_deletes(relationship):
+def test_association_relationships__use_passive_deletes(relationship):
     assert relationship.passive_deletes, (
         f"Relationship '{relationship}' uses an association table, so it must set "
         "passive_deletes and leave the cleanup to the database."

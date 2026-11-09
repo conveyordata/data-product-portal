@@ -13,6 +13,7 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType
 from app.events.model import Event
 from app.events.schema_response import GetEventHistoryResponseItem
@@ -537,6 +538,33 @@ class TestUsersRouter:
             technical_asset.id
         )
         assert response.json()["pending_actions"][0]["status"] == "pending"
+
+    def test_get_pending_actions__technical_asset_link_on_hidden_data_product(
+        self, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory(
+            data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+            access_function=OutputPortAccessFunction.PRIVATE,
+        )
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST
+            ],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=output_port.id
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(
+            output_port=output_port, status=DecisionStatus.PENDING
+        )
+
+        response = client.get("/api/v2/users/current/pending_actions")
+
+        assert response.status_code == 200, response.text
+        assert [a["id"] for a in response.json()["pending_actions"]] == [str(link.id)]
+        assert output_port.data_product.name not in response.text
 
     def test_get_current_user(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
