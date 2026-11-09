@@ -10,6 +10,7 @@ from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct, DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.settings import settings
 from tests.factories import (
@@ -101,7 +102,9 @@ def test_hidden_data_product_not_visible_for_owner_of_approved_consumer(
 ):
     producer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
     consumer = DataProductFactory()
-    output_port = OutputPortFactory(data_product=producer)
+    output_port = OutputPortFactory(
+        data_product=producer, access_function=OutputPortAccessFunction.PRIVATE
+    )
     user = UserFactory()
 
     owner_role = RoleFactory.data_product_owner()
@@ -132,7 +135,9 @@ def test_hidden_data_product_id_not_visible_as_abstract_data_product_for_owner_o
 ):
     producer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
     consumer = DataProductFactory()
-    output_port = OutputPortFactory(data_product=producer)
+    output_port = OutputPortFactory(
+        data_product=producer, access_function=OutputPortAccessFunction.PRIVATE
+    )
     user = UserFactory()
 
     owner_role = RoleFactory.data_product_owner()
