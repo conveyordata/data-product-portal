@@ -52,9 +52,7 @@ def override_unauthenticated_get_db():
         # Tests share this scoped session with the factories, so anything they
         # created is still in the cache of SQL Alchemy. We need to expire it,
         # otherwise a request reuses those objects instead of loading them
-        # through the filters that the application applies:
-        # - enforce_private_output_port_filter
-        # - enforce_hidden_data_product_filter
+        # through the visibility filter (app.database.visibility).
         test_db.flush()
         test_db.expire_all()
         yield test_db

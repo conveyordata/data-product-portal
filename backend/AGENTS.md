@@ -20,6 +20,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 *   When creating new endpoints check with the user if authorization is needed with `Authorization.enforce()`.
 In principle should always be present on non GET endpoints and sensitive GET endpoints.
 * Check if new actions need to be added.
+* Who sees a Data Product, Exploration, Technical Asset or Output Port is decided in `app/database/visibility.py`; don't read `session.info` or write visibility predicates elsewhere.
 
 ## SQLAlchemy
 *   SQLAlchemy: use `joined` lazy loading for 1:1 relationships; otherwise use `raise` and specify explicit eager loading.

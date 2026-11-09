@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
-from typing import Optional, Sequence
+from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -18,11 +18,7 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
-from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment as DataProductRoleAssignmentModel,
-)
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
@@ -31,7 +27,6 @@ from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.input_ports.schema_response import (
     OutputPortInputPort,
 )
@@ -41,11 +36,11 @@ from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
+from app.database.visibility import acting_as, member_of, visible_ids
 from app.events.enums import EventEntityType, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.groups.service import GroupService
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.notifications.service import NotificationService
@@ -333,18 +328,8 @@ class InputPortService:
         )
         return True
 
-    @staticmethod
-    def calculate_redaction_of_consumer(
-        current_user: User, consuming_data_product: AbstractDataProduct
-    ) -> bool:
-        if not isinstance(consuming_data_product, DataProductModel):
-            return False
-        return not Authorization().has_read_access_to_data_product(
-            current_user, consuming_data_product
-        )
-
     def get_consuming_data_products(
-        self, current_user: User, output_port_id: UUID, data_product_id: UUID
+        self, output_port_id: UUID, data_product_id: UUID
     ) -> Sequence[OutputPortInputPort]:
 
         output_port = self.db.scalar(
@@ -364,117 +349,118 @@ class InputPortService:
         if not output_port:
             raise output_port_not_found_exception(output_port_id)
 
+        links = output_port.data_product_links
+        seen = visible_ids(
+            self.db, (link.consuming_abstract_data_product_id for link in links)
+        )
         result = []
-        for link in output_port.data_product_links:
+        for link in links:
             item = OutputPortInputPort.model_validate(link)
             item.consuming_abstract_data_product.set_redacted(
-                self.calculate_redaction_of_consumer(
-                    current_user, link.consuming_abstract_data_product
-                )
+                link.consuming_abstract_data_product_id not in seen
             )
             result.append(item)
         return result
 
-    def compute_redaction(
-        self, user: User, request: InputPortRequestModel
-    ) -> InputPortRequest:
-        result = InputPortRequest.model_validate(request)
-        result.input_port.consuming_abstract_data_product.set_redacted(
-            self.calculate_redaction_of_consumer(
-                user, request.input_port.consuming_abstract_data_product
-            )
-        )
-        return result
-
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
-        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
-            user.id
-        )
-        requested_associations = (
-            self.db.scalars(
+        with acting_as(self.db, user.id):
+            requested_associations = (
+                self.db.scalars(
+                    select(InputPortRequestModel)
+                    .join(InputPortModel)
+                    .where(
+                        InputPortRequestModel.decision
+                        == InputPortRequestDecision.PENDING
+                    )
+                    .where(
+                        or_(
+                            InputPortModel.output_port.has(
+                                OutputPortModel.assignments.any(
+                                    DatasetRoleAssignmentModel.user_id == user.id
+                                )
+                            ),
+                            InputPortModel.output_port.has(
+                                member_of(self.db, OutputPortModel.data_product_id)
+                            ),
+                        )
+                    )
+                    .options(
+                        selectinload(InputPortRequestModel.input_port).selectinload(
+                            InputPortModel.requests
+                        )
+                    )
+                    .order_by(asc(InputPortRequestModel.created_on)),
+                    # Skip since we will authorize and redact manually
+                    execution_options=UNFILTERED,
+                )
+                .unique()
+                .all()
+            )
+
+            authorizer = Authorization()
+            return self._redact(
+                a
+                for a in requested_associations
+                if authorizer.has_access(
+                    sub=str(user.id),
+                    dom=str(a.input_port.output_port.data_product.domain.id),
+                    obj=str(a.input_port.output_port_id),
+                    parent=str(a.input_port.output_port.data_product_id),
+                    act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                )
+            )
+
+    def get_user_requests(
+        self, user: User, hide_old_inactive: bool
+    ) -> Sequence[InputPortRequest]:
+        with acting_as(self.db, user.id):
+            query = (
                 select(InputPortRequestModel)
                 .join(InputPortModel)
-                .where(
-                    InputPortRequestModel.decision == InputPortRequestDecision.PENDING
-                )
-                .where(
-                    or_(
-                        InputPortModel.output_port.has(
-                            OutputPortModel.assignments.any(
-                                DatasetRoleAssignmentModel.user_id == user.id
-                            )
-                        ),
-                        InputPortModel.output_port.has(
-                            OutputPortModel.data_product.has(
-                                or_(
-                                    DataProductRoleAssignmentModel.identity_id
-                                    == user.id,
-                                    DataProductRoleAssignmentModel.identity_id.in_(
-                                        user_group_ids
-                                    ),
-                                )
-                            )
-                        ),
-                    )
-                )
+                .join(InputPortModel.output_port)
+                .where(InputPortRequestModel.requested_by_id == user.id)
                 .options(
                     selectinload(InputPortRequestModel.input_port).selectinload(
                         InputPortModel.requests
                     )
                 )
-                .order_by(asc(InputPortRequestModel.created_on)),
-                # Skip since we will authorize and redact manually
-                execution_options=UNFILTERED,
+                .order_by(asc(InputPortRequestModel.requested_on))
             )
-            .unique()
-            .all()
-        )
 
-        authorizer = Authorization()
-        return [
-            self.compute_redaction(user, a)
-            for a in requested_associations
-            if authorizer.has_access(
-                sub=str(user.id),
-                dom=str(a.input_port.output_port.data_product.domain.id),
-                obj=str(a.input_port.output_port_id),
-                parent=str(a.input_port.output_port.data_product_id),
-                act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-            )
-        ]
-
-    def get_user_requests(
-        self, user: User, hide_old_inactive: bool
-    ) -> Sequence[InputPortRequest]:
-        query = (
-            select(InputPortRequestModel)
-            .join(InputPortModel)
-            .join(InputPortModel.output_port)
-            .where(InputPortRequestModel.requested_by_id == user.id)
-            .options(
-                selectinload(InputPortRequestModel.input_port).selectinload(
-                    InputPortModel.requests
+            if hide_old_inactive:
+                thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+                query = query.where(
+                    or_(
+                        InputPortRequestModel.decision
+                        == InputPortRequestDecision.PENDING,
+                        InputPortRequestModel.requested_on >= thirty_days_ago,
+                    )
                 )
-            )
-            .order_by(asc(InputPortRequestModel.requested_on))
-        )
 
-        if hide_old_inactive:
-            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-            query = query.where(
-                or_(
-                    InputPortRequestModel.decision == InputPortRequestDecision.PENDING,
-                    InputPortRequestModel.requested_on >= thirty_days_ago,
+            # We skip visibility because we will redact manually
+            requests = (
+                self.db.scalars(
+                    query, execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True}
                 )
+                .unique()
+                .all()
             )
 
-        # We skip visibility because we will redact manually
-        requests = (
-            self.db.scalars(
-                query, execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True}
-            )
-            .unique()
-            .all()
+            return self._redact(requests)
+
+    def _redact(
+        self, requests: Iterable[InputPortRequestModel]
+    ) -> list[InputPortRequest]:
+        requests = list(requests)
+        seen = visible_ids(
+            self.db,
+            (r.input_port.consuming_abstract_data_product_id for r in requests),
         )
-
-        return [self.compute_redaction(user, request) for request in requests]
+        result = []
+        for request in requests:
+            item = InputPortRequest.model_validate(request)
+            item.input_port.consuming_abstract_data_product.set_redacted(
+                request.input_port.consuming_abstract_data_product_id not in seen
+            )
+            result.append(item)
+        return result

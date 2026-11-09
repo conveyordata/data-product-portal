@@ -34,8 +34,12 @@ _Avoid_: Broadcast, Message
 ### Visibility and access
 
 **Visibility**:
-Whether a Data Product is Discoverable (visible to every authenticated user) or Hidden (visible only to its members). Fixed at creation.
+Whether a Data Product is Discoverable (visible to every authenticated user) or Hidden (visible only to its Members, admins and the system account). Fixed at creation.
 _Avoid_: Private Data Product, public Data Product
+
+**Member**:
+A user with an approved role on a Data Product, held directly or through one of their groups. A pending or denied request does not make someone a Member.
+_Avoid_: owner, team member (when meaning any role)
 
 **Access Function**:
 One of three fixed behaviours that governs an Output Port: Auto-approve, Approval required, or Invite only (hidden and approval required).
@@ -58,7 +62,9 @@ A name a Provisioner registers on a Data Product, Exploration or Domain to block
 - An **Output Port** has exactly one **Access Type**; its **Access Function** is the Access Type's.
 - An **Output Port** of a **Hidden** **Data Product** must have an Access Type mapped to **Invite only**.
 - At least one **Access Type** is always mapped to **Invite only**.
-- Members of a **Consuming Data Product** may read an **Invite only** **Output Port** it consumes; nobody else outside the owning Data Product sees it.
+- An **Invite only** **Output Port** is seen by admins, the system account, **Members** of its owning Data Product, users with an approved role on the Output Port itself, and **Members** of a **Consuming Data Product** that consumes it; nobody else.
+- An **Exploration** cannot consume an **Invite only** **Output Port**.
+- Consuming an **Invite only** **Output Port** does not make it searchable, nor reveal which other Data Products consume it.
 - Anyone who can see an **Output Port** can read its **Announcements**; only its producing team can post or delete them.
 - A **Domain** that still has **Data Products** or **Explorations** cannot be deleted.
 - A **Domain** with **Finalizers** stays in deleting until every **Provisioner** has removed its own.

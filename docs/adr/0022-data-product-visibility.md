@@ -52,7 +52,7 @@ The model is:
 * The Casbin matcher is extended to allow public resource-role groupings such as `g("*", role, product_id)`.
 
 The data product `visibility` field remains the source of truth, while Casbin remains the enforcement engine.
-The application keeps Casbin and the database in sync when a product is created, when visibility changes, and when assignments are approved, denied, or revoked.
+The application keeps Casbin and the database in sync when a product is created and when assignments are approved, denied, or revoked.
 
 The reason for adding ORM based visibility is to reduce the change of mistakes.
 
@@ -65,7 +65,7 @@ This will be reflected in the application as follows:
 * Create a `public_reader` role and attach it to a product when `visibility == discoverable`.
 * Use the existing resource-role model with a wildcard subject such as `g("*", public_reader_role_id, product_id)`.
 * Update the Casbin matcher to allow wildcard public resource-role groupings during enforcement.
-* When product visibility changes, update Casbin groupings to match the product row state.
+* Visibility is fixed at creation, so the Casbin grouping is created with the product and re-synced at startup.
 * When assignments are approved or revoked, continue through the existing assignment sync logic for the assigned-user case.
 * Enforce access at the route layer through the standard authorization flow without app-side visibility checks on each endpoint.
 
@@ -107,8 +107,7 @@ The notable changes are:
 * Add `DATA_PRODUCT__READ` to the action enum.
 * Add `public_reader` as a resource role with `DATA_PRODUCT__READ` permission.
 * Update the Casbin matcher to allow `g("*", role, product_id)` for public reads.
-* When a product becomes discoverable, create the wildcard public grouping.
-* When a product becomes hidden, revoke the wildcard public grouping.
+* When a discoverable product is created, create the wildcard public grouping. Visibility cannot change afterwards.
 * When a user is approved for a hidden product, the existing assignment flow already creates the user-specific group.
 * When approved assignments are revoked or denied, the existing revoke logic removes the user-specific group.
 
@@ -123,3 +122,10 @@ The ORM filters hide Hidden Data Products, their Technical Assets and Invite onl
 * A test runs every configuration `DELETE` and `PUT` route as a configuration manager and as an admin with Hidden Data Products and Invite only Output Ports present, and expects the same result.
 
 We rejected skipping the filters for loads made while the ORM flushes: SQLAlchemy only exposes that state through a private attribute.
+
+### One visibility module
+
+`app/database/visibility.py` is the only place that defines who sees a Data Product, Exploration, Technical Asset or Output Port.
+The ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all ask it, and `acting_as` is the only way to act as a user on a session.
+Redaction used to ask Casbin, whose cache lags a revocation, while the list next to it was filtered live; it now uses the same SQL rule as the list.
+Casbin keeps guarding routes, and a test checks that both agree on the same fixtures; known gaps for admins and the system account are marked as expected failures until fixed.

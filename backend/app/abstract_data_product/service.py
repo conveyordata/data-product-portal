@@ -5,7 +5,7 @@ from uuid import UUID
 
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, contains_eager, selectinload
 
 from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
@@ -34,23 +34,22 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
-from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import _has_user_access_to_hidden_data_product
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import (
     InputPortService,
     RedactedInputPort,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import (
-    access_function_filter_excluding_consumers,
-    ensure_output_port_exists,
-)
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import (
     SKIP_DATA_PRODUCT_VISIBILITY_FILTER,
     SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
     UNFILTERED,
+)
+from app.database.visibility import (
+    member_of,
+    output_port_visible_ignoring_consumption,
 )
 from app.users.model import User
 
@@ -67,16 +66,6 @@ class AbstractDataProductService:
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
 
-    def _is_data_product_member(self, data_product_id: UUID, user_id: UUID) -> bool:
-        return bool(
-            self.db.scalar(
-                select(
-                    _has_user_access_to_hidden_data_product(DataProductModel, user_id)
-                ).where(DataProductModel.id == data_product_id),
-                execution_options=UNFILTERED,
-            )
-        )
-
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
         query = (
@@ -91,19 +80,17 @@ class AbstractDataProductService:
                 selectinload(InputPortModel.requests),
             )
             .filter(
-                InputPortModel.consuming_abstract_data_product_id == data_product_id
+                InputPortModel.consuming_abstract_data_product_id == data_product_id,
+                or_(
+                    member_of(self.db, data_product_id),
+                    output_port_visible_ignoring_consumption(self.db, OutputPortModel),
+                ),
             )
         )
-        user_id = self.db.info.get("current_user_id")
-        is_member = user_id is not None and self._is_data_product_member(
-            data_product_id, user_id
-        )
-        if user_id is not None and not is_member:
-            query = query.where(access_function_filter_excluding_consumers(user_id))
         return (
             self.db.scalars(
                 query,
-                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: is_member},
+                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True},
             )
             .unique()
             .all()
