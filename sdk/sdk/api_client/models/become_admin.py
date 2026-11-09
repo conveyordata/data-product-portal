@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -13,14 +14,14 @@ T = TypeVar("T", bound="BecomeAdmin")
 class BecomeAdmin:
     """
     Attributes:
-        expiry (str):
+        expiry (datetime.datetime):
     """
 
-    expiry: str
+    expiry: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        expiry = self.expiry
+        expiry = self.expiry.isoformat()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -35,7 +36,7 @@ class BecomeAdmin:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        expiry = d.pop("expiry")
+        expiry = datetime.datetime.fromisoformat(d.pop("expiry"))
 
         become_admin = cls(
             expiry=expiry,

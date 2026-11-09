@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import Iterable, Iterator, Optional
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, event, false, func, or_, select, true
+from sqlalchemy import ColumnElement, event, false, or_, select, true
 from sqlalchemy.orm import ORMExecuteState, Session, with_loader_criteria
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
@@ -13,11 +13,10 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.global_.admin import is_user_admin
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment,
 )
-from app.authorization.roles import ADMIN_UUID
 from app.data_products.model import DataProduct, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
@@ -28,7 +27,6 @@ from app.database.database import (
     UNFILTERED,
 )
 from app.groups.model import GroupMembership
-from app.users.model import User
 
 _CURRENT_USER = "current_user_id"
 _OPEN_ACCESS_FUNCTIONS = (
@@ -62,26 +60,6 @@ def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
     if user_id is None:
         return false()
     return _member(data_product_id, user_id)
-
-
-def is_user_admin(user_id: UUID) -> ColumnElement[bool]:
-    temporary = (
-        select(User.id)
-        .where(User.id == user_id, User.admin_expiry > func.now())
-        .correlate(None)
-        .exists()
-    )
-    permanent = (
-        select(GlobalRoleAssignment.id)
-        .where(
-            GlobalRoleAssignment.identity_id == user_id,
-            GlobalRoleAssignment.role_id == ADMIN_UUID,
-            GlobalRoleAssignment.decision == DecisionStatus.APPROVED,
-        )
-        .correlate(None)
-        .exists()
-    )
-    return or_(temporary, permanent)
 
 
 def visible_ids(db: Session, ids: Iterable[UUID]) -> set[UUID]:

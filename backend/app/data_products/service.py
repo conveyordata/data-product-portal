@@ -63,7 +63,7 @@ from app.data_products.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
+from app.database.database import UNFILTERED
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -157,7 +157,7 @@ class DataProductService(AbstractDataProductService):
     def sync_data_product_consumer_access(self) -> None:
         data_product_ids = self.db.scalars(
             select(DataProductModel.id),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+            execution_options=UNFILTERED,
         ).all()
         for data_product_id in data_product_ids:
             self._sync_consumer_reader_grouping(data_product_id)
@@ -626,7 +626,7 @@ class DataProductService(AbstractDataProductService):
             select(DataProductModel.id).where(
                 DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
             ),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+            execution_options=UNFILTERED,
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

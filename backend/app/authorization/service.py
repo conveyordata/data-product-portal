@@ -9,6 +9,7 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.admin import admin_expiry_in_future
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
@@ -134,7 +135,7 @@ class AuthorizationService:
 
     def _sync_temporary_admins(self) -> None:
         for user_id in self.db.scalars(
-            select(UserModel.id).where(UserModel.admin_expiry > func.now())
+            select(UserModel.id).where(admin_expiry_in_future)
         ):
             self.authorizer.assign_admin_role(user_id=str(user_id))
 

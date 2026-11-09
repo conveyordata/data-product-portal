@@ -1,9 +1,9 @@
 import asyncio
-from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.global_.admin import admin_expiry_in_future
 from app.authorization.role_assignments.global_.service import RoleAssignmentService
 from app.core.logging import logger
 from app.database.database import SessionLocal
@@ -18,7 +18,7 @@ async def revoke_expired_admins(db: Session) -> None:
         db.execute(
             select(UserModel)
             .where(UserModel.admin_expiry.isnot(None))
-            .where(UserModel.admin_expiry <= datetime.now(timezone.utc))
+            .where(~admin_expiry_in_future)
         )
         .scalars()
         .all()

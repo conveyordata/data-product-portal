@@ -129,5 +129,5 @@ We rejected skipping the filters for loads made while the ORM flushes: SQLAlchem
 The ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all ask it, and `acting_as` is the only way to act as a user on a session.
 Redaction used to ask Casbin, whose cache lags a revocation, while the list next to it was filtered live; it now uses the same SQL rule as the list.
 Casbin keeps guarding routes, and a test checks that both agree on the same fixtures.
-Whether a user is an admin is decided by the database: an approved admin role assignment (only the system account holds one) or an admin expiry in the future.
+Whether a user is an admin is decided by the database (`app/authorization/role_assignments/global_/admin.py`): a permanent, approved admin role assignment, or a temporary elevation whose expiry is in the future (see [ADR-0008](0008-admin-toggle.md)).
 Casbin's admin role follows it: becoming and revoking admin update both, and reloading the enforcer restores temporary admins.

@@ -986,16 +986,16 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 
 // Ref: #/components/schemas/BecomeAdmin
 type BecomeAdmin struct {
-	Expiry string `json:"expiry"`
+	Expiry time.Time `json:"expiry"`
 }
 
 // GetExpiry returns the value of Expiry.
-func (s *BecomeAdmin) GetExpiry() string {
+func (s *BecomeAdmin) GetExpiry() time.Time {
 	return s.Expiry
 }
 
 // SetExpiry sets the value of Expiry.
-func (s *BecomeAdmin) SetExpiry(val string) {
+func (s *BecomeAdmin) SetExpiry(val time.Time) {
 	s.Expiry = val
 }
 

@@ -828,7 +828,7 @@ def _system_account(data_product):
 def _admin(data_product):
     user = UserFactory(can_become_admin=True)
     GlobalRoleAssignmentService(object_session(user)).become_admin(
-        user, "2099-01-01T00:00:00"
+        user, datetime(2099, 1, 1)
     )
     return user
 
