@@ -62,7 +62,7 @@ class RoleAssignmentService:
         role_assignment = GlobalRoleAssignmentModel(
             identity_id=request.identity_id,
             role_id=request.role_id,
-            requested_on=datetime.now(),
+            requested_on=datetime.now(timezone.utc),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
@@ -86,7 +86,7 @@ class RoleAssignmentService:
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
-            assignment.decided_on = datetime.now()
+            assignment.decided_on = datetime.now(timezone.utc)
             assignment.decided_by_id = actor.id
 
         self.db.flush()

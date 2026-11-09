@@ -28,7 +28,7 @@ def _entry_points_with_fakes(group: str) -> list[EntryPoint]:
 registry.entry_points = _entry_points_with_fakes  # type: ignore[assignment]
 settings.ENABLED_PLUGINS = list(FAKE_PLUGINS)
 
-engine = create_engine(database.get_url())
+engine = create_engine(database.get_url(), connect_args={"options": "-c timezone=UTC"})
 session_factory = sessionmaker(autoflush=False, bind=engine, query_cls=database.MyQuery)
 TestingSessionLocal = scoped_session(session_factory)
 

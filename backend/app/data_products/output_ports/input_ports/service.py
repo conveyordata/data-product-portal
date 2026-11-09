@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
@@ -290,7 +290,7 @@ class InputPortService:
             or grant.valid_until is None
             or input_port.renewal_status == RenewalStatus.PENDING
             or not 0
-            <= (grant.valid_until - date.today()).days
+            <= (grant.valid_until - datetime.now(timezone.utc).date()).days
             <= settings.EXPIRING_SOON_THRESHOLD_DAYS
         ):
             return False

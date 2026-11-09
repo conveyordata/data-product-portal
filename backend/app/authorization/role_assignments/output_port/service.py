@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -87,7 +87,7 @@ class RoleAssignmentService:
             user_id=user_id,
             output_port_id=dataset_id,
             data_product_id=output_port.data_product_id,
-            requested_on=datetime.now(),
+            requested_on=datetime.now(timezone.utc),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
@@ -114,7 +114,7 @@ class RoleAssignmentService:
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
-            assignment.decided_on = datetime.now()
+            assignment.decided_on = datetime.now(timezone.utc)
             assignment.decided_by_id = actor.id
 
         self.db.flush()

@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
@@ -111,7 +111,7 @@ class InputPort(
 
     @property
     def active_grant(self) -> Optional["InputPortRequest"]:
-        today = date.today()
+        today = datetime.now(timezone.utc).date()
         return next(
             (
                 request
