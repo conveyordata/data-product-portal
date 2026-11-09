@@ -6,102 +6,120 @@ description: Authentication flows explained
 
 # Authentication
 
-You can find diagrams explaining the different authentication flows used in the Data Product Portal below.
-This is useful background information if you would like to implement wrappers around Data Product Portal functionality.
+The Data Product Portal signs users in with OpenID Connect (OIDC). It has been tested with AWS Cognito and should work with any OIDC provider. The settings below cover Keycloak and Microsoft Entra ID as well.
+The diagrams below show the sign-in flows. They are useful background if you build a wrapper around the portal.
 
-## Basic Authentication (OIDC)
+## Browser sign-in
+
+The backend fetches the provider's public keys once at startup, and uses them to check every access token itself.
+It only asks for the user's details when it sees a user for the first time.
 
 ``` mermaid
 sequenceDiagram
     participant User
     participant Frontend
-    participant Cognito
+    participant Provider as Identity provider
     participant Backend
-    alt user initiates auth
-      User->>Frontend: Initiates Auth Flow
-    else user makes call
-     User->>Frontend:  Requests Resource
-     Frontend->>Backend: Makes unauthenticated HTTPS request
-     Backend->>Frontend: Responds with 401 Unauthenticated
-    end
 
-    Frontend->>Cognito: Redirects to Cognito with Auth Request
-    Cognito->>User: Presents Authentication UI
-    User->>Cognito: Submits Credentials
-    Cognito->>Frontend: Redirects with ID Token & Access Token
-    Frontend->>User: Shows Authenticated Session
-    User->>Frontend: Requests Resource
-    Frontend->>Backend: API Call with Access Token
-    Backend->>Cognito: Validates Access Token
-    Cognito->>Backend: Token Valid
-    Backend->>Frontend: Responds with Resource
+    User->>Frontend: Opens the portal
+    Frontend->>Provider: Redirects to sign in
+    User->>Provider: Signs in
+    Provider->>Frontend: Redirects back with ID token and access token
+    Frontend->>Backend: API call with access token
+    Backend->>Backend: Checks signature, issuer, audience and expiry
+    opt First request of an unknown user
+        alt OIDC_IDENTITY_SOURCE=userinfo
+            Backend->>Provider: Userinfo request with access token
+            Provider->>Backend: Email and names
+        else OIDC_IDENTITY_SOURCE=access_token
+            Backend->>Backend: Reads email and names from the access token
+        end
+        Backend->>Backend: Creates or updates the user
+    end
+    Backend->>Frontend: Responds with resource
 ```
 
 ---
 
-## Device Flow
-The device flow is used to authenticate from machines without browser access or decent user interfaces to portal by redirecting the authentication request to your browser.
+## Device flow
+
+The device flow signs in machines without a browser, such as the CLI. You confirm the sign-in in a browser on another device.
 
 ``` mermaid
 sequenceDiagram
     participant User
-    participant Headless Device
-    participant Cognito
+    participant Device as Headless device
     participant Backend
+    participant Provider as Identity provider
 
-    Note over Headless Device, Backend: Device requests code from Backend
+    Device->>Backend: Requests a device code
+    Backend->>Device: user_code, device_code and verification_uri
 
-    Headless Device->>Backend: Request device code
-    Backend->>Headless Device: Provide user_code, device_code, verification_uri
+    User->>Backend: Opens verification_uri and confirms user_code
+    Backend->>User: Redirects to the provider
+    User->>Provider: Signs in
+    Provider->>Backend: Redirects back with an authorization code
+    Backend->>User: Confirms the device is authorized
 
-    Note over User, Headless Device: User authorizes device using another device (e.g., smartphone or browser)
-
-    User->>Cognito: Navigate to verification_uri and confirm user_code
-    Cognito->>User: Prompt for Cognito login credentials
-    User->>Cognito: Provide credentials
-    Cognito->>Backend: Store authorization code in backend
-    Cognito->>User: Confirm authorization
-
-    Note over Headless Device, Backend: Device polls backend for the authorization token (can start immediately after device_code request)
-
-    loop until token received or timeout
-        Headless Device->>Backend: Poll with device_code for authorization token
-    alt authorization token received
-Backend->>Cognito: token call to fetch access token
-Cognito->>Backend: return access token
-    else
-    end
-        Backend->>Headless Device: Respond with pending, access token (success), or error
+    loop Until token, error or timeout
+        Device->>Backend: Polls with device_code
+        opt Authorization code received
+            Backend->>Provider: Exchanges the code for tokens
+            Provider->>Backend: Access token
+        end
+        Backend->>Device: Pending, access token or error
     end
 
-    Note over Headless Device, Backend: Device uses access token to access Backend
-
-    Headless Device->>Backend: Access with access token
-    Backend->>Headless Device: Grant access
+    Device->>Backend: API call with access token
 ```
 
 ---
 
 ## Setting up OIDC
 
-Portal has been tested with AWS Cognito but should work with any OIDC provider.
+### Where the backend reads the user from
 
-OIDC returns identity, refresh and access tokens.
-Providers may vary in the information they pass in tokens, and the application depends on this information, so integrating a new provider might require some code changes there as well.
-
-With `userinfo`, the provider must return at least email and name; family_name is used as the last name when present, and given_name as the first name, with name as fallback. With `access_token`, only the claim named by `OIDC_EMAIL_CLAIM` is required; names come from given_name, family_name and name when present, and otherwise from the part of the email before the @.
-
-The backend reads the current user from one of two sources, set with `OIDC_IDENTITY_SOURCE`:
+The backend needs to know who is calling: a stable user id, an email and a name.
+It reads them from one of two sources, set with `OIDC_IDENTITY_SOURCE`.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `OIDC_IDENTITY_SOURCE` | `userinfo` | `userinfo` asks the provider's userinfo endpoint with the access token. `access_token` reads the claims of the validated access token and never calls userinfo. |
-| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. It is stored as the user's external id, so don't change it once users have logged in. Use an id the provider sets and users can't change, such as `sub` or Entra's `oid`, never `email` or `preferred_username`: whoever controls that value controls the account. |
+| `OIDC_IDENTITY_SOURCE` | `userinfo` | `userinfo` asks the provider's userinfo endpoint, using the access token. `access_token` reads the claims of the access token itself and never calls userinfo. |
+| `OIDC_USER_ID_CLAIM` | `sub` | The access token claim that identifies a user. |
 | `OIDC_EMAIL_CLAIM` | `email` | The access token claim that holds the email address. Only used with `access_token`. |
 
-Use `userinfo` for Cognito, whose access tokens carry no email. Keycloak works with both. With `userinfo`, a rejected access token or an answer without a valid email is a 401, and an unreachable or failing endpoint is a 503.
+:::warning
+The user id claim is stored as the user's external id, so don't change it once users have signed in.
+Pick an id the provider sets and users can't change, such as `sub` or Entra ID's `oid`.
+Never pick `email` or `preferred_username`: whoever can change that value can take over the account.
+:::
 
-Use `access_token` for providers whose userinfo endpoint does not accept the portal's access token, such as Microsoft Entra ID. When given_name is missing, name is split into first and last name: on the comma for names written as "Last, First", otherwise on the last space. An identity read from the access token links to an existing user with the same email only when the token's `email` claim holds that address and `email_verified` is true; otherwise a login whose email already belongs to another user is rejected. For Entra ID, use:
+Which source to pick:
+
+| Provider | Source | Why |
+|---|---|---|
+| AWS Cognito | `userinfo` | Its access tokens carry no email. |
+| Keycloak | either | It puts email and names in both. |
+| Microsoft Entra ID | `access_token` | Its userinfo endpoint doesn't accept the portal's access token. |
+
+### Required claims
+
+With `userinfo`, the answer must hold `email` and `name`.
+`given_name` is used as the first name, with `name` as fallback, and `family_name` as the last name.
+A rejected access token or an answer without a valid email gives a 401. An unreachable or failing endpoint gives a 503.
+
+With `access_token`, only the claim named by `OIDC_EMAIL_CLAIM` is required.
+Names come from `given_name` and `family_name`.
+Without `given_name`, `name` is split into first and last name: on the comma for "Last, First", otherwise on the last space.
+Without any name, the part of the email before the @ becomes the first name.
+
+### Linking to an existing user
+
+A user who signs in for the first time can already exist in the portal with the same email, for example because they were created before their first sign-in.
+With `access_token`, the backend links the two only when the token's `email` claim holds that address and `email_verified` is true.
+Otherwise the sign-in is rejected, so nobody can claim an account just by putting its email in a token.
+
+### Microsoft Entra ID
 
 ```
 OIDC_IDENTITY_SOURCE=access_token
@@ -109,13 +127,18 @@ OIDC_USER_ID_CLAIM=oid
 OIDC_EMAIL_CLAIM=preferred_username
 ```
 
-Entra ID's `sub` differs per application, while `oid` is the same for a user across the tenant. Set `OIDC_AUDIENCE` to the audience of the portal's access token. The frontend still requests only `openid profile email`, and with those scopes Entra ID issues an access token for Microsoft Graph, not for the portal. Requesting the portal's API scope needs a frontend change that is not available yet. With the Helm chart, set these settings through `extraConfigMapValues`.
+- Use `oid`, not `sub`: Entra ID's `sub` is different for every application, while `oid` is the same for a user across the tenant.
+- Set `OIDC_AUDIENCE` to the audience of the portal's access token.
+- The frontend requests only `openid profile email` today. With those scopes Entra ID issues an access token for Microsoft Graph, not for the portal. Requesting the portal's own API scope needs a frontend change that isn't available yet.
+- Entra ID never sends `email_verified`, so a new sign-in never links to an existing user by email.
+
+With the Helm chart, set these settings through `extraConfigMapValues`.
 
 ### Cognito setup
 
 This is not a full explanation on how to set up Cognito, but the key points to keep in mind for the Portal are listed below:
 
-- Add email, family_name and name to the required_attributesin your user pool.
+- Add email, family_name and name to the required attributes in your user pool.
 - Create an app integration and note the client ID and secret.
 - Find the authority URL using the format: `https://cognito-idp.<COGNITO_REGION>.amazonaws.com/<COGNITO_USER_POOL_ID>`
 
