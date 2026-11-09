@@ -519,7 +519,8 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         output_port = OutputPortFactory(
-            data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+            data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         role = RoleFactory(
             scope=Scope.DATASET,
