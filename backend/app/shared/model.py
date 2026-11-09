@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.compiler import compiles
@@ -23,13 +23,21 @@ class UTCDateTime(TypeDecorator):
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
-        if isinstance(value, datetime) and value.tzinfo is not None:
-            return value.astimezone(timezone.utc).replace(tzinfo=None)
+        return to_naive_utc(value) if isinstance(value, datetime) else value
+
+
+def to_naive_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
         return value
+    return value.astimezone(timezone.utc).replace(tzinfo=None)
 
 
 def naive_utc_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def utc_today() -> date:
+    return datetime.now(timezone.utc).date()
 
 
 class BaseORM:

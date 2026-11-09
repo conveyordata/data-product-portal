@@ -188,11 +188,7 @@ def _data_product_id_visible(data_product_id, user_id: UUID) -> ColumnElement[bo
         select(data_products.c.id)
         .where(
             data_products.c.id == data_product_id,
-            or_(
-                data_products.c.visibility == DataProductVisibility.DISCOVERABLE,
-                _member(data_products.c.id, user_id),
-                is_user_admin(user_id),
-            ),
+            _data_product_visible(data_products.c, user_id),
         )
         .correlate_except(data_products)
         .exists()

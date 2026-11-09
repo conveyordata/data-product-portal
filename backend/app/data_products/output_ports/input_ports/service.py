@@ -42,6 +42,7 @@ from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.settings import settings
+from app.shared.model import utc_today
 from app.users.model import User as UserModel
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
@@ -290,7 +291,7 @@ class InputPortService:
             or grant.valid_until is None
             or input_port.renewal_status == RenewalStatus.PENDING
             or not 0
-            <= (grant.valid_until - datetime.now(timezone.utc).date()).days
+            <= (grant.valid_until - utc_today()).days
             <= settings.EXPIRING_SOON_THRESHOLD_DAYS
         ):
             return False

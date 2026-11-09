@@ -20,7 +20,7 @@ from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Authorization
 from app.database.database import ensure_exists
-from app.shared.model import naive_utc_now
+from app.shared.model import naive_utc_now, to_naive_utc
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -103,6 +103,11 @@ class RoleAssignmentService:
 
     def become_admin(self, user: UserModel, expiry: datetime) -> None:
         self.ensure_can_become_admin(user)
+        if to_naive_utc(expiry) <= naive_utc_now():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Admin expiry must be in the future",
+            )
         user.admin_expiry = expiry
         self.db.flush()
         self.sync_admin_role(user.id)

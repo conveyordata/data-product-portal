@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
@@ -22,7 +22,7 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.webhooks.events import InputPortEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
-from app.shared.model import BaseORM, UTCDateTime, utcnow
+from app.shared.model import BaseORM, UTCDateTime, utc_today, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
@@ -110,7 +110,7 @@ class InputPort(
 
     @property
     def active_grant(self) -> Optional["InputPortRequest"]:
-        today = datetime.now(timezone.utc).date()
+        today = utc_today()
         return next(
             (
                 request

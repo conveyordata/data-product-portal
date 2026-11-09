@@ -89,6 +89,17 @@ class TestGlobalRoleAssignmentsRouter:
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_become_admin__rejects_expiry_in_the_past(self, client: TestClient):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert Authorization().has_admin_role(user_id=str(user.id)) is False
+
     def test_revoke_admin(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
 
@@ -98,7 +109,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
         response = client.post(
             f"{ENDPOINT}/become_admin",
-            json={"expiry": "2024-12-31T23:59:59Z"},
+            json={"expiry": "2099-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
 
