@@ -26,6 +26,7 @@ from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.database.visibility import (
     member_of,
     output_port_visible_ignoring_consumption,
+    restrict_to_visible_input_ports,
     visible_ids,
 )
 from app.settings import settings
@@ -979,3 +980,34 @@ def test_acting_as__output_port_agrees_with_casbin_route_check(
     )
 
     assert sees is may_read
+
+
+@pytest.mark.parametrize(("member", "expected_visible"), [(True, True), (False, False)])
+def test_restrict_to_visible_input_ports__pending_input_port_on_unseen_output_port(
+    session, member, expected_visible
+):
+    user = UserFactory()
+    consumer = DataProductFactory()
+    if member:
+        DataProductRoleAssignmentFactory(
+            data_product_id=consumer.id,
+            identity_id=user.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+    input_port = InputPortFactory(
+        output_port=OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE),
+        consuming_abstract_data_product=consumer,
+        status=InputPortStatus.PENDING,
+    )
+    stmt = (
+        select(InputPort.id)
+        .join(InputPort.output_port)
+        .where(InputPort.consuming_abstract_data_product_id == consumer.id)
+    )
+
+    with as_user(session, user.id):
+        seen = session.scalars(
+            restrict_to_visible_input_ports(session, stmt, consumer.id)
+        ).all()
+
+    assert (input_port.id in seen) is expected_visible

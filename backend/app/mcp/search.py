@@ -43,7 +43,6 @@ def universal_search(
     query_results = {}
     if "data_products" in search_types:
         all_data_products = DataProductService(db).get_data_products(
-            current_user=user,
             assignment_filter=AssignmentFilter.ALL,
         )
         filtered_data_products = []
@@ -141,7 +140,6 @@ def search_data_products(
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_data_products = DataProductService(db).get_data_products(
-        current_user=user,
         assignment_filter=AssignmentFilter.ALL,
     )
     filtered_data_products = []

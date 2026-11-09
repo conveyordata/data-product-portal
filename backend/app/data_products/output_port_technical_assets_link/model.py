@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Sequence
 
-from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey
+from sqlalchemy import UUID, Column, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 import uuid
 
-from app.shared.model import BaseORM, utcnow
+from app.shared.model import BaseORM, UTCDateTime, utcnow
 
 
 class TechnicalAssetOutputPortAssociation(Base, BaseORM, EventTrackedMixin):
@@ -27,9 +27,9 @@ class TechnicalAssetOutputPortAssociation(Base, BaseORM, EventTrackedMixin):
         Enum(DecisionStatus),
         default=DecisionStatus.PENDING,
     )
-    requested_on = Column(DateTime(timezone=False), server_default=utcnow())
-    approved_on = Column(DateTime(timezone=False))
-    denied_on = Column(DateTime(timezone=False))
+    requested_on = Column(UTCDateTime(), server_default=utcnow())
+    approved_on = Column(UTCDateTime())
+    denied_on = Column(UTCDateTime())
 
     technical_asset_id: Mapped[uuid.UUID] = mapped_column(
         "data_output_id", ForeignKey("data_outputs.id")

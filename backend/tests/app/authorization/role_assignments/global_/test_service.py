@@ -12,6 +12,7 @@ class TestRoleAssignmentService:
         expiry = datetime(2099, 1, 1, 2, 0, tzinfo=timezone(timedelta(hours=2)))
 
         RoleAssignmentService(session).become_admin(user, expiry)
+        session.refresh(user)
 
         assert user.admin_expiry == datetime(2099, 1, 1, 0, 0)
 

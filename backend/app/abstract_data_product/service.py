@@ -5,7 +5,7 @@ from uuid import UUID
 
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, contains_eager, selectinload
 
 from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
@@ -44,13 +44,9 @@ from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import (
     SKIP_DATA_PRODUCT_VISIBILITY_FILTER,
-    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
     UNFILTERED,
 )
-from app.database.visibility import (
-    member_of,
-    output_port_visible_ignoring_consumption,
-)
+from app.database.visibility import restrict_to_visible_input_ports
 from app.users.model import User
 
 
@@ -68,33 +64,20 @@ class AbstractDataProductService:
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
-        query = (
+        query = restrict_to_visible_input_ports(
+            self.db,
             select(InputPortModel)
-            # Join (rather than selectinload) the output port so that the
-            # private output port visibility filter excludes the whole
-            # input port row when its output port isn't visible to the
-            # current user, instead of just nulling out the relationship.
             .join(InputPortModel.output_port)
             .options(
                 contains_eager(InputPortModel.output_port),
                 selectinload(InputPortModel.requests),
             )
             .filter(
-                InputPortModel.consuming_abstract_data_product_id == data_product_id,
-                or_(
-                    member_of(self.db, data_product_id),
-                    output_port_visible_ignoring_consumption(self.db, OutputPortModel),
-                ),
-            )
+                InputPortModel.consuming_abstract_data_product_id == data_product_id
+            ),
+            data_product_id,
         )
-        return (
-            self.db.scalars(
-                query,
-                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True},
-            )
-            .unique()
-            .all()
-        )
+        return self.db.scalars(query).unique().all()
 
     def _resolve_access_duration(
         self, adp: AbstractDataProduct, output_port: OutputPortModel

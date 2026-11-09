@@ -6,7 +6,6 @@ from sqlalchemy import (
     UUID,
     Column,
     Date,
-    DateTime,
     Enum,
     ForeignKey,
     Integer,
@@ -23,7 +22,7 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.webhooks.events import InputPortEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
-from app.shared.model import BaseORM, utcnow
+from app.shared.model import BaseORM, UTCDateTime, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
@@ -210,13 +209,9 @@ class InputPortRequest(
     requested_duration_days: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True
     )
-    requested_on = Column(DateTime(timezone=False), server_default=utcnow())
-    decided_on: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=False), nullable=True
-    )
-    revoked_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=False), nullable=True
-    )
+    requested_on = Column(UTCDateTime(), server_default=utcnow())
+    decided_on: Mapped[Optional[datetime]] = mapped_column(UTCDateTime(), nullable=True)
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime(), nullable=True)
     valid_from: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     valid_until: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 

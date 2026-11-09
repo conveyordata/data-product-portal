@@ -1,5 +1,4 @@
 import copy
-from datetime import datetime, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -21,6 +20,7 @@ from app.core.authz import Action
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
+from app.shared.model import naive_utc_now
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -87,7 +87,7 @@ class RoleAssignmentService:
             user_id=user_id,
             output_port_id=dataset_id,
             data_product_id=output_port.data_product_id,
-            requested_on=datetime.now(timezone.utc),
+            requested_on=naive_utc_now(),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
@@ -114,7 +114,7 @@ class RoleAssignmentService:
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
-            assignment.decided_on = datetime.now(timezone.utc)
+            assignment.decided_on = naive_utc_now()
             assignment.decided_by_id = actor.id
 
         self.db.flush()

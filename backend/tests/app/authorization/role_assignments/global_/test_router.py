@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from fastapi import status
@@ -6,6 +7,7 @@ from fastapi.testclient import TestClient
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization
 from app.settings import settings
 from tests.factories import (
     GlobalRoleAssignmentFactory,
@@ -68,7 +70,7 @@ class TestGlobalRoleAssignmentsRouter:
 
         response = client.post(
             f"{ENDPOINT}/become_admin",
-            json={"expiry": "2024-12-31T23:59:59Z"},
+            json={"expiry": "2099-12-31T23:59:59Z"},
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -288,6 +290,27 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["role"]["id"] == str(admin.id)
+
+    def test_delete_assignment__keeps_casbin_admin_of_temporary_admin(
+        self, client: TestClient
+    ):
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        GlobalRoleAssignmentFactory(
+            identity_id=me.id,
+            role_id=RoleFactory(
+                scope=Scope.GLOBAL,
+                permissions=[AuthorizationAction.GLOBAL__DELETE_USER],
+            ).id,
+        )
+        user = UserFactory(admin_expiry=datetime(2099, 1, 1))
+        assignment = GlobalRoleAssignmentFactory(
+            identity_id=user.id, role_id=RoleFactory.admin().id
+        )
+
+        response = client.delete(f"{ENDPOINT}/{assignment.id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert Authorization().has_admin_role(user_id=str(user.id)) is True
 
     def test_delete_last_admin_assignment(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import Iterable, Iterator, Optional
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, event, false, or_, select, true
+from sqlalchemy import ColumnElement, Select, event, false, or_, select, true
 from sqlalchemy.orm import ORMExecuteState, Session, with_loader_criteria
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
@@ -55,6 +55,18 @@ def output_port_visible_ignoring_consumption(
     return _output_port_visible_ignoring_consumption(output_port, user_id)
 
 
+def restrict_to_visible_input_ports(
+    db: Session, stmt: Select, data_product_id: UUID
+) -> Select:
+    """`stmt` selects the Input Ports of `data_product_id` joined to their Output Port."""
+    return stmt.where(
+        or_(
+            member_of(db, data_product_id),
+            output_port_visible_ignoring_consumption(db, OutputPort),
+        )
+    ).execution_options(**{SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True})
+
+
 def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
     user_id = _current_user(db)
     if user_id is None:
@@ -63,7 +75,7 @@ def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
 
 
 def visible_ids(db: Session, ids: Iterable[UUID]) -> set[UUID]:
-    """Unknown ids are left out."""
+    """Unknown ids are left out, unless no user acts on the session: then all ids are returned."""
     ids = set(ids)
     user_id = _current_user(db)
     if user_id is None or not ids:

@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    UUID,Column, DateTime, ForeignKey, String, func,
+    UUID,Column, ForeignKey, String, func,
     select,
 )
 from sqlalchemy import Enum as SAEnum
@@ -34,7 +34,7 @@ from app.database.database import (
     ensure_exists,
 )
 from app.database.event_mixin import EventTrackedMixin
-from app.shared.model import utcnow
+from app.shared.model import UTCDateTime, utcnow
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -151,7 +151,7 @@ class DataProductEnvironment(Base):
         ForeignKey("environments.id"), primary_key=True
     )
     creation_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=utcnow()
+        UTCDateTime(), server_default=utcnow()
     )
     environment: Mapped[Environment] = relationship(lazy="joined")
 

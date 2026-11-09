@@ -85,10 +85,12 @@ def delete_global_role_assignment(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> DeleteGlobalRoleAssignmentResponse:
-    assignment = RoleAssignmentService(db).delete_assignment(id)
+    service = RoleAssignmentService(db)
+    assignment = service.delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment).remove()
+        service.sync_admin_role(assignment.identity_id)
     return DeleteGlobalRoleAssignmentResponse(id=assignment.id)
 
 
@@ -164,5 +166,6 @@ def modify_global_role_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment, previous_role_id=original_role).swap()
+        service.sync_admin_role(assignment.identity_id)
 
     return assignment

@@ -76,10 +76,7 @@ def _azure_credential() -> "DefaultAzureCredential":
 
 engine = create_engine(
     get_url(),
-    connect_args={
-        "connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS,
-        "options": "-c timezone=UTC",
-    },
+    connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_timeout=settings.DB_POOL_TIMEOUT_SECONDS,
