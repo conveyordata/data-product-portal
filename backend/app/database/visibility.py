@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import Iterable, Iterator, Optional
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, event, false, or_, select, true
+from sqlalchemy import ColumnElement, event, false, func, or_, select, true
 from sqlalchemy.orm import ORMExecuteState, Session, with_loader_criteria
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
@@ -13,10 +13,11 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment,
 )
-from app.core.auth.db_utils import is_system_account, is_user_admin
+from app.authorization.roles import ADMIN_UUID
 from app.data_products.model import DataProduct, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
@@ -27,6 +28,7 @@ from app.database.database import (
     UNFILTERED,
 )
 from app.groups.model import GroupMembership
+from app.users.model import User
 
 _CURRENT_USER = "current_user_id"
 _OPEN_ACCESS_FUNCTIONS = (
@@ -60,6 +62,26 @@ def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
     if user_id is None:
         return false()
     return _member(data_product_id, user_id)
+
+
+def is_user_admin(user_id: UUID) -> ColumnElement[bool]:
+    temporary = (
+        select(User.id)
+        .where(User.id == user_id, User.admin_expiry > func.now())
+        .correlate(None)
+        .exists()
+    )
+    permanent = (
+        select(GlobalRoleAssignment.id)
+        .where(
+            GlobalRoleAssignment.identity_id == user_id,
+            GlobalRoleAssignment.role_id == ADMIN_UUID,
+            GlobalRoleAssignment.decision == DecisionStatus.APPROVED,
+        )
+        .correlate(None)
+        .exists()
+    )
+    return or_(temporary, permanent)
 
 
 def visible_ids(db: Session, ids: Iterable[UUID]) -> set[UUID]:
@@ -131,7 +153,7 @@ def _data_product_visible(data_product, user_id: UUID) -> ColumnElement[bool]:
     return or_(
         data_product.visibility == DataProductVisibility.DISCOVERABLE,
         _member(data_product.id, user_id),
-        _privileged(user_id),
+        is_user_admin(user_id),
     )
 
 
@@ -163,7 +185,7 @@ def _output_port_visible_ignoring_consumption(
         output_port.access_function.in_(_OPEN_ACCESS_FUNCTIONS),
         _has_output_port_role(output_port.id, user_id),
         _member(output_port.data_product_id, user_id),
-        _privileged(user_id),
+        is_user_admin(user_id),
     )
 
 
@@ -179,7 +201,7 @@ def _data_product_id_visible(data_product_id, user_id: UUID) -> ColumnElement[bo
             or_(
                 data_products.c.visibility == DataProductVisibility.DISCOVERABLE,
                 _member(data_products.c.id, user_id),
-                _privileged(user_id),
+                is_user_admin(user_id),
             ),
         )
         .correlate_except(data_products)
@@ -237,7 +259,3 @@ def _has_output_port_role(output_port_id, user_id: UUID) -> ColumnElement[bool]:
         .correlate_except(assignments)
         .exists()
     )
-
-
-def _privileged(user_id: UUID) -> ColumnElement[bool]:
-    return or_(is_user_admin(user_id), is_system_account(user_id))

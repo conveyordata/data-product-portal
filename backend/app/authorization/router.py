@@ -11,6 +11,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.data_products.output_ports.model import OutputPort
 from app.database.deps import get_db_session
+from app.database.visibility import is_user_admin
 from app.users.schema import User
 
 router = APIRouter(tags=["Authorization"], prefix="/v2/authz")
@@ -62,11 +63,10 @@ def check_access(
     "/admin",
 )
 def is_admin(
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> IsAdminResponse:
-    authorizer = Authorization()
-
     return IsAdminResponse(
-        is_admin=authorizer.has_admin_role(user_id=user.id),
+        is_admin=bool(db.scalar(select(is_user_admin(user.id)))),
         time=user.admin_expiry.isoformat() if user.admin_expiry else None,
     )

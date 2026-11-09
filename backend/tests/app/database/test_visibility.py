@@ -3,11 +3,16 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.orm import object_session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
+from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
@@ -29,6 +34,7 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
     ExplorationFactory,
+    GlobalRoleAssignmentFactory,
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
@@ -53,6 +59,12 @@ def _group_owner_identity(user):
     group = GroupFactory()
     GroupMembershipFactory(group=group, member=user)
     return group.id
+
+
+def _system_account_user():
+    user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=ADMIN_UUID)
+    return user
 
 
 def test_acting_as__hidden_data_product_visible_for_currently_activated_admin(session):
@@ -183,12 +195,24 @@ def test_acting_as__hidden_data_product_id_not_visible_as_abstract_data_product_
 
 def test_acting_as__hidden_data_product_visible_for_system_account(session):
     data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
-    system_user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+    system_user = _system_account_user()
 
     with as_user(session, system_user.id):
         loaded = session.get(DataProduct, data_product.id)
 
     assert loaded.id == data_product.id
+
+
+def test_acting_as__hidden_data_product_not_visible_for_system_account_without_admin_role(
+    session,
+):
+    data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    system_user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+
+    with as_user(session, system_user.id):
+        loaded = session.get(DataProduct, data_product.id)
+
+    assert loaded is None
 
 
 def test_acting_as__hidden_data_product_query_can_skip_visibility_filter(session):
@@ -509,7 +533,7 @@ def test_acting_as__not_invite_only_output_port_visible_without_assignment(sessi
 
 def test_acting_as__invite_only_output_port_visible_for_system_account(session):
     output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
-    system_user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+    system_user = _system_account_user()
     output_port_id = output_port.id
     session.expunge(output_port)
 
@@ -612,17 +636,17 @@ def test_acting_as__technical_asset_of_hidden_data_product_visible_for_member(
 
 
 @pytest.mark.parametrize(
-    "user_kwargs",
+    "make_user",
     [
-        {"admin_expiry": datetime(2099, 1, 1)},
-        {"external_id": SYSTEM_ACCOUNT_BOT_EXTERNAL_ID},
+        lambda: UserFactory(admin_expiry=datetime(2099, 1, 1)),
+        _system_account_user,
     ],
 )
 def test_acting_as__technical_asset_of_hidden_data_product_visible_for_admin_and_system_account(
-    session, user_kwargs
+    session, make_user
 ):
     asset = _hidden_technical_asset()
-    user = UserFactory(**user_kwargs)
+    user = make_user()
 
     with as_user(session, user.id):
         loaded = _load(session, asset)
@@ -670,27 +694,11 @@ def _load(session, asset: TechnicalAsset, **kwargs) -> TechnicalAsset | None:
     )
 
 
-def _invite_only_output_port_consumed_by_member_of(user):
-    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
-    consumer = DataProductFactory()
-    DataProductRoleAssignmentFactory(
-        data_product_id=consumer.id,
-        identity_id=user.id,
-        role_id=RoleFactory.data_product_owner().id,
-    )
-    InputPortFactory(
-        output_port=output_port,
-        consuming_abstract_data_product=consumer,
-        status=InputPortStatus.APPROVED,
-    )
-    return output_port
-
-
 def test_output_port_visible_ignoring_consumption__hides_output_port_seen_only_as_consumer(
     session,
 ):
-    user = UserFactory()
-    output_port = _invite_only_output_port_consumed_by_member_of(user)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+    user = _consumer_member(InputPortStatus.APPROVED)(output_port)
     stmt = select(OutputPort.id).where(OutputPort.id == output_port.id)
 
     with as_user(session, user.id):
@@ -807,36 +815,28 @@ def _member_with(decision, via_group=False, owner=True):
 
 
 def _member_of_consumer(data_product):
-    user = UserFactory()
-    consumer = DataProductFactory()
-    DataProductRoleAssignmentFactory(
-        data_product_id=consumer.id,
-        identity_id=user.id,
-        role_id=RoleFactory.data_product_owner().id,
+    output_port = OutputPortFactory(
+        data_product=data_product, access_function=OutputPortAccessFunction.PRIVATE
     )
-    InputPortFactory(
-        output_port=OutputPortFactory(
-            data_product=data_product,
-            access_function=OutputPortAccessFunction.PRIVATE,
-        ),
-        consuming_abstract_data_product=consumer,
-        status=InputPortStatus.APPROVED,
-    )
-    return user
+    return _consumer_member(InputPortStatus.APPROVED)(output_port)
 
 
 def _system_account(data_product):
-    return UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+    return _system_account_user()
 
 
 def _admin(data_product):
-    user = UserFactory(admin_expiry=datetime(2099, 1, 1))
-    Authorization().assign_admin_role(user_id=str(user.id))
+    user = UserFactory(can_become_admin=True)
+    GlobalRoleAssignmentService(object_session(user)).become_admin(
+        user, "2099-01-01T00:00:00"
+    )
     return user
 
 
 def _revoked_admin(data_product):
-    return UserFactory(admin_expiry=datetime(2099, 1, 1))
+    user = _admin(data_product)
+    GlobalRoleAssignmentService(object_session(user)).revoke_admin(user)
+    return user
 
 
 _USERS = {
@@ -853,22 +853,9 @@ _USERS = {
 }
 
 
-_KNOWN_DRIFT = {
-    _revoked_admin: "revoke_admin removes the Casbin admin role but keeps admin_expiry",
-    _admin: "reload_enforcer drops admin roles; nothing restores them from admin_expiry",
-    _system_account: "Casbin has no grant for the system account; SQL lets it see all",
-}
-
-
 @pytest.mark.parametrize("visibility", list(DataProductVisibility))
 @pytest.mark.parametrize("make_user", _USERS.values(), ids=_USERS.keys())
-def test_visible_ids__agrees_with_casbin_route_check(
-    session, request, visibility, make_user
-):
-    if visibility is DataProductVisibility.HIDDEN and make_user in _KNOWN_DRIFT:
-        request.applymarker(
-            pytest.mark.xfail(strict=True, reason=_KNOWN_DRIFT[make_user])
-        )
+def test_visible_ids__agrees_with_casbin_route_check(session, visibility, make_user):
     data_product = DataProductFactory(visibility=visibility)
     user = make_user(data_product)
     AuthorizationService(session).reload_enforcer()
@@ -880,6 +867,115 @@ def test_visible_ids__agrees_with_casbin_route_check(
         dom=str(data_product.domain_id),
         obj=str(data_product.id),
         act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
+    )
+
+    assert sees is may_read
+
+
+def _owning(make_user):
+    def make(output_port):
+        data_product = object_session(output_port).get(
+            DataProduct, output_port.data_product_id
+        )
+        return make_user(data_product)
+
+    return make
+
+
+def _output_port_role(decision):
+    def make(output_port):
+        user = UserFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
+        )
+        DatasetRoleAssignmentFactory(
+            output_port=output_port, user_id=user.id, role_id=role.id, decision=decision
+        )
+        return user
+
+    return make
+
+
+def _consumer_member(status, sibling=False):
+    def make(output_port):
+        user = UserFactory()
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=consumer.id,
+            identity_id=user.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        consumed = (
+            OutputPortFactory(
+                data_product=object_session(output_port).get(
+                    DataProduct, output_port.data_product_id
+                ),
+                access_function=OutputPortAccessFunction.PRIVATE,
+            )
+            if sibling
+            else output_port
+        )
+        InputPortFactory(
+            output_port=consumed,
+            consuming_abstract_data_product=consumer,
+            status=status,
+        )
+        return user
+
+    return make
+
+
+_OUTPUT_PORT_USERS = {
+    "stranger": _stranger,
+    "owner": _owning(_member_with(DecisionStatus.APPROVED)),
+    "other_role": _owning(_member_with(DecisionStatus.APPROVED, owner=False)),
+    "group_member": _owning(_member_with(DecisionStatus.APPROVED, via_group=True)),
+    "pending_member": _owning(_member_with(DecisionStatus.PENDING)),
+    "output_port_role": _output_port_role(DecisionStatus.APPROVED),
+    "pending_output_port_role": _output_port_role(DecisionStatus.PENDING),
+    "consumer_member": _consumer_member(InputPortStatus.APPROVED),
+    "pending_consumer_member": _consumer_member(InputPortStatus.PENDING),
+    "sibling_consumer_member": _consumer_member(InputPortStatus.APPROVED, sibling=True),
+    "system_account": _system_account,
+    "admin": _admin,
+    "revoked_admin": _revoked_admin,
+}
+
+
+@pytest.mark.parametrize(
+    ("visibility", "access_function"),
+    [
+        (DataProductVisibility.DISCOVERABLE, OutputPortAccessFunction.UNRESTRICTED),
+        (DataProductVisibility.DISCOVERABLE, OutputPortAccessFunction.RESTRICTED),
+        (DataProductVisibility.DISCOVERABLE, OutputPortAccessFunction.PRIVATE),
+        (DataProductVisibility.HIDDEN, OutputPortAccessFunction.PRIVATE),
+    ],
+)
+@pytest.mark.parametrize(
+    "make_user", _OUTPUT_PORT_USERS.values(), ids=_OUTPUT_PORT_USERS.keys()
+)
+def test_acting_as__output_port_agrees_with_casbin_route_check(
+    session, visibility, access_function, make_user
+):
+    data_product = DataProductFactory(visibility=visibility)
+    output_port = OutputPortFactory(
+        data_product=data_product, access_function=access_function
+    )
+    user = make_user(output_port)
+    AuthorizationService(session).reload_enforcer()
+
+    with as_user(session, user.id):
+        sees = (
+            session.scalar(select(OutputPort.id).where(OutputPort.id == output_port.id))
+            is not None
+        )
+    may_read = Authorization().has_access(
+        sub=str(user.id),
+        dom=str(data_product.domain_id),
+        obj=str(output_port.id),
+        parent=str(data_product.id),
+        act=AuthorizationAction.HIDDEN__OUTPUT_PORT__READ,
     )
 
     assert sees is may_read

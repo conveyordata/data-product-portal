@@ -63,7 +63,7 @@ from app.data_products.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -119,7 +119,8 @@ class DataProductService(AbstractDataProductService):
                     OutputPortModel.data_product_id == data_product_id,
                     InputPortModel.status == InputPortStatus.APPROVED,
                 )
-                .distinct()
+                .distinct(),
+                execution_options=UNFILTERED,
             ).tuples()
         )
 

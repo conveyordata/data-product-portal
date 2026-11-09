@@ -17,7 +17,9 @@ from app.authorization.role_assignments.global_.schema import (
 )
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
+from app.core.authz import Authorization
 from app.database.database import ensure_exists
+from app.database.visibility import is_user_admin
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -97,6 +99,18 @@ class RoleAssignmentService:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="This assignment was already decided",
             )
+
+    def become_admin(self, user: UserModel, expiry: str) -> None:
+        self.ensure_can_become_admin(user)
+        user.admin_expiry = expiry
+        self.db.flush()
+        Authorization().assign_admin_role(user_id=str(user.id))
+
+    def revoke_admin(self, user: UserModel) -> None:
+        user.admin_expiry = None
+        self.db.flush()
+        if not self.db.scalar(select(is_user_admin(user.id))):
+            Authorization().revoke_admin_role(user_id=user.id)
 
     def ensure_can_become_admin(self, user: UserModel) -> None:
         if not user.can_become_admin:

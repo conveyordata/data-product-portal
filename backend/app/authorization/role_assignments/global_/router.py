@@ -39,10 +39,7 @@ def become_admin(
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    RoleAssignmentService(db).ensure_can_become_admin(user)
-    user.admin_expiry = request.expiry
-    authorizer = Authorization()
-    authorizer.assign_admin_role(user_id=str(user.id))
+    RoleAssignmentService(db).become_admin(user, request.expiry)
 
 
 @router.post(
@@ -53,8 +50,7 @@ def revoke_admin(
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    authorizer = Authorization()
-    authorizer.revoke_admin_role(user_id=user.id)
+    RoleAssignmentService(db).revoke_admin(user)
 
 
 @router.post(
