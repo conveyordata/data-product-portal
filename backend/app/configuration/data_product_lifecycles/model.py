@@ -24,8 +24,8 @@ class DataProductLifecycle(Base, BaseORM):
 
     # Relationships
     data_products: Mapped[list["DataProduct"]] = relationship(
-        lazy="raise", back_populates="lifecycle", cascade="all, delete-orphan"
+        lazy="raise", back_populates="lifecycle", passive_deletes=True
     )
     datasets: Mapped[list["OutputPort"]] = relationship(
-        lazy="raise", back_populates="lifecycle", cascade="all, delete-orphan"
+        lazy="raise", back_populates="lifecycle", passive_deletes=True
     )

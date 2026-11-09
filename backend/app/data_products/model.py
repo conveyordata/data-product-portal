@@ -178,7 +178,10 @@ class DataProduct(
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table, back_populates="data_products", lazy="raise"
+        secondary=tag_data_product_table,
+        back_populates="data_products",
+        lazy="raise",
+        passive_deletes=True,
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         back_populates="data_product",

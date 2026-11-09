@@ -13,6 +13,7 @@ from app.database.database import get_system_db_session
 from app.database.deps import get_db_session
 from app.main import app
 from app.open_api_export import custom_openapi
+from tests.route_util import iter_app_routes
 
 
 def test_endpoints_return_object_or_none():
@@ -192,24 +193,6 @@ def test_openapi_file_upload_uses_binary_schema():
     }
 
 
-def _iter_app_routes():
-    def walk(node):
-        if isinstance(node, APIRoute):
-            yield node
-            return
-
-        if type(node).__name__ == "_IncludedRouter":
-            for candidate in node.effective_candidates():
-                yield from walk(candidate)
-            return
-
-        if hasattr(node, "path") and hasattr(node, "dependencies"):
-            yield node
-
-    for route in app.routes:
-        yield from walk(route)
-
-
 def _route_has_authorization_enforce(route) -> bool:
     return any(isinstance(d.call, Enforcement) for d in route.dependant.dependencies)
 
@@ -228,7 +211,7 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
     }
     missing = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         if not getattr(route, "path", "").startswith("/api/v2/"):
             continue
         # We only check data products paths
@@ -249,7 +232,7 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
 def test_db_session_dependencies_use_function_scope():
     invalid = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         for dependant in _iter_dependants(route.dependant):
             call = getattr(dependant, "call", None)
             if call not in {get_db_session, get_system_db_session}:
@@ -278,7 +261,7 @@ def test_routes_only_use_get_db_session():
 
     invalid = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         if route.path in exceptions:
             continue
         direct_calls = {
@@ -398,7 +381,7 @@ def test_is_supported_key__rejects_unsupported_shape(endpoint):
 
 
 def _enforced_routes():
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         for dependency in route.dependant.dependencies:
             enforcement = dependency.call
             if (

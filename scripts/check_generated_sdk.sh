@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+[[ -d ${VIRTUAL_ENV:-} ]] || unset VIRTUAL_ENV
 
 # Check if the generated API is up to date
 

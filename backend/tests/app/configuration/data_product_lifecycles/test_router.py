@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from tests.factories import DataProductFactory, LifecycleFactory
@@ -37,6 +39,11 @@ class TestDataProductLifecyclesRouter:
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
+    def test_remove_data_product_lifecycle__not_found(self, client):
+        response = self.remove_data_product_lifecycle(client, uuid4())
+        assert response.status_code == 404
+
+    @pytest.mark.usefixtures("admin")
     def test_remove_data_product_lifecycle_coupled_data_product(self, client):
         data_product_lifecycle = LifecycleFactory()
         DataProductFactory(lifecycle=data_product_lifecycle)
@@ -48,6 +55,13 @@ class TestDataProductLifecyclesRouter:
             client, {"name": "test", "value": 2, "color": "blue"}
         )
         assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_lifecycle__not_found(self, client):
+        response = self.update_data_product_lifecycle(
+            client, {"name": "update", "value": 3, "color": "green"}, uuid4()
+        )
+        assert response.status_code == 404
 
     def test_update_data_product_lifecycle_admin_only(self, client):
         data_product_lifecycle = LifecycleFactory()

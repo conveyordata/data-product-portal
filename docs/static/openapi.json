@@ -17310,92 +17310,6 @@
         ],
         "title": "OutputPortUpdate"
       },
-      "OwnedTechnicalAsset": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          },
-          "technical_mapping": {
-            "$ref": "#/components/schemas/TechnicalMapping"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
-          },
-          "configuration": {
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": true,
-            "type": "object",
-            "required": [
-              "name"
-            ],
-            "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "technical_mapping",
-          "owner_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "OwnedTechnicalAsset"
-      },
       "PendingActionResponse": {
         "properties": {
           "pending_actions": {
@@ -18922,7 +18836,7 @@
             "title": "Technical Asset Id"
           },
           "technical_asset": {
-            "$ref": "#/components/schemas/OwnedTechnicalAsset"
+            "$ref": "#/components/schemas/TechnicalAsset"
           },
           "status": {
             "$ref": "#/components/schemas/DecisionStatus"

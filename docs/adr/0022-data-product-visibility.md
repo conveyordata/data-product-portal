@@ -113,3 +113,13 @@ The notable changes are:
 * When approved assignments are revoked or denied, the existing revoke logic removes the user-specific group.
 
 This keeps authorization centralized and avoids a second visibility enforcement layer.
+
+### Writes under the ORM filters
+
+The ORM filters hide Hidden Data Products, their Technical Assets and Invite only Output Ports from every query made on behalf of a user, including the reads a write depends on. A configuration manager who is not an admin would otherwise fail to delete a tag that has association rows they cannot see, or count too few rows before refusing a delete. Therefore:
+
+* The filters are for reads. A write or integrity check that must see every row, such as an "in use" count or a migration between Domains or Data Product types, uses `UNFILTERED`.
+* The database cleans up association rows: every foreign key on an association table declares `ondelete` (cascade or refuse), and the relationship sets `passive_deletes`. Tests check both.
+* A test runs every configuration `DELETE` and `PUT` route as a configuration manager and as an admin with Hidden Data Products and Invite only Output Ports present, and expects the same result.
+
+We rejected skipping the filters for loads made while the ORM flushes: SQLAlchemy only exposes that state through a private attribute.

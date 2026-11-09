@@ -16,6 +16,7 @@ from app.configuration.data_product_lifecycles.schema_response import (
     DataProductLifeCyclesGetItem,
     UpdateDataProductLifeCycleResponse,
 )
+from app.database.database import ensure_exists
 
 
 class DataProductLifeCycleService:
@@ -40,7 +41,9 @@ class DataProductLifeCycleService:
     def update_data_product_lifecycle(
         self, id: UUID, data_product_lifecycle: DataProductLifeCycleUpdate
     ) -> UpdateDataProductLifeCycleResponse:
-        lifecycle = self.db.get(DataProductLifeCycleModel, id)
+        lifecycle: DataProductLifeCycleModel = ensure_exists(
+            id, self.db, DataProductLifeCycleModel
+        )
         lifecycle.color = data_product_lifecycle.color
         lifecycle.is_default = data_product_lifecycle.is_default
         lifecycle.name = data_product_lifecycle.name
@@ -49,7 +52,8 @@ class DataProductLifeCycleService:
         return UpdateDataProductLifeCycleResponse(id=id)
 
     def delete_data_product_lifecycle(self, lifecycle_id: UUID) -> None:
-        lifecycle = self.db.get(DataProductLifeCycleModel, lifecycle_id)
+        lifecycle: DataProductLifeCycleModel = ensure_exists(
+            lifecycle_id, self.db, DataProductLifeCycleModel
+        )
         self.db.delete(lifecycle)
         self.db.flush()
-        return
