@@ -25,7 +25,7 @@ from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.data_products.technical_assets.service import ensure_technical_asset_shareable
-from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
 from app.groups.service import GroupService
 from app.users.schema import User
 from app.users.schema_response import (
@@ -68,7 +68,7 @@ class TechnicalAssetOutputPortService:
                     TechnicalAssetOutputPortAssociationModel.technical_asset
                 ),
             ),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+            execution_options=UNFILTERED,
         )
         if not current_link:
             raise HTTPException(

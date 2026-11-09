@@ -86,6 +86,19 @@ class TestDataProductTypesRouter:
         response = self.create_data_product_type(client, data_product_type_payload)
         assert response.status_code == 403
 
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_type__not_found(self, client):
+        response = self.update_data_product_type(
+            client,
+            {
+                "name": "update",
+                "description": "update",
+                "icon_key": DataProductIconKey.DEFAULT.value,
+            },
+            uuid4(),
+        )
+        assert response.status_code == 404
+
     def test_update_data_product_type_admin_only(self, client):
         data_product_type = DataProductTypeFactory()
         update_payload = {

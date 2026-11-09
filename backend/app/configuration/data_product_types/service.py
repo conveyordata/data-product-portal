@@ -68,7 +68,7 @@ class DataProductTypeService:
     def update_data_product_type(
         self, id: UUID, data_product_type: DataProductTypeUpdate
     ) -> UpdateDataProductTypeResponse:
-        current_data_product_type = self.db.get(DataProductTypeModel, id)
+        current_data_product_type = ensure_data_product_type_exists(id, self.db)
         updated_data_product_type = data_product_type.parse_pydantic_schema()
 
         for attr, value in updated_data_product_type.items():
