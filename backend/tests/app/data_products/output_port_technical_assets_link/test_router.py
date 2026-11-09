@@ -5,6 +5,7 @@ import pytest
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.conftest import (
@@ -505,6 +506,42 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             response.json()["detail"]
             == "You don't have permission to perform this action"
         )
+
+    @pytest.mark.parametrize(
+        ("decide", "expected_status"),
+        [
+            ("approve_link_between_technical_asset_and_output_port", "approved"),
+            ("deny_link_between_technical_asset_and_output_port", "denied"),
+        ],
+    )
+    def test_decide_technical_asset_link__output_port_role_on_hidden_data_product(
+        self, client, session, decide, expected_status
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory(
+            data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        )
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=output_port.id
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(
+            output_port=output_port, status=DecisionStatus.PENDING
+        )
+
+        response = getattr(self, decide)(
+            client,
+            output_port.data_product.id,
+            link.technical_asset.id,
+            output_port.id,
+        )
+
+        assert response.status_code == 200, response.text
+        session.refresh(link)
+        assert link.status == expected_status
 
     def test_remove_technical_asset_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

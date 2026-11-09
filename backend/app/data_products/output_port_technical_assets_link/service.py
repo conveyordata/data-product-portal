@@ -5,7 +5,7 @@ from uuid import UUID
 import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment as DataProductRoleAssignmentModel,
@@ -25,6 +25,7 @@ from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.data_products.technical_assets.service import ensure_technical_asset_shareable
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.groups.service import GroupService
 from app.users.schema import User
 from app.users.schema_response import (
@@ -35,15 +36,6 @@ from app.users.schema_response import (
 class TechnicalAssetOutputPortService:
     def __init__(self, db: Session):
         self.db = db
-
-    def get_link_by_id(self, id: UUID) -> TechnicalAssetOutputPortAssociationModel:
-        current_link = self.db.get(TechnicalAssetOutputPortAssociationModel, id)
-        if not current_link:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset data output link {id} not found",
-            )
-        return current_link
 
     def get_link(
         self, *, data_product_id: UUID, technical_asset_id: UUID, output_port_id: UUID
@@ -70,11 +62,20 @@ class TechnicalAssetOutputPortService:
                 OutputPort.data_product_id == data_product_id,
                 TechnicalAssetModel.owner_id == data_product_id,
             )
+            .options(
+                contains_eager(TechnicalAssetOutputPortAssociationModel.technical_asset)
+            ),
+            # Callers are authorized on the Output Port, which can belong to a
+            # Hidden Data Product the actor has no role on.
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset data output link {id} not found",
+                detail=(
+                    f"Output Port {output_port_id} link to Technical Asset "
+                    f"{technical_asset_id} not found"
+                ),
             )
         return current_link
 
@@ -120,23 +121,6 @@ class TechnicalAssetOutputPortService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        self.db.flush()
-        return current_link
-
-    def remove_technical_asset_link(
-        self,
-        data_product_id: UUID,
-        technical_asset_id: UUID,
-        output_port_id: UUID,
-        *,
-        actor: User,
-    ) -> TechnicalAssetOutputPortAssociationModel:
-        current_link = self.get_link(
-            data_product_id=data_product_id,
-            technical_asset_id=technical_asset_id,
-            output_port_id=output_port_id,
-        )
-        self.db.delete(current_link)
         self.db.flush()
         return current_link
 
