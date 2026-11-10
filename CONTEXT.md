@@ -68,7 +68,9 @@ A name a Provisioner registers on a Data Product, Exploration or Domain to block
 - At least one **Access Type** is always mapped to **Invite only**.
 - An **Invite only** **Output Port** is seen by admins, **Members** of its owning Data Product, users with an approved role on the Output Port itself, and **Members** of a **Consuming Data Product** that consumes it; nobody else.
 - An **Exploration** cannot consume an **Invite only** **Output Port**.
-- Consuming an **Invite only** **Output Port** does not make it searchable, nor reveal which other Data Products consume it.
+- Consuming an **Invite only** **Output Port** does not make it searchable.
+- Anyone who can see an **Output Port** sees which Data Products consume it; a consuming Data Product they cannot see is redacted: its name and namespace are hidden, the requester and reason stay visible.
+- A Data Product's **Input Ports** on an **Invite only** **Output Port** are shown only to its **Members** and to those who see that Output Port other than by consuming it.
 - Anyone who can see an **Output Port** can read its **Announcements**; only its producing team can post or delete them.
 - A **Domain** that still has **Data Products** or **Explorations** cannot be deleted.
 - A **Domain** with **Finalizers** stays in deleting until every **Provisioner** has removed its own.
