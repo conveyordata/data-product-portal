@@ -11,7 +11,7 @@ function plugin(overrides: Partial<UiElementMetadataResponse> = {}): UiElementMe
         plugin: 'SomePlugin',
         platform: 'some-platform',
         display_name: 'Some platform',
-        icon_name: 'some-logo.svg',
+        icon_name: 'azure-logo.svg',
         has_environments: false,
         detailed_name: 'Some platform',
         ui_metadata: [],
@@ -23,7 +23,7 @@ function tile(overrides: Partial<PlatformTile> = {}): PlatformTile {
     return {
         label: 'Some platform',
         value: 'some-platform',
-        icon_name: 'some-logo.svg',
+        icon_name: 'azure-logo.svg',
         ...overrides,
     } as PlatformTile;
 }

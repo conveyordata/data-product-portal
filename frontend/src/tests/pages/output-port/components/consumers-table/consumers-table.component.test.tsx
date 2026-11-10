@@ -10,6 +10,7 @@ import {
     type OutputPortInputPort,
     RenewalStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
@@ -59,6 +60,7 @@ function consumer(
 }
 
 function mockApi() {
+    mockDataProductHttp('consumer-1');
     server.use(
         http.get('*/api/v2/authz/access/:action', () => HttpResponse.json({ allowed: true })),
         http.get('*/api/v2/users/current/pending_actions', () => HttpResponse.json({ pending_actions: [] })),

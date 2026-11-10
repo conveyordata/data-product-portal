@@ -2,6 +2,10 @@ import { HttpResponse, http } from 'msw';
 import { Link, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Cart from '@/pages/cart/cart.page.tsx';
+import {
+    AccessDurationType,
+    type GetOutputPortAccessDurationsResponse,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
@@ -32,6 +36,18 @@ const createNewExploration = async () => {
 };
 
 describe('Cart', () => {
+    beforeEach(() => {
+        const permanent = { access_duration_type: AccessDurationType.Permanent, days: 0 };
+        server.use(
+            http.get('*/api/v2/data_products/:dataProductId/output_ports/:id/access_durations', ({ params }) =>
+                HttpResponse.json<GetOutputPortAccessDurationsResponse>({
+                    id: String(params.id),
+                    data_product_access_duration: permanent,
+                    exploration_access_duration: permanent,
+                }),
+            ),
+        );
+    });
     const selectDataProducts = async () => {
         const dataProductChoice = await screen.findByText('I want to build Data Products');
         await userEvent.click(dataProductChoice);
@@ -46,6 +62,7 @@ describe('Cart', () => {
     };
     describe('Empty cart page', () => {
         it('Should show a message to direct to the Marketplace', async () => {
+            mockOutputPortsSearch([]);
             renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 currentUser: mockUsers[0],
@@ -551,6 +568,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
+            mockGetDomains();
             mockOutputPortsSearch();
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id);
