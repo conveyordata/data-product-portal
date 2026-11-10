@@ -56,6 +56,8 @@ The application keeps Casbin and the database in sync when a product is created 
 
 The reason for adding ORM based visibility is to reduce the change of mistakes.
 
+The split between deciding and enforcing was later sharpened: see [The database decides, Casbin enforces routes](#the-database-decides-casbin-enforces-routes).
+
 ### Confirmation
 
 This will be reflected in the application as follows:
@@ -123,11 +125,19 @@ The ORM filters hide Hidden Data Products, their Technical Assets and Invite onl
 
 We rejected skipping the filters for loads made while the ORM flushes: SQLAlchemy only exposes that state through a private attribute.
 
-### One visibility module
+### The database decides, Casbin enforces routes
 
-`app/database/visibility.py` is the only place that defines who sees a Data Product, Exploration, Technical Asset or Output Port.
-The ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all ask it, and `acting_as` is the only way to act as a user on a session.
-Redaction used to ask Casbin, whose cache lags a revocation, while the list next to it was filtered live; it now uses the same SQL rule as the list.
-Casbin keeps guarding routes, and a test checks that both agree on the same fixtures.
-Whether a user is an admin is decided by the database (`app/authorization/role_assignments/global_/admin.py`): a permanent, approved admin role assignment, or a temporary elevation whose expiry is in the future (see [ADR-0008](0008-admin-toggle.md)).
-Casbin's admin role follows it: becoming and revoking admin update both, and reloading the enforcer restores temporary admins.
+Casbin was chosen as the engine because every route check already went through it, and a second permission system risked drifting from it or being forgotten on nested routes; redaction was meant to reuse it.
+Adding ORM based visibility for lists created a second copy of the rule anyway: lists were decided in SQL, routes and redaction by Casbin, and nothing kept the two aligned.
+The same happened to admin status ([ADR-0008](0008-admin-toggle.md)): the SQL filter read the admin expiry, routes read Casbin's admin role.
+A parity test found them disagreeing: revoking admin left the expiry set, a restart wiped temporary admins from Casbin, and the system account only saw Hidden items through a special case.
+A Casbin sync run on behalf of a user also dropped other consumers' access, because it read through that user's filter.
+
+We therefore separate deciding from enforcing:
+
+* The database decides. `app/database/visibility.py` is the only place that defines who sees a Data Product, Exploration, Technical Asset or Output Port; the ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all use it, and `acting_as` is the only way to act as a user on a session. Redaction no longer asks Casbin, whose cache lagged revocations.
+* Whether a user is an admin is decided by `app/authorization/role_assignments/global_/admin.py`: a permanent, approved admin role assignment, or a temporary elevation whose expiry is in the future.
+* Casbin is a projection of the database that enforces routes. Becoming, revoking and removing admin and the visibility syncs write the database first and then update Casbin; reloading the enforcer rebuilds it from the database, temporary admins included. Syncs read `UNFILTERED`.
+* Parity tests compare the visibility module with the Casbin route checks for Data Products and Output Ports, for every kind of user.
+
+Still open: Casbin is written before the request commits, so a rolled-back request leaves it ahead of the database until the next reload; each worker caches Casbin rules until its next policy reload; and a reload can overwrite a change another worker makes at the same moment.
