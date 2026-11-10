@@ -16,6 +16,7 @@ import { ReviewRequestModal } from '@/components/pending-access-requests-modal/r
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { transformToTableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
 import { TabKeys } from '@/pages/product-studio/product-studio-tabkeys.ts';
+import { AnnouncementType } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
 import {
     useGetUserNotificationsQuery,
@@ -88,8 +89,8 @@ export function HomeNotifications() {
                 .filter((n) => isAnnouncementNotification(n) && n.event.announcement && n.event.output_port)
                 .sort((a, b) => {
                     const urgency =
-                        ANNOUNCEMENT_URGENCY.findIndex((type) => type === a.event.announcement?.type) -
-                        ANNOUNCEMENT_URGENCY.findIndex((type) => type === b.event.announcement?.type);
+                        ANNOUNCEMENT_URGENCY.indexOf(a.event.announcement?.type ?? AnnouncementType.Info) -
+                        ANNOUNCEMENT_URGENCY.indexOf(b.event.announcement?.type ?? AnnouncementType.Info);
                     return urgency || new Date(b.event.created_on).getTime() - new Date(a.event.created_on).getTime();
                 }),
         [notifications],
