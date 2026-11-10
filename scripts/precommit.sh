@@ -3,7 +3,9 @@ set -uo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-if ! git diff --quiet; then
+if [[ ${1-} == --files ]]; then
+    check_only=1
+elif ! git diff --quiet; then
     echo "Stage your change first: the files the hooks rewrite are staged for you." >&2
     exit 1
 fi
@@ -26,6 +28,8 @@ if [[ -z $VIRTUAL_ENV ]]; then
     exit 1
 fi
 export VIRTUAL_ENV PATH="$VIRTUAL_ENV/bin:$PATH" PYTHONPATH="$PWD/backend:$PWD/plugins" OTEL_SDK_DISABLED=true
+
+[[ -n ${check_only-} ]] && exec pre-commit run "$@"
 
 untracked() { git ls-files --others --exclude-standard; }
 before="$(untracked)"
