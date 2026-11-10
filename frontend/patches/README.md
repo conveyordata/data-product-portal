@@ -1,6 +1,7 @@
 This folder is used to apply temporary patches to npm packages.
 
 If you need to create a patch:
+
 - make the needed modifications directly in your `node_modules` folder
 - run `npx patch-package "name_of_the_package"`
 - this will create the corresponding patch files in this directory
