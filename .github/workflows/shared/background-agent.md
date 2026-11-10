@@ -54,7 +54,7 @@ steps:
   - name: Install frontend dependencies
     run: task setup:frontend
   - name: Install pre-commit
-    run: pip install pre-commit && pre-commit install-hooks
+    run: pip install -r .github/requirements-pre-commit.txt --require-hashes && pre-commit install-hooks
   - name: Preload embedding model
     working-directory: backend
     run: mkdir -p $FASTEMBED_CACHE_PATH && poetry run python -m app.embed
