@@ -1,8 +1,7 @@
 import type { Editor } from '@tiptap/react';
-import { act } from 'react';
 import { describe, expect, it } from 'vitest';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { renderWithProviders, screen, userEvent } from '../../test-utils';
+import { act, renderWithProviders, screen, userEvent } from '../../test-utils';
 
 async function renderEditor(initialContent: string) {
     const { container } = renderWithProviders(<TextEditor initialContent={initialContent} />);

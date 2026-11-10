@@ -24,7 +24,7 @@ import {
 import { server } from '@/tests/mocks/server.ts';
 import { mockGetTags } from '@/tests/mocks/tags.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { act, renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 afterEach(() => {
     localStorage.clear();
@@ -305,7 +305,7 @@ describe('Cart', () => {
             await createNewDataProduct();
             const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
 
-            await new Promise((resolve) => setTimeout(resolve, 700));
+            await act(() => new Promise((resolve) => setTimeout(resolve, 700)));
             await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), 'sales');
 
             await waitFor(() => expect(namespace()?.value).toBe('sales'));

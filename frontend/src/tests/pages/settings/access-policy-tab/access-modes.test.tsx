@@ -58,7 +58,7 @@ describe('AccessModes', () => {
         });
 
         const addButton = screen.getByRole('button', { name: /Add access mode/i });
-        addButton.click();
+        await userEvent.click(addButton);
 
         await waitFor(() => {
             expect(screen.getByText('Create Access Mode')).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('AccessModes', () => {
         });
 
         const editButtons = screen.getAllByRole('button', { name: /Edit/i });
-        editButtons[0].click();
+        await userEvent.click(editButtons[0]);
 
         await waitFor(() => {
             expect(screen.getByText('Edit Access Mode')).toBeInTheDocument();
