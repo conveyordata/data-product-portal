@@ -10,8 +10,11 @@ import {
     type OutputPortInputPort,
     RenewalStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { allowAllAuth } from '@/tests/mocks/auth.ts';
+import { mockExpiringSoonThreshold } from '@/tests/mocks/configurationAccessDurations.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
+import { mockUserPendingActions } from '@/tests/mocks/userPendingActions.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 const requester = {
@@ -61,13 +64,9 @@ function consumer(
 
 function mockApi() {
     mockDataProductHttp('consumer-1');
-    server.use(
-        http.get('*/api/v2/authz/access/:action', () => HttpResponse.json({ allowed: true })),
-        http.get('*/api/v2/users/current/pending_actions', () => HttpResponse.json({ pending_actions: [] })),
-        http.get('*/api/v2/configuration/access_durations/expiring_soon_threshold', () =>
-            HttpResponse.json({ days: 14 }),
-        ),
-    );
+    allowAllAuth();
+    mockUserPendingActions([]);
+    mockExpiringSoonThreshold();
 }
 
 function renderTable(link: OutputPortInputPort) {
@@ -147,6 +146,7 @@ describe('ConsumersTable', () => {
     });
 
     it('renews access for the consumer after confirmation', async () => {
+        const user = userEvent.setup();
         let body: unknown;
         server.use(
             http.post('*/api/v2/data_products/dp-1/output_ports/op-1/input_ports/renew', async ({ request }) => {
@@ -158,13 +158,14 @@ describe('ConsumersTable', () => {
 
         const renewButton = await screen.findByRole('button', { name: 'Renew Access' });
         await waitFor(() => expect(renewButton).toBeEnabled());
-        await userEvent.click(renewButton);
-        await userEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+        await user.click(renewButton);
+        await user.click(await screen.findByRole('button', { name: 'Confirm' }));
 
         await waitFor(() => expect(body).toEqual({ consuming_data_product_id: 'consumer-1' }));
     });
 
     it('refreshes the consumers after renewing access', async () => {
+        const user = userEvent.setup();
         let renewed = false;
         mockApi();
         server.use(
@@ -182,8 +183,8 @@ describe('ConsumersTable', () => {
 
         const renewButton = await screen.findByRole('button', { name: 'Renew Access' });
         await waitFor(() => expect(renewButton).toBeEnabled());
-        await userEvent.click(renewButton);
-        await userEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+        await user.click(renewButton);
+        await user.click(await screen.findByRole('button', { name: 'Confirm' }));
 
         expect(await screen.findByRole('button', { name: 'Revoke Access' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Renew Access' })).not.toBeInTheDocument();

@@ -50,6 +50,7 @@ describe('AccessModes', () => {
     });
 
     it('opens modal in create mode when Add access mode button is clicked', async () => {
+        const user = userEvent.setup();
         mockAccessModesHttp();
         renderWithProviders(<AccessModes />);
 
@@ -58,7 +59,7 @@ describe('AccessModes', () => {
         });
 
         const addButton = screen.getByRole('button', { name: /Add access mode/i });
-        await userEvent.click(addButton);
+        await user.click(addButton);
 
         await waitFor(() => {
             expect(screen.getByText('Create Access Mode')).toBeInTheDocument();
@@ -66,6 +67,7 @@ describe('AccessModes', () => {
     });
 
     it('opens modal in edit mode when Edit button is clicked', async () => {
+        const user = userEvent.setup();
         mockAccessModesHttp();
         renderWithProviders(<AccessModes />);
 
@@ -74,7 +76,7 @@ describe('AccessModes', () => {
         });
 
         const editButtons = screen.getAllByRole('button', { name: /Edit/i });
-        await userEvent.click(editButtons[0]);
+        await user.click(editButtons[0]);
 
         await waitFor(() => {
             expect(screen.getByText('Edit Access Mode')).toBeInTheDocument();

@@ -2,7 +2,7 @@ import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { server } from '@/tests/mocks/server.ts';
-import { renderWithProviders, screen, waitFor } from '../../test-utils';
+import { renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
 
 describe('SidebarLogo', () => {
     it('shows the configured portal name in the sidebar and the browser tab', async () => {

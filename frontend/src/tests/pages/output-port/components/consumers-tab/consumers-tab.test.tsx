@@ -11,6 +11,7 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { mockExpiringSoonThreshold } from '@/tests/mocks/configurationAccessDurations.ts';
 import { server } from '@/tests/mocks/server.ts';
+import { mockUserPendingActions } from '@/tests/mocks/userPendingActions.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 describe('ConsumersTab', () => {
@@ -19,12 +20,12 @@ describe('ConsumersTab', () => {
         [false, false],
     ])('shows the add action when access is %s', async (allowed, visible) => {
         mockExpiringSoonThreshold();
+        mockUserPendingActions([]);
         server.use(
             http.get('*/api/v2/authz/access/:action', () => HttpResponse.json({ allowed })),
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId/input_ports/', () =>
                 HttpResponse.json({ input_ports: [] }),
             ),
-            http.get('*/api/v2/users/current/pending_actions', () => HttpResponse.json({ pending_actions: [] })),
         );
 
         renderWithProviders(<ConsumersTab dataProductId="data-product-id" outputPortId="output-port-id" />);

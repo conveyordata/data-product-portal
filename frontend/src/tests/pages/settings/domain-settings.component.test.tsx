@@ -21,6 +21,7 @@ describe('Domain settings without environment scope', () => {
     });
 
     it.each(['create', 'edit'] as const)('only sends Domain metadata when saving in %s mode', async (mode) => {
+        const user = userEvent.setup();
         const save = vi.fn();
         const fetchEnvironments = vi.fn(() => HttpResponse.json({ environments: mockEnvironments }));
         server.use(
@@ -46,13 +47,13 @@ describe('Domain settings without environment scope', () => {
         expect(screen.queryByText('Environment Setting')).not.toBeInTheDocument();
         const name = screen.getByRole('textbox', { name: 'Name' });
         const description = screen.getByRole('textbox', { name: 'Description' });
-        await userEvent.clear(name);
-        await userEvent.type(name, 'Research');
-        await userEvent.clear(description);
-        await userEvent.type(description, 'Research domain');
+        await user.clear(name);
+        await user.type(name, 'Research');
+        await user.clear(description);
+        await user.type(description, 'Research domain');
         const submit = screen.getByRole('button', { name: mode === 'edit' ? 'Update' : 'Create' });
         await waitFor(() => expect(submit).toBeEnabled());
-        await userEvent.click(submit);
+        await user.click(submit);
         const metadata = { name: 'Research', description: 'Research domain' };
         await waitFor(() =>
             expect(save).toHaveBeenCalledWith(mode === 'create' ? { ...metadata, namespace: 'Research' } : metadata),

@@ -72,5 +72,5 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
-export { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+export { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';

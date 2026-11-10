@@ -30,9 +30,9 @@ afterEach(() => {
     localStorage.clear();
 });
 
-const createNewExploration = async () => {
+const createNewExploration = async (user: ReturnType<typeof userEvent.setup>) => {
     const existingChoice = await screen.findByText('Create a new Exploration');
-    await userEvent.click(existingChoice);
+    await user.click(existingChoice);
 };
 
 describe('Cart', () => {
@@ -48,17 +48,17 @@ describe('Cart', () => {
             ),
         );
     });
-    const selectDataProducts = async () => {
+    const selectDataProducts = async (user: ReturnType<typeof userEvent.setup>) => {
         const dataProductChoice = await screen.findByText('I want to build Data Products');
-        await userEvent.click(dataProductChoice);
+        await user.click(dataProductChoice);
     };
-    const selectExplorations = async () => {
+    const selectExplorations = async (user: ReturnType<typeof userEvent.setup>) => {
         const explorationsChoice = await screen.findByText('I want to explore this data');
-        await userEvent.click(explorationsChoice);
+        await user.click(explorationsChoice);
     };
-    const selectExistingExplorations = async () => {
+    const selectExistingExplorations = async (user: ReturnType<typeof userEvent.setup>) => {
         const existingChoice = await screen.findByText('Select an existing Exploration');
-        await userEvent.click(existingChoice);
+        await user.click(existingChoice);
     };
     describe('Empty cart page', () => {
         it('Should show a message to direct to the Marketplace', async () => {
@@ -72,11 +72,12 @@ describe('Cart', () => {
         });
     });
     describe('Cart should support existing data products', () => {
-        const selectExistingDataProducts = async () => {
+        const selectExistingDataProducts = async (user: ReturnType<typeof userEvent.setup>) => {
             const existingChoice = await screen.findByText('Select an existing Data Product');
-            await userEvent.click(existingChoice);
+            await user.click(existingChoice);
         };
         it('should allow users to select an existing data product', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             // Mock the output ports search (cart items)
@@ -96,19 +97,19 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await selectExistingDataProducts();
+            await selectDataProducts(user);
+            await selectExistingDataProducts(user);
 
             const selectDataProduct1 = await screen.findByText(mockDataProducts[0].name);
-            await userEvent.click(selectDataProduct1);
+            await user.click(selectDataProduct1);
 
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
             );
-            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+            await user.type(justificationTextArea, 'I need this data for my analysis.');
 
             const submitButton = await screen.findByText('Submit access requests');
-            await userEvent.click(submitButton);
+            await user.click(submitButton);
 
             // Assert the submit API was called
             await waitFor(() => {
@@ -117,6 +118,7 @@ describe('Cart', () => {
         });
 
         it('When selecting an existing data product with overlap in input ports and the cart it should show a warning', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -132,22 +134,23 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await selectExistingDataProducts();
+            await selectDataProducts(user);
+            await selectExistingDataProducts(user);
 
             const selectDataProduct1 = await screen.findByText(mockDataProducts[0].name);
-            await userEvent.click(selectDataProduct1);
+            await user.click(selectDataProduct1);
 
             await waitFor(() => {
                 expect(
                     screen.getByText(
                         /Output Ports in the cart, for which the selected Data Product already has access/,
                     ),
-                ).toBeTruthy();
+                ).toBeInTheDocument();
             });
         });
 
         it('When selecting an existing data product with overlap in output ports and the cart should show a warning', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -163,14 +166,16 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await selectExistingDataProducts();
+            await selectDataProducts(user);
+            await selectExistingDataProducts(user);
 
             const selectDataProduct1 = await screen.findByText(mockDataProducts[0].name);
-            await userEvent.click(selectDataProduct1);
+            await user.click(selectDataProduct1);
 
             await waitFor(() => {
-                expect(screen.getByText(/Output Ports, that are part of your selected Data Product/)).toBeTruthy();
+                expect(
+                    screen.getByText(/Output Ports, that are part of your selected Data Product/),
+                ).toBeInTheDocument();
             });
         });
     });
@@ -178,45 +183,51 @@ describe('Cart', () => {
     describe('Cart should support creating a new data product', () => {
         beforeEach(() => mockGetEnvironments());
 
-        const createNewDataProduct = async () => {
+        const createNewDataProduct = async (user: ReturnType<typeof userEvent.setup>) => {
             const existingChoice = await screen.findByText('Create a new Data Product');
-            await userEvent.click(existingChoice);
+            await user.click(existingChoice);
         };
 
-        const fillRequiredDataProductFields = async ({
-            name = 'My New Data Product',
-            description = 'A detailed description of the data product.',
-            hidden = false,
-            justification = 'I need this data for my analysis.',
-        } = {}) => {
+        const fillRequiredDataProductFields = async (
+            user: ReturnType<typeof userEvent.setup>,
+            {
+                name = 'My New Data Product',
+                description = 'A detailed description of the data product.',
+                hidden = false,
+                justification = 'I need this data for my analysis.',
+            } = {},
+        ) => {
             const nameInput = await screen.findByRole('textbox', { name: /name/i });
-            await userEvent.type(nameInput, name);
+            await user.type(nameInput, name);
 
             if (hidden) {
-                await userEvent.click(screen.getByText('Hidden'));
+                await user.click(screen.getByText('Hidden'));
                 await waitFor(() => {
-                    expect(screen.getByText(/Only use a hidden Data Product when it's really required/i)).toBeTruthy();
+                    expect(
+                        screen.getByText(/Only use a hidden Data Product when it's really required/i),
+                    ).toBeInTheDocument();
                 });
             }
 
-            await userEvent.click(screen.getByRole('combobox', { name: /type/i }));
-            await userEvent.click(await screen.findByText('Reporting'));
+            await user.click(screen.getByRole('combobox', { name: /type/i }));
+            await user.click(await screen.findByText('Reporting'));
 
-            await userEvent.click(screen.getByRole('combobox', { name: /status/i }));
-            await userEvent.click(await screen.findByText('Draft'));
+            await user.click(screen.getByRole('combobox', { name: /status/i }));
+            await user.click(await screen.findByText('Draft'));
 
-            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
-            await userEvent.click(await screen.findByText('Finance'));
+            await user.click(screen.getByRole('combobox', { name: /domain/i }));
+            await user.click(await screen.findByText('Finance'));
 
-            await userEvent.type(screen.getByRole('textbox', { name: /description/i }), description);
+            await user.type(screen.getByRole('textbox', { name: /description/i }), description);
 
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
             );
-            await userEvent.type(justificationTextArea, justification);
+            await user.type(justificationTextArea, justification);
         };
 
         it('Should succeed when filling in the form completely', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -241,12 +252,12 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await createNewDataProduct();
-            await fillRequiredDataProductFields();
+            await selectDataProducts(user);
+            await createNewDataProduct(user);
+            await fillRequiredDataProductFields(user);
 
             const submitButton = await screen.findByText('Create');
-            await userEvent.click(submitButton);
+            await user.click(submitButton);
 
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
@@ -254,6 +265,7 @@ describe('Cart', () => {
         });
 
         it('lets the user type a namespace when the name has no usable characters', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             mockOutputPortsSearch();
@@ -272,17 +284,18 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await createNewDataProduct();
+            await selectDataProducts(user);
+            await createNewDataProduct(user);
             const namespace = () => document.querySelector('[data-cy="namespace"]');
             expect(namespace()).toBeDisabled();
 
-            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+            await user.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
 
             await waitFor(() => expect(namespace()).toBeEnabled());
         });
 
         it('keeps suggesting the namespace when the user starts typing after the form settled', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             mockOutputPortsSearch();
@@ -301,18 +314,19 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await createNewDataProduct();
+            await selectDataProducts(user);
+            await createNewDataProduct(user);
             const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
 
             await act(() => new Promise((resolve) => setTimeout(resolve, 700)));
-            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), 'sales');
+            await user.type(await screen.findByRole('textbox', { name: /name/i }), 'sales');
 
             await waitFor(() => expect(namespace()?.value).toBe('sales'));
             expect(namespace()).toBeDisabled();
         });
 
         it('should warn before creating a hidden data product', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -336,21 +350,21 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectDataProducts();
-            await createNewDataProduct();
-            await fillRequiredDataProductFields({
+            await selectDataProducts(user);
+            await createNewDataProduct(user);
+            await fillRequiredDataProductFields(user, {
                 name: 'My Hidden Data Product',
                 description: 'Secret product details',
                 hidden: true,
             });
 
-            await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+            await user.click(screen.getByRole('button', { name: 'Create' }));
             await waitFor(() => {
                 expect(screen.getAllByRole('button', { name: 'Create' }).length).toBeGreaterThan(1);
             });
 
             const confirmButtons = screen.getAllByRole('button', { name: 'Create' });
-            await userEvent.click(confirmButtons[confirmButtons.length - 1]);
+            await user.click(confirmButtons[confirmButtons.length - 1]);
 
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
@@ -360,6 +374,7 @@ describe('Cart', () => {
 
     describe('Cart should support creating a new exploration', () => {
         it('Should succeed when filling in the form completely', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             // Mock the output ports search (cart items)
@@ -381,25 +396,25 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await createNewExploration();
+            await selectExplorations(user);
+            await createNewExploration(user);
 
             const nameInput = await screen.findByRole('textbox', { name: /name/i });
-            await userEvent.type(nameInput, 'My New exploration');
+            await user.type(nameInput, 'My New exploration');
 
             const domainSelect = screen.getByRole('combobox', { name: /domain/i });
-            await userEvent.click(domainSelect);
+            await user.click(domainSelect);
             const domainOption = await screen.findByText('Finance');
-            await userEvent.click(domainOption);
+            await user.click(domainOption);
 
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
             );
-            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+            await user.type(justificationTextArea, 'I need this data for my analysis.');
 
             const submitButton = await screen.findByRole('button', { name: 'Create' });
             await waitFor(() => expect(submitButton).not.toBeDisabled());
-            await userEvent.click(submitButton);
+            await user.click(submitButton);
 
             // Assert the create and link APIs were called
             await waitFor(() => {
@@ -408,6 +423,7 @@ describe('Cart', () => {
         }, 15000);
 
         it('Should show an error on duplicate namespace', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             // Mock the output ports search (cart items)
@@ -426,21 +442,22 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await createNewExploration();
+            await selectExplorations(user);
+            await createNewExploration(user);
 
             const nameInput = await screen.findByRole('textbox', { name: /name/i });
-            await userEvent.type(nameInput, 'My New exploration');
+            await user.type(nameInput, 'My New exploration');
 
             // Assert the validation error is shown
             await waitFor(() => {
-                expect(screen.getByText('An Exploration with this name already exists')).toBeTruthy();
+                expect(screen.getByText('An Exploration with this name already exists')).toBeInTheDocument();
             });
         });
     });
 
     describe('Cart should reject an exploration name without usable characters', () => {
         it('shows an error and does not create the exploration', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             mockOutputPortsSearch();
@@ -459,29 +476,30 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await createNewExploration();
-            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
-            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
-            await userEvent.click(await screen.findByText('Finance'));
-            await userEvent.type(
+            await selectExplorations(user);
+            await createNewExploration(user);
+            await user.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+            await user.click(screen.getByRole('combobox', { name: /domain/i }));
+            await user.click(await screen.findByText('Finance'));
+            await user.type(
                 await screen.findByPlaceholderText('Explain why you need access to these Output Ports'),
                 'I need this data for my analysis.',
             );
 
             const submitButton = await screen.findByRole('button', { name: 'Create' });
             await waitFor(() => expect(submitButton).not.toBeDisabled());
-            await userEvent.click(submitButton);
+            await user.click(submitButton);
 
             expect(
                 await screen.findByText('The name of the Exploration must contain a letter or a digit'),
-            ).toBeTruthy();
+            ).toBeInTheDocument();
             expect(createHandler).not.toHaveBeenCalled();
         });
     });
 
     describe('Cart should support existing explorations', () => {
         it('should allow users to select an existing exploration', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             // Mock the output ports search (cart items)
@@ -500,11 +518,11 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await selectExistingExplorations();
+            await selectExplorations(user);
+            await selectExistingExplorations(user);
 
             const selectExploration1 = await screen.findByText(mockExplorations[0].name);
-            await userEvent.click(selectExploration1);
+            await user.click(selectExploration1);
 
             const justificationTextArea = await screen.findByPlaceholderText(
                 'Explain why you need access to these Output Ports',
@@ -516,10 +534,10 @@ describe('Cart', () => {
             // Assert that the pre-fill warning is shown
             expect(
                 screen.getByText('Pre-filled from the Exploration description. Please review before submitting.'),
-            ).toBeTruthy();
+            ).toBeInTheDocument();
 
             // Assert that typing removes the warning
-            await userEvent.type(justificationTextArea, ' Extra info.');
+            await user.type(justificationTextArea, ' Extra info.');
             await waitFor(() => {
                 expect(
                     screen.queryByText('Pre-filled from the Exploration description. Please review before submitting.'),
@@ -527,7 +545,7 @@ describe('Cart', () => {
             });
 
             const submitButton = await screen.findByText('Submit access requests');
-            await userEvent.click(submitButton);
+            await user.click(submitButton);
 
             // Assert the submit API was called
             await waitFor(() => {
@@ -536,6 +554,7 @@ describe('Cart', () => {
         });
 
         it('When selecting an existing data product with overlap in input ports and the cart it should show a warning', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -550,20 +569,21 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await selectExistingExplorations();
+            await selectExplorations(user);
+            await selectExistingExplorations(user);
 
             const selectExploration1 = await screen.findByText(mockExplorations[0].name);
-            await userEvent.click(selectExploration1);
+            await user.click(selectExploration1);
 
             await waitFor(() => {
                 expect(
                     screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
-                ).toBeTruthy();
+                ).toBeInTheDocument();
             });
         });
 
         it('should clear stale overlap warnings when switching from existing to new exploration', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -579,19 +599,19 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await selectExistingExplorations();
+            await selectExplorations(user);
+            await selectExistingExplorations(user);
 
             const selectExploration1 = await screen.findByText(mockExplorations[0].name);
-            await userEvent.click(selectExploration1);
+            await user.click(selectExploration1);
 
             await waitFor(() => {
                 expect(
                     screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
-                ).toBeTruthy();
+                ).toBeInTheDocument();
             });
 
-            await createNewExploration();
+            await createNewExploration(user);
 
             await waitFor(() => {
                 expect(
@@ -605,6 +625,7 @@ describe('Cart', () => {
 
     describe('Cart should persist selection choices across navigation', () => {
         it('should restore the exploration and existing/new selection when navigating away and back', async () => {
+            const user = userEvent.setup();
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
@@ -633,17 +654,17 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await selectExplorations();
-            await selectExistingExplorations();
+            await selectExplorations(user);
+            await selectExistingExplorations(user);
 
             // Navigate away and back
-            await userEvent.click(screen.getByText('Go away'));
+            await user.click(screen.getByText('Go away'));
             await screen.findByText('Back to cart');
-            await userEvent.click(screen.getByText('Back to cart'));
+            await user.click(screen.getByText('Back to cart'));
 
             await waitFor(() => {
-                expect(screen.getByText('Select an existing Exploration')).toBeTruthy();
-                expect(screen.getByText('I want to explore this data')).toBeTruthy();
+                expect(screen.getByText('Select an existing Exploration')).toBeInTheDocument();
+                expect(screen.getByText('I want to explore this data')).toBeInTheDocument();
             });
         });
     });

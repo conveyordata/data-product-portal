@@ -1,28 +1,30 @@
 import type { Editor } from '@tiptap/react';
 import { describe, expect, it } from 'vitest';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { act, renderWithProviders, screen, userEvent } from '../../test-utils';
+import { act, renderWithProviders, screen, userEvent } from '@/tests/test-utils.tsx';
 
-async function renderEditor(initialContent: string) {
+async function renderEditor(user: ReturnType<typeof userEvent.setup>, initialContent: string) {
     const { container } = renderWithProviders(<TextEditor initialContent={initialContent} />);
-    await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
+    await user.click(await screen.findByRole('button', { name: 'Edit content' }));
     return (container.querySelector('.ProseMirror') as HTMLElement & { editor: Editor }).editor;
 }
 
 describe('TextEditorMenu', () => {
     it('bolds the selected text', async () => {
-        const editor = await renderEditor('<p>plain</p>');
+        const user = userEvent.setup();
+        const editor = await renderEditor(user, '<p>plain</p>');
         act(() => {
             editor.commands.selectAll();
         });
 
-        await userEvent.click(screen.getByRole('button', { name: 'Bold' }));
+        await user.click(screen.getByRole('button', { name: 'Bold' }));
 
         expect(editor.getHTML()).toBe('<p><strong>plain</strong></p>');
     });
 
     it('highlights Bold when the cursor moves into bold text', async () => {
-        const editor = await renderEditor('<p>plain <strong>bold</strong></p>');
+        const user = userEvent.setup();
+        const editor = await renderEditor(user, '<p>plain <strong>bold</strong></p>');
         act(() => {
             editor.commands.setTextSelection(2);
         });
@@ -36,16 +38,18 @@ describe('TextEditorMenu', () => {
     });
 
     it('turns a paragraph into a heading', async () => {
-        const editor = await renderEditor('<p>title</p>');
+        const user = userEvent.setup();
+        const editor = await renderEditor(user, '<p>title</p>');
 
-        await userEvent.click(screen.getByRole('combobox'));
-        await userEvent.click(await screen.findByText('Heading 2'));
+        await user.click(screen.getByRole('combobox'));
+        await user.click(await screen.findByText('Heading 2'));
 
         expect(editor.getHTML()).toContain('<h2>title</h2>');
     });
 
     it('shows Text for a heading level it does not offer', async () => {
-        const editor = await renderEditor('<h4>deep</h4>');
+        const user = userEvent.setup();
+        const editor = await renderEditor(user, '<h4>deep</h4>');
         act(() => {
             editor.commands.setTextSelection(2);
         });

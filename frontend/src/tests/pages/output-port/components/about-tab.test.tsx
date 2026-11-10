@@ -8,6 +8,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
 describe('Output Port AboutTab', () => {
     it('edits with the Output Port permission and saves to the Output Port', async () => {
+        const user = userEvent.setup();
         let savedBody: unknown;
         server.use(
             http.get('*/api/v2/data_products/dp1/output_ports/op1', () =>
@@ -27,9 +28,9 @@ describe('Output Port AboutTab', () => {
         );
         const { container } = renderWithProviders(<AboutTab dataProductId="dp1" outputPortId="op1" />);
 
-        await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
+        await user.click(await screen.findByRole('button', { name: 'Edit content' }));
         await editRichText(container, 'Edited about');
-        await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
         await waitFor(() => expect(savedBody).toEqual({ about: '<p>Edited about</p>' }));
     });

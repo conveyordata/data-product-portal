@@ -15,6 +15,7 @@ import {
     TechnicalMapping,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL } from '@/store/common/api-errors.ts';
+import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { fireEvent, renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
 
@@ -93,6 +94,7 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
 
 describe('OutputPortCard', () => {
     it('opens the incompatible access modes modal when linking fails with incompatible modes', async () => {
+        allowAllAuth();
         server.use(
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
                 HttpResponse.json({
@@ -109,7 +111,6 @@ describe('OutputPortCard', () => {
             http.get('*/api/v2/data_products/:dataProductId/technical_assets/:technicalAssetId', () =>
                 HttpResponse.json(technicalAsset),
             ),
-            http.get('*/api/v2/authz/access/:action', () => HttpResponse.json({ allowed: true })),
             http.post('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId/technical_assets/add', () =>
                 HttpResponse.json({ detail: INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL }, { status: 400 }),
             ),
