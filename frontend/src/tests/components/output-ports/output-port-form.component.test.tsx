@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -23,10 +22,11 @@ import {
 import { server } from '@/tests/mocks/server.ts';
 import { mockGetTags } from '@/tests/mocks/tags.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent } from '@/tests/test-utils.tsx';
 
 describe('OutputPortForm', () => {
     it('only allows Invite only access types for hidden data products', async () => {
+        const user = userEvent.setup();
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
@@ -71,7 +71,7 @@ describe('OutputPortForm', () => {
         const select = await screen.findByRole('combobox', { name: /access type/i });
         expect(await screen.findByTitle('Private')).toBeInTheDocument();
 
-        await userEvent.click(select);
+        await user.click(select);
 
         const option = (name: string) =>
             screen

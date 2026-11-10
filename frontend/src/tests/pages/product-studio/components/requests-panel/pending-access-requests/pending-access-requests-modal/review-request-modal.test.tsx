@@ -1,8 +1,7 @@
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import type { InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
-import { fireEvent, renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 const mockInputPortAction: InputPortRequest = {
     id: 'action-1',
@@ -86,8 +85,9 @@ describe('ReviewRequestModal — InputPort', () => {
     it('calls onAccept with the action when Accept is clicked (no decision note required)', async () => {
         const onClose = vi.fn();
         const onAccept = vi.fn();
+        const user = userEvent.setup();
         renderModal({ onAccept, onClose });
-        fireEvent.click(screen.getByRole('button', { name: /accept/i }));
+        await user.click(screen.getByRole('button', { name: /accept/i }));
         expect(onAccept).toHaveBeenCalledWith(mockInputPortAction, undefined);
         expect(onClose).toHaveBeenCalled();
     });
@@ -95,23 +95,23 @@ describe('ReviewRequestModal — InputPort', () => {
     it('Passes decision note on accept when filled in', async () => {
         const onClose = vi.fn();
         const onAccept = vi.fn();
+        const user = userEvent.setup();
         renderModal({ onAccept, onClose });
 
         const textarea = screen.getByRole('textbox');
         const decisionNote = 'Approved because you are awesome.';
-        await userEvent.type(textarea, decisionNote);
-        fireEvent.click(screen.getByRole('button', { name: /accept/i }));
+        await user.type(textarea, decisionNote);
+        await user.click(screen.getByRole('button', { name: /accept/i }));
         expect(onAccept).toHaveBeenCalledWith(mockInputPortAction, decisionNote);
         expect(onClose).toHaveBeenCalled();
     });
 
     it('shows validation error when declining without decision note', async () => {
         const onReject = vi.fn();
+        const user = userEvent.setup();
         renderModal({ onReject });
-        fireEvent.click(screen.getByRole('button', { name: /decline/i }));
-        await waitFor(() => {
-            expect(screen.getByText('A decision note is required when declining')).toBeInTheDocument();
-        });
+        await user.click(screen.getByRole('button', { name: /decline/i }));
+        expect(await screen.findByText('A decision note is required when declining')).toBeInTheDocument();
         expect(onReject).not.toHaveBeenCalled();
     });
 
@@ -119,10 +119,11 @@ describe('ReviewRequestModal — InputPort', () => {
         const onClose = vi.fn();
 
         const onReject = vi.fn();
+        const user = userEvent.setup();
         renderModal({ onReject, onClose });
         const textarea = screen.getByRole('textbox');
-        await userEvent.type(textarea, 'Not approved due to policy.');
-        fireEvent.click(screen.getByRole('button', { name: /decline/i }));
+        await user.type(textarea, 'Not approved due to policy.');
+        await user.click(screen.getByRole('button', { name: /decline/i }));
         await waitFor(() => {
             expect(onReject).toHaveBeenCalledWith(mockInputPortAction, 'Not approved due to policy.');
         });

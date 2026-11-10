@@ -37,6 +37,7 @@ describe('AboutEditor', () => {
     });
 
     it('offers a retry when loading fails', async () => {
+        const user = userEvent.setup();
         const refetch = vi.fn();
         renderWithProviders(
             <AboutEditor
@@ -44,7 +45,7 @@ describe('AboutEditor', () => {
             />,
         );
 
-        await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+        await user.click(screen.getByRole('button', { name: 'Try again' }));
 
         expect(screen.getByText("Couldn't load this section")).toBeInTheDocument();
         expect(refetch).toHaveBeenCalled();
@@ -58,13 +59,14 @@ describe('AboutEditor', () => {
     });
 
     it('saves the edited About, confirms it and leaves edit mode', async () => {
+        const user = userEvent.setup();
         const dispatchMessageSpy = vi.spyOn(feedback, 'dispatchMessage');
         const save = vi.fn().mockResolvedValue(undefined);
         const { container } = renderWithProviders(<AboutEditor source={source({ save })} />);
 
-        await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
+        await user.click(await screen.findByRole('button', { name: 'Edit content' }));
         await editRichText(container, 'Edited about');
-        await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
         expect(save).toHaveBeenCalledWith('<p>Edited about</p>');
         expect(await screen.findByRole('button', { name: 'Edit content' })).toBeInTheDocument();
@@ -75,14 +77,15 @@ describe('AboutEditor', () => {
     });
 
     it('reports a failed save and stays in edit mode', async () => {
+        const user = userEvent.setup();
         const dispatchMessageSpy = vi.spyOn(feedback, 'dispatchMessage');
         const { container } = renderWithProviders(
             <AboutEditor source={source({ save: vi.fn().mockRejectedValue(new Error('failed')) })} />,
         );
 
-        await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
+        await user.click(await screen.findByRole('button', { name: 'Edit content' }));
         await editRichText(container, 'Edited about');
-        await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
         await waitFor(() =>
             expect(dispatchMessageSpy).toHaveBeenCalledWith({

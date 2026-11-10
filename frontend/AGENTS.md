@@ -22,3 +22,4 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 - Prefer using semantic size tokens ("small", "medium") instead of raw pixel gaps (static numbers)
 -   **No chained type assertions**: Never use `as unknown as X`. Fix the type at its source or narrow it with a type guard.
 -   **No module mocking**: Avoid `vi.mock`. Pass dependencies in, or mock HTTP with `msw`.
+-   **No `*ByRole` queries**: They compute the accessibility tree and are slow. Use `*ByText` or `*ByLabelText` instead.

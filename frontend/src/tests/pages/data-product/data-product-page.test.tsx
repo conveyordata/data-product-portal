@@ -7,8 +7,10 @@ import { mockEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
 import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import { mockGetPlatformTiles } from '@/tests/mocks/plugins.ts';
 import { server } from '@/tests/mocks/server.ts';
+import { mockUserPendingActions } from '@/tests/mocks/userPendingActions.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
+import { DecisionStatus } from '@/types/roles';
 
 const savedScopeProduct = {
     ...mockDataProducts[0],
@@ -19,15 +21,13 @@ const savedScopeProduct = {
 };
 
 function mockUserCalls() {
+    mockUserPendingActions([]);
     server.use(
         http.get('*/api/v2/users/current', () => {
             return HttpResponse.json(mockUsers[0]);
         }),
         http.get('*/api/v2/users', () => {
             return HttpResponse.json({ users: mockUsers });
-        }),
-        http.get('*/api/v2/users/current/pending_actions', () => {
-            return HttpResponse.json({ pending_actions: [] });
         }),
     );
 }
@@ -67,6 +67,7 @@ describe('DataProduct Page', () => {
     });
 
     it('offers only declared environments in integration menus without fetching defaults', async () => {
+        const user = userEvent.setup();
         setupDefaultMocks();
         mockDataProductDetailCalls(savedScopeProduct);
         mockGetPlatformTiles();
@@ -80,7 +81,7 @@ describe('DataProduct Page', () => {
         const tile = (await screen.findByText('AWS')).parentElement as HTMLElement;
         const radio = within(tile).getByRole('radio');
         await waitFor(() => expect(radio).toBeEnabled());
-        await userEvent.hover(radio.closest('label') as HTMLElement);
+        await user.hover(radio.closest('label') as HTMLElement);
         const menu = await screen.findByRole('menu');
         expect(within(menu).getByText('Test')).toBeInTheDocument();
         expect(within(menu).queryByText('Development')).not.toBeInTheDocument();
@@ -133,7 +134,7 @@ describe('DataProduct Page', () => {
         server.use(
             http.get('*/api/v2/authz/role_assignments/data_product', () => {
                 return HttpResponse.json({
-                    role_assignments: [{ user: { id: '1' }, decision: 'approved' }],
+                    role_assignments: [{ user: { id: '1' }, decision: DecisionStatus.Approved }],
                 });
             }),
         );

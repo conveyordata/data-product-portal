@@ -331,7 +331,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 name="visibility"
                 label={t('Visibility')}
                 tooltip={t('The visibility of the Data Product, this cannot be changed after creation')}
-                initialValue={DataProductVisibility.Discoverable}
+                initialValue={mode === 'create' ? DataProductVisibility.Discoverable : undefined}
             >
                 <Radio.Group
                     optionType="button"

@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { PeoplePage } from '@/pages/people/people-table.component';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users';
+import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
 import { server } from '../../mocks/server';
-import { renderWithProviders, screen, userEvent, waitFor, within } from '../../test-utils';
 
 describe('PeoplePage', () => {
     it('shows loading state while fetching', () => {
@@ -48,6 +48,7 @@ describe('PeoplePage', () => {
     });
 
     it('filters users by search term', async () => {
+        const user = userEvent.setup();
         allowAllAuth();
         mockUsersHttp([mockUsers[0], mockUsers[1]]);
         renderWithProviders(<PeoplePage />);
@@ -58,7 +59,7 @@ describe('PeoplePage', () => {
         });
 
         const searchInput = screen.getByPlaceholderText('Search people by name');
-        await userEvent.type(searchInput, 'bob');
+        await user.type(searchInput, 'bob');
 
         await waitFor(() => {
             expect(screen.queryByText(user1)).not.toBeInTheDocument();
