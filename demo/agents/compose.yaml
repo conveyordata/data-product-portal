@@ -53,7 +53,6 @@ services:
     volumes:
       - agent_configs:/agent_configs
       - ./products:/products
-      # AWS profiles and SSO cache, for AGENT_MODEL_PROVIDER=bedrock
       - ${HOME}/.aws:/root/.aws
     ports:
       - "7070:7070"

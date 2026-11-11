@@ -15,7 +15,6 @@ from agno.tools.postgres import PostgresTools
 
 yaml_dir = os.environ.get("AGENT_CONFIGS_PATH", "/agent_configs")
 model_id = os.environ.get("AGENT_MODEL_ID", "claude-sonnet-4-5")
-# AgentOS reads sessions from one database, so all agents must share it
 db = SqliteDb(db_file="agno.db")
 
 

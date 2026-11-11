@@ -21,7 +21,6 @@ PORTAL_URL = "http://localhost:5050"
 
 # john.scientist is the admin user seeded in portal_seed.sql
 OWNER_ID = "b72fca38-17ff-4259-a075-5aaa5973343c"
-# jane.researcher owns Inventory Snapshot, so she approves access requests to it
 JANE_ID = "d9f3aae2-391e-46c1-aec6-a7ae1114a7da"
 
 

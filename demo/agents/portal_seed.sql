@@ -71,7 +71,7 @@ begin
     INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('35f2dd11-3119-4eb3-8f19-01b323131221', 'user', 'bob.johnson@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
     INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', false, 'Bob', 'Johnson', NULL, false) returning id INTO bob_id;
     INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('d9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'user', 'jane.researcher@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
-    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', true, 'Jane', 'Researcher', NULL, false) returning id INTO jane_id;
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', true, 'Jane', 'Researcher', NULL, true) returning id INTO jane_id;
     INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('b72fca38-17ff-4259-a075-5aaa5973343c', 'user', 'john.scientist@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
     INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', true, 'John', 'Scientist', NULL, true) returning id INTO john_id;
     -- ROLES
