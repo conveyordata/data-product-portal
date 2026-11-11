@@ -19,10 +19,10 @@ model_id = os.environ.get("AGENT_MODEL_ID", "claude-sonnet-4-5")
 db = SqliteDb(db_file="agno.db")
 
 
-def make_model(id: str = model_id, **kwargs) -> Claude:
+def make_model(**kwargs) -> Claude:
     if os.environ.get("AGENT_MODEL_PROVIDER") == "bedrock":
-        return BedrockClaude(id=id, session=boto3.Session(), **kwargs)
-    return Claude(id=id, **kwargs)
+        return BedrockClaude(id=model_id, session=boto3.Session(), **kwargs)
+    return Claude(id=model_id, **kwargs)
 
 
 def build_instructions(config: dict) -> str:
@@ -75,9 +75,7 @@ def make_admin_agent() -> Agent:
             "The public schema is empty: find tables by querying information_schema.tables across all schemas, "
             "and always use schema-qualified table names."
         ),
-        model=make_model(
-            os.environ.get("GENERIC_AGENT_MODEL_ID", model_id), cache_system_prompt=True
-        ),
+        model=make_model(cache_system_prompt=True),
         tools=[
             PostgresTools(
                 host=os.environ.get("PROV_DEMO_DB_HOST", "postgresql-demo"),
