@@ -130,13 +130,15 @@ export function UserMenu() {
                     {
                         <Badge
                             count={
-                                isAdmin?.is_admin
-                                    ? t('Admin powers until ') +
-                                      new Date(`${isAdmin?.time}Z`).toLocaleTimeString(undefined, {
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                      })
-                                    : 0
+                                !isAdmin?.is_admin
+                                    ? 0
+                                    : isAdmin.time
+                                      ? t('Admin powers until ') +
+                                        new Date(`${isAdmin.time}Z`).toLocaleTimeString(undefined, {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                      : t('Permanent Admin')
                             }
                             showZero={false}
                             color={colorPrimary}

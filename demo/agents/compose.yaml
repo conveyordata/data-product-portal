@@ -40,7 +40,7 @@ services:
       portal:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6060"]
+      test: ["CMD", "curl", "-f", "http://localhost:6060/healthz"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -53,6 +53,8 @@ services:
     volumes:
       - agent_configs:/agent_configs
       - ./products:/products
+      # AWS profiles and SSO cache, for AGENT_MODEL_PROVIDER=bedrock
+      - ${HOME}/.aws:/root/.aws
     ports:
       - "7070:7070"
     depends_on:

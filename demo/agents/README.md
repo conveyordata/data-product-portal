@@ -1,6 +1,8 @@
 # Demo Scenario: AI Agents for Data Products
 
-This demo showcases how the Data Product Portal can provision **AI agents** alongside data products. Each data product gets its own Agno agent — pre-configured with direct PostgreSQL access scoped to its schema and a semantic model that encodes business logic. When a data product requests access to another's output port and the request is approved, the consumer's agent automatically gains cross-schema query access and inherits the provider's semantic model.
+This demo showcases how the Data Product Portal can provision **AI agents** alongside data products.
+Each data product gets its own Agno agent — pre-configured with direct PostgreSQL access scoped to its schema and a semantic model that encodes business logic.
+When a data product requests access to another's output port and the request is approved, the consumer's agent automatically gains cross-schema query access and inherits the provider's semantic model.
 
 The company is **SwiftGear**, a specialty outdoor gear retailer. Their data team is adopting data product thinking to make their operational data accessible and trustworthy — not just for engineers, but for analysts and AI agents.
 
@@ -52,7 +54,8 @@ Each data product owns a dedicated PostgreSQL schema in the `dpp_demo` database,
 | `customers`    | Master customer records: email, name, signup date |
 | `web_sessions` | Anonymous session logs: page paths, timestamps    |
 
-**Semantic gotcha:** `acquired_by` in `customers` is an internal admin ID, not a customer ID — never join it to the customers table. Web session `user_id` is an anonymous UUID and cannot be joined directly to customers.
+**Semantic gotcha:** `acquired_by` in `customers` is an internal admin ID, not a customer ID — never join it to the customers table.
+Web session `user_id` is an anonymous UUID and cannot be joined directly to customers.
 
 ## Architecture
 
@@ -89,6 +92,8 @@ Portal UI
 ```
 
 ## Scenario Steps
+
+For shorter, scripted demos built on this setup, see [scenarios](scenarios/).
 
 ### 1. Configure Secrets
 
@@ -150,7 +155,7 @@ To demonstrate access propagation, have the **Sales Transaction Ledger** request
 
 1. In the portal, navigate to **Sales Transaction Ledger**
 2. Go to **Input Ports** → request access to **Inventory Snapshot**'s output port
-3. Approve the request
+3. Switch user to Jane Researcher, the owner of Inventory Snapshot, and approve the request under Pending Requests in the Product Studio
 
 The provisioner's webhook handler will:
 - `GRANT SELECT ON ALL TABLES IN SCHEMA inventory_snapshot TO sales_transaction_ledger_user`
@@ -179,7 +184,8 @@ Grants schema-level SELECT access in `dpp_demo`. The result string `dpp_demo.{sc
 
 ### Agno Link
 
-The Agno plugin generates a link to `https://os.agno.com/chat?type=agent&id={namespace}`. Clicking it opens the agent chat for that data product in Agno's hosted UI.
+The Agno plugin generates a link to `https://os.agno.com/chat?type=agent&id={namespace}-agent`.
+Clicking it opens the agent chat for that data product in Agno's hosted UI.
 
 ## Toil & Maintenance
 

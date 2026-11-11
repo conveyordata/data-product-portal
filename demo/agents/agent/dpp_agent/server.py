@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
 
+import boto3
 import yaml
 from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
+from agno.models.aws import Claude as BedrockClaude
 from agno.os import AgentOS
 from agno.team import Team
 from agno.team.mode import TeamMode
@@ -13,6 +15,14 @@ from agno.tools.postgres import PostgresTools
 
 yaml_dir = os.environ.get("AGENT_CONFIGS_PATH", "/agent_configs")
 model_id = os.environ.get("AGENT_MODEL_ID", "claude-sonnet-4-5")
+# AgentOS reads sessions from one database, so all agents must share it
+db = SqliteDb(db_file="agno.db")
+
+
+def make_model(id: str = model_id, **kwargs) -> Claude:
+    if os.environ.get("AGENT_MODEL_PROVIDER") == "bedrock":
+        return BedrockClaude(id=id, session=boto3.Session(), **kwargs)
+    return Claude(id=id, **kwargs)
 
 
 def build_instructions(config: dict) -> str:
@@ -61,9 +71,13 @@ def make_admin_agent() -> Agent:
         description="Full-access database agent for ad-hoc queries across all schemas.",
         instructions=(
             "You are a database assistant with full admin access to the PostgreSQL database. "
-            "Use postgres tools to answer questions about any table or schema."
+            "Use postgres tools to answer questions about any table or schema. "
+            "The public schema is empty: find tables by querying information_schema.tables across all schemas, "
+            "and always use schema-qualified table names."
         ),
-        model=Claude(id=model_id, cache_system_prompt=True),
+        model=make_model(
+            os.environ.get("GENERIC_AGENT_MODEL_ID", model_id), cache_system_prompt=True
+        ),
         tools=[
             PostgresTools(
                 host=os.environ.get("PROV_DEMO_DB_HOST", "postgresql-demo"),
@@ -73,7 +87,7 @@ def make_admin_agent() -> Agent:
                 password=os.environ.get("PROV_DEMO_DB_ADMIN_PASSWORD", "abc123"),
             ),
         ],
-        db=SqliteDb(db_file="agno_generic_database_agent.db"),
+        db=db,
         add_history_to_context=False,
         num_history_runs=0,
         compress_tool_results=True,
@@ -90,7 +104,7 @@ def make_fallback_agent() -> Agent:
             "Data product agents are provisioned automatically when data products are created in the portal. "
             "If no data product agents are available yet, let the user know they should run `task create-products` first."
         ),
-        model=Claude(id=model_id, cache_system_prompt=True),
+        model=make_model(cache_system_prompt=True),
         markdown=True,
     )
 
@@ -116,7 +130,7 @@ def load_dynamic_agents():
             name=config["name"],
             description=config.get("description", ""),
             instructions=build_instructions(config),
-            model=Claude(id=model_id, cache_system_prompt=True),
+            model=make_model(cache_system_prompt=True),
             tools=[
                 PostgresTools(
                     host=postgres_cfg.get("host", "localhost"),
@@ -128,7 +142,7 @@ def load_dynamic_agents():
                 ),
                 FileTools(Path("/products")),
             ],
-            db=SqliteDb(db_file=f"agno_{config['name'].replace(' ', '_')}.db"),
+            db=db,
             add_history_to_context=False,
             num_history_runs=0,
             compress_tool_results=True,
@@ -147,7 +161,8 @@ def make_data_team(agents: list[Agent]) -> Team:
             "Routes questions to the right specialist and synthesises cross-domain answers."
         ),
         mode=TeamMode.route,
-        model=Claude(id=model_id),
+        db=db,
+        model=make_model(),
         members=agents,
         instructions=(
             "You are the SwiftGear Data Team coordinator. "
