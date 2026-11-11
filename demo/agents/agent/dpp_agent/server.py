@@ -17,7 +17,7 @@ yaml_dir = os.environ.get("AGENT_CONFIGS_PATH", "/agent_configs")
 use_bedrock = os.environ.get("AGENT_MODEL_PROVIDER") == "bedrock"
 model_id = os.environ.get(
     "AGENT_MODEL_ID",
-    "global.anthropic.claude-sonnet-4-6" if use_bedrock else "claude-sonnet-4-5",
+    "eu.anthropic.claude-sonnet-4-6" if use_bedrock else "claude-sonnet-4-5",
 )
 db = SqliteDb(db_file="agno.db")
 
