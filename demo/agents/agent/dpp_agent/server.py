@@ -14,12 +14,16 @@ from agno.tools.file import FileTools
 from agno.tools.postgres import PostgresTools
 
 yaml_dir = os.environ.get("AGENT_CONFIGS_PATH", "/agent_configs")
-model_id = os.environ.get("AGENT_MODEL_ID", "claude-sonnet-4-5")
+use_bedrock = os.environ.get("AGENT_MODEL_PROVIDER") == "bedrock"
+model_id = os.environ.get(
+    "AGENT_MODEL_ID",
+    "global.anthropic.claude-sonnet-4-6" if use_bedrock else "claude-sonnet-4-5",
+)
 db = SqliteDb(db_file="agno.db")
 
 
 def make_model(**kwargs) -> Claude:
-    if os.environ.get("AGENT_MODEL_PROVIDER") == "bedrock":
+    if use_bedrock:
         return BedrockClaude(id=model_id, session=boto3.Session(), **kwargs)
     return Claude(id=model_id, **kwargs)
 
