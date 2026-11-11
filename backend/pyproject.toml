@@ -78,25 +78,12 @@ data-product-portal-sdk = { path = "../sdk", develop = true }
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = ">=0.48,<0.50"
 mypy = ">=2.3.1"
 types-cachetools = "*"
 types-requests = "*"
 types-pytz = "*"
 types-PyYAML = "*"
 locust = "^2.46.5"
-
-[tool.poe.tasks]
-test = "pytest -v tests/"
-lint = "ruff check --fix"
-format = "ruff format"
-ruff = ["lint", "format"]
-ty = "uvx ty check"
-coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
-up = "docker compose up -d postgresql"
-down = "docker compose down postgresql"
-poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade"
-loadtest = "locust -f loadtest/locustfile.py"
 
 [tool.mypy]
 ignore_missing_imports = true

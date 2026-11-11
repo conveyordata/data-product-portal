@@ -132,6 +132,47 @@ tasks:
       - poetry run pytest -v
       - docker compose kill
 
+  coverage:backend:
+    desc: "Run the backend tests with a coverage report"
+    dir: backend
+    cmds:
+      - poetry run pytest --cov-report term-missing --cov-report html --cov=app tests/
+
+  lint:backend:
+    desc: "Lint and format the backend with ruff"
+    dir: backend
+    cmds:
+      - poetry run ruff check --fix
+      - poetry run ruff format
+
+  ty:backend:
+    desc: "Type check the backend with ty"
+    dir: backend
+    cmds:
+      - poetry run uvx ty check
+
+  loadtest:backend:
+    desc: "Run the Locust load test, e.g. task loadtest:backend -- --headless -H http://localhost:5050 -u 10 -r 5 -t 1m"
+    dir: backend
+    cmds:
+      - poetry run locust -f loadtest/locustfile.py {{.CLI_ARGS}}
+
+  db:up:
+    desc: "Start the postgresql database"
+    cmds:
+      - docker compose up -d postgresql
+
+  db:down:
+    desc: "Stop the postgresql database"
+    cmds:
+      - docker compose down postgresql
+
+  poetry:reqs:
+    desc: "Regenerate the hashed Poetry bootstrap requirements"
+    dir: backend
+    cmds:
+      - uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade
+
   test:frontend:
     desc: "Run the tests for the frontend"
     dir: frontend
