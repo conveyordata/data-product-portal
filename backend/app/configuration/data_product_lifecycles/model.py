@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Boolean, Column, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 
 from app.database.database import Base

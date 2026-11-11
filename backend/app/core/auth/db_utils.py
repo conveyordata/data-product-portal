@@ -13,6 +13,7 @@ def is_user_admin(user_id: uuid.UUID):
         select(User.id)
         .where(User.id == user_id)
         .where(User.admin_expiry > func.now())
+        .correlate(None)
         .exists()
     )
 
@@ -24,6 +25,7 @@ def is_system_account(user_id: uuid.UUID):
         select(User.id)
         .where(User.id == user_id)
         .where(User.external_id == SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+        .correlate(None)
         .exists()
     )
 

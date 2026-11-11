@@ -7,7 +7,7 @@ from alembic import command
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import Column, Engine, MetaData, String, Table, select
+from sqlalchemy import UUID, Column, Engine, MetaData, String, Table, select
 from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import Session
 
@@ -27,13 +27,13 @@ _FILE_TEMPLATE = (
 _configuration_table = Table(
     "data_output_configurations",
     MetaData(),
-    Column("id", String),
+    Column("id", UUID(as_uuid=False)),
     Column("configuration_type", String),
 )
 _technical_asset_table = Table(
     "data_outputs",
     MetaData(),
-    Column("configuration_id", String),
+    Column("configuration_id", UUID(as_uuid=False)),
 )
 
 
