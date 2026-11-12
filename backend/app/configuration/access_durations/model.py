@@ -1,8 +1,7 @@
 import uuid
 
+from sqlalchemy import UUID, Integer, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import Integer, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.abstract_data_product.type import AbstractDataProductType
