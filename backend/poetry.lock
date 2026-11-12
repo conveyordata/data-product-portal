@@ -5224,18 +5224,18 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "sqlalchemy-easy-softdelete"
-version = "1.1.0"
+version = "2.0.0"
 description = "Easily add soft-deletion to your SQLAlchemy Models."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "sqlalchemy_easy_softdelete-1.1.0-py3-none-any.whl", hash = "sha256:71c9e672ea946a9a3e8005d1164017ed6e8f1d4c07e51819fa92a5dfcc7a3400"},
-    {file = "sqlalchemy_easy_softdelete-1.1.0.tar.gz", hash = "sha256:e0b78a0e1e2b477e519c73ef889e938e3ff34433a8d6c47ad6c3582e0e99d0a4"},
+    {file = "sqlalchemy_easy_softdelete-2.0.0-py3-none-any.whl", hash = "sha256:dc75d1369e261eb4a07baa2e574ad6e662d8e96fbb30e668fd350f770149f9f1"},
+    {file = "sqlalchemy_easy_softdelete-2.0.0.tar.gz", hash = "sha256:5c757f4e36f13b5ac7107d77ed415fa8879f23d587b80f7f6e6009e1125ed9dd"},
 ]
 
 [package.dependencies]
-sqlalchemy = ">=2.0.20,<2.2"
+sqlalchemy = ">=2.0.28,<2.2"
 
 [[package]]
 name = "sqlalchemy-utils"
@@ -6030,4 +6030,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "4ea70be70a507fec1acf81217051a32539290d6e097f079e4871b1a51c10478d"
+content-hash = "e69baf2ea4ef8031b71d29827ec2f87ecaae9778f00f35dea7afd85282cc3ea4"
