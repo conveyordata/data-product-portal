@@ -86,9 +86,9 @@ Portal UI
                     reads /agent_configs/*.yml (hot-reload)
                         │
                     Agent per data product:
-                    - MCP postgres (scoped user)
+                    - PostgresTools (scoped user)
                     - FileTools (/products OSI files)
-                    - LocalSkills (postgres-semantic)
+                    - Skills (postgres-semantic)
 ```
 
 ## Scenario Steps
@@ -97,12 +97,12 @@ For shorter, scripted demos built on this setup, see [scenarios](scenarios/).
 
 ### 1. Configure Secrets
 
-The Agno agent server requires an Anthropic API key. Copy the example file and fill it in — it is gitignored and never committed:
+The Agno agent server needs either an Anthropic API key or Claude on AWS Bedrock. Copy the example file and fill it in — it is gitignored and never committed:
 
 ```bash
 cd demo/agents
 cp .env.secret.example .env.secret
-# then edit .env.secret and set your ANTHROPIC_API_KEY
+# then edit .env.secret: set ANTHROPIC_API_KEY, or the Bedrock variables
 ```
 
 ### 2. Start the Demo

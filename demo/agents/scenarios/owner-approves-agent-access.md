@@ -51,7 +51,7 @@ The agent reads its semantic model, calculates the real average order value and 
 
    On approval, the provisioner grants the Sales Transaction Ledger database user read access to the `inventory_snapshot` schema and adds the inventory semantic model to the Sales Transaction Ledger agent. The agent server reloads automatically.
 
-4. Ask the same question again, in a new chat. The agent now combines sales with current stock and flags HIKE-BOOTS-M as out of stock. It also checks the retired flag of the inventory, a rule it received with the inventory semantic model.
+4. Ask the same question again, in a new chat. The agent now combines sales with current stock and flags HIKE-BOOTS-M as out of stock. It takes current stock from `inventory_latest`, a rule it received with the inventory semantic model.
 
 > "Someone requests access, the owner of the source decides. That's how access between applications works today. The only difference is that this user is an agent."
 

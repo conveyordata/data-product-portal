@@ -8,6 +8,7 @@ from agno.db.sqlite import SqliteDb
 from agno.models.anthropic import Claude
 from agno.models.aws import Claude as BedrockClaude
 from agno.os import AgentOS
+from agno.skills import LocalSkills, Skills
 from agno.team import Team
 from agno.team.mode import TeamMode
 from agno.tools.file import FileTools
@@ -19,6 +20,7 @@ model_id = os.environ.get("AGENT_MODEL_ID") or (
     "eu.anthropic.claude-sonnet-4-6" if use_bedrock else "claude-sonnet-4-5"
 )
 db = SqliteDb(db_file="agno.db")
+skills = Skills(loaders=[LocalSkills(str(Path(__file__).parent.parent / "skills"))])
 
 
 def make_model(**kwargs) -> Claude:
@@ -142,6 +144,7 @@ def load_dynamic_agents():
                 ),
                 FileTools(Path("/products")),
             ],
+            skills=skills,
             db=db,
             add_history_to_context=False,
             num_history_runs=0,
