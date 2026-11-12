@@ -20,7 +20,7 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import UIElementType
-from portal_plugins.common.azure_helpers import get_azure_plugin_url
+from common.azure_helpers import get_azure_plugin_url
 
 logger = logging.getLogger(__name__)
 

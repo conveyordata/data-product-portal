@@ -13,7 +13,7 @@ from portal_plugins.azure_keyvault.model import NAME
 from portal_plugins.azure_keyvault.model import (
     AzureKeyVaultTechnicalAssetConfiguration as AzureKeyVaultTechnicalAssetConfigurationModel,
 )
-from portal_plugins.common.azure_helpers import get_azure_plugin_url
+from common.azure_helpers import get_azure_plugin_url
 
 KEY_VAULT_PREFIX = "kv-adp-"
 KEY_VAULT_MAX_LENGTH = 20

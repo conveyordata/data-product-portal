@@ -29,7 +29,10 @@ s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"
 snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
 
 [tool.poetry]
-packages = [{ include = "portal_plugins", from = "." }]
+packages = [
+    { include = "portal_plugins", from = "." },
+    { include = "common", from = "." },
+]
 
 [tool.poetry.dependencies]
 python = "^3.13"
