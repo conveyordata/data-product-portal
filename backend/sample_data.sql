@@ -325,6 +325,18 @@ VALUES ('8dc4b677-5ae8-7823-91a6-e15196b2e562', '{{ azure_environment_id_dev }}'
 ), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+SELECT 'c320903a-cff0-4bdb-b105-7cf8e87a6cd9'::uuid, '{{ azure_environment_id_dev }}'::uuid, ps.platform_id, ps.id, '[]', timezone('utc'::text, current_timestamp), NULL, NULL
+FROM public.platform_services AS ps
+JOIN public.platforms AS p ON p.id = ps.platform_id
+WHERE lower(p.name) = 'azure' AND lower(ps.name) = 'azurekeyvault';
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+SELECT 'b05271f3-6973-4635-a106-c5a4a743a18c'::uuid, '{{ azure_environment_id_prd }}'::uuid, ps.platform_id, ps.id, '[]', timezone('utc'::text, current_timestamp), NULL, NULL
+FROM public.platform_services AS ps
+JOIN public.platforms AS p ON p.id = ps.platform_id
+WHERE lower(p.name) = 'azure' AND lower(ps.name) = 'azurekeyvault';
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
 VALUES ('1c52b0e5-961f-412a-995e-0c1efae19f41', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
