@@ -261,7 +261,14 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     }, debounce);
 
     useEffect(() => {
-        setResultString({ ...form.getFieldsValue(true), name: dataOutputNameValue, namespace, technical_mapping });
+        const values = form.getFieldsValue(true);
+        setResultString({
+            ...values,
+            name: dataOutputNameValue,
+            namespace,
+            technical_mapping,
+            configuration: configurationType ? values.configuration : undefined,
+        });
     }, [form, dataOutputNameValue, namespace, technical_mapping, configurationType, setResultString]);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (

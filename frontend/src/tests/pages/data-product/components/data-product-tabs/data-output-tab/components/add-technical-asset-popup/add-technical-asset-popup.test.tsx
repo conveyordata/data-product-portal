@@ -286,6 +286,7 @@ describe('TechnicalAssetPopup', async () => {
             }),
         );
 
+        await waitFor(() => expect(screen.getByLabelText(/^aws$/i)).not.toBeDisabled());
         await user.click(screen.getByLabelText(/^aws$/i));
         expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
         await user.click(screen.getByLabelText(/^s3$/i));
@@ -304,6 +305,7 @@ describe('TechnicalAssetPopup', async () => {
             }),
         );
 
+        await waitFor(() => expect(screen.getByLabelText(/^test platform$/i)).not.toBeDisabled());
         await user.click(screen.getByLabelText(/^test platform$/i));
         expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
         await user.click(screen.getByLabelText(/^test plugin$/i));
