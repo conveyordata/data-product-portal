@@ -1,11 +1,18 @@
 import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup.js';
 import { delay, HttpResponse, http } from 'msw';
 import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
+import type { RenderTechnicalAssetAccessPathRequest } from '@/store/api/services/generated/pluginsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
-import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
+import { mock_platform_service_configuration, mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
-import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
+import {
+    mock_platform_tiles,
+    mock_plugins,
+    mockGetPlatformTiles,
+    mockGetPlugins,
+    mockRenderTechnicalAssetAccessPath,
+} from '@/tests/mocks/plugins.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -153,6 +160,164 @@ describe('TechnicalAssetPopup', async () => {
 
         await waitFor(() => expect(screen.getByLabelText(/repository link/i)).toHaveValue(''));
         expect(renderSpy).not.toHaveBeenCalled();
+    }, 15000);
+
+    it('should refresh the preview when only the name changes', async () => {
+        defaultMocks();
+        mockResourceNamesSanitize('fixed-namespace');
+        const previewRequests = vi.fn();
+        server.use(
+            http.post<never, RenderTechnicalAssetAccessPathRequest>(
+                '*/api/v2/plugins/render_technical_asset_access_path',
+                async ({ request }) => {
+                    const body = await request.json();
+                    previewRequests(body);
+                    return HttpResponse.json({ technical_asset_access_path: body.name });
+                },
+            ),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderWithProviders(
+            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
+        );
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+        await waitFor(() => expect(screen.getByLabelText(/resulting path/i)).toHaveValue('My new technical asset'));
+
+        const nameInput = screen.getByLabelText(/^name$/i);
+        await user.clear(nameInput);
+        await user.type(nameInput, 'Renamed asset');
+
+        await waitFor(() => expect(screen.getByLabelText(/resulting path/i)).toHaveValue('Renamed asset'));
+        expect(previewRequests).toHaveBeenLastCalledWith(
+            expect.objectContaining({ name: 'Renamed asset', namespace: 'fixed-namespace' }),
+        );
+    }, 15000);
+
+    it('should initialize previews only after selecting a child plugin, including when switching platforms', async () => {
+        defaultMocks();
+        mockResourceNamesSanitize('fixed-namespace');
+        const platform = { id: 'test-platform', name: 'Test Platform' };
+        mockGetPlatformConfigs({
+            platform_service_configurations: [
+                ...mock_platform_service_configuration,
+                {
+                    id: 'test-config',
+                    platform,
+                    service: {
+                        id: 'test-service',
+                        name: 'test-plugin',
+                        platform,
+                        result_string_template: 'rendered-preview',
+                        technical_info_template: 'rendered-preview',
+                    },
+                    config: [],
+                },
+            ],
+        });
+        mockGetPlugins({
+            plugins: [
+                ...mock_plugins,
+                {
+                    plugin: 'TestTechnicalAssetConfiguration',
+                    ui_metadata: [],
+                    has_environments: true,
+                    platform: 'test-plugin',
+                    parent_platform: 'test-platform',
+                    display_name: 'Test Plugin',
+                    detailed_name: 'Test Plugin',
+                    icon_name: '',
+                    result_label: 'Resulting path',
+                },
+            ],
+        });
+        mockGetPlatformTiles({
+            platform_tiles: [
+                ...mock_platform_tiles,
+                {
+                    label: 'Test Platform',
+                    value: 'test-platform',
+                    icon_name: '',
+                    children: [
+                        {
+                            label: 'Test Plugin',
+                            value: 'test-plugin',
+                            icon_name: '',
+                        },
+                    ],
+                    show_in_form: true,
+                },
+            ],
+        });
+        const previewRequests = vi.fn();
+        server.use(
+            http.post<never, RenderTechnicalAssetAccessPathRequest>(
+                '*/api/v2/plugins/render_technical_asset_access_path',
+                async ({ request }) => {
+                    const body = await request.json();
+                    previewRequests(body);
+                    return HttpResponse.json({ technical_asset_access_path: 'rendered-preview' });
+                },
+            ),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderWithProviders(
+            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
+        );
+        const nameInput = screen.getByLabelText(/^name$/i);
+        await waitFor(() => expect(nameInput).not.toBeDisabled());
+        await user.type(nameInput, 'test-asset');
+        await screen.findByDisplayValue('fixed-namespace');
+
+        await user.click(screen.getByLabelText(/^test platform$/i));
+        await user.click(screen.getByLabelText(/^test plugin$/i));
+
+        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('rendered-preview'));
+        expect(previewRequests).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                name: 'test-asset',
+                namespace: 'fixed-namespace',
+                data_product_id: mockDataProducts[0].id,
+                platform_id: platform.id,
+                service_id: 'test-service',
+                configuration: { name: 'TestTechnicalAssetConfiguration' },
+            }),
+        );
+
+        await user.click(screen.getByLabelText(/^aws$/i));
+        expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
+        await user.click(screen.getByLabelText(/^s3$/i));
+        expect(screen.getByLabelText('Resulting path')).toHaveValue('');
+        await user.click(screen.getByLabelText(/^bucket$/i));
+        await user.click(screen.getAllByText('datalake')[1]);
+        await user.type(screen.getByLabelText(/^path$/i), 'test-path');
+
+        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('rendered-preview'));
+        const awsConfig = mock_platform_service_configuration[0];
+        expect(previewRequests).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                platform_id: awsConfig.platform.id,
+                service_id: awsConfig.service.id,
+                configuration: expect.objectContaining({ name: 'S3TechnicalAssetConfiguration', path: 'test-path' }),
+            }),
+        );
+
+        await user.click(screen.getByLabelText(/^test platform$/i));
+        expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
+        await user.click(screen.getByLabelText(/^test plugin$/i));
+        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('rendered-preview'));
+
+        for (const [request] of previewRequests.mock.calls) {
+            const isTestPlatform = request.platform_id === platform.id;
+            expect(request.service_id).toBe(isTestPlatform ? 'test-service' : awsConfig.service.id);
+            expect(request.configuration).toEqual(
+                expect.objectContaining({
+                    name: isTestPlatform ? 'TestTechnicalAssetConfiguration' : 'S3TechnicalAssetConfiguration',
+                }),
+            );
+        }
     }, 15000);
 
     it('should block switching platforms while a render request is in flight', async () => {

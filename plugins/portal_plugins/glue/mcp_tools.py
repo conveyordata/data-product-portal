@@ -140,10 +140,11 @@ def register_tools(mcp: FastMCP) -> None:
             }
 
         plugin_context = PluginContext.build(
-            technical_asset.owner,
-            technical_asset.namespace,
-            TechnicalMapping(technical_asset.technical_mapping),
-            technical_asset.id,
+            data_product=technical_asset.owner,
+            name=technical_asset.name,
+            namespace=technical_asset.namespace,
+            technical_mapping=TechnicalMapping(technical_asset.technical_mapping),
+            technical_asset_id=technical_asset.id,
         )
 
         # Use consuming data product namespace for workgroup if provided, otherwise use owner's

@@ -25,6 +25,7 @@ class RenderTechnicalAssetAccessPathRequest:
         platform_id (UUID):
         service_id (UUID):
         data_product_id (UUID):
+        name (str):
         namespace (str):
         technical_mapping (TechnicalMapping):
         configuration (RenderTechnicalAssetAccessPathRequestConfiguration): Configuration of the technical asset. The
@@ -34,6 +35,7 @@ class RenderTechnicalAssetAccessPathRequest:
     platform_id: UUID
     service_id: UUID
     data_product_id: UUID
+    name: str
     namespace: str
     technical_mapping: TechnicalMapping
     configuration: RenderTechnicalAssetAccessPathRequestConfiguration
@@ -45,6 +47,8 @@ class RenderTechnicalAssetAccessPathRequest:
         service_id = str(self.service_id)
 
         data_product_id = str(self.data_product_id)
+
+        name = self.name
 
         namespace = self.namespace
 
@@ -59,6 +63,7 @@ class RenderTechnicalAssetAccessPathRequest:
                 "platform_id": platform_id,
                 "service_id": service_id,
                 "data_product_id": data_product_id,
+                "name": name,
                 "namespace": namespace,
                 "technical_mapping": technical_mapping,
                 "configuration": configuration,
@@ -80,6 +85,8 @@ class RenderTechnicalAssetAccessPathRequest:
 
         data_product_id = UUID(d.pop("data_product_id"))
 
+        name = d.pop("name")
+
         namespace = d.pop("namespace")
 
         technical_mapping = TechnicalMapping(d.pop("technical_mapping"))
@@ -92,6 +99,7 @@ class RenderTechnicalAssetAccessPathRequest:
             platform_id=platform_id,
             service_id=service_id,
             data_product_id=data_product_id,
+            name=name,
             namespace=namespace,
             technical_mapping=technical_mapping,
             configuration=configuration,

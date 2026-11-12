@@ -12628,6 +12628,7 @@ type RenderTechnicalAssetAccessPathRequest struct {
 	PlatformID       uuid.UUID        `json:"platform_id"`
 	ServiceID        uuid.UUID        `json:"service_id"`
 	DataProductID    uuid.UUID        `json:"data_product_id"`
+	Name             string           `json:"name"`
 	Namespace        string           `json:"namespace"`
 	TechnicalMapping TechnicalMapping `json:"technical_mapping"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
@@ -12648,6 +12649,11 @@ func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
 // GetDataProductID returns the value of DataProductID.
 func (s *RenderTechnicalAssetAccessPathRequest) GetDataProductID() uuid.UUID {
 	return s.DataProductID
+}
+
+// GetName returns the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequest) GetName() string {
+	return s.Name
 }
 
 // GetNamespace returns the value of Namespace.
@@ -12678,6 +12684,11 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
 // SetDataProductID sets the value of DataProductID.
 func (s *RenderTechnicalAssetAccessPathRequest) SetDataProductID(val uuid.UUID) {
 	s.DataProductID = val
+}
+
+// SetName sets the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequest) SetName(val string) {
+	s.Name = val
 }
 
 // SetNamespace sets the value of Namespace.

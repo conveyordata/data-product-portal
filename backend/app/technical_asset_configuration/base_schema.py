@@ -124,6 +124,7 @@ class PlatformMetadata(ORMModel):
 
 class TechnicalAssetContext(ORMModel):
     id: Optional[UUID] = None
+    name: str
     namespace: str
     technical_mapping: TechnicalMapping
 
@@ -137,6 +138,7 @@ class PluginContext(ORMModel):
     def build(
         cls,
         data_product: "DataProductModel",
+        name: str,
         namespace: str,
         technical_mapping: TechnicalMapping,
         technical_asset_id: Optional[UUID] = None,
@@ -144,6 +146,7 @@ class PluginContext(ORMModel):
         return cls(
             technical_asset=TechnicalAssetContext(
                 id=technical_asset_id,
+                name=name,
                 namespace=namespace,
                 technical_mapping=technical_mapping,
             ),

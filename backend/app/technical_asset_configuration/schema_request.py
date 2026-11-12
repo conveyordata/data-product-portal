@@ -9,6 +9,7 @@ class RenderTechnicalAssetAccessPathRequest(ORMModel):
     platform_id: UUID
     service_id: UUID
     data_product_id: UUID
+    name: str
     namespace: str
     technical_mapping: TechnicalMapping
     configuration: DataOutputConfiguration

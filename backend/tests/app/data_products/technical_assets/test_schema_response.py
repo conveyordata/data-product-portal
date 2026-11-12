@@ -47,6 +47,7 @@ def _item(
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_construct(
         id=uuid4(),
+        name="Order secrets",
         namespace="orders",
         technical_mapping=TechnicalMapping.Default,
         owner=DataProduct(
@@ -84,11 +85,11 @@ def test_result_string__can_use_the_plugin_context():
         configuration,
         _service(
             "{domain.name}/{data_product.namespace}/"
-            "{technical_asset.namespace}/{repository}"
+            "{technical_asset.namespace}/{technical_asset.name}/{repository}"
         ),
     )
 
-    assert item.result_string == "sales/customer360/orders/some-repo"
+    assert item.result_string == "sales/customer360/orders/Order secrets/some-repo"
 
 
 def test_result_string__is_empty_without_a_service():
@@ -107,13 +108,13 @@ def test_technical_info__can_use_the_plugin_context():
         _service(
             "{repository}",
             "{environment}/{domain.name}/{data_product.namespace}/"
-            "{technical_asset.namespace}/{repository}",
+            "{technical_asset.namespace}/{technical_asset.name}/{repository}",
         ),
         [EnvironmentConfigsGetItem.model_construct(config=[], environment=environment)],
     )
 
     assert [info.info for info in item.technical_info] == [
-        "dev/sales/customer360/orders/some-repo"
+        "dev/sales/customer360/orders/Order secrets/some-repo"
     ]
 
 

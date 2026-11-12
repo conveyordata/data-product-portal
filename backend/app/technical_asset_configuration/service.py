@@ -225,8 +225,11 @@ class PluginService:
         return request.configuration.render_template(
             template,
             plugin_context=PluginContext.build(
-                ensure_data_product_exists(request.data_product_id, self.db),
-                request.namespace,
-                request.technical_mapping,
+                data_product=ensure_data_product_exists(
+                    request.data_product_id, self.db
+                ),
+                name=request.name,
+                namespace=request.namespace,
+                technical_mapping=request.technical_mapping,
             ),
         )

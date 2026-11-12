@@ -16,6 +16,7 @@ dependencies = [
 [project.entry-points."data_product_portal.plugins"]
 agno = "portal_plugins.agno.schema:AgnoPlugin"
 azure-blob = "portal_plugins.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+azure-keyvault = "portal_plugins.azure_keyvault.schema:AzureKeyVaultTechnicalAssetConfiguration"
 conveyor = "portal_plugins.conveyor.schema:ConveyorPlugin"
 databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfiguration"
 github = "portal_plugins.github.schema:GitHubPlugin"
