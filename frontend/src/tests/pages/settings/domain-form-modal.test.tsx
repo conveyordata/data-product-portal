@@ -5,7 +5,7 @@ import {
     mockResourceNamesSanitize,
     mockResourceNamesValidate,
 } from '@/tests/mocks/resource_names.ts';
-import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { act, renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 describe('CreateDomainModal', () => {
     it('lets the user type a namespace when the name has no usable characters', async () => {
@@ -30,7 +30,7 @@ describe('CreateDomainModal', () => {
         renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
         const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
 
-        await new Promise((resolve) => setTimeout(resolve, 700));
+        await act(() => new Promise((resolve) => setTimeout(resolve, 700)));
         await user.type(screen.getByLabelText('Name'), 'sales');
 
         await waitFor(() => expect(namespace()?.value).toBe('sales'));

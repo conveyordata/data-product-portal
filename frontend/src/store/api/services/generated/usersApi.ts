@@ -363,6 +363,37 @@ export type InputPortRequest = {
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
+export type TechnicalAsset = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: TechnicalAssetStatus;
+  technical_mapping: TechnicalMapping;
+  owner_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+};
+export type TechnicalAssetOutputPortRequest = {
+  id: string;
+  output_port_id: string;
+  output_port: OutputPort;
+  technical_asset_id: string;
+  technical_asset: TechnicalAsset;
+  status: DecisionStatus;
+  requested_on: string;
+  denied_on: string | null;
+  approved_on: string | null;
+  requested_by: User;
+  denied_by: User | null;
+  approved_by: User | null;
+  request_type?: "TechnicalAssetOutputPort";
+};
 export type AbstractDataProductStatus =
   | "pending"
   | "active"
@@ -389,38 +420,6 @@ export type DataProduct = {
   description: string;
   status: AbstractDataProductStatus;
   type: DataProductType;
-};
-export type OwnedTechnicalAsset = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  status: TechnicalAssetStatus;
-  technical_mapping: TechnicalMapping;
-  owner_id: string;
-  platform_id?: string | null;
-  service_id?: string | null;
-  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
-  configuration: {
-    name: string;
-    [key: string]: any;
-  };
-  owner: DataProduct;
-};
-export type TechnicalAssetOutputPortRequest = {
-  id: string;
-  output_port_id: string;
-  output_port: OutputPort;
-  technical_asset_id: string;
-  technical_asset: OwnedTechnicalAsset;
-  status: DecisionStatus;
-  requested_on: string;
-  denied_on: string | null;
-  approved_on: string | null;
-  requested_by: User;
-  denied_by: User | null;
-  approved_by: User | null;
-  request_type?: "TechnicalAssetOutputPort";
 };
 export type DataProductRoleAssignmentRequest = {
   id: string;

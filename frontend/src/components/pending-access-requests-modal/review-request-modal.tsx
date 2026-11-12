@@ -17,6 +17,7 @@ import {
 } from 'antd';
 import type { GlobalToken } from 'antd/es/theme/interface';
 import { addDays, isPast } from 'date-fns';
+import type { TFunction } from 'i18next';
 import { type CSSProperties, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -130,11 +131,7 @@ const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     }
 };
 
-const hiddenDataProductName = (
-    name: string,
-    t: (key: string, params?: Record<string, string>) => string,
-    token: GlobalToken,
-): ReactNode => (
+const hiddenDataProductName = (name: string, t: TFunction, token: GlobalToken): ReactNode => (
     <Tooltip
         title={t(
             'This is a hidden Data Product, validate this requests based on its business justification. You can always contact the requester for details.',
@@ -166,11 +163,7 @@ function LinkableCard({ linkTo, style, children }: { linkTo?: string; style?: CS
 const isInputPortRequest = (action: Request): action is InputPortRequest =>
     action.request_type === RequestType_InputPort;
 
-function getRequestDetails(
-    action: Request,
-    t: (key: string, params?: Record<string, string>) => string,
-    token: GlobalToken,
-): RequestDetails | undefined {
+function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): RequestDetails | undefined {
     if (isInputPortRequest(action)) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,

@@ -2,7 +2,7 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.configuration.data_product_types.model import (
@@ -21,6 +21,8 @@ from app.configuration.data_product_types.schema_response import (
     DataProductTypesGetItem,
     UpdateDataProductTypeResponse,
 )
+from app.data_products.model import DataProduct as DataProductModel
+from app.database.database import UNFILTERED
 
 
 class DataProductTypeService:
@@ -66,7 +68,7 @@ class DataProductTypeService:
     def update_data_product_type(
         self, id: UUID, data_product_type: DataProductTypeUpdate
     ) -> UpdateDataProductTypeResponse:
-        current_data_product_type = self.db.get(DataProductTypeModel, id)
+        current_data_product_type = ensure_data_product_type_exists(id, self.db)
         updated_data_product_type = data_product_type.parse_pydantic_schema()
 
         for attr, value in updated_data_product_type.items():
@@ -76,13 +78,10 @@ class DataProductTypeService:
         return UpdateDataProductTypeResponse(id=id)
 
     def remove_data_product_type(self, id: UUID) -> None:
-        data_product_type = self.db.get(
-            DataProductTypeModel,
-            id,
-            options=[selectinload(DataProductTypeModel.data_products)],
-        )
-
-        if data_product_type.data_products:
+        if self.db.scalar(
+            select(exists().where(DataProductModel.type_id == id)),
+            execution_options=UNFILTERED,
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
@@ -90,6 +89,12 @@ class DataProductTypeService:
                     "multiple data products"
                 ),
             )
+        data_product_type = ensure_data_product_type_exists(
+            id,
+            self.db,
+            options=[selectinload(DataProductTypeModel.data_products)],
+            execution_options=UNFILTERED,
+        )
 
         self.db.delete(data_product_type)
 
@@ -98,6 +103,7 @@ class DataProductTypeService:
             from_id,
             self.db,
             options=[selectinload(DataProductTypeModel.data_products)],
+            execution_options=UNFILTERED,
         )
         new_data_product_type = ensure_data_product_type_exists(to_id, self.db)
 

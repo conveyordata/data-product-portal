@@ -19,6 +19,10 @@ Every demo should be self-contained in its own subdirectory and follow these req
 - **Scenario Documentation**: A local `README.md` explaining the business context and the narrative flow of the demo.
 
 
+## Python runtime
+
+The demo provisioners and agent server use the same pinned Python 3.14 image as the portal. Their hashed Poetry bootstrap requirements are generated for Python 3.14. Run `task poetry:sync` from this directory to copy the backend's bootstrap requirements to both provisioners.
+
 ## Existing Demos
 
 ### [Basic Demo](./basic/README.md)

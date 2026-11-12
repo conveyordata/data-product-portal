@@ -1,7 +1,7 @@
 import uuid
 
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy import UUID, Column, String
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from app.database.database import Base
 from app.shared.model import BaseORM

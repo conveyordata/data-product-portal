@@ -19,7 +19,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.output_port import OutputPort
-    from ..models.owned_technical_asset import OwnedTechnicalAsset
+    from ..models.technical_asset import TechnicalAsset
     from ..models.user import User
 
 
@@ -34,7 +34,7 @@ class TechnicalAssetOutputPortRequest:
         output_port_id (UUID):
         output_port (OutputPort):
         technical_asset_id (UUID):
-        technical_asset (OwnedTechnicalAsset):
+        technical_asset (TechnicalAsset):
         status (DecisionStatus):
         requested_on (datetime.datetime):
         denied_on (datetime.datetime | None):
@@ -49,7 +49,7 @@ class TechnicalAssetOutputPortRequest:
     output_port_id: UUID
     output_port: OutputPort
     technical_asset_id: UUID
-    technical_asset: OwnedTechnicalAsset
+    technical_asset: TechnicalAsset
     status: DecisionStatus
     requested_on: datetime.datetime
     denied_on: datetime.datetime | None
@@ -133,7 +133,7 @@ class TechnicalAssetOutputPortRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.output_port import OutputPort  # noqa: PLC0415
-        from ..models.owned_technical_asset import OwnedTechnicalAsset  # noqa: PLC0415
+        from ..models.technical_asset import TechnicalAsset  # noqa: PLC0415
         from ..models.user import User  # noqa: PLC0415
 
         d = dict(src_dict)
@@ -145,7 +145,7 @@ class TechnicalAssetOutputPortRequest:
 
         technical_asset_id = UUID(d.pop("technical_asset_id"))
 
-        technical_asset = OwnedTechnicalAsset.from_dict(d.pop("technical_asset"))
+        technical_asset = TechnicalAsset.from_dict(d.pop("technical_asset"))
 
         status = DecisionStatus(d.pop("status"))
 

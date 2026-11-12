@@ -36,11 +36,11 @@ def ensure_exists(
     return item
 
 
-def get_url(async_: bool = False) -> str:
+def get_url() -> str:
     user = quote_plus(settings.POSTGRES_USER)
     password = quote_plus(settings.POSTGRES_PASSWORD)
     return (
-        f"postgresql{'+asyncpg' if async_ else ''}://{user}:"
+        f"postgresql://{user}:"
         f"{password}@{settings.POSTGRES_SERVER}:"
         f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )

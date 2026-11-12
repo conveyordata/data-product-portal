@@ -6,6 +6,17 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+
+- **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
+
+### bugfixes
+
+- **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
+- **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
+- **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
+- **[API/UI]**: Users whose only role is on an Output Port of a Hidden Data Product can approve and deny its Technical Asset link requests again, and their pending actions no longer fail.
+
 ## 0.8.1
 
 ### breaking changes

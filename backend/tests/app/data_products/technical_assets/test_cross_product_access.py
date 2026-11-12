@@ -12,7 +12,6 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.settings import settings
-from tests.app.shared.test_router import _iter_app_routes
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -23,6 +22,7 @@ from tests.factories import (
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
+from tests.route_util import iter_app_routes
 
 ASSETS = "/api/v2/data_products/{data_product_id}/technical_assets"
 ASSET = f"{ASSETS}/{{id}}"
@@ -51,7 +51,7 @@ ROUTES_WITHOUT_TECHNICAL_ASSET_ID = {("GET", f"{ASSETS}/"), ("POST", f"{ASSETS}/
 def test_technical_asset_route__all_routes_covered():
     discovered = {
         (method, route.path)
-        for route in _iter_app_routes()
+        for route in iter_app_routes()
         if _is_technical_asset_route(route)
         for method in route.methods
     }

@@ -3,9 +3,18 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, event, func, or_, select
+from sqlalchemy import (
+    UUID,
+    Column,
+    DateTime,
+    ForeignKey,
+    String,
+    event,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
     Mapped,
     Session,
@@ -178,7 +187,10 @@ class DataProduct(
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table, back_populates="data_products", lazy="raise"
+        secondary=tag_data_product_table,
+        back_populates="data_products",
+        lazy="raise",
+        passive_deletes=True,
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         back_populates="data_product",

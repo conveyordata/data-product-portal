@@ -53,4 +53,4 @@ If the PR touches `frontend/` in a way the user can see, add screenshots, ideall
 | <screenshot> | <screenshot> |
 ```
 
-If you can run the app and capture them, do so. Otherwise leave `<!-- TODO: screenshot of ... -->` placeholders naming the exact page and state to capture, and tell the author they still need to add them (images are uploaded through the GitHub web UI).
+If you can run the app, capture them with the `screenshot` skill (`--compare main`). Otherwise leave `<!-- TODO: screenshot of ... -->` placeholders naming the exact page and state to capture, and tell the author they still need to add them (images are uploaded through the GitHub web UI).

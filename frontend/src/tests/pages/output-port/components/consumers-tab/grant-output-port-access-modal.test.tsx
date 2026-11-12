@@ -1,6 +1,7 @@
 import { delay, HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { GrantOutputPortAccessModal } from '@/pages/output-port/components/dataset-tabs/consumers-tab/components/grant-output-port-access-modal.tsx';
+import { AbstractDataProductStatus, OutputPortAccessFunction } from '@/store/api/services/generated/dataProductsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
@@ -15,13 +16,16 @@ describe('GrantOutputPortAccessModal', () => {
                             id: 'consumer-id',
                             name: 'Consumer',
                             description: 'Consumer description',
-                            status: 'active',
+                            status: AbstractDataProductStatus.Active,
                         },
                     ],
                 }),
             ),
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
-                HttpResponse.json({ access_modes: [], access_type: { access_function: 'restricted' } }),
+                HttpResponse.json({
+                    access_modes: [],
+                    access_type: { access_function: OutputPortAccessFunction.Restricted },
+                }),
             ),
             http.post(
                 '*/api/v2/data_products/:dataProductId/output_ports/:outputPortId/input_ports/grant',
@@ -80,11 +84,21 @@ describe('GrantOutputPortAccessModal', () => {
             http.get('*/api/v2/data_products', () => HttpResponse.json({ data_products: [] })),
             http.get('*/api/v2/explorations', () =>
                 HttpResponse.json({
-                    explorations: [{ id: 'exploration-id', name: 'My exploration', description: '', status: 'active' }],
+                    explorations: [
+                        {
+                            id: 'exploration-id',
+                            name: 'My exploration',
+                            description: '',
+                            status: AbstractDataProductStatus.Active,
+                        },
+                    ],
                 }),
             ),
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
-                HttpResponse.json({ access_modes: [], access_type: { access_function: 'restricted' } }),
+                HttpResponse.json({
+                    access_modes: [],
+                    access_type: { access_function: OutputPortAccessFunction.Restricted },
+                }),
             ),
         );
         const user = userEvent.setup();

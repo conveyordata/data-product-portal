@@ -2,8 +2,7 @@ import uuid
 from string import ascii_lowercase, digits
 
 from shortuuid import ShortUUID
-from sqlalchemy import Column, DateTime, Enum, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Column, DateTime, Enum, Integer, String
 
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.database.database import Base

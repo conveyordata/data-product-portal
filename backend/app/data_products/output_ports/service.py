@@ -3,7 +3,7 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import String, case, func, select
+from sqlalchemy import String, case, func, literal_column, select
 from sqlalchemy.orm import (
     Session,
     joinedload,
@@ -352,9 +352,12 @@ class OutputPortService:
     @staticmethod
     def _recalculate_search_vector(output_port: OutputPortModel) -> None:
         output_port.search_vector = func.setweight(
-            func.to_tsvector("english", output_port.name), "A"
+            func.to_tsvector("english", output_port.name), literal_column("'A'")
         ).op("||")(
-            func.setweight(func.to_tsvector("english", output_port.description), "B")
+            func.setweight(
+                func.to_tsvector("english", output_port.description),
+                literal_column("'B'"),
+            )
         )
 
     def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:

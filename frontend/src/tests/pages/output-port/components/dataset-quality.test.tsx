@@ -48,6 +48,7 @@ describe('DatasetQuality', () => {
     });
 
     it('keeps showing the quality while it refetches', async () => {
+        const user = userEvent.setup();
         let requests = 0;
         server.use(
             http.get('*/api/v2/data_products/dp1/output_ports/op1/data_quality_summary', async () => {
@@ -71,7 +72,7 @@ describe('DatasetQuality', () => {
         );
         expect(await screen.findByText('Passed')).toBeInTheDocument();
 
-        await userEvent.click(screen.getByRole('button', { name: 'Refetch' }));
+        await user.click(screen.getByRole('button', { name: 'Refetch' }));
 
         expect(await screen.findByText('Refetching')).toBeInTheDocument();
         expect(screen.getByText('Passed')).toBeInTheDocument();

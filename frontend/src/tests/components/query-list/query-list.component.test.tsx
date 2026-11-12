@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
 import { QueryList } from '@/components/query-list/query-list.component.tsx';
-import { renderWithProviders, screen } from '../../test-utils';
+import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 const settledQuery: EmptyStateQuery = {
     isFetching: false,

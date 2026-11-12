@@ -1,7 +1,6 @@
 import uuid
 
-from sqlalchemy import Enum, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Enum, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.data_products.output_ports.enums import OutputPortAccessFunction

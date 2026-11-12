@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+[[ -d ${VIRTUAL_ENV:-} ]] || unset VIRTUAL_ENV
 
 # Check if the generated SDK plugin configurations are up to date
 

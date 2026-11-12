@@ -23,6 +23,7 @@ from app.search_output_ports.schema_response import (
     SearchOutputPortsResponse,
 )
 from app.settings import settings
+from tests import engine as test_engine
 from tests.factories import (
     DataQualitySummaryFactory,
     DatasetRoleAssignmentFactory,
@@ -278,6 +279,9 @@ class TestOutputPortSearchRouter:
         command.downgrade(cfg, "base")
 
         migrate_all(owning_plugins, engine)
+        # Pooled connections hold prepared statements bound to the dropped types.
+        engine.dispose()
+        test_engine.dispose()
 
         seed_cmd(path="./sample_data.sql")
 

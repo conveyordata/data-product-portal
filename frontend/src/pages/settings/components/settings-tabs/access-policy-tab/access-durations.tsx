@@ -1,5 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
+import { Checkbox, Flex, InputNumber, Select, Space, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
@@ -154,12 +154,14 @@ export default function AccessDurations() {
                         ]}
                     />
                     {record.durationType === AccessDurationType.TimeBound && (
-                        <InputNumber
-                            min={1}
-                            value={record.defaultDays ?? undefined}
-                            onChange={(val) => updatePolicy(record.key, { defaultDays: val ?? 1 })}
-                            addonAfter={t('days')}
-                        />
+                        <Space.Compact>
+                            <InputNumber
+                                min={1}
+                                value={record.defaultDays ?? undefined}
+                                onChange={(val) => updatePolicy(record.key, { defaultDays: val ?? 1 })}
+                            />
+                            <Space.Addon>{t('days')}</Space.Addon>
+                        </Space.Compact>
                     )}
                 </Flex>
             ),
@@ -197,12 +199,14 @@ export default function AccessDurations() {
                         />
                         <Typography.Text>{label}</Typography.Text>
                         {!isTimeBound && record.alternativeAllowed && (
-                            <InputNumber
-                                min={1}
-                                value={record.alternativeDays}
-                                onChange={(val) => updatePolicy(record.key, { alternativeDays: val ?? 1 })}
-                                addonAfter={t('days')}
-                            />
+                            <Space.Compact>
+                                <InputNumber
+                                    min={1}
+                                    value={record.alternativeDays}
+                                    onChange={(val) => updatePolicy(record.key, { alternativeDays: val ?? 1 })}
+                                />
+                                <Space.Addon>{t('days')}</Space.Addon>
+                            </Space.Compact>
                         )}
                     </Flex>
                 );

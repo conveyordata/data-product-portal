@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OutputPortAccessTypeFormModal } from '@/pages/settings/components/settings-tabs/components/output-port-access-types-table/output-port-access-type-form-modal.component.tsx';
@@ -7,7 +6,7 @@ import {
     type OutputPortAccessTypesGetItem,
 } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import { server } from '@/tests/mocks/server.ts';
-import { renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 const mockOnClose = vi.fn();
 
