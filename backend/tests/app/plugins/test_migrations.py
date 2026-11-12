@@ -8,7 +8,10 @@ from uuid import uuid4
 import pytest
 from alembic import command
 from alembic.script import ScriptDirectory
-from sqlalchemy import Engine, create_engine, inspect
+from portal_plugins.azure_keyvault.model import (
+    AzureKeyVaultTechnicalAssetConfiguration as KeyVaultConfiguration,
+)
+from sqlalchemy import Engine, create_engine, inspect, select
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy_utils.functions import (
     create_database,
@@ -104,6 +107,38 @@ def test_migrate_plugin__is_idempotent():
     migrate(ExamplePlugin)  # must not raise on a plugin already at its head
 
     assert "example_0002_add_extra" in _tracked_revisions()
+
+
+def test_migrate_keyvault__adds_uniqueness_without_changing_existing_vaults():
+    config = _config(
+        _version_locations(installed()),
+        engine.url.render_as_string(hide_password=False),
+    )
+    command.downgrade(config, "azure_keyvault_0001_baseline")
+    try:
+        configuration_id = uuid4()
+        TechnicalAssetFactory(
+            configuration=KeyVaultConfiguration(
+                id=configuration_id, vault_name="kv-adp-existing"
+            )
+        )
+    finally:
+        migrate()
+
+    constraints = inspect(engine).get_unique_constraints(
+        KeyVaultConfiguration.__tablename__
+    )
+    assert any(
+        constraint["name"] == "uq_azure_keyvault_vault_name"
+        and constraint["column_names"] == ["vault_name"]
+        for constraint in constraints
+    )
+    with engine.connect() as connection:
+        assert connection.scalar(
+            select(KeyVaultConfiguration.__table__.c.vault_name).where(
+                KeyVaultConfiguration.__table__.c.id == configuration_id
+            )
+        ) == "kv-adp-existing"
 
 
 def test_migrate_all__still_checks_for_orphans_when_a_plugin_is_dropped():

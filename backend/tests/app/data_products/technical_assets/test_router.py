@@ -175,6 +175,44 @@ class TestKeyVaultTechnicalAssets:
             == 0
         )
 
+    def test_create__rejects_duplicate_when_precheck_misses_conflict(
+        self, client, session, keyvault_payload, monkeypatch
+    ):
+        created = client.post(
+            ENDPOINT.format(keyvault_payload["owner_id"]), json=keyvault_payload
+        )
+        assert created.status_code == 200, created.text
+        other_product = DataProductFactory()
+        validate = AzureKeyVaultTechnicalAssetConfiguration.validate_configuration
+
+        def validate_without_existing_vault(configuration, context, db):
+            with patch.object(db, "scalar", return_value=False):
+                validate(configuration, context, db)
+
+        monkeypatch.setattr(
+            AzureKeyVaultTechnicalAssetConfiguration,
+            "validate_configuration",
+            validate_without_existing_vault,
+        )
+        duplicate = client.post(
+            ENDPOINT.format(other_product.id),
+            json={**keyvault_payload, "namespace": "another-namespace"},
+        )
+
+        assert duplicate.status_code == 400, duplicate.text
+        assert "uq_azure_keyvault_vault_name" in duplicate.json()["detail"]
+        assert (
+            session.scalar(select(func.count()).select_from(KeyVaultConfigurationModel))
+            == 1
+        )
+        assert (
+            session.scalar(select(func.count()).select_from(TechnicalAssetConfiguration))
+            == 1
+        )
+        assert client.get(
+            f"{ENDPOINT.format(keyvault_payload['owner_id'])}/{created.json()['id']}"
+        ).status_code == 200
+
     def test_delete__removes_configuration_and_allows_name_reuse(
         self, client, session, keyvault_payload
     ):
