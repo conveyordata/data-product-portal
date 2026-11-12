@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists

@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Column, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 
 from app.database.database import Base

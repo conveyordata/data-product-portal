@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Column, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_products.output_ports.announcements.model import Announcement

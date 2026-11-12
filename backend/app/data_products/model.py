@@ -3,9 +3,18 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, event, func, or_, select
+from sqlalchemy import (
+    UUID,
+    Column,
+    DateTime,
+    ForeignKey,
+    String,
+    event,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
     Mapped,
     Session,

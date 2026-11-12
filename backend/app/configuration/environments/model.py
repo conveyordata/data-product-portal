@@ -1,7 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Boolean, Column, String
 
 from app.database.database import Base
 from app.shared.model import BaseORM

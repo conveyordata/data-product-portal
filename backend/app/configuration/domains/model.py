@@ -1,9 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, String, UniqueConstraint
+from sqlalchemy import UUID, Column, String, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.configuration.domains.status import DomainStatus

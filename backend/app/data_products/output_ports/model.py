@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
+    UUID,
     Column,
     Enum,
     ForeignKey,
@@ -14,7 +15,7 @@ from sqlalchemy import (
     or_,
     select,
 )
-from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import (
     Mapped,
     Session,
