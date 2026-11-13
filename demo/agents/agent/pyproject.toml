@@ -12,7 +12,9 @@ dependencies = [
     "anthropic (>=0.84.0,<0.85.0)",
     "psycopg[binary] (>=3.1.0,<4.0.0)",
     "pyyaml (>=6.0.2,<7.0.0)",
-    "sqlalchemy[asyncio] (>=2.0,<3.0)"
+    "sqlalchemy[asyncio] (>=2.0,<3.0)",
+    "watchfiles (>=1.0.0,<2.0.0)",
+    "boto3 (>=1.35.0,<2.0.0)"
 ]
 
 [tool.poetry]
