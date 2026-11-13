@@ -39,6 +39,31 @@ Requirements:
 
 We recommend using a managed database service.
 
+The backend logs in to the database in one of two ways, set with `POSTGRES_AUTH_MODE`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `POSTGRES_AUTH_MODE` | `password` | `password` sends `POSTGRES_PASSWORD`. `azure` asks Microsoft Entra ID for a short-lived token for every new connection and sends that as the password. |
+| `POSTGRES_PASSWORD` | | Required with `password`. Leave it empty to let the database driver read the password from the file in `PGPASSFILE`. Not used with `azure`. |
+| `AZURE_CLIENT_ID` | | Only with `azure`. The client id of the user-assigned managed identity to log in with, when the host has more than one. This is the standard Azure SDK variable; AKS workload identity sets it for you. |
+
+For Azure Database for PostgreSQL with Microsoft Entra authentication, set `POSTGRES_AUTH_MODE=azure`, set `POSTGRES_USER` to the database user of the backend's identity and require TLS with `PGSSLMODE=require`. In the Helm chart these are `database.auth_mode` and `database.sslmode`. How to enable Entra authentication on the server and create that user is described in [Microsoft's documentation](https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-configure).
+
+For other token sources, such as HashiCorp Vault or a cloud IAM sidecar, let them write the password to a [password file](https://www.postgresql.org/docs/current/libpq-pgpass.html), point `PGPASSFILE` to it and leave `POSTGRES_PASSWORD` empty. The driver reads the file for every new connection, so a refreshed password is picked up without a restart.
+
+`AZURE_CLIENT_ID`, `PGSSLMODE` and `PGPASSFILE` are read by the Azure SDK and the database driver, not by the portal, so set them as environment variables of the backend container. A `.env` file does not reach the driver.
+
+##### Switching an existing installation to token login
+
+A token logs in as the identity it belongs to, so the database user usually changes too. The existing tables belong to the old password user, and the new user can't read them or run migrations until it has the same rights. Switch in this order:
+
+1. Let the database accept both password and token logins while you switch.
+2. Create a database user for the new identity and give it the rights of the old user, for example by making it a member of the old user's role.
+3. Deploy the portal with the new `POSTGRES_AUTH_MODE` and `POSTGRES_USER`.
+4. Once every backend instance runs with the new settings, you can turn off password login.
+
+Until step 4 you can roll back by deploying with the old `POSTGRES_USER` and `POSTGRES_PASSWORD`.
+
 #### Host
 
 A dedicated hostname is required for running a production setup of Portal.
