@@ -604,9 +604,9 @@ pbs-installer==2026.10.25 \
     --hash=sha256:19158e6fe4c941a230fdd017e48562ccea8a1d9320d9ffb30b38826d516b375b \
     --hash=sha256:d7cfcc37f15f55926d51b93e5275cca548e2d91fe530109f56258bc3aa754ea9
     # via poetry
-pkginfo==1.13.3 \
-    --hash=sha256:66520cd19fddf3faa9554d68dcc0e6801944275bf612e8b581dfba968a9b4cc9 \
-    --hash=sha256:ad74cc8184b28b77b06cccc49361fd0fdc56fd87e307425ce1c2b7596dbe3185
+pkginfo==2.0 \
+    --hash=sha256:98c7aaa804dfe017b0de65d4b41a2f4649a656f43d3c21525b13e8075716fa1b \
+    --hash=sha256:f7b4f267881785582c923631a0fa7e275b0d390a5cbab54aa4ec0ecc7eddb375
     # via poetry
 platformdirs==4.13.5 \
     --hash=sha256:05831adf87d392760f4b5c3a0a95579ab5a10b18b9b9bd43680dcb47544788a0 \
