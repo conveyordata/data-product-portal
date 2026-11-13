@@ -19,7 +19,7 @@ packages = [{ include = "app" }]
 python = "^3.14"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
-gunicorn = "^26.2.0"
+gunicorn = ">=26.2,<28.0"
 uvicorn = ">=0.52.4,<0.55.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
 pydantic-settings = "^2.15.0"
