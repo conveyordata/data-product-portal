@@ -159,6 +159,7 @@ tasks:
 
   db:up:
     desc: "Start the postgresql database"
+    dir: backend
     cmds:
       - docker compose up -d postgresql
 
