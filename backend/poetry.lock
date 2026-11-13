@@ -360,18 +360,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.43.126"
+version = "1.43.127"
 description = "The AWS SDK for Python (Boto3)"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "plugins"]
 files = [
-    {file = "boto3-1.43.126-py3-none-any.whl", hash = "sha256:dd701a973b02a73930e546a6a15d13edbfbedc3180bb3d55b0a88678c284ccd6"},
-    {file = "boto3-1.43.126.tar.gz", hash = "sha256:5fda4a3dd2782c134a01d1678911962c2860dd8de8cd10bef168ba1507b371a9"},
+    {file = "boto3-1.43.127-py3-none-any.whl", hash = "sha256:47f87f89b10e62f5191bd98674beb0dd52ed368c19fcdfef2ef38ead31126f49"},
+    {file = "boto3-1.43.127.tar.gz", hash = "sha256:b5417e81d439b35ccf3a1eb51fa06cf9c97167c9a6beaa1929175ee9840d505a"},
 ]
 
 [package.dependencies]
-botocore = ">=1.43.126,<1.44.0"
+botocore = ">=1.43.127,<1.44.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.19.0,<0.20.0"
 
@@ -3850,14 +3850,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.86.0"
+version = "7.86.4"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.86.0-py3-none-any.whl", hash = "sha256:616ff58e56891c89869e1cde77c410fd6ed3cfb1a95938844409b7b2a3c8bceb"},
-    {file = "posthog-7.86.0.tar.gz", hash = "sha256:fae11f4f2ebf92a8025d4de0547cc0c4098489b3a219ed538db5e58465813f5c"},
+    {file = "posthog-7.86.4-py3-none-any.whl", hash = "sha256:627caed7b0b47c340820734844ae4b3cbd3d31e46c1766571a4ee2f3bd55fe57"},
+    {file = "posthog-7.86.4.tar.gz", hash = "sha256:e52662b84404f047ab10a275b0ded8e22d82a361f92febb40506404a263cd6f7"},
 ]
 
 [package.dependencies]
@@ -5385,19 +5385,20 @@ files = [
 
 [[package]]
 name = "typer"
-version = "0.28.0"
+version = "0.29.0"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "typer-0.28.0-py3-none-any.whl", hash = "sha256:afd18929180b706c5e9a239f53c3c8136903553c0c2d460598bbaa924191d4ab"},
-    {file = "typer-0.28.0.tar.gz", hash = "sha256:69ab84ef79fd601cff071bbd2566d855ecadfd93adbc4b3360b9924359bdd857"},
+    {file = "typer-0.29.0-py3-none-any.whl", hash = "sha256:b3c3de6e06a848274dc7bd56a433499e9cf25fa1d40aa3ba4eccfec4e1624c7b"},
+    {file = "typer-0.29.0.tar.gz", hash = "sha256:6871960a1603fba66af2ff751be48a6735af6480a67660afaf2fab2f7e008ed4"},
 ]
 
 [package.dependencies]
 annotated-doc = ">=0.0.2"
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+pydantic = ">=2.5.3"
 rich = ">=13.8.0"
 shellingham = ">=1.3.0"
 
@@ -6030,4 +6031,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "0ee5214802925fe3aced1ca5c7cadf23e7db13d6a154ae076f4420ba90d64afb"
+content-hash = "708e68f913297f0cb191cd80c1fa843d5728cd8eb02fe87cc64ba588f38ee463"
