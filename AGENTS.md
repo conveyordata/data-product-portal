@@ -21,7 +21,7 @@ It consists of a 3-tier web architecture.
 
 ## Workflow & Automation
 
-*   **Task Runner**: `Taskfile.yml` is primarily for release automation.
+*   **Task Runner**: `Taskfile.yml` holds release automation and the development tasks (setup, tests, coverage, database, load test). Run `task --list` to see them.
 *   **Pre-commit**: Stage your change and run `scripts/precommit.sh` rather than invoking Ruff, mypy, or Biome directly. It sets up the backend environment (also in a worktree without its own venv), reruns the hooks until the generators (OpenAPI client, SDK, CLI, translations) stop changing files, and stages what they write. Commit only once it exits 0. To check files without staging (e.g. other edits are unstaged), run `scripts/precommit.sh --files <repo-relative paths>`. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
 *   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
