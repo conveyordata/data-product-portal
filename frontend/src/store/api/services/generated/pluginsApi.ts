@@ -147,6 +147,7 @@ export type RenderTechnicalAssetAccessPathRequest = {
   platform_id: string;
   service_id: string;
   data_product_id: string;
+  name: string;
   namespace: string;
   technical_mapping: TechnicalMapping;
   /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */

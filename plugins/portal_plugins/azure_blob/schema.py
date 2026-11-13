@@ -1,6 +1,5 @@
 import logging
 from typing import ClassVar, Optional
-from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -21,7 +20,7 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import UIElementType
-from app.users.schema import User
+from common.azure_helpers import get_azure_plugin_url
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +52,7 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def validate_configuration(self, context: PluginContext, db: Session):
         self.domain = context.domain.name
 
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        return "https://portal.azure.com/"
+    get_url = classmethod(get_azure_plugin_url)
 
     def get_configuration(
         self, configs: list[AzureBlobConfig]

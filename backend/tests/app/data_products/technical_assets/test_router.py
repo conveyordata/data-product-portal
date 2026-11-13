@@ -5,6 +5,13 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
+from portal_plugins.azure_keyvault.model import (
+    AzureKeyVaultTechnicalAssetConfiguration as KeyVaultConfigurationModel,
+)
+from portal_plugins.azure_keyvault.schema import (
+    AzureKeyVaultTechnicalAssetConfiguration,
+)
+from sqlalchemy import func, select
 
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
@@ -12,6 +19,7 @@ from app.core.authz import Action
 from app.data_products.model import DataProduct, DataProductEnvironment
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.settings import settings
+from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
@@ -72,6 +80,155 @@ def data_product_role_assignment(technical_asset_payload) -> Role:
         data_product_id=technical_asset_payload["owner_id"],
     )
     return role
+
+
+class TestKeyVaultTechnicalAssets:
+    @pytest.fixture
+    def keyvault_payload(self, monkeypatch, admin):
+        plugin = AzureKeyVaultTechnicalAssetConfiguration
+        monkeypatch.setattr(
+            settings, "ENABLED_PLUGINS", [*settings.ENABLED_PLUGINS, plugin.name]
+        )
+        metadata = plugin.get_platform_metadata()
+        service = PlatformServiceFactory(
+            result_string_template=metadata.result_string_template,
+            technical_info_template=metadata.technical_info_template,
+        )
+        environment = EnvironmentFactory(name="Production", acronym="prd")
+        data_product = DataProductFactory(
+            environments=[DataProductEnvironment(environment=environment)]
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=service.platform,
+            service=service,
+            environment=environment,
+            config="[]",
+        )
+        return {
+            "name": "copilot-usage",
+            "namespace": "namespace-longer-than-thirteen",
+            "description": "Secrets",
+            "technical_mapping": "default",
+            "configuration": {"name": plugin.name, "vault_name": "client-override"},
+            "platform_id": str(service.platform.id),
+            "service_id": str(service.id),
+            "owner_id": str(data_product.id),
+            "tag_ids": [],
+        }
+
+    def test_create_and_rename__preserves_vault_identity(
+        self, client, keyvault_payload
+    ):
+        TechnicalAssetFactory(name=keyvault_payload["name"])
+        endpoint = ENDPOINT.format(keyvault_payload["owner_id"])
+        created = client.post(endpoint, json=keyvault_payload)
+        assert created.status_code == 200, created.text
+        asset_endpoint = f"{endpoint}/{created.json()['id']}"
+
+        before = client.get(asset_endpoint)
+        assert before.status_code == 200, before.text
+        assert before.json()["configuration"]["vault_name"] == "kv-adp-copilot-usage"
+        assert before.json()["namespace"] == keyvault_payload["namespace"]
+        assert before.json()["result_string"] == "kv-adp-copilot-usage"
+        assert before.json()["technical_info"][0]["info"] == (
+            "https://kv-adp-copilot-usage-prd.vault.azure.net/"
+        )
+
+        renamed = client.put(
+            asset_endpoint,
+            json={
+                "name": "Copilot usage secrets!",
+                "description": "Updated description",
+                "tag_ids": [],
+            },
+        )
+        assert renamed.status_code == 200, renamed.text
+        after = client.get(asset_endpoint)
+        assert after.status_code == 200, after.text
+        assert after.json()["name"] == "Copilot usage secrets!"
+        for field in ("configuration", "result_string", "technical_info", "namespace"):
+            assert after.json()[field] == before.json()[field]
+
+        other_product = DataProductFactory()
+        duplicate = client.post(
+            ENDPOINT.format(other_product.id),
+            json={**keyvault_payload, "namespace": "another-namespace"},
+        )
+        assert duplicate.status_code == 400, duplicate.text
+        assert duplicate.json()["detail"] == (
+            "Key Vault kv-adp-copilot-usage already exists"
+        )
+
+    @pytest.mark.parametrize("name", ["a" * 14, "Invalid name"])
+    def test_create__rejects_invalid_vault_name(
+        self, client, session, keyvault_payload, name
+    ):
+        response = client.post(
+            ENDPOINT.format(keyvault_payload["owner_id"]),
+            json={**keyvault_payload, "name": name},
+        )
+
+        assert response.status_code == 400, response.text
+        assert "Key Vault name" in response.json()["detail"]
+        assert (
+            session.scalar(select(func.count()).select_from(KeyVaultConfigurationModel))
+            == 0
+        )
+
+    def test_create__rejects_duplicate_when_precheck_misses_conflict(
+        self, client, session, keyvault_payload, monkeypatch
+    ):
+        created = client.post(
+            ENDPOINT.format(keyvault_payload["owner_id"]), json=keyvault_payload
+        )
+        assert created.status_code == 200, created.text
+        other_product = DataProductFactory()
+        validate = AzureKeyVaultTechnicalAssetConfiguration.validate_configuration
+
+        def validate_without_existing_vault(configuration, context, db):
+            with patch.object(db, "scalar", return_value=False):
+                validate(configuration, context, db)
+
+        monkeypatch.setattr(
+            AzureKeyVaultTechnicalAssetConfiguration,
+            "validate_configuration",
+            validate_without_existing_vault,
+        )
+        duplicate = client.post(
+            ENDPOINT.format(other_product.id),
+            json={**keyvault_payload, "namespace": "another-namespace"},
+        )
+
+        assert duplicate.status_code == 400, duplicate.text
+        assert "uq_azure_keyvault_vault_name" in duplicate.json()["detail"]
+        assert (
+            session.scalar(select(func.count()).select_from(KeyVaultConfigurationModel))
+            == 1
+        )
+        assert (
+            session.scalar(select(func.count()).select_from(TechnicalAssetConfiguration))
+            == 1
+        )
+        assert client.get(
+            f"{ENDPOINT.format(keyvault_payload['owner_id'])}/{created.json()['id']}"
+        ).status_code == 200
+
+    def test_delete__removes_configuration_and_allows_name_reuse(
+        self, client, session, keyvault_payload
+    ):
+        endpoint = ENDPOINT.format(keyvault_payload["owner_id"])
+        created = client.post(endpoint, json=keyvault_payload)
+        assert created.status_code == 200, created.text
+        configuration_id = session.scalar(select(KeyVaultConfigurationModel.id))
+        assert configuration_id is not None
+
+        deleted = client.delete(f"{endpoint}/{created.json()['id']}")
+        assert deleted.status_code == 200, deleted.text
+        assert session.get(KeyVaultConfigurationModel, configuration_id) is None
+        assert session.get(TechnicalAssetConfiguration, configuration_id) is None
+
+        recreated = client.post(endpoint, json=keyvault_payload)
+        assert recreated.status_code == 200, recreated.text
 
 
 class TestTechnicalAssetsRouter:
@@ -423,7 +580,7 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 403
 
-    def test_remove_technical_asset(self, client: TestClient):
+    def test_remove_technical_asset(self, client: TestClient, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -434,10 +591,14 @@ class TestTechnicalAssetsRouter:
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=data_product)
+        configuration_id = technical_asset.configuration_id
+        configuration_type = type(technical_asset.configuration)
         response = self.delete_technical_asset(
             client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
+        assert session.get(configuration_type, configuration_id) is None
+        assert session.get(TechnicalAssetConfiguration, configuration_id) is None
 
     def test_remove_technical_asset_with_tags(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

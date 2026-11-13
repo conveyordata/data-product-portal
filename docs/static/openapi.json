@@ -17621,6 +17621,10 @@
             "format": "uuid",
             "title": "Data Product Id"
           },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
           "namespace": {
             "type": "string",
             "title": "Namespace"
@@ -17648,6 +17652,7 @@
           "platform_id",
           "service_id",
           "data_product_id",
+          "name",
           "namespace",
           "technical_mapping",
           "configuration"

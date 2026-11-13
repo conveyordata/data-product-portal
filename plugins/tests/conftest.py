@@ -19,7 +19,9 @@ from app.technical_asset_configuration.base_schema import (
 def plugin_context() -> PluginContext:
     return PluginContext(
         technical_asset=TechnicalAssetContext(
-            namespace="orders", technical_mapping=TechnicalMapping.Default
+            name="order-secrets",
+            namespace="orders",
+            technical_mapping=TechnicalMapping.Default,
         ),
         data_product=DataProduct(
             id=uuid4(),

@@ -190,9 +190,10 @@ class TechnicalAssetService:
         if technical_asset.technical_mapping == TechnicalMapping.Default:
             technical_asset.configuration.validate_configuration(
                 PluginContext.build(
-                    ensure_data_product_exists(data_product_id, self.db),
-                    technical_asset.namespace,
-                    TechnicalMapping.Default,
+                    data_product=ensure_data_product_exists(data_product_id, self.db),
+                    name=technical_asset.name,
+                    namespace=technical_asset.namespace,
+                    technical_mapping=TechnicalMapping.Default,
                 ),
                 self.db,
             )

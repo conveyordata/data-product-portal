@@ -30,7 +30,7 @@ This section describes how to integrate the portal with your platform of choice.
 - **AWS**: S3, Glue, Athena, Redshift, Parameter Store
 - **Conveyor**: A [self-service workflow manager](https://conveyor.dataminded.com/) for Data Products
 - **Agno**: [An agent platform](https://www.agno.com/)
-- **Azure**: Blob Storage
+- **Azure**: Blob Storage, Key Vault
 - **Databricks**: We support registering elements from the catalog
 - **PostgreSQL**: The [open source object-relational database system](https://www.postgresql.org/). You can register schemas, databases, tables etc.
 - **OSI**: [Open Semantic Interchange](https://open-semantic-interchange.org/) which registers your semantic layers

@@ -17,6 +17,10 @@ sidebar_position: 200
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
 - **[API/UI]**: Users whose only role is on an Output Port of a Hidden Data Product can approve and deny its Technical Asset link requests again, and their pending actions no longer fail.
 
+### features
+
+- **[Plugins]**: Templates and `validate_configuration` can use the Technical Asset name, e.g. `{technical_asset.name}`.`
+
 ## 0.8.1
 
 ### breaking changes

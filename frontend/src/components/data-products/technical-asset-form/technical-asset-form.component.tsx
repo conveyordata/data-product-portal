@@ -90,6 +90,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const technical_mapping = Form.useWatch('technical_mapping', form);
     const namespace = Form.useWatch('namespace', form);
     const dataOutputNameValue = Form.useWatch('name', form);
+    const configurationType = Form.useWatch(['configuration', 'name'], form);
 
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateNamespace] = useLazyValidateResourceNameQuery();
@@ -180,6 +181,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                 form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
             } else {
                 setSelectedConfiguration(undefined);
+                form.setFieldValue('service_id', undefined);
             }
         }
     };
@@ -239,7 +241,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                 form.setFieldValue('result', result);
             }
         };
-        if (!values.platform_id || !values.service_id) {
+        if (!values.platform_id || !values.service_id || !values.configuration?.name) {
             form.setFieldValue('result', undefined);
             return;
         }
@@ -247,6 +249,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             platform_id: values.platform_id,
             service_id: values.service_id,
             data_product_id: dataProductId,
+            name: values.name ?? '',
             namespace: values.namespace ?? '',
             technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
             configuration: values.configuration,
@@ -258,8 +261,15 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     }, debounce);
 
     useEffect(() => {
-        setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
-    }, [form, namespace, technical_mapping, setResultString]);
+        const values = form.getFieldsValue(true);
+        setResultString({
+            ...values,
+            name: dataOutputNameValue,
+            namespace,
+            technical_mapping,
+            configuration: configurationType ? values.configuration : undefined,
+        });
+    }, [form, dataOutputNameValue, namespace, technical_mapping, configurationType, setResultString]);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,

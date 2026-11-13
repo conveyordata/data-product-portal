@@ -199,7 +199,7 @@ class TestPlatformTilesEndpoint:
         service = PlatformServiceFactory(
             result_string_template=(
                 "{domain.name}/{data_product.namespace}/"
-                "{technical_asset.namespace}/{path}/{table}"
+                "{technical_asset.namespace}/{technical_asset.name}/{path}/{table}"
             )
         )
         data_product = DataProductFactory(namespace="customer360")
@@ -212,7 +212,7 @@ class TestPlatformTilesEndpoint:
         assert response.status_code == 200, response.text
         assert (
             response.json()["technical_asset_access_path"]
-            == f"{data_product.domain.name}/customer360/orders/path/table"
+            == f"{data_product.domain.name}/customer360/orders/Order secrets/path/table"
         )
 
     def test_render_technical_asset_access_path__forbidden_without_create_technical_asset(
@@ -245,6 +245,7 @@ class TestPlatformTilesEndpoint:
             platform_id=service.platform.id,
             service_id=service.id,
             data_product_id=data_product.id,
+            name="Order secrets",
             namespace="orders",
             technical_mapping=TechnicalMapping.Default,
             configuration=FakeTechnicalAssetConfiguration(path="path", table="table"),
@@ -324,6 +325,22 @@ class TestLinkPluginEndToEnd:
 
         assert response.status_code == 500
         assert "FakeLinkPlugin" in response.json()["detail"]
+
+    def test_get_plugin_url__azure_children_share_parent_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [
+                "AzureBlobTechnicalAssetConfiguration",
+                "AzureKeyVaultTechnicalAssetConfiguration",
+            ],
+        )
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/azure/url?id={data_product.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["url"] == "https://portal.azure.com/"
 
     @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
     def test_get_plugin_url__parent_platform_ignores_disabled_child(
