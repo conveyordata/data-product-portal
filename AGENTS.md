@@ -31,22 +31,22 @@ It consists of a 3-tier web architecture.
 
 Follow [Our Development Process](CONTRIBUTING.md#our-development-process). At the start of new work:
 
-1. If the user gave no issue or link, ask for one. Read it with the tools you have; if you can't, ask the user to paste it.
-2. No link and no clear path yet: suggest a grilling session (`grilling` skill) to work out what the user wants.
-3. No GitHub issue yet: draft one (title, body, `bug` or `enhancement`, source link) and create it once the user says yes.
-4. Read the issue with `gh issue view <n> --json labels,body,comments,closedByPullRequestsReferences` and propose the next step:
+1. If the user gave an issue or link, read it with the tools you have; if you can't, ask them to paste it.
+2. If there is no GitHub issue yet, offer to draft one (title, body, `bug` or `enhancement`, source link) and create it once the user says yes. If it isn't clear yet what they want, suggest a grilling session first.
+3. Read the issue (see `docs/agents/issue-tracker.md`) and, if it has a linked PR (`closedByPullRequestsReferences`), the PR with `gh pr view <n> --json isDraft,reviews`. Propose the first matching next step:
 
 | State | Next step |
 |-------|-----------|
+| UI change without a linked, signed-off design | Ask for the design link and its sign-off |
 | `needs-triage` | Triage it (`/triage`): set a `ready-for-*`, `needs-info` or `wontfix` [label](CONTRIBUTING.md#labels) |
-| UI change without a linked design | Ask for the design link and its sign-off |
-| Issue leaves open questions about what or how | Suggest a grilling session on the issue (`grilling`), or `/wayfinder` for big unclear work |
+| `needs-info` or `wontfix` | Nothing to build; say so |
+| Issue leaves open questions about what or how | Suggest a grilling session on the issue, or `/wayfinder` for big unclear work |
 | Bug with unknown cause | `diagnosing-bugs` |
-| Approach clear | Implement (`/implement`) and open a draft PR with `Closes #<n>` |
-| Draft PR | `code-review`, then the Copilot loop, up to 3 rounds |
+| Approach clear, no PR | Implement (`/implement`), for a bug with a regression test, and open a draft PR with `Closes #<n>` |
+| Draft PR | `code-review` against `main` and the issue, then the Copilot loop, up to 3 rounds |
 | Copilot has nothing useful left | Mark the PR ready, write the body with `pr-description` |
 
-These are suggestions, not requirements: propose one step at a time, wait for the user's yes, and go along when they skip a step. Skills written as `/name` only start when the user types them; suggest the command. At every step, flag when an ADR is needed and write it with the `adr` skill.
+These are suggestions, not requirements: propose one step at a time, wait for the user's yes, and go along when they skip a step. A grilling session uses the `grilling` skill, which is what `/grill-me` runs. Skills written as `/name` only start when the user types them; suggest the command. At every step, flag when an ADR is needed and write it with the `adr` skill.
 
 ## General Rules for Agents
 
