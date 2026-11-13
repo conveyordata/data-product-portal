@@ -3909,14 +3909,14 @@ files = [
 
 [[package]]
 name = "posthog"
-version = "7.86.4"
+version = "7.86.6"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.86.4-py3-none-any.whl", hash = "sha256:627caed7b0b47c340820734844ae4b3cbd3d31e46c1766571a4ee2f3bd55fe57"},
-    {file = "posthog-7.86.4.tar.gz", hash = "sha256:e52662b84404f047ab10a275b0ded8e22d82a361f92febb40506404a263cd6f7"},
+    {file = "posthog-7.86.6-py3-none-any.whl", hash = "sha256:1108635ceea437c0f3ab014fc5c865f8fda085d3018a009f3818353e26b909fd"},
+    {file = "posthog-7.86.6.tar.gz", hash = "sha256:5232c5b49d26fb5bb72f53cca9d66a3e11876c308e2f457416136862ca3b62ab"},
 ]
 
 [package.dependencies]
