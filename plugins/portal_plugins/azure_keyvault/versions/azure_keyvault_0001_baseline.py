@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),
+        sa.UniqueConstraint("vault_name", name="uq_azure_keyvault_vault_name"),
         if_not_exists=True,
     )
 
