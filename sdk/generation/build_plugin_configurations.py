@@ -67,6 +67,7 @@ def _field_lines(plugin_class: ast.ClassDef, source: str) -> list[str]:
             "name",
             "version",
             "mcp_instructions",
+            "environment_configuration",
         ):
             continue
         assert node.end_lineno is not None

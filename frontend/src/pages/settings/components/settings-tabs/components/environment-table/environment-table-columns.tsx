@@ -1,4 +1,4 @@
-import { Checkbox, Popconfirm, type TableColumnsType } from 'antd';
+import { Checkbox, InputNumber, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -9,23 +9,59 @@ import { Sorter } from '@/utils/table-sorter.helper';
 type Props = {
     t: TFunction;
     onToggleGlobal: (environment: EnvironmentGetItem, isGlobal: boolean) => void;
+    onChangePosition: (environment: EnvironmentGetItem, position: number | null) => void;
+    disabled?: boolean;
 };
 
-export const getEnvironmentTableColumns = ({ t, onToggleGlobal }: Props): TableColumnsType<EnvironmentGetItem> => {
+export const getEnvironmentTableColumns = ({
+    t,
+    onToggleGlobal,
+    onChangePosition,
+    disabled,
+}: Props): TableColumnsType<EnvironmentGetItem> => {
     const sorter = new Sorter<EnvironmentGetItem>();
     return [
         {
+            title: (
+                <QuestionTooltip
+                    title={t(
+                        'Environments are listed in this order, lowest first. Environments without an order come last.',
+                    )}
+                >
+                    {t('Order')}
+                </QuestionTooltip>
+            ),
+            dataIndex: 'position',
+            width: 120,
+            sorter: sorter.numberSorter((environment) => environment.position ?? Number.MAX_SAFE_INTEGER),
+            defaultSortOrder: 'ascend',
+            render: (position: number | null | undefined, environment) => (
+                <InputNumber
+                    aria-label={t('Order of {{name}}', { name: environment.name })}
+                    min={0}
+                    precision={0}
+                    disabled={disabled}
+                    defaultValue={position ?? undefined}
+                    onBlur={(event) => {
+                        const next = event.target.value === '' ? null : Number(event.target.value);
+                        if (next !== (position ?? null)) {
+                            onChangePosition(environment, next);
+                        }
+                    }}
+                />
+            ),
+        },
+        {
             title: t('Name'),
             dataIndex: 'name',
-            width: '33.33%',
+            width: '25%',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
             sorter: sorter.stringSorter((environment) => environment.name),
-            defaultSortOrder: 'ascend',
         },
         {
             title: t('Acronym'),
             dataIndex: 'acronym',
-            width: '33.33%',
+            width: '25%',
             sorter: sorter.stringSorter((environment) => environment.acronym),
         },
         {
@@ -39,7 +75,7 @@ export const getEnvironmentTableColumns = ({ t, onToggleGlobal }: Props): TableC
                 </QuestionTooltip>
             ),
             key: 'is_global',
-            width: '33.33%',
+            width: '25%',
             render: (_, environment) => {
                 const isGlobal = environment.is_global ?? true;
                 if (!isGlobal) {

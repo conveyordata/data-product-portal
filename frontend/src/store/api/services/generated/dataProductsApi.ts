@@ -369,6 +369,7 @@ export type EnvironmentGetItem = {
   context: string;
   is_default?: boolean;
   is_global?: boolean;
+  position?: number | null;
 };
 export type DataProductEnvironment = {
   environment_id: string;

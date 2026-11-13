@@ -1,16 +1,16 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import { TechnicalAssetOutlined } from '@/components/icons';
 import { QueryList } from '@/components/query-list/query-list.component.tsx';
 import { TechnicalAssetCard } from '@/components/technical-assets/technical-asset-card/technical-asset-card.component.tsx';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductTechnicalAssetsQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { createTechnicalAssetNewPath } from '@/types/navigation.ts';
 
 type Props = {
     dataProductId: string;
@@ -23,7 +23,7 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
     const technicalAssetsQuery = useGetDataProductTechnicalAssetsQuery(dataProductId);
     const { data: { technical_assets: technicalAssets = [] } = {} } = technicalAssetsQuery;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
-    const { isVisible, handleOpen, handleClose } = useModal();
+    const navigate = useNavigate();
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -66,7 +66,7 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
                         disabled={!canCreateDataOutput}
                         type="primary"
                         loading={isLoadingDataProduct}
-                        onClick={handleOpen}
+                        onClick={() => navigate(createTechnicalAssetNewPath(dataProductId))}
                     >
                         {t('Add Technical Asset')}
                     </Button>
@@ -100,10 +100,6 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
                 }}
                 filter={searchFilter(searchTerm, setSearchTerm)}
             />
-
-            {isVisible && (
-                <AddTechnicalAssetPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />
-            )}
         </Flex>
     );
 }

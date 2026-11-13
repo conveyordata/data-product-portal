@@ -694,8 +694,8 @@ type UpdateDomainParams struct {
 	ID uuid.UUID
 }
 
-// UpdateEnvironmentIsGlobalParams is parameters of update_environment_is_global operation.
-type UpdateEnvironmentIsGlobalParams struct {
+// UpdateEnvironmentParams is parameters of update_environment operation.
+type UpdateEnvironmentParams struct {
 	ID uuid.UUID
 }
 
@@ -754,10 +754,21 @@ type UpdateTechnicalAssetParams struct {
 	ID            uuid.UUID
 }
 
+// UpdateTechnicalAssetEnvironmentConfigurationParams is parameters of update_technical_asset_environment_configuration operation.
+type UpdateTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // UpdateTechnicalAssetStatusParams is parameters of update_technical_asset_status operation.
 type UpdateTechnicalAssetStatusParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// ValidateNewTechnicalAssetEnvironmentConfigurationParams is parameters of validate_new_technical_asset_environment_configuration operation.
+type ValidateNewTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
 }
 
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
@@ -765,4 +776,10 @@ type ValidateResourceNameParams struct {
 	ResourceName  string
 	Model         ResourceNameModel
 	DataProductID OptUUID `json:",omitempty,omitzero"`
+}
+
+// ValidateTechnicalAssetEnvironmentConfigurationParams is parameters of validate_technical_asset_environment_configuration operation.
+type ValidateTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
 }

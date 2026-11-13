@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 from app.shared.schema import ORMModel
@@ -11,6 +11,7 @@ class Environment(ORMModel):
     context: str
     is_default: bool = False
     is_global: bool = True
+    position: Optional[int] = None
 
 
 class EnvironmentGetItem(Environment):

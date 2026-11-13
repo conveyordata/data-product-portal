@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.environment_ui_metadata import EnvironmentUIMetadata
     from ..models.platform_tile import PlatformTile
     from ..models.ui_element_metadata import UIElementMetadata
 
@@ -28,6 +29,7 @@ class UIElementMetadataResponse:
         icon_name (str):
         detailed_name (str):
         not_configured (bool | Unset):  Default: False.
+        environment_ui_metadata (list[EnvironmentUIMetadata] | Unset):
         result_label (str | Unset):  Default: 'Resulting path'.
         result_tooltip (str | Unset):  Default: 'The path you can access through this technical asset'.
         icon_data_uri (None | str | Unset):
@@ -45,6 +47,7 @@ class UIElementMetadataResponse:
     icon_name: str
     detailed_name: str
     not_configured: bool | Unset = False
+    environment_ui_metadata: list[EnvironmentUIMetadata] | Unset = UNSET
     result_label: str | Unset = "Resulting path"
     result_tooltip: str | Unset = "The path you can access through this technical asset"
     icon_data_uri: None | str | Unset = UNSET
@@ -75,6 +78,15 @@ class UIElementMetadataResponse:
         detailed_name = self.detailed_name
 
         not_configured = self.not_configured
+
+        environment_ui_metadata: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.environment_ui_metadata, Unset):
+            environment_ui_metadata = []
+            for environment_ui_metadata_item_data in self.environment_ui_metadata:
+                environment_ui_metadata_item = (
+                    environment_ui_metadata_item_data.to_dict()
+                )
+                environment_ui_metadata.append(environment_ui_metadata_item)
 
         result_label = self.result_label
 
@@ -119,6 +131,8 @@ class UIElementMetadataResponse:
         )
         if not_configured is not UNSET:
             field_dict["not_configured"] = not_configured
+        if environment_ui_metadata is not UNSET:
+            field_dict["environment_ui_metadata"] = environment_ui_metadata
         if result_label is not UNSET:
             field_dict["result_label"] = result_label
         if result_tooltip is not UNSET:
@@ -138,6 +152,9 @@ class UIElementMetadataResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.environment_ui_metadata import (
+            EnvironmentUIMetadata,  # noqa: PLC0415
+        )
         from ..models.platform_tile import PlatformTile  # noqa: PLC0415
         from ..models.ui_element_metadata import UIElementMetadata  # noqa: PLC0415
 
@@ -162,6 +179,17 @@ class UIElementMetadataResponse:
         detailed_name = d.pop("detailed_name")
 
         not_configured = d.pop("not_configured", UNSET)
+
+        _environment_ui_metadata = d.pop("environment_ui_metadata", UNSET)
+        environment_ui_metadata: list[EnvironmentUIMetadata] | Unset = UNSET
+        if _environment_ui_metadata is not UNSET:
+            environment_ui_metadata = []
+            for environment_ui_metadata_item_data in _environment_ui_metadata:
+                environment_ui_metadata_item = EnvironmentUIMetadata.from_dict(
+                    environment_ui_metadata_item_data
+                )
+
+                environment_ui_metadata.append(environment_ui_metadata_item)
 
         result_label = d.pop("result_label", UNSET)
 
@@ -215,6 +243,7 @@ class UIElementMetadataResponse:
             icon_name=icon_name,
             detailed_name=detailed_name,
             not_configured=not_configured,
+            environment_ui_metadata=environment_ui_metadata,
             result_label=result_label,
             result_tooltip=result_tooltip,
             icon_data_uri=icon_data_uri,

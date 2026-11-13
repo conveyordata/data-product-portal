@@ -5,7 +5,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.configuration.environments.model import (
+    ENVIRONMENT_DISPLAY_ORDER,
+)
 from app.configuration.environments.model import Environment as EnvironmentModel
+from app.configuration.environments.schema_request import EnvironmentUpdate
 from app.configuration.environments.schema_response import Environment
 
 
@@ -14,12 +18,23 @@ class EnvironmentService:
         self.db = db
 
     def get_environments(self) -> Sequence[Environment]:
-        return self.db.scalars(select(EnvironmentModel)).all()
+        return self.db.scalars(
+            select(EnvironmentModel).order_by(*ENVIRONMENT_DISPLAY_ORDER)
+        ).all()
 
     def get_environment(self, environment_id: UUID) -> Environment:
         return self.db.scalar(select(EnvironmentModel).filter_by(id=environment_id))
 
-    def update_is_global(self, environment_id: UUID, is_global: bool) -> Environment:
+    def update_environment(
+        self, environment_id: UUID, update: EnvironmentUpdate
+    ) -> Environment:
+        environment = self._get_or_404(environment_id)
+        for field, value in update.model_dump(exclude_unset=True).items():
+            setattr(environment, field, value)
+        self.db.flush()
+        return environment
+
+    def _get_or_404(self, environment_id: UUID) -> EnvironmentModel:
         environment = self.db.scalar(
             select(EnvironmentModel).filter_by(id=environment_id)
         )
@@ -28,7 +43,4 @@ class EnvironmentService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Environment not found",
             )
-
-        environment.is_global = is_global
-        self.db.flush()
         return environment

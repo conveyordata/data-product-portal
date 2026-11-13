@@ -1,23 +1,28 @@
-import { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
+import { CodeOutlined, CompassOutlined, HistoryOutlined, SettingOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
+import { EnvironmentSettingsSection } from '@/components/environment-settings/environment-settings-section.component.tsx';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { OutputPortOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { OutputPortTab } from '@/pages/technical-asset/components/technical-asset-tabs/output-port-tab/output-port-tab.tsx';
 import { TabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys.ts';
-import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import {
+    type GetTechnicalAssetResponse,
+    useGetTechnicalAssetEventHistoryQuery,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import styles from './technical-asset-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
 type Props = {
-    technicalAssetId: string;
+    technicalAsset: GetTechnicalAssetResponse;
     dataProductId: string;
+    canEdit: boolean;
     isLoading: boolean;
 };
 
@@ -28,8 +33,9 @@ type Tab = {
     children: ReactNode;
 };
 
-export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading }: Props) {
+export function TechnicalAssetTabs({ technicalAsset, dataProductId, canEdit, isLoading }: Props) {
     const { t } = useTranslation();
+    const technicalAssetId = technicalAsset.id;
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -72,6 +78,18 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                 children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
             },
             {
+                label: t('Settings'),
+                key: TabKeys.Settings,
+                icon: <SettingOutlined />,
+                children: (
+                    <EnvironmentSettingsSection
+                        dataProductId={dataProductId}
+                        technicalAsset={technicalAsset}
+                        canEdit={canEdit}
+                    />
+                ),
+            },
+            {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
@@ -85,7 +103,7 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                 ),
             },
         ];
-    }, [technicalAssetId, t, dataOutputHistoryData, historyQuery, dataProductId]);
+    }, [technicalAssetId, technicalAsset, canEdit, t, dataOutputHistoryData, historyQuery, dataProductId]);
 
     if (isLoading) {
         return <LoadingSpinner />;

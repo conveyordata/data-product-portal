@@ -1697,10 +1697,11 @@ type CreateTechnicalAssetRequest struct {
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	SourceAligned    OptNilBool             `json:"sourceAligned"`
-	TechnicalMapping OptNilTechnicalMapping `json:"technical_mapping"`
-	AccessModeIds    []uuid.UUID            `json:"access_mode_ids"`
-	TagIds           []uuid.UUID            `json:"tag_ids"`
+	SourceAligned     OptNilBool                                      `json:"sourceAligned"`
+	TechnicalMapping  OptNilTechnicalMapping                          `json:"technical_mapping"`
+	AccessModeIds     []uuid.UUID                                     `json:"access_mode_ids"`
+	TagIds            []uuid.UUID                                     `json:"tag_ids"`
+	EnvironmentValues OptCreateTechnicalAssetRequestEnvironmentValues `json:"environment_values"`
 }
 
 // GetName returns the value of Name.
@@ -1753,6 +1754,11 @@ func (s *CreateTechnicalAssetRequest) GetTagIds() []uuid.UUID {
 	return s.TagIds
 }
 
+// GetEnvironmentValues returns the value of EnvironmentValues.
+func (s *CreateTechnicalAssetRequest) GetEnvironmentValues() OptCreateTechnicalAssetRequestEnvironmentValues {
+	return s.EnvironmentValues
+}
+
 // SetName sets the value of Name.
 func (s *CreateTechnicalAssetRequest) SetName(val string) {
 	s.Name = val
@@ -1803,6 +1809,11 @@ func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
+// SetEnvironmentValues sets the value of EnvironmentValues.
+func (s *CreateTechnicalAssetRequest) SetEnvironmentValues(val OptCreateTechnicalAssetRequestEnvironmentValues) {
+	s.EnvironmentValues = val
+}
+
 // Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 // /v2/plugins/{name}/form.
 type CreateTechnicalAssetRequestConfiguration struct {
@@ -1833,6 +1844,28 @@ func (s *CreateTechnicalAssetRequestConfiguration) SetAdditionalProps(val Create
 type CreateTechnicalAssetRequestConfigurationAdditional map[string]jx.Raw
 
 func (s *CreateTechnicalAssetRequestConfigurationAdditional) init() CreateTechnicalAssetRequestConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type CreateTechnicalAssetRequestEnvironmentValues map[string]CreateTechnicalAssetRequestEnvironmentValuesItem
+
+func (s *CreateTechnicalAssetRequestEnvironmentValues) init() CreateTechnicalAssetRequestEnvironmentValues {
+	m := *s
+	if m == nil {
+		m = map[string]CreateTechnicalAssetRequestEnvironmentValuesItem{}
+		*s = m
+	}
+	return m
+}
+
+type CreateTechnicalAssetRequestEnvironmentValuesItem map[string]jx.Raw
+
+func (s *CreateTechnicalAssetRequestEnvironmentValuesItem) init() CreateTechnicalAssetRequestEnvironmentValuesItem {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -4212,6 +4245,7 @@ type Environment struct {
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
 	IsGlobal  OptBool   `json:"is_global"`
+	Position  OptNilInt `json:"position"`
 }
 
 // GetID returns the value of ID.
@@ -4244,6 +4278,11 @@ func (s *Environment) GetIsGlobal() OptBool {
 	return s.IsGlobal
 }
 
+// GetPosition returns the value of Position.
+func (s *Environment) GetPosition() OptNilInt {
+	return s.Position
+}
+
 // SetID sets the value of ID.
 func (s *Environment) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4274,8 +4313,13 @@ func (s *Environment) SetIsGlobal(val OptBool) {
 	s.IsGlobal = val
 }
 
-func (*Environment) getEnvironmentRes()            {}
-func (*Environment) updateEnvironmentIsGlobalRes() {}
+// SetPosition sets the value of Position.
+func (s *Environment) SetPosition(val OptNilInt) {
+	s.Position = val
+}
+
+func (*Environment) getEnvironmentRes()    {}
+func (*Environment) updateEnvironmentRes() {}
 
 // Ref: #/components/schemas/EnvironmentGetItem
 type EnvironmentGetItem struct {
@@ -4285,6 +4329,7 @@ type EnvironmentGetItem struct {
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
 	IsGlobal  OptBool   `json:"is_global"`
+	Position  OptNilInt `json:"position"`
 }
 
 // GetID returns the value of ID.
@@ -4317,6 +4362,11 @@ func (s *EnvironmentGetItem) GetIsGlobal() OptBool {
 	return s.IsGlobal
 }
 
+// GetPosition returns the value of Position.
+func (s *EnvironmentGetItem) GetPosition() OptNilInt {
+	return s.Position
+}
+
 // SetID sets the value of ID.
 func (s *EnvironmentGetItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4347,19 +4397,61 @@ func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
 	s.IsGlobal = val
 }
 
-// Ref: #/components/schemas/EnvironmentUpdateGlobal
-type EnvironmentUpdateGlobal struct {
-	IsGlobal bool `json:"is_global"`
+// SetPosition sets the value of Position.
+func (s *EnvironmentGetItem) SetPosition(val OptNilInt) {
+	s.Position = val
+}
+
+// Ref: #/components/schemas/EnvironmentUIMetadata
+type EnvironmentUIMetadata struct {
+	EnvironmentID uuid.UUID           `json:"environment_id"`
+	UIMetadata    []UIElementMetadata `json:"ui_metadata"`
+}
+
+// GetEnvironmentID returns the value of EnvironmentID.
+func (s *EnvironmentUIMetadata) GetEnvironmentID() uuid.UUID {
+	return s.EnvironmentID
+}
+
+// GetUIMetadata returns the value of UIMetadata.
+func (s *EnvironmentUIMetadata) GetUIMetadata() []UIElementMetadata {
+	return s.UIMetadata
+}
+
+// SetEnvironmentID sets the value of EnvironmentID.
+func (s *EnvironmentUIMetadata) SetEnvironmentID(val uuid.UUID) {
+	s.EnvironmentID = val
+}
+
+// SetUIMetadata sets the value of UIMetadata.
+func (s *EnvironmentUIMetadata) SetUIMetadata(val []UIElementMetadata) {
+	s.UIMetadata = val
+}
+
+// Ref: #/components/schemas/EnvironmentUpdate
+type EnvironmentUpdate struct {
+	IsGlobal OptNilBool `json:"is_global"`
+	Position OptNilInt  `json:"position"`
 }
 
 // GetIsGlobal returns the value of IsGlobal.
-func (s *EnvironmentUpdateGlobal) GetIsGlobal() bool {
+func (s *EnvironmentUpdate) GetIsGlobal() OptNilBool {
 	return s.IsGlobal
 }
 
+// GetPosition returns the value of Position.
+func (s *EnvironmentUpdate) GetPosition() OptNilInt {
+	return s.Position
+}
+
 // SetIsGlobal sets the value of IsGlobal.
-func (s *EnvironmentUpdateGlobal) SetIsGlobal(val bool) {
+func (s *EnvironmentUpdate) SetIsGlobal(val OptNilBool) {
 	s.IsGlobal = val
+}
+
+// SetPosition sets the value of Position.
+func (s *EnvironmentUpdate) SetPosition(val OptNilInt) {
+	s.Position = val
 }
 
 // Ref: #/components/schemas/EnvironmentsGet
@@ -5940,6 +6032,284 @@ func (s *GetRolesResponse) SetRoles(val []Role) {
 
 func (*GetRolesResponse) getRolesRes() {}
 
+// Ref: #/components/schemas/GetTechnicalAssetResponse
+type GetTechnicalAssetResponse struct {
+	ID               uuid.UUID            `json:"id"`
+	Name             string               `json:"name"`
+	Description      string               `json:"description"`
+	Namespace        string               `json:"namespace"`
+	OwnerID          uuid.UUID            `json:"owner_id"`
+	PlatformID       OptNilUUID           `json:"platform_id"`
+	ServiceID        OptNilUUID           `json:"service_id"`
+	Status           TechnicalAssetStatus `json:"status"`
+	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
+	AccessModes      []AccessMode         `json:"access_modes"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration     GetTechnicalAssetResponseConfiguration     `json:"configuration"`
+	Owner             DataProduct                                `json:"owner"`
+	Environments      []DataProductEnvironment                   `json:"environments"`
+	OutputPortLinks   []OutputPortLink                           `json:"output_port_links"`
+	Tags              []Tag                                      `json:"tags"`
+	EnvironmentValues GetTechnicalAssetResponseEnvironmentValues `json:"environment_values"`
+	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
+	SourceAligned bool            `json:"sourceAligned"`
+	ResultString  string          `json:"result_string"`
+	TechnicalInfo []TechnicalInfo `json:"technical_info"`
+}
+
+// GetID returns the value of ID.
+func (s *GetTechnicalAssetResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *GetTechnicalAssetResponse) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *GetTechnicalAssetResponse) GetDescription() string {
+	return s.Description
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *GetTechnicalAssetResponse) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetOwnerID returns the value of OwnerID.
+func (s *GetTechnicalAssetResponse) GetOwnerID() uuid.UUID {
+	return s.OwnerID
+}
+
+// GetPlatformID returns the value of PlatformID.
+func (s *GetTechnicalAssetResponse) GetPlatformID() OptNilUUID {
+	return s.PlatformID
+}
+
+// GetServiceID returns the value of ServiceID.
+func (s *GetTechnicalAssetResponse) GetServiceID() OptNilUUID {
+	return s.ServiceID
+}
+
+// GetStatus returns the value of Status.
+func (s *GetTechnicalAssetResponse) GetStatus() TechnicalAssetStatus {
+	return s.Status
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *GetTechnicalAssetResponse) GetTechnicalMapping() TechnicalMapping {
+	return s.TechnicalMapping
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetTechnicalAssetResponse) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
+// GetConfiguration returns the value of Configuration.
+func (s *GetTechnicalAssetResponse) GetConfiguration() GetTechnicalAssetResponseConfiguration {
+	return s.Configuration
+}
+
+// GetOwner returns the value of Owner.
+func (s *GetTechnicalAssetResponse) GetOwner() DataProduct {
+	return s.Owner
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetTechnicalAssetResponse) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
+}
+
+// GetOutputPortLinks returns the value of OutputPortLinks.
+func (s *GetTechnicalAssetResponse) GetOutputPortLinks() []OutputPortLink {
+	return s.OutputPortLinks
+}
+
+// GetTags returns the value of Tags.
+func (s *GetTechnicalAssetResponse) GetTags() []Tag {
+	return s.Tags
+}
+
+// GetEnvironmentValues returns the value of EnvironmentValues.
+func (s *GetTechnicalAssetResponse) GetEnvironmentValues() GetTechnicalAssetResponseEnvironmentValues {
+	return s.EnvironmentValues
+}
+
+// GetSourceAligned returns the value of SourceAligned.
+func (s *GetTechnicalAssetResponse) GetSourceAligned() bool {
+	return s.SourceAligned
+}
+
+// GetResultString returns the value of ResultString.
+func (s *GetTechnicalAssetResponse) GetResultString() string {
+	return s.ResultString
+}
+
+// GetTechnicalInfo returns the value of TechnicalInfo.
+func (s *GetTechnicalAssetResponse) GetTechnicalInfo() []TechnicalInfo {
+	return s.TechnicalInfo
+}
+
+// SetID sets the value of ID.
+func (s *GetTechnicalAssetResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *GetTechnicalAssetResponse) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *GetTechnicalAssetResponse) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *GetTechnicalAssetResponse) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetOwnerID sets the value of OwnerID.
+func (s *GetTechnicalAssetResponse) SetOwnerID(val uuid.UUID) {
+	s.OwnerID = val
+}
+
+// SetPlatformID sets the value of PlatformID.
+func (s *GetTechnicalAssetResponse) SetPlatformID(val OptNilUUID) {
+	s.PlatformID = val
+}
+
+// SetServiceID sets the value of ServiceID.
+func (s *GetTechnicalAssetResponse) SetServiceID(val OptNilUUID) {
+	s.ServiceID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetTechnicalAssetResponse) SetStatus(val TechnicalAssetStatus) {
+	s.Status = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *GetTechnicalAssetResponse) SetTechnicalMapping(val TechnicalMapping) {
+	s.TechnicalMapping = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetTechnicalAssetResponse) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
+// SetConfiguration sets the value of Configuration.
+func (s *GetTechnicalAssetResponse) SetConfiguration(val GetTechnicalAssetResponseConfiguration) {
+	s.Configuration = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *GetTechnicalAssetResponse) SetOwner(val DataProduct) {
+	s.Owner = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetTechnicalAssetResponse) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
+}
+
+// SetOutputPortLinks sets the value of OutputPortLinks.
+func (s *GetTechnicalAssetResponse) SetOutputPortLinks(val []OutputPortLink) {
+	s.OutputPortLinks = val
+}
+
+// SetTags sets the value of Tags.
+func (s *GetTechnicalAssetResponse) SetTags(val []Tag) {
+	s.Tags = val
+}
+
+// SetEnvironmentValues sets the value of EnvironmentValues.
+func (s *GetTechnicalAssetResponse) SetEnvironmentValues(val GetTechnicalAssetResponseEnvironmentValues) {
+	s.EnvironmentValues = val
+}
+
+// SetSourceAligned sets the value of SourceAligned.
+func (s *GetTechnicalAssetResponse) SetSourceAligned(val bool) {
+	s.SourceAligned = val
+}
+
+// SetResultString sets the value of ResultString.
+func (s *GetTechnicalAssetResponse) SetResultString(val string) {
+	s.ResultString = val
+}
+
+// SetTechnicalInfo sets the value of TechnicalInfo.
+func (s *GetTechnicalAssetResponse) SetTechnicalInfo(val []TechnicalInfo) {
+	s.TechnicalInfo = val
+}
+
+func (*GetTechnicalAssetResponse) getTechnicalAssetRes() {}
+
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
+type GetTechnicalAssetResponseConfiguration struct {
+	Name            string `json:"name"`
+	AdditionalProps GetTechnicalAssetResponseConfigurationAdditional
+}
+
+// GetName returns the value of Name.
+func (s *GetTechnicalAssetResponseConfiguration) GetName() string {
+	return s.Name
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *GetTechnicalAssetResponseConfiguration) GetAdditionalProps() GetTechnicalAssetResponseConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetName sets the value of Name.
+func (s *GetTechnicalAssetResponseConfiguration) SetName(val string) {
+	s.Name = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *GetTechnicalAssetResponseConfiguration) SetAdditionalProps(val GetTechnicalAssetResponseConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type GetTechnicalAssetResponseConfigurationAdditional map[string]jx.Raw
+
+func (s *GetTechnicalAssetResponseConfigurationAdditional) init() GetTechnicalAssetResponseConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type GetTechnicalAssetResponseEnvironmentValues map[string]GetTechnicalAssetResponseEnvironmentValuesItem
+
+func (s *GetTechnicalAssetResponseEnvironmentValues) init() GetTechnicalAssetResponseEnvironmentValues {
+	m := *s
+	if m == nil {
+		m = map[string]GetTechnicalAssetResponseEnvironmentValuesItem{}
+		*s = m
+	}
+	return m
+}
+
+type GetTechnicalAssetResponseEnvironmentValuesItem map[string]jx.Raw
+
+func (s *GetTechnicalAssetResponseEnvironmentValuesItem) init() GetTechnicalAssetResponseEnvironmentValuesItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/GetTechnicalAssetsResponse
 type GetTechnicalAssetsResponse struct {
 	TechnicalAssets []GetTechnicalAssetsResponseItem `json:"technical_assets"`
@@ -6161,8 +6531,6 @@ func (s *GetTechnicalAssetsResponseItem) SetResultString(val string) {
 func (s *GetTechnicalAssetsResponseItem) SetTechnicalInfo(val []TechnicalInfo) {
 	s.TechnicalInfo = val
 }
-
-func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
 // Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 // /v2/plugins/{name}/form.
@@ -6926,7 +7294,7 @@ func (*HTTPValidationError) updateDataProductStatusRes()                  {}
 func (*HTTPValidationError) updateDataProductTypeRes()                    {}
 func (*HTTPValidationError) updateDataProductUsageRes()                   {}
 func (*HTTPValidationError) updateDomainRes()                             {}
-func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
+func (*HTTPValidationError) updateEnvironmentRes()                        {}
 func (*HTTPValidationError) updateGroupRes()                              {}
 func (*HTTPValidationError) updateMachineUserRes()                        {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
@@ -7812,6 +8180,116 @@ func (s *ModifyOutputPortRoleAssignment) SetRoleID(val uuid.UUID) {
 	s.RoleID = val
 }
 
+// Ref: #/components/schemas/NewTechnicalAssetEnvironmentConfigurationValidation
+type NewTechnicalAssetEnvironmentConfigurationValidation struct {
+	Namespace string `json:"namespace"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration     NewTechnicalAssetEnvironmentConfigurationValidationConfiguration        `json:"configuration"`
+	TechnicalMapping  OptTechnicalMapping                                                     `json:"technical_mapping"`
+	EnvironmentValues OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues `json:"environment_values"`
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetConfiguration returns the value of Configuration.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetConfiguration() NewTechnicalAssetEnvironmentConfigurationValidationConfiguration {
+	return s.Configuration
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetTechnicalMapping() OptTechnicalMapping {
+	return s.TechnicalMapping
+}
+
+// GetEnvironmentValues returns the value of EnvironmentValues.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) GetEnvironmentValues() OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	return s.EnvironmentValues
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetConfiguration sets the value of Configuration.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetConfiguration(val NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) {
+	s.Configuration = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetTechnicalMapping(val OptTechnicalMapping) {
+	s.TechnicalMapping = val
+}
+
+// SetEnvironmentValues sets the value of EnvironmentValues.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) SetEnvironmentValues(val OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) {
+	s.EnvironmentValues = val
+}
+
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
+type NewTechnicalAssetEnvironmentConfigurationValidationConfiguration struct {
+	Name            string `json:"name"`
+	AdditionalProps NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional
+}
+
+// GetName returns the value of Name.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) GetName() string {
+	return s.Name
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) GetAdditionalProps() NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetName sets the value of Name.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) SetName(val string) {
+	s.Name = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) SetAdditionalProps(val NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional map[string]jx.Raw
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) init() NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues map[string]NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) init() NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	m := *s
+	if m == nil {
+		m = map[string]NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem{}
+		*s = m
+	}
+	return m
+}
+
+type NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem map[string]jx.Raw
+
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) init() NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // NewNilDataProductLifeCycle returns new NilDataProductLifeCycle with value set to v.
 func NewNilDataProductLifeCycle(v DataProductLifeCycle) NilDataProductLifeCycle {
 	return NilDataProductLifeCycle{
@@ -8326,6 +8804,52 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptCreateTechnicalAssetRequestEnvironmentValues returns new OptCreateTechnicalAssetRequestEnvironmentValues with value set to v.
+func NewOptCreateTechnicalAssetRequestEnvironmentValues(v CreateTechnicalAssetRequestEnvironmentValues) OptCreateTechnicalAssetRequestEnvironmentValues {
+	return OptCreateTechnicalAssetRequestEnvironmentValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCreateTechnicalAssetRequestEnvironmentValues is optional CreateTechnicalAssetRequestEnvironmentValues.
+type OptCreateTechnicalAssetRequestEnvironmentValues struct {
+	Value CreateTechnicalAssetRequestEnvironmentValues
+	Set   bool
+}
+
+// IsSet returns true if OptCreateTechnicalAssetRequestEnvironmentValues was set.
+func (o OptCreateTechnicalAssetRequestEnvironmentValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCreateTechnicalAssetRequestEnvironmentValues) Reset() {
+	var v CreateTechnicalAssetRequestEnvironmentValues
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCreateTechnicalAssetRequestEnvironmentValues) SetTo(v CreateTechnicalAssetRequestEnvironmentValues) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCreateTechnicalAssetRequestEnvironmentValues) Get() (v CreateTechnicalAssetRequestEnvironmentValues, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCreateTechnicalAssetRequestEnvironmentValues) Or(d CreateTechnicalAssetRequestEnvironmentValues) CreateTechnicalAssetRequestEnvironmentValues {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDataProductVisibility returns new OptDataProductVisibility with value set to v.
 func NewOptDataProductVisibility(v DataProductVisibility) OptDataProductVisibility {
 	return OptDataProductVisibility{
@@ -8458,6 +8982,54 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues returns new OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues with value set to v.
+func NewOptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues(v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
+	return OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues is optional NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues.
+type OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues struct {
+	Value NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues
+	Set   bool
+}
+
+// IsSet returns true if OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues was set.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) IsSet() bool {
+	return o.Set
+}
+
+// Reset unsets value.
+func (o *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Reset() {
+	var v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) SetTo(v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Get() (v NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Or(d NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10726,6 +11298,52 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTechnicalMapping returns new OptTechnicalMapping with value set to v.
+func NewOptTechnicalMapping(v TechnicalMapping) OptTechnicalMapping {
+	return OptTechnicalMapping{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTechnicalMapping is optional TechnicalMapping.
+type OptTechnicalMapping struct {
+	Value TechnicalMapping
+	Set   bool
+}
+
+// IsSet returns true if OptTechnicalMapping was set.
+func (o OptTechnicalMapping) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTechnicalMapping) Reset() {
+	var v TechnicalMapping
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTechnicalMapping) SetTo(v TechnicalMapping) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTechnicalMapping) Get() (v TechnicalMapping, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTechnicalMapping) Or(d TechnicalMapping) TechnicalMapping {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14141,8 +14759,9 @@ func (s *SearchOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualitySt
 // Option for select UI elements.
 // Ref: #/components/schemas/SelectOption
 type SelectOption struct {
-	Label string            `json:"label"`
-	Value SelectOptionValue `json:"value"`
+	Label    string            `json:"label"`
+	Value    SelectOptionValue `json:"value"`
+	Disabled OptNilBool        `json:"disabled"`
 }
 
 // GetLabel returns the value of Label.
@@ -14155,6 +14774,11 @@ func (s *SelectOption) GetValue() SelectOptionValue {
 	return s.Value
 }
 
+// GetDisabled returns the value of Disabled.
+func (s *SelectOption) GetDisabled() OptNilBool {
+	return s.Disabled
+}
+
 // SetLabel sets the value of Label.
 func (s *SelectOption) SetLabel(val string) {
 	s.Label = val
@@ -14165,12 +14789,18 @@ func (s *SelectOption) SetValue(val SelectOptionValue) {
 	s.Value = val
 }
 
+// SetDisabled sets the value of Disabled.
+func (s *SelectOption) SetDisabled(val OptNilBool) {
+	s.Disabled = val
+}
+
 // SelectOptionValue represents sum type.
 type SelectOptionValue struct {
 	// Type selects the active sum variant, switch on this field.
 	Type   SelectOptionValueType
 	String string
 	Bool   bool
+	Int    int
 }
 
 // SelectOptionValueType is oneOf type of SelectOptionValue.
@@ -14180,6 +14810,7 @@ type SelectOptionValueType string
 const (
 	StringSelectOptionValue SelectOptionValueType = "string"
 	BoolSelectOptionValue   SelectOptionValueType = "bool"
+	IntSelectOptionValue    SelectOptionValueType = "int"
 )
 
 // IsString reports whether SelectOptionValue is string.
@@ -14187,6 +14818,9 @@ func (s SelectOptionValue) IsString() bool { return s.Type == StringSelectOption
 
 // IsBool reports whether SelectOptionValue is bool.
 func (s SelectOptionValue) IsBool() bool { return s.Type == BoolSelectOptionValue }
+
+// IsInt reports whether SelectOptionValue is int.
+func (s SelectOptionValue) IsInt() bool { return s.Type == IntSelectOptionValue }
 
 // SetString sets SelectOptionValue to string.
 func (s *SelectOptionValue) SetString(v string) {
@@ -14227,6 +14861,27 @@ func (s SelectOptionValue) GetBool() (v bool, ok bool) {
 func NewBoolSelectOptionValue(v bool) SelectOptionValue {
 	var s SelectOptionValue
 	s.SetBool(v)
+	return s
+}
+
+// SetInt sets SelectOptionValue to int.
+func (s *SelectOptionValue) SetInt(v int) {
+	s.Type = IntSelectOptionValue
+	s.Int = v
+}
+
+// GetInt returns int and true boolean if SelectOptionValue is int.
+func (s SelectOptionValue) GetInt() (v int, ok bool) {
+	if !s.IsInt() {
+		return v, false
+	}
+	return s.Int, true
+}
+
+// NewIntSelectOptionValue returns new SelectOptionValue from int.
+func NewIntSelectOptionValue(v int) SelectOptionValue {
+	var s SelectOptionValue
+	s.SetInt(v)
 	return s
 }
 
@@ -14487,6 +15142,43 @@ func (s *TechnicalAssetConfiguration) SetAdditionalProps(val TechnicalAssetConfi
 type TechnicalAssetConfigurationAdditional map[string]jx.Raw
 
 func (s *TechnicalAssetConfigurationAdditional) init() TechnicalAssetConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/TechnicalAssetEnvironmentConfigurationUpdate
+type TechnicalAssetEnvironmentConfigurationUpdate struct {
+	EnvironmentValues TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues `json:"environment_values"`
+}
+
+// GetEnvironmentValues returns the value of EnvironmentValues.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) GetEnvironmentValues() TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues {
+	return s.EnvironmentValues
+}
+
+// SetEnvironmentValues sets the value of EnvironmentValues.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) SetEnvironmentValues(val TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) {
+	s.EnvironmentValues = val
+}
+
+type TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues map[string]TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem
+
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) init() TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues {
+	m := *s
+	if m == nil {
+		m = map[string]TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem{}
+		*s = m
+	}
+	return m
+}
+
+type TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem map[string]jx.Raw
+
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) init() TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -14930,21 +15622,22 @@ func (s *UIElementMetadata) SetUseNamespaceWhenNotSourceAligned(val OptNilBool) 
 
 // Ref: #/components/schemas/UIElementMetadataResponse
 type UIElementMetadataResponse struct {
-	NotConfigured   OptBool             `json:"not_configured"`
-	UIMetadata      []UIElementMetadata `json:"ui_metadata"`
-	Plugin          string              `json:"plugin"`
-	HasEnvironments bool                `json:"has_environments"`
-	ResultLabel     OptString           `json:"result_label"`
-	ResultTooltip   OptString           `json:"result_tooltip"`
-	Platform        string              `json:"platform"`
-	DisplayName     string              `json:"display_name"`
-	IconName        string              `json:"icon_name"`
-	IconDataURI     OptNilString        `json:"icon_data_uri"`
-	ParentPlatform  OptNilString        `json:"parent_platform"`
-	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
-	ShowInForm      OptBool             `json:"show_in_form"`
-	Shareable       OptBool             `json:"shareable"`
-	DetailedName    string              `json:"detailed_name"`
+	NotConfigured         OptBool                 `json:"not_configured"`
+	UIMetadata            []UIElementMetadata     `json:"ui_metadata"`
+	EnvironmentUIMetadata []EnvironmentUIMetadata `json:"environment_ui_metadata"`
+	Plugin                string                  `json:"plugin"`
+	HasEnvironments       bool                    `json:"has_environments"`
+	ResultLabel           OptString               `json:"result_label"`
+	ResultTooltip         OptString               `json:"result_tooltip"`
+	Platform              string                  `json:"platform"`
+	DisplayName           string                  `json:"display_name"`
+	IconName              string                  `json:"icon_name"`
+	IconDataURI           OptNilString            `json:"icon_data_uri"`
+	ParentPlatform        OptNilString            `json:"parent_platform"`
+	PlatformTile          OptNilPlatformTile      `json:"platform_tile"`
+	ShowInForm            OptBool                 `json:"show_in_form"`
+	Shareable             OptBool                 `json:"shareable"`
+	DetailedName          string                  `json:"detailed_name"`
 }
 
 // GetNotConfigured returns the value of NotConfigured.
@@ -14955,6 +15648,11 @@ func (s *UIElementMetadataResponse) GetNotConfigured() OptBool {
 // GetUIMetadata returns the value of UIMetadata.
 func (s *UIElementMetadataResponse) GetUIMetadata() []UIElementMetadata {
 	return s.UIMetadata
+}
+
+// GetEnvironmentUIMetadata returns the value of EnvironmentUIMetadata.
+func (s *UIElementMetadataResponse) GetEnvironmentUIMetadata() []EnvironmentUIMetadata {
+	return s.EnvironmentUIMetadata
 }
 
 // GetPlugin returns the value of Plugin.
@@ -15030,6 +15728,11 @@ func (s *UIElementMetadataResponse) SetNotConfigured(val OptBool) {
 // SetUIMetadata sets the value of UIMetadata.
 func (s *UIElementMetadataResponse) SetUIMetadata(val []UIElementMetadata) {
 	s.UIMetadata = val
+}
+
+// SetEnvironmentUIMetadata sets the value of EnvironmentUIMetadata.
+func (s *UIElementMetadataResponse) SetEnvironmentUIMetadata(val []EnvironmentUIMetadata) {
+	s.EnvironmentUIMetadata = val
 }
 
 // SetPlugin sets the value of Plugin.
@@ -15138,13 +15841,19 @@ func (s *UIElementRadio) SetOptions(val OptNilSelectOptionArray) {
 
 // Ref: #/components/schemas/UIElementSelect
 type UIElementSelect struct {
-	MaxCount OptNilInt               `json:"max_count"`
-	Options  OptNilSelectOptionArray `json:"options"`
+	MaxCount     OptNilInt               `json:"max_count"`
+	InitialValue OptNilString            `json:"initial_value"`
+	Options      OptNilSelectOptionArray `json:"options"`
 }
 
 // GetMaxCount returns the value of MaxCount.
 func (s *UIElementSelect) GetMaxCount() OptNilInt {
 	return s.MaxCount
+}
+
+// GetInitialValue returns the value of InitialValue.
+func (s *UIElementSelect) GetInitialValue() OptNilString {
+	return s.InitialValue
 }
 
 // GetOptions returns the value of Options.
@@ -15155,6 +15864,11 @@ func (s *UIElementSelect) GetOptions() OptNilSelectOptionArray {
 // SetMaxCount sets the value of MaxCount.
 func (s *UIElementSelect) SetMaxCount(val OptNilInt) {
 	s.MaxCount = val
+}
+
+// SetInitialValue sets the value of InitialValue.
+func (s *UIElementSelect) SetInitialValue(val OptNilString) {
+	s.InitialValue = val
 }
 
 // SetOptions sets the value of Options.
@@ -15541,6 +16255,16 @@ func (s *UpdateTagResponse) SetID(val uuid.UUID) {
 
 func (*UpdateTagResponse) updateTagRes() {}
 
+type UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw
+
+func (*UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) updateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON jx.Raw
+
+func (*UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) updateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
 type UpdateTechnicalAssetNotFoundApplicationJSON jx.Raw
 
 func (*UpdateTechnicalAssetNotFoundApplicationJSON) updateTechnicalAssetRes() {}
@@ -15560,7 +16284,8 @@ func (s *UpdateTechnicalAssetResponse) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
-func (*UpdateTechnicalAssetResponse) updateTechnicalAssetRes() {}
+func (*UpdateTechnicalAssetResponse) updateTechnicalAssetEnvironmentConfigurationRes() {}
+func (*UpdateTechnicalAssetResponse) updateTechnicalAssetRes()                         {}
 
 type UpdateTechnicalAssetStatusNotFoundApplicationJSON jx.Raw
 
@@ -15834,6 +16559,36 @@ func (s *UsersGet) SetAdminExpiry(val OptNilDateTime) {
 // SetGlobalRole sets the value of GlobalRole.
 func (s *UsersGet) SetGlobalRole(val NilGlobalRoleAssignmentResponse) {
 	s.GlobalRole = val
+}
+
+type ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON jx.Raw
+
+func (*ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) validateNewTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON jx.Raw
+
+func (*ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) validateTechnicalAssetEnvironmentConfigurationRes() {
 }
 
 // Ref: #/components/schemas/ValidationError

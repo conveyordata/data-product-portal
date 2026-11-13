@@ -5585,19 +5585,26 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.EnvironmentValues.Set {
+			e.FieldStart("environment_values")
+			s.EnvironmentValues.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfCreateTechnicalAssetRequest = [10]string{
-	0: "name",
-	1: "description",
-	2: "namespace",
-	3: "platform_id",
-	4: "service_id",
-	5: "configuration",
-	6: "sourceAligned",
-	7: "technical_mapping",
-	8: "access_mode_ids",
-	9: "tag_ids",
+var jsonFieldsNameOfCreateTechnicalAssetRequest = [11]string{
+	0:  "name",
+	1:  "description",
+	2:  "namespace",
+	3:  "platform_id",
+	4:  "service_id",
+	5:  "configuration",
+	6:  "sourceAligned",
+	7:  "technical_mapping",
+	8:  "access_mode_ids",
+	9:  "tag_ids",
+	10: "environment_values",
 }
 
 // Decode decodes CreateTechnicalAssetRequest from json.
@@ -5734,6 +5741,16 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"tag_ids\"")
+			}
+		case "environment_values":
+			if err := func() error {
+				s.EnvironmentValues.Reset()
+				if err := s.EnvironmentValues.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_values\"")
 			}
 		default:
 			return d.Skip()
@@ -5961,6 +5978,118 @@ func (s CreateTechnicalAssetRequestConfigurationAdditional) MarshalJSON() ([]byt
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *CreateTechnicalAssetRequestConfigurationAdditional) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValues) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValues) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		elem.Encode(e)
+	}
+}
+
+// Decode decodes CreateTechnicalAssetRequestEnvironmentValues from json.
+func (s *CreateTechnicalAssetRequestEnvironmentValues) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateTechnicalAssetRequestEnvironmentValues to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem CreateTechnicalAssetRequestEnvironmentValuesItem
+		if err := func() error {
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateTechnicalAssetRequestEnvironmentValues")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateTechnicalAssetRequestEnvironmentValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValuesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValuesItem) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes CreateTechnicalAssetRequestEnvironmentValuesItem from json.
+func (s *CreateTechnicalAssetRequestEnvironmentValuesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateTechnicalAssetRequestEnvironmentValuesItem to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateTechnicalAssetRequestEnvironmentValuesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreateTechnicalAssetRequestEnvironmentValuesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateTechnicalAssetRequestEnvironmentValuesItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -12398,15 +12527,22 @@ func (s *Environment) encodeFields(e *jx.Encoder) {
 			s.IsGlobal.Encode(e)
 		}
 	}
+	{
+		if s.Position.Set {
+			e.FieldStart("position")
+			s.Position.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfEnvironment = [6]string{
+var jsonFieldsNameOfEnvironment = [7]string{
 	0: "id",
 	1: "name",
 	2: "acronym",
 	3: "context",
 	4: "is_default",
 	5: "is_global",
+	6: "position",
 }
 
 // Decode decodes Environment from json.
@@ -12486,6 +12622,16 @@ func (s *Environment) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_global\"")
+			}
+		case "position":
+			if err := func() error {
+				s.Position.Reset()
+				if err := s.Position.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"position\"")
 			}
 		default:
 			return d.Skip()
@@ -12580,15 +12726,22 @@ func (s *EnvironmentGetItem) encodeFields(e *jx.Encoder) {
 			s.IsGlobal.Encode(e)
 		}
 	}
+	{
+		if s.Position.Set {
+			e.FieldStart("position")
+			s.Position.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfEnvironmentGetItem = [6]string{
+var jsonFieldsNameOfEnvironmentGetItem = [7]string{
 	0: "id",
 	1: "name",
 	2: "acronym",
 	3: "context",
 	4: "is_default",
 	5: "is_global",
+	6: "position",
 }
 
 // Decode decodes EnvironmentGetItem from json.
@@ -12669,6 +12822,16 @@ func (s *EnvironmentGetItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_global\"")
 			}
+		case "position":
+			if err := func() error {
+				s.Position.Reset()
+				if err := s.Position.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"position\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -12726,56 +12889,83 @@ func (s *EnvironmentGetItem) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *EnvironmentUpdateGlobal) Encode(e *jx.Encoder) {
+func (s *EnvironmentUIMetadata) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *EnvironmentUpdateGlobal) encodeFields(e *jx.Encoder) {
+func (s *EnvironmentUIMetadata) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("is_global")
-		e.Bool(s.IsGlobal)
+		e.FieldStart("environment_id")
+		json.EncodeUUID(e, s.EnvironmentID)
+	}
+	{
+		e.FieldStart("ui_metadata")
+		e.ArrStart()
+		for _, elem := range s.UIMetadata {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfEnvironmentUpdateGlobal = [1]string{
-	0: "is_global",
+var jsonFieldsNameOfEnvironmentUIMetadata = [2]string{
+	0: "environment_id",
+	1: "ui_metadata",
 }
 
-// Decode decodes EnvironmentUpdateGlobal from json.
-func (s *EnvironmentUpdateGlobal) Decode(d *jx.Decoder) error {
+// Decode decodes EnvironmentUIMetadata from json.
+func (s *EnvironmentUIMetadata) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode EnvironmentUpdateGlobal to nil")
+		return errors.New("invalid: unable to decode EnvironmentUIMetadata to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "is_global":
+		case "environment_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Bool()
-				s.IsGlobal = bool(v)
+				v, err := json.DecodeUUID(d)
+				s.EnvironmentID = v
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_global\"")
+				return errors.Wrap(err, "decode field \"environment_id\"")
+			}
+		case "ui_metadata":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.UIMetadata = make([]UIElementMetadata, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem UIElementMetadata
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.UIMetadata = append(s.UIMetadata, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ui_metadata\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode EnvironmentUpdateGlobal")
+		return errors.Wrap(err, "decode EnvironmentUIMetadata")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -12787,8 +12977,8 @@ func (s *EnvironmentUpdateGlobal) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfEnvironmentUpdateGlobal) {
-					name = jsonFieldsNameOfEnvironmentUpdateGlobal[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfEnvironmentUIMetadata) {
+					name = jsonFieldsNameOfEnvironmentUIMetadata[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -12809,14 +12999,94 @@ func (s *EnvironmentUpdateGlobal) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *EnvironmentUpdateGlobal) MarshalJSON() ([]byte, error) {
+func (s *EnvironmentUIMetadata) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *EnvironmentUpdateGlobal) UnmarshalJSON(data []byte) error {
+func (s *EnvironmentUIMetadata) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *EnvironmentUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *EnvironmentUpdate) encodeFields(e *jx.Encoder) {
+	{
+		if s.IsGlobal.Set {
+			e.FieldStart("is_global")
+			s.IsGlobal.Encode(e)
+		}
+	}
+	{
+		if s.Position.Set {
+			e.FieldStart("position")
+			s.Position.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfEnvironmentUpdate = [2]string{
+	0: "is_global",
+	1: "position",
+}
+
+// Decode decodes EnvironmentUpdate from json.
+func (s *EnvironmentUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EnvironmentUpdate to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "is_global":
+			if err := func() error {
+				s.IsGlobal.Reset()
+				if err := s.IsGlobal.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_global\"")
+			}
+		case "position":
+			if err := func() error {
+				s.Position.Reset()
+				if err := s.Position.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"position\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EnvironmentUpdate")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *EnvironmentUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EnvironmentUpdate) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -17847,6 +18117,736 @@ func (s *GetRolesResponse) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *GetTechnicalAssetResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetTechnicalAssetResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
+		e.FieldStart("owner_id")
+		json.EncodeUUID(e, s.OwnerID)
+	}
+	{
+		if s.PlatformID.Set {
+			e.FieldStart("platform_id")
+			s.PlatformID.Encode(e)
+		}
+	}
+	{
+		if s.ServiceID.Set {
+			e.FieldStart("service_id")
+			s.ServiceID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("technical_mapping")
+		s.TechnicalMapping.Encode(e)
+	}
+	{
+		e.FieldStart("access_modes")
+		e.ArrStart()
+		for _, elem := range s.AccessModes {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("configuration")
+		s.Configuration.Encode(e)
+	}
+	{
+		e.FieldStart("owner")
+		s.Owner.Encode(e)
+	}
+	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("output_port_links")
+		e.ArrStart()
+		for _, elem := range s.OutputPortLinks {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("tags")
+		e.ArrStart()
+		for _, elem := range s.Tags {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("environment_values")
+		s.EnvironmentValues.Encode(e)
+	}
+	{
+		e.FieldStart("sourceAligned")
+		e.Bool(s.SourceAligned)
+	}
+	{
+		e.FieldStart("result_string")
+		e.Str(s.ResultString)
+	}
+	{
+		e.FieldStart("technical_info")
+		e.ArrStart()
+		for _, elem := range s.TechnicalInfo {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGetTechnicalAssetResponse = [19]string{
+	0:  "id",
+	1:  "name",
+	2:  "description",
+	3:  "namespace",
+	4:  "owner_id",
+	5:  "platform_id",
+	6:  "service_id",
+	7:  "status",
+	8:  "technical_mapping",
+	9:  "access_modes",
+	10: "configuration",
+	11: "owner",
+	12: "environments",
+	13: "output_port_links",
+	14: "tags",
+	15: "environment_values",
+	16: "sourceAligned",
+	17: "result_string",
+	18: "technical_info",
+}
+
+// Decode decodes GetTechnicalAssetResponse from json.
+func (s *GetTechnicalAssetResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetResponse to nil")
+	}
+	var requiredBitSet [3]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "namespace":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "owner_id":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.OwnerID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner_id\"")
+			}
+		case "platform_id":
+			if err := func() error {
+				s.PlatformID.Reset()
+				if err := s.PlatformID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"platform_id\"")
+			}
+		case "service_id":
+			if err := func() error {
+				s.ServiceID.Reset()
+				if err := s.ServiceID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"service_id\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "technical_mapping":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				if err := s.TechnicalMapping.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"technical_mapping\"")
+			}
+		case "access_modes":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.AccessModes = make([]AccessMode, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessMode
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessModes = append(s.AccessModes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_modes\"")
+			}
+		case "configuration":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				if err := s.Configuration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"configuration\"")
+			}
+		case "owner":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				if err := s.Owner.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner\"")
+			}
+		case "environments":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				s.Environments = make([]DataProductEnvironment, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DataProductEnvironment
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
+			}
+		case "output_port_links":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				s.OutputPortLinks = make([]OutputPortLink, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem OutputPortLink
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.OutputPortLinks = append(s.OutputPortLinks, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"output_port_links\"")
+			}
+		case "tags":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				s.Tags = make([]Tag, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Tag
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Tags = append(s.Tags, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tags\"")
+			}
+		case "environment_values":
+			requiredBitSet[1] |= 1 << 7
+			if err := func() error {
+				if err := s.EnvironmentValues.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_values\"")
+			}
+		case "sourceAligned":
+			requiredBitSet[2] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.SourceAligned = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sourceAligned\"")
+			}
+		case "result_string":
+			requiredBitSet[2] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.ResultString = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"result_string\"")
+			}
+		case "technical_info":
+			requiredBitSet[2] |= 1 << 2
+			if err := func() error {
+				s.TechnicalInfo = make([]TechnicalInfo, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem TechnicalInfo
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.TechnicalInfo = append(s.TechnicalInfo, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"technical_info\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [3]uint8{
+		0b10011111,
+		0b11111111,
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetTechnicalAssetResponse) {
+					name = jsonFieldsNameOfGetTechnicalAssetResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetTechnicalAssetResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GetTechnicalAssetResponseConfiguration) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetTechnicalAssetResponseConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+var jsonFieldsNameOfGetTechnicalAssetResponseConfiguration = [1]string{
+	0: "name",
+}
+
+// Decode decodes GetTechnicalAssetResponseConfiguration from json.
+func (s *GetTechnicalAssetResponseConfiguration) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetResponseConfiguration to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
+			}
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetResponseConfiguration")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetTechnicalAssetResponseConfiguration) {
+					name = jsonFieldsNameOfGetTechnicalAssetResponseConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetTechnicalAssetResponseConfiguration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetResponseConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s GetTechnicalAssetResponseConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s GetTechnicalAssetResponseConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes GetTechnicalAssetResponseConfigurationAdditional from json.
+func (s *GetTechnicalAssetResponseConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetResponseConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetResponseConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetTechnicalAssetResponseConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetResponseConfigurationAdditional) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValues) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValues) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		elem.Encode(e)
+	}
+}
+
+// Decode decodes GetTechnicalAssetResponseEnvironmentValues from json.
+func (s *GetTechnicalAssetResponseEnvironmentValues) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetResponseEnvironmentValues to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem GetTechnicalAssetResponseEnvironmentValuesItem
+		if err := func() error {
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetResponseEnvironmentValues")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetResponseEnvironmentValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValuesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValuesItem) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes GetTechnicalAssetResponseEnvironmentValuesItem from json.
+func (s *GetTechnicalAssetResponseEnvironmentValuesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetResponseEnvironmentValuesItem to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetResponseEnvironmentValuesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetTechnicalAssetResponseEnvironmentValuesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetResponseEnvironmentValuesItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *GetTechnicalAssetsResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -18086,6 +19086,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode GetTechnicalAssetsResponseItem to nil")
 	}
 	var requiredBitSet [3]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -23986,6 +24987,437 @@ func (s *ModifyOutputPortRoleAssignment) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
+		e.FieldStart("configuration")
+		s.Configuration.Encode(e)
+	}
+	{
+		if s.TechnicalMapping.Set {
+			e.FieldStart("technical_mapping")
+			s.TechnicalMapping.Encode(e)
+		}
+	}
+	{
+		if s.EnvironmentValues.Set {
+			e.FieldStart("environment_values")
+			s.EnvironmentValues.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidation = [4]string{
+	0: "namespace",
+	1: "configuration",
+	2: "technical_mapping",
+	3: "environment_values",
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidation from json.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewTechnicalAssetEnvironmentConfigurationValidation to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "namespace":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "configuration":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Configuration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"configuration\"")
+			}
+		case "technical_mapping":
+			if err := func() error {
+				s.TechnicalMapping.Reset()
+				if err := s.TechnicalMapping.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"technical_mapping\"")
+			}
+		case "environment_values":
+			if err := func() error {
+				s.EnvironmentValues.Reset()
+				if err := s.EnvironmentValues.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_values\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewTechnicalAssetEnvironmentConfigurationValidation")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidation) {
+					name = jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidation[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+var jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidationConfiguration = [1]string{
+	0: "name",
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidationConfiguration from json.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewTechnicalAssetEnvironmentConfigurationValidationConfiguration to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
+			}
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewTechnicalAssetEnvironmentConfigurationValidationConfiguration")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidationConfiguration) {
+					name = jsonFieldsNameOfNewTechnicalAssetEnvironmentConfigurationValidationConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional from json.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationConfigurationAdditional) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		elem.Encode(e)
+	}
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues from json.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem
+		if err := func() error {
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem from json.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValuesItem) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes DataProductLifeCycle as json.
 func (o NilDataProductLifeCycle) Encode(e *jx.Encoder) {
 	if o.Null {
@@ -24545,6 +25977,40 @@ func (s *OptBool) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes CreateTechnicalAssetRequestEnvironmentValues as json.
+func (o OptCreateTechnicalAssetRequestEnvironmentValues) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes CreateTechnicalAssetRequestEnvironmentValues from json.
+func (o *OptCreateTechnicalAssetRequestEnvironmentValues) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptCreateTechnicalAssetRequestEnvironmentValues to nil")
+	}
+	o.Set = true
+	o.Value = make(CreateTechnicalAssetRequestEnvironmentValues)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptCreateTechnicalAssetRequestEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptCreateTechnicalAssetRequestEnvironmentValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes DataProductVisibility as json.
 func (o OptDataProductVisibility) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -24642,6 +26108,40 @@ func (s OptInt) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues as json.
+func (o OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues from json.
+func (o *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues to nil")
+	}
+	o.Set = true
+	o.Value = make(NewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNewTechnicalAssetEnvironmentConfigurationValidationEnvironmentValues) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -26337,6 +27837,39 @@ func (s OptString) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptString) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TechnicalMapping as json.
+func (o OptTechnicalMapping) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes TechnicalMapping from json.
+func (o *OptTechnicalMapping) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTechnicalMapping to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTechnicalMapping) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTechnicalMapping) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -32606,6 +34139,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode RenderTechnicalAssetAccessPathRequest to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -37103,11 +38637,18 @@ func (s *SelectOption) encodeFields(e *jx.Encoder) {
 		e.FieldStart("value")
 		s.Value.Encode(e)
 	}
+	{
+		if s.Disabled.Set {
+			e.FieldStart("disabled")
+			s.Disabled.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfSelectOption = [2]string{
+var jsonFieldsNameOfSelectOption = [3]string{
 	0: "label",
 	1: "value",
+	2: "disabled",
 }
 
 // Decode decodes SelectOption from json.
@@ -37140,6 +38681,16 @@ func (s *SelectOption) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"value\"")
+			}
+		case "disabled":
+			if err := func() error {
+				s.Disabled.Reset()
+				if err := s.Disabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disabled\"")
 			}
 		default:
 			return d.Skip()
@@ -37204,6 +38755,8 @@ func (s SelectOptionValue) Encode(e *jx.Encoder) {
 		e.Str(s.String)
 	case BoolSelectOptionValue:
 		e.Bool(s.Bool)
+	case IntSelectOptionValue:
+		e.Int(s.Int)
 	}
 }
 
@@ -37221,6 +38774,13 @@ func (s *SelectOptionValue) Decode(d *jx.Decoder) error {
 			return err
 		}
 		s.Type = BoolSelectOptionValue
+	case jx.Number:
+		v, err := d.Int()
+		s.Int = int(v)
+		if err != nil {
+			return err
+		}
+		s.Type = IntSelectOptionValue
 	case jx.String:
 		v, err := d.Str()
 		s.String = string(v)
@@ -37971,6 +39531,7 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode TechnicalAsset to nil")
 	}
 	var requiredBitSet [2]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -38310,6 +39871,212 @@ func (s TechnicalAssetConfigurationAdditional) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *TechnicalAssetConfigurationAdditional) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("environment_values")
+		s.EnvironmentValues.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfTechnicalAssetEnvironmentConfigurationUpdate = [1]string{
+	0: "environment_values",
+}
+
+// Decode decodes TechnicalAssetEnvironmentConfigurationUpdate from json.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TechnicalAssetEnvironmentConfigurationUpdate to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "environment_values":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.EnvironmentValues.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_values\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TechnicalAssetEnvironmentConfigurationUpdate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTechnicalAssetEnvironmentConfigurationUpdate) {
+					name = jsonFieldsNameOfTechnicalAssetEnvironmentConfigurationUpdate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TechnicalAssetEnvironmentConfigurationUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		elem.Encode(e)
+	}
+}
+
+// Decode decodes TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues from json.
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem
+		if err := func() error {
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValues) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem from json.
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TechnicalAssetEnvironmentConfigurationUpdateEnvironmentValuesItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -39498,6 +41265,16 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
+		if s.EnvironmentUIMetadata != nil {
+			e.FieldStart("environment_ui_metadata")
+			e.ArrStart()
+			for _, elem := range s.EnvironmentUIMetadata {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		e.FieldStart("plugin")
 		e.Str(s.Plugin)
 	}
@@ -39565,22 +41342,23 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [15]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [16]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
-	2:  "plugin",
-	3:  "has_environments",
-	4:  "result_label",
-	5:  "result_tooltip",
-	6:  "platform",
-	7:  "display_name",
-	8:  "icon_name",
-	9:  "icon_data_uri",
-	10: "parent_platform",
-	11: "platform_tile",
-	12: "show_in_form",
-	13: "shareable",
-	14: "detailed_name",
+	2:  "environment_ui_metadata",
+	3:  "plugin",
+	4:  "has_environments",
+	5:  "result_label",
+	6:  "result_tooltip",
+	7:  "platform",
+	8:  "display_name",
+	9:  "icon_name",
+	10: "icon_data_uri",
+	11: "parent_platform",
+	12: "platform_tile",
+	13: "show_in_form",
+	14: "shareable",
+	15: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -39621,8 +41399,25 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ui_metadata\"")
 			}
+		case "environment_ui_metadata":
+			if err := func() error {
+				s.EnvironmentUIMetadata = make([]EnvironmentUIMetadata, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem EnvironmentUIMetadata
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.EnvironmentUIMetadata = append(s.EnvironmentUIMetadata, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_ui_metadata\"")
+			}
 		case "plugin":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Plugin = string(v)
@@ -39634,7 +41429,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"plugin\"")
 			}
 		case "has_environments":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.HasEnvironments = bool(v)
@@ -39666,7 +41461,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_tooltip\"")
 			}
 		case "platform":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.Platform = string(v)
@@ -39678,7 +41473,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform\"")
 			}
 		case "display_name":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.DisplayName = string(v)
@@ -39690,7 +41485,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"display_name\"")
 			}
 		case "icon_name":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.IconName = string(v)
@@ -39752,7 +41547,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"shareable\"")
 			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -39773,8 +41568,8 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11001110,
-		0b01000001,
+		0b10011010,
+		0b10000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -39934,6 +41729,12 @@ func (s *UIElementSelect) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.InitialValue.Set {
+			e.FieldStart("initial_value")
+			s.InitialValue.Encode(e)
+		}
+	}
+	{
 		if s.Options.Set {
 			e.FieldStart("options")
 			s.Options.Encode(e)
@@ -39941,9 +41742,10 @@ func (s *UIElementSelect) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUIElementSelect = [2]string{
+var jsonFieldsNameOfUIElementSelect = [3]string{
 	0: "max_count",
-	1: "options",
+	1: "initial_value",
+	2: "options",
 }
 
 // Decode decodes UIElementSelect from json.
@@ -39964,6 +41766,16 @@ func (s *UIElementSelect) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"max_count\"")
+			}
+		case "initial_value":
+			if err := func() error {
+				s.InitialValue.Reset()
+				if err := s.InitialValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"initial_value\"")
 			}
 		case "options":
 			if err := func() error {
@@ -42089,6 +43901,90 @@ func (s *UpdateTagResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON as json.
+func (s UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON from json.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON as json.
+func (s UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON from json.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UpdateTechnicalAssetNotFoundApplicationJSON as json.
 func (s UpdateTechnicalAssetNotFoundApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -43038,6 +44934,258 @@ func (s *UsersGet) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UsersGet) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON as json.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON from json.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON as json.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON from json.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON as json.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON from json.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateNewTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON as json.
+func (s ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON from json.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON as json.
+func (s ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON from json.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON as json.
+func (s ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON from json.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ValidateTechnicalAssetEnvironmentConfigurationUnprocessableEntityApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -20,10 +20,12 @@ class UIElementSelect:
     """
     Attributes:
         max_count (int | None | Unset):  Default: 1.
+        initial_value (None | str | Unset):
         options (list[SelectOption] | None | Unset):
     """
 
     max_count: int | None | Unset = 1
+    initial_value: None | str | Unset = UNSET
     options: list[SelectOption] | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -33,6 +35,12 @@ class UIElementSelect:
             max_count = UNSET
         else:
             max_count = self.max_count
+
+        initial_value: None | str | Unset
+        if isinstance(self.initial_value, Unset):
+            initial_value = UNSET
+        else:
+            initial_value = self.initial_value
 
         options: list[dict[str, Any]] | None | Unset
         if isinstance(self.options, Unset):
@@ -51,6 +59,8 @@ class UIElementSelect:
         field_dict.update({})
         if max_count is not UNSET:
             field_dict["max_count"] = max_count
+        if initial_value is not UNSET:
+            field_dict["initial_value"] = initial_value
         if options is not UNSET:
             field_dict["options"] = options
 
@@ -70,6 +80,15 @@ class UIElementSelect:
             return cast(int | None | Unset, data)
 
         max_count = _parse_max_count(d.pop("max_count", UNSET))
+
+        def _parse_initial_value(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        initial_value = _parse_initial_value(d.pop("initial_value", UNSET))
 
         def _parse_options(data: object) -> list[SelectOption] | None | Unset:
             if data is None:
@@ -97,6 +116,7 @@ class UIElementSelect:
 
         ui_element_select = cls(
             max_count=max_count,
+            initial_value=initial_value,
             options=options,
         )
 
