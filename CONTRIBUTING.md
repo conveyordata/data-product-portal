@@ -114,7 +114,7 @@ We follow a "Review Then Commit" workflow. All contributions are made via Pull R
 6.  **Submit a Pull Request:** Push your branch to your fork and open a draft pull request against the `main` branch of the original repository.
     * In the PR description, link to the issue you are resolving (e.g., "Closes #123").
     * Provide a clear summary of the changes you have made.
-    * Copilot reviews the draft when it opens. Address its comments and re-request a review until it has nothing useful left, up to about 3 rounds. Then mark the PR ready for review.
+    * Copilot reviews the draft when it opens. Address its comments and re-request a review until it has nothing useful left, up to 3 rounds. Then mark the PR ready for review.
 7.  **Address Feedback:** A project committer will review your PR. They may ask for changes or provide suggestions. Please address the feedback and push your changes to the same branch.
 8.  **Merging:** Once the PR is approved by a committer and all automated checks have passed, it will be merged into the `main` branch.
 
