@@ -74,7 +74,7 @@ Using an AI agent is optional. If you do, these skills fit the steps above:
 | Step | Skills |
 |------|--------|
 | Triage | `triage` |
-| Shape the solution | `grill-with-docs` (or `grill-me`), `wayfinder` for big unclear work, `adr`, `prototype` to test technical assumptions |
+| Shape the solution | `grill-me`, `wayfinder` for big unclear work, `adr` when the change needs one, `prototype` to test technical assumptions |
 | Break it down | `to-spec`, `to-tickets` |
 | Diagnose a bug | `diagnosing-bugs` |
 | Implement | `implement` |
