@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import lru_cache
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     OIDC_AUTHORITY: Optional[str] = None
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
+    OIDC_IDENTITY_SOURCE: Literal["userinfo", "access_token"] = "userinfo"
+    OIDC_USER_ID_CLAIM: str = "sub"
+    OIDC_EMAIL_CLAIM: str = "email"
 
     MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []
