@@ -24,6 +24,8 @@ It consists of a 3-tier web architecture.
 *   **Task Runner**: `Taskfile.yml` is primarily for release automation.
 *   **Pre-commit**: Stage your change and run `scripts/precommit.sh` rather than invoking Ruff, mypy, or Biome directly. It sets up the backend environment (also in a worktree without its own venv), reruns the hooks until the generators (OpenAPI client, SDK, CLI, translations) stop changing files, and stages what they write. Commit only once it exits 0. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
+*   **Development Process**: Follow [Our Development Process](CONTRIBUTING.md#our-development-process). When starting new work, check for a GitHub issue; if there is none, draft one (title, body, `bug` or `enhancement`) and create it once the user says yes. Link it in the PR (`Closes #123`) and open the PR as a draft. When a go/no-go happens in the conversation, set the matching [label](CONTRIBUTING.md#labels) on the issue.
+*   **Agent Skills**: Issue tracker, triage labels and domain docs for skills are configured in `docs/agents/`.
 *   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
 
 ## General Rules for Agents

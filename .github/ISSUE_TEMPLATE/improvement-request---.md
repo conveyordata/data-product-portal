@@ -1,7 +1,7 @@
 ---
 name: "Improvement request \U0001F680"
 about: Suggest an improvement
-labels: enhancement
+labels: enhancement, needs-triage
 
 ---
 ## Summary
