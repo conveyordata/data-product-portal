@@ -127,17 +127,28 @@ We rejected skipping the filters for loads made while the ORM flushes: SQLAlchem
 
 ### The database decides, Casbin enforces routes
 
-Casbin was chosen as the engine because every route check already went through it, and a second permission system risked drifting from it or being forgotten on nested routes; redaction was meant to reuse it.
-Adding ORM based visibility for lists created a second copy of the rule anyway: lists were decided in SQL, routes and redaction by Casbin, and nothing kept the two aligned.
-The same happened to admin status ([ADR-0008](0008-admin-toggle.md)): the SQL filter read the admin expiry, routes read Casbin's admin role.
-A parity test found them disagreeing: revoking admin left the expiry set, a restart wiped temporary admins from Casbin, and the system account only saw Hidden items through a special case.
-A Casbin sync run on behalf of a user also dropped other consumers' access, because it read through that user's filter.
+We chose Casbin to decide visibility because every route check already went through it. A second permission system could drift from it or be forgotten on nested routes.
+
+Adding ORM based visibility created that second system anyway. Lists were filtered in SQL, while routes and redaction asked Casbin, and nothing kept the two in line.
+Admin status ([ADR-0008](0008-admin-toggle.md)) had the same split: the SQL filter checked the admin expiry, while routes checked Casbin's admin role.
+
+A test comparing the two found they disagreed:
+
+* Revoking admin removed the Casbin role but left the expiry set, so SQL still treated the user as admin.
+* A restart removed temporary admins from Casbin, while SQL still treated them as admin.
+* The system account only saw Hidden items because of a special case in the SQL filter.
+* Rebuilding Casbin rules on behalf of a user read through that user's filter, so it removed access for other consumers the user could not see.
 
 We therefore separate deciding from enforcing:
 
 * The database decides. `app/database/visibility.py` is the only place that defines who sees a Data Product, Exploration, Technical Asset or Output Port; the ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all use it, and `acting_as` is the only way to act as a user on a session. Redaction no longer asks Casbin, whose cache lagged revocations.
 * Whether a user is an admin is decided by `app/authorization/role_assignments/global_/admin.py`: a permanent, approved admin role assignment, or a temporary elevation whose expiry is in the future.
-* Casbin is a projection of the database that enforces routes. Becoming, revoking and removing admin and the visibility syncs write the database first and then update Casbin; reloading the enforcer rebuilds it from the database, temporary admins included. Syncs read `UNFILTERED`.
-* Parity tests compare the visibility module with the Casbin route checks for Data Products and Output Ports, for every kind of user.
+* Casbin is a copy of the database, used only to check routes. Changes to admin status and to who can read a Data Product are written to the database first, then to Casbin. When Casbin reloads, it rebuilds all its rules from the database, temporary admins included.
+* Code that rebuilds Casbin rules reads the database with `UNFILTERED`, so it sees every row and not only the rows the current user can see.
+* Parity tests check, for every kind of user, that the database and Casbin give the same answer for Data Products and Output Ports.
 
-Still open: Casbin is written before the request commits, so a rolled-back request leaves it ahead of the database until the next reload; each worker caches Casbin rules until its next policy reload; and a reload can overwrite a change another worker makes at the same moment.
+Known gaps, where Casbin can still disagree with the database:
+
+* Casbin is updated before the request's transaction commits. If the request fails and rolls back, Casbin keeps the change until its next reload.
+* Each worker keeps its own copy of the Casbin rules, so a change made on one worker reaches the others only when they next reload.
+* When two workers change rules at the same time, one worker's reload can overwrite the other's change.
