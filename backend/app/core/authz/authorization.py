@@ -2,11 +2,9 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Sequence,
     TypeAlias,
     Union,
-    assert_never,
 )
 from uuid import UUID
 
@@ -19,7 +17,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_products.model import DataProductVisibility
 from app.database import database
 from app.database.deps import get_db_session
 from app.settings import settings
@@ -28,9 +25,6 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
-
-if TYPE_CHECKING:
-    from app.data_products.model import DataProduct
 
 ID: TypeAlias = Union[str, UUID]
 
@@ -445,25 +439,6 @@ class Authorization(metaclass=Singleton):
         )
         self._after_update()
         return bool(updates)
-
-    def has_read_access_to_data_product(
-        self, current_user: User, data_product: "DataProduct"
-    ) -> bool:
-
-        # The check for visibility is a performance optimization to avoid unnecessary
-        # has_access checks for discoverable data products.
-        match data_product.visibility:
-            case DataProductVisibility.DISCOVERABLE:
-                return True
-            case DataProductVisibility.HIDDEN:
-                return self.has_access(
-                    sub=str(current_user.id),
-                    obj=str(data_product.id),
-                    dom=str(data_product.domain_id),
-                    act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
-                )
-            case _:
-                assert_never(data_product.visibility)
 
     def assign_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
         """

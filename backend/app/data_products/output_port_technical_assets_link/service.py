@@ -7,15 +7,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, contains_eager
 
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment as DataProductRoleAssignmentModel,
-)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.core.authz import Action, Authorization
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
@@ -26,7 +22,7 @@ from app.data_products.technical_assets.model import (
 )
 from app.data_products.technical_assets.service import ensure_technical_asset_shareable
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
-from app.groups.service import GroupService
+from app.database.visibility import acting_as, member_of
 from app.users.schema import User
 from app.users.schema_response import (
     TechnicalAssetOutputPortRequest,
@@ -150,57 +146,47 @@ class TechnicalAssetOutputPortService:
     def get_user_pending_actions(
         self, user: User
     ) -> Sequence[TechnicalAssetOutputPortRequest]:
-        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
-            user.id
-        )
-        requested_associations = (
-            self.db.scalars(
-                select(TechnicalAssetOutputPortAssociationModel)
-                .where(
-                    TechnicalAssetOutputPortAssociationModel.status
-                    == DecisionStatus.PENDING,
-                )
-                .where(
-                    or_(
-                        TechnicalAssetOutputPortAssociationModel.output_port.has(
-                            OutputPortModel.assignments.any(
-                                DatasetRoleAssignmentModel.user_id == user.id
-                            )
-                        ),
-                        TechnicalAssetOutputPortAssociationModel.output_port.has(
-                            OutputPortModel.data_product.has(
-                                DataProductModel.assignments.any(
-                                    or_(
-                                        DataProductRoleAssignmentModel.identity_id
-                                        == user.id,
-                                        DataProductRoleAssignmentModel.identity_id.in_(
-                                            user_group_ids
-                                        ),
-                                    )
-                                )
-                            )
-                        ),
+        with acting_as(self.db, user.id):
+            requested_associations = (
+                self.db.scalars(
+                    select(TechnicalAssetOutputPortAssociationModel)
+                    .where(
+                        TechnicalAssetOutputPortAssociationModel.status
+                        == DecisionStatus.PENDING,
                     )
+                    .where(
+                        or_(
+                            TechnicalAssetOutputPortAssociationModel.output_port.has(
+                                OutputPortModel.assignments.any(
+                                    DatasetRoleAssignmentModel.user_id == user.id
+                                )
+                            ),
+                            TechnicalAssetOutputPortAssociationModel.output_port.has(
+                                member_of(self.db, OutputPortModel.data_product_id)
+                            ),
+                        )
+                    )
+                    .order_by(
+                        asc(TechnicalAssetOutputPortAssociationModel.requested_on)
+                    ),
+                    execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
                 )
-                .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on)),
-                execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+                .unique()
+                .all()
             )
-            .unique()
-            .all()
-        )
 
-        authorizer = Authorization()
-        return [
-            TechnicalAssetOutputPortRequest.model_validate(a)
-            for a in requested_associations
-            if authorizer.has_access(
-                sub=str(user.id),
-                dom=str(a.output_port.data_product.domain.id),
-                obj=str(a.output_port_id),
-                parent=str(a.output_port.data_product_id),
-                act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
-            )
-        ]
+            authorizer = Authorization()
+            return [
+                TechnicalAssetOutputPortRequest.model_validate(a)
+                for a in requested_associations
+                if authorizer.has_access(
+                    sub=str(user.id),
+                    dom=str(a.output_port.data_product.domain.id),
+                    obj=str(a.output_port_id),
+                    parent=str(a.output_port.data_product_id),
+                    act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
+                )
+            ]
 
     def _get_pending_link(
         self, *, data_product_id: UUID, technical_asset_id: UUID, output_port_id: UUID

@@ -52,9 +52,11 @@ The model is:
 * The Casbin matcher is extended to allow public resource-role groupings such as `g("*", role, product_id)`.
 
 The data product `visibility` field remains the source of truth, while Casbin remains the enforcement engine.
-The application keeps Casbin and the database in sync when a product is created, when visibility changes, and when assignments are approved, denied, or revoked.
+The application keeps Casbin and the database in sync when a product is created and when assignments are approved, denied, or revoked.
 
 The reason for adding ORM based visibility is to reduce the change of mistakes.
+
+The split between deciding and enforcing was later sharpened: see [The database decides, Casbin enforces routes](#the-database-decides-casbin-enforces-routes).
 
 ### Confirmation
 
@@ -65,7 +67,7 @@ This will be reflected in the application as follows:
 * Create a `public_reader` role and attach it to a product when `visibility == discoverable`.
 * Use the existing resource-role model with a wildcard subject such as `g("*", public_reader_role_id, product_id)`.
 * Update the Casbin matcher to allow wildcard public resource-role groupings during enforcement.
-* When product visibility changes, update Casbin groupings to match the product row state.
+* Visibility is fixed at creation, so the Casbin grouping is created with the product and re-synced at startup.
 * When assignments are approved or revoked, continue through the existing assignment sync logic for the assigned-user case.
 * Enforce access at the route layer through the standard authorization flow without app-side visibility checks on each endpoint.
 
@@ -107,8 +109,7 @@ The notable changes are:
 * Add `DATA_PRODUCT__READ` to the action enum.
 * Add `public_reader` as a resource role with `DATA_PRODUCT__READ` permission.
 * Update the Casbin matcher to allow `g("*", role, product_id)` for public reads.
-* When a product becomes discoverable, create the wildcard public grouping.
-* When a product becomes hidden, revoke the wildcard public grouping.
+* When a discoverable product is created, create the wildcard public grouping. Visibility cannot change afterwards.
 * When a user is approved for a hidden product, the existing assignment flow already creates the user-specific group.
 * When approved assignments are revoked or denied, the existing revoke logic removes the user-specific group.
 
@@ -123,3 +124,31 @@ The ORM filters hide Hidden Data Products, their Technical Assets and Invite onl
 * A test runs every configuration `DELETE` and `PUT` route as a configuration manager and as an admin with Hidden Data Products and Invite only Output Ports present, and expects the same result.
 
 We rejected skipping the filters for loads made while the ORM flushes: SQLAlchemy only exposes that state through a private attribute.
+
+### The database decides, Casbin enforces routes
+
+We chose Casbin to decide visibility because every route check already went through it. A second permission system could drift from it or be forgotten on nested routes.
+
+Adding ORM based visibility created that second system anyway. Lists were filtered in SQL, while routes and redaction asked Casbin, and nothing kept the two in line.
+Admin status ([ADR-0008](0008-admin-toggle.md)) had the same split: the SQL filter checked the admin expiry, while routes checked Casbin's admin role.
+
+A test comparing the two found they disagreed:
+
+* Revoking admin removed the Casbin role but left the expiry set, so SQL still treated the user as admin.
+* A restart removed temporary admins from Casbin, while SQL still treated them as admin.
+* The system account only saw Hidden items because of a special case in the SQL filter.
+* Rebuilding Casbin rules on behalf of a user read through that user's filter, so it removed access for other consumers the user could not see.
+
+We therefore separate deciding from enforcing:
+
+* The database decides. `app/database/visibility.py` is the only place that defines who sees a Data Product, Exploration, Technical Asset or Output Port; the ORM filter, search, the Input Ports of a Data Product and the redaction of consumers all use it, and `acting_as` is the only way to act as a user on a session. Redaction no longer asks Casbin, whose cache lagged revocations.
+* Whether a user is an admin is decided by `app/authorization/role_assignments/global_/admin.py`: a permanent, approved admin role assignment, or a temporary elevation whose expiry is in the future.
+* Casbin is a copy of the database, used only to check routes. Changes to admin status and to who can read a Data Product are written to the database first, then to Casbin. When Casbin reloads, it rebuilds all its rules from the database, temporary admins included.
+* Code that rebuilds Casbin rules reads the database with `UNFILTERED`, so it sees every row and not only the rows the current user can see.
+* Parity tests check, for every kind of user, that the database and Casbin give the same answer for Data Products and Output Ports.
+
+Known gaps, where Casbin can still disagree with the database:
+
+* Casbin is updated before the request's transaction commits. If the request fails and rolls back, Casbin keeps the change until its next reload.
+* Each worker keeps its own copy of the Casbin rules, so a change made on one worker reaches the others only when they next reload.
+* When two workers change rules at the same time, one worker's reload can overwrite the other's change.

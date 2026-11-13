@@ -2590,7 +2590,7 @@ func (s *BecomeAdmin) Encode(e *jx.Encoder) {
 func (s *BecomeAdmin) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("expiry")
-		e.Str(s.Expiry)
+		json.EncodeDateTime(e, s.Expiry)
 	}
 }
 
@@ -2610,8 +2610,8 @@ func (s *BecomeAdmin) Decode(d *jx.Decoder) error {
 		case "expiry":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Expiry = string(v)
+				v, err := json.DecodeDateTime(d)
+				s.Expiry = v
 				if err != nil {
 					return err
 				}

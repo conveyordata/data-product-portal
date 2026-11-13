@@ -1,11 +1,11 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, Table
+from sqlalchemy import UUID, Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
-from app.shared.model import BaseORM, utcnow
+from app.shared.model import BaseORM, UTCDateTime, utcnow
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
@@ -18,8 +18,8 @@ tag_data_product_table = Table(
     Base.metadata,
     Column("data_product_id", ForeignKey("data_products.id", ondelete="CASCADE")),
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
+    Column("created_on", UTCDateTime(), server_default=utcnow()),
+    Column("updated_on", UTCDateTime(), onupdate=utcnow()),
 )
 
 tag_output_port_table = Table(
@@ -27,8 +27,8 @@ tag_output_port_table = Table(
     Base.metadata,
     Column("dataset_id", ForeignKey("datasets.id", ondelete="CASCADE")),
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
+    Column("created_on", UTCDateTime(), server_default=utcnow()),
+    Column("updated_on", UTCDateTime(), onupdate=utcnow()),
 )
 
 tag_technical_asset_table = Table(
@@ -36,8 +36,8 @@ tag_technical_asset_table = Table(
     Base.metadata,
     Column("data_output_id", ForeignKey("data_outputs.id", ondelete="CASCADE")),
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
+    Column("created_on", UTCDateTime(), server_default=utcnow()),
+    Column("updated_on", UTCDateTime(), onupdate=utcnow()),
 )
 
 

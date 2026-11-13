@@ -39,10 +39,7 @@ def become_admin(
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    RoleAssignmentService(db).ensure_can_become_admin(user)
-    user.admin_expiry = request.expiry
-    authorizer = Authorization()
-    authorizer.assign_admin_role(user_id=str(user.id))
+    RoleAssignmentService(db).become_admin(user, request.expiry)
 
 
 @router.post(
@@ -53,8 +50,7 @@ def revoke_admin(
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    authorizer = Authorization()
-    authorizer.revoke_admin_role(user_id=user.id)
+    RoleAssignmentService(db).revoke_admin(user)
 
 
 @router.post(
@@ -89,10 +85,12 @@ def delete_global_role_assignment(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> DeleteGlobalRoleAssignmentResponse:
-    assignment = RoleAssignmentService(db).delete_assignment(id)
+    service = RoleAssignmentService(db)
+    assignment = service.delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment).remove()
+        service.sync_admin_role(assignment.identity_id)
     return DeleteGlobalRoleAssignmentResponse(id=assignment.id)
 
 
@@ -168,5 +166,6 @@ def modify_global_role_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment, previous_role_id=original_role).swap()
+        service.sync_admin_role(assignment.identity_id)
 
     return assignment

@@ -9,6 +9,7 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.admin import admin_expiry_in_future
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
@@ -23,6 +24,7 @@ from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
 from app.groups.model import GroupMembership
+from app.users.model import User as UserModel
 
 DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
 OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
@@ -56,6 +58,9 @@ class AuthorizationService:
             f"Synced {changed_global_a}/{total_global_a}"
             " global assignments to the casbin table"
         )
+
+        self._sync_temporary_admins()
+        logger.info("Synced temporary admins to the casbin table")
 
         self._sync_data_products_reader_role()
         logger.info("Synced data products reader role permissions")
@@ -127,6 +132,12 @@ class AuthorizationService:
             if GlobalAuthAssignment(assignment).add():
                 changes += 1
         return changes, len(global_assignments)
+
+    def _sync_temporary_admins(self) -> None:
+        for user_id in self.db.scalars(
+            select(UserModel.id).where(admin_expiry_in_future)
+        ):
+            self.authorizer.assign_admin_role(user_id=str(user_id))
 
     def _sync_data_products_reader_role(self):
         from app.data_products.service import DataProductService

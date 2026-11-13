@@ -1,4 +1,5 @@
-from datetime import date, datetime, timedelta
+import time
+from datetime import date, datetime, timedelta, timezone
 
 import pytz
 
@@ -7,9 +8,10 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
     RenewalStatus,
 )
+from app.shared.model import utc_today
 from tests.factories import InputPortFactory, InputPortRequestFactory
 
-TODAY = date.today()
+TODAY = utc_today()
 NOW = datetime.now(pytz.utc)
 
 
@@ -108,6 +110,32 @@ class TestInputPortModel:
             ],
         )
         assert port.active_grant is None
+
+    def test_active_grant__uses_utc_date_whatever_the_server_time_zone(
+        self, monkeypatch
+    ):
+        utc_date = datetime.now(timezone.utc).date()
+        # Etc/GMT signs are inverted: GMT+12 is UTC-12, so the local date is yesterday.
+        zone = "Etc/GMT+12" if datetime.now(timezone.utc).hour < 12 else "Etc/GMT-14"
+        monkeypatch.setenv("TZ", zone)
+        time.tzset()
+        try:
+            assert date.today() != utc_date
+            port = InputPortFactory.build(
+                request=False,
+                requests=[
+                    InputPortRequestFactory.build(
+                        decision=InputPortRequestDecision.APPROVED,
+                        valid_from=utc_date,
+                        valid_until=utc_date,
+                        decided_by=None,
+                    )
+                ],
+            )
+            assert port.active_grant is not None
+        finally:
+            monkeypatch.undo()
+            time.tzset()
 
     def test_pending_request__returns_the_pending_request(self):
         pending = InputPortRequestFactory.build(

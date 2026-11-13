@@ -21,6 +21,7 @@ from app.core.authz import Action, Authorization
 from app.core.logging import logger
 from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import db_session
+from app.database.visibility import acting_as
 from app.settings import settings
 from app.users.model import User
 from app.users.model import User as UserModel
@@ -153,12 +154,8 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
 
 @contextmanager
 def get_user_db_session(user: User = Depends(get_mcp_authenticated_user)):
-    with db_session() as db:
-        db.info["current_user_id"] = user.id
-        try:
-            yield db
-        finally:
-            db.info.pop("current_user_id", None)
+    with db_session() as db, acting_as(db, user.id):
+        yield db
 
 
 def authorize_data_product_read_integrations(

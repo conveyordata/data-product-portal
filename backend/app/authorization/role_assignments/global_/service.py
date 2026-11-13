@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.admin import is_user_admin
 from app.authorization.role_assignments.global_.model import (
     GlobalRoleAssignment as GlobalRoleAssignmentModel,
 )
@@ -17,7 +18,9 @@ from app.authorization.role_assignments.global_.schema import (
 )
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
+from app.core.authz import Authorization
 from app.database.database import ensure_exists
+from app.shared.model import naive_utc_now, to_naive_utc
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -60,7 +63,7 @@ class RoleAssignmentService:
         role_assignment = GlobalRoleAssignmentModel(
             identity_id=request.identity_id,
             role_id=request.role_id,
-            requested_on=datetime.now(),
+            requested_on=naive_utc_now(),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
@@ -84,7 +87,7 @@ class RoleAssignmentService:
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
-            assignment.decided_on = datetime.now()
+            assignment.decided_on = naive_utc_now()
             assignment.decided_by_id = actor.id
 
         self.db.flush()
@@ -97,6 +100,32 @@ class RoleAssignmentService:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="This assignment was already decided",
             )
+
+    def become_admin(self, user: UserModel, expiry: datetime) -> None:
+        self.ensure_can_become_admin(user)
+        if to_naive_utc(expiry) <= naive_utc_now():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Admin expiry must be in the future",
+            )
+        user.admin_expiry = expiry
+        self.db.flush()
+        self.sync_admin_role(user.id)
+
+    def revoke_admin(self, user: UserModel) -> None:
+        user.admin_expiry = None
+        self.db.flush()
+        self.sync_admin_role(user.id)
+
+    def is_admin(self, user_id: UUID) -> bool:
+        return bool(self.db.scalar(select(is_user_admin(user_id))))
+
+    def sync_admin_role(self, user_id: UUID) -> None:
+        authorizer = Authorization()
+        if self.is_admin(user_id):
+            authorizer.assign_admin_role(user_id=str(user_id))
+        else:
+            authorizer.revoke_admin_role(user_id=str(user_id))
 
     def ensure_can_become_admin(self, user: UserModel) -> None:
         if not user.can_become_admin:

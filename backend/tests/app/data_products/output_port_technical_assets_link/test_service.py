@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
@@ -89,3 +91,34 @@ class TestDataOutputDatasetService:
         ).get_user_pending_actions(user)
 
         assert {action.id for action in pending_actions} == {pending_association.id}
+
+    @pytest.mark.parametrize(
+        "decision", [DecisionStatus.PENDING, DecisionStatus.DENIED]
+    )
+    def test_get_user_pending_actions__skips_role_that_is_not_approved(
+        self, session, decision
+    ):
+        user = UserFactory()
+        data_product = DataProductFactory()
+        TechnicalAssetOutputPortAssociationFactory(
+            output_port=OutputPortFactory(data_product=data_product),
+            status=DecisionStatus.PENDING,
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=RoleFactory(
+                scope=Scope.DATA_PRODUCT,
+                permissions=[
+                    Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
+                ],
+            ).id,
+            decision=decision,
+        )
+        AuthorizationService(session).reload_enforcer()
+
+        pending_actions = TechnicalAssetOutputPortService(
+            session
+        ).get_user_pending_actions(user)
+
+        assert pending_actions == []
