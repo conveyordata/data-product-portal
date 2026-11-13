@@ -92,5 +92,5 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 Create exactly one issue and one pull request:
 
-- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`.
-- Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<temporary id of the issue>` and put the evidence and the test or proof output under the matching sections.
+- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`.
+- Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<the same temporary id>` (for example `Fixes #aw_fix1`) and put the evidence and the test or proof output under the matching sections. The id is only replaced by the real issue number if you passed it to `create_issue`; otherwise the merged PR leaves the issue open and that open issue stops every later run of this agent.
