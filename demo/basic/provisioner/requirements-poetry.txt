@@ -437,9 +437,9 @@ dulwich==1.2.21 \
     --hash=sha256:fa9ef02ec417282303e103158c5ffbd94cb2c3a51691fc9722807fceca24f55e \
     --hash=sha256:fe852ca18749eaa72377cc3e98938cf6e21d5d57ba195e4efe18f89beb86dd30
     # via poetry
-fastjsonschema==2.22.2 \
-    --hash=sha256:0fb3915616adac85ccfdd737d26be1089845d2019819505b42d39888458f74d4 \
-    --hash=sha256:72064e12356a7d6ef02165be2946b9abadbdf238536e07eb587e3dbaa33099cf
+fastjsonschema==2.22.3 \
+    --hash=sha256:8330c91b027dcf941efcb7b1f0998515ff95d177ea15bbabdfe8671965620901 \
+    --hash=sha256:f670b443830b75aca3f00b75949efa20f4b2a80302ec7a21505c28dd54cffd43
     # via poetry
 filelock==4.2.4 \
     --hash=sha256:301241438c57936ef93f4243a94f2559022268bfcf9b375a9a72eb0f8db8358e \
