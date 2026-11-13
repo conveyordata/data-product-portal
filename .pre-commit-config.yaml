@@ -87,7 +87,7 @@ repos:
       name: Check Python version pins match the backend
       entry: ./scripts/check_python_version.sh
       language: script
-      files: ^(backend/pyproject\.toml|backend/\.python-version|plugins/pyproject\.toml|Dockerfile|\.pre-commit-config\.yaml)$
+      files: ^(backend/pyproject\.toml|backend/\.python-version|plugins/pyproject\.toml|Dockerfile|\.pre-commit-config\.yaml|scripts/check_python_version\.sh)$
       pass_filenames: false
     - id: regen-openapi-spec
       name: Regen openapi spec

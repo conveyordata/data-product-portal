@@ -7,6 +7,7 @@ on:
       - 'plugins/**'
       - 'Dockerfile'
       - 'compose.yaml'
+      - '.env.docker'
       - '.github/workflows/nightly-build.yml'
   schedule:
     - cron: '0 2 * * *'

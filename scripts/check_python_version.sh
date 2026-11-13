@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
-expected=$(grep -m1 -oE '^python = "\^[0-9]+\.[0-9]+' backend/pyproject.toml | grep -oE '[0-9]+\.[0-9]+')
+minor() { grep -m1 -oE '[0-9]+\.[0-9]+'; }
+hook() { sed -n "/name: mypy ($1)/,/- id:/p" .pre-commit-config.yaml | grep -m1 'language_version' | minor; }
+
+expected=$(grep -m1 -E '^python = ' backend/pyproject.toml | minor)
+if [[ -z "$expected" ]]; then
+  echo "Could not read the Python version from backend/pyproject.toml"
+  exit 1
+fi
 
 found=(
-  "backend/.python-version|$(grep -oE '^[0-9]+\.[0-9]+' backend/.python-version)"
-  "Dockerfile|$(grep -m1 -oE 'python:[0-9]+\.[0-9]+' Dockerfile | cut -d: -f2)"
-  "plugins/pyproject.toml requires-python|$(grep -m1 -oE '^requires-python = ">=[0-9]+\.[0-9]+' plugins/pyproject.toml | grep -oE '[0-9]+\.[0-9]+')"
-  "plugins/pyproject.toml python|$(grep -m1 -oE '^python = "\^[0-9]+\.[0-9]+' plugins/pyproject.toml | grep -oE '[0-9]+\.[0-9]+')"
-  "mypy (backend) hook|$(grep -A1 'name: mypy (backend)' .pre-commit-config.yaml | grep -oE 'python[0-9]+\.[0-9]+' | cut -c7-)"
-  "mypy (plugins) hook|$(grep -A1 'name: mypy (plugins)' .pre-commit-config.yaml | grep -oE 'python[0-9]+\.[0-9]+' | cut -c7-)"
+  "backend/.python-version|$(minor < backend/.python-version)"
+  "Dockerfile|$(grep -m1 -oE 'python:[0-9]+\.[0-9]+' Dockerfile | minor)"
+  "plugins/pyproject.toml requires-python|$(grep -m1 -E '^requires-python = ' plugins/pyproject.toml | minor)"
+  "plugins/pyproject.toml python|$(grep -m1 -E '^python = ' plugins/pyproject.toml | minor)"
+  "mypy (backend) hook|$(hook backend)"
+  "mypy (plugins) hook|$(hook plugins)"
 )
 
 status=0
