@@ -4,7 +4,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    UUID,Column, ForeignKey, String, func,
+    UUID,
+    Column,
+    ForeignKey,
+    String,
+    func,
     select,
 )
 from sqlalchemy import Enum as SAEnum
