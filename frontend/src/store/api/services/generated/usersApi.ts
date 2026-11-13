@@ -271,19 +271,14 @@ export type GroupsGetResponse = {
 };
 export type AccessDurationType = "permanent" | "time_bound";
 export type InputPortRequestDecision =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "cancelled";
+  "pending" | "approved" | "denied" | "cancelled";
 export type AccessMode = {
   id: string;
   name: string;
   description: string;
 };
 export type AbstractDataProductType =
-  | "unknown"
-  | "data_products"
-  | "explorations";
+  "unknown" | "data_products" | "explorations";
 export type AbstractDataProductInfo = {
   name: string;
   namespace: string;
@@ -292,9 +287,7 @@ export type AbstractDataProductInfo = {
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessFunction =
-  | "restricted"
-  | "private"
-  | "unrestricted";
+  "restricted" | "private" | "unrestricted";
 export type OutputPortAccessType = {
   id: string;
   name: string;
@@ -395,10 +388,7 @@ export type TechnicalAssetOutputPortRequest = {
   request_type?: "TechnicalAssetOutputPort";
 };
 export type AbstractDataProductStatus =
-  | "pending"
-  | "active"
-  | "archived"
-  | "deleting";
+  "pending" | "active" | "archived" | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"
