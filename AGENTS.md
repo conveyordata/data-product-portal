@@ -24,7 +24,29 @@ It consists of a 3-tier web architecture.
 *   **Task Runner**: `Taskfile.yml` holds release automation and the development tasks (setup, tests, coverage, database, load test). Run `task --list` to see them.
 *   **Pre-commit**: Stage your change and run `scripts/precommit.sh` rather than invoking Ruff, mypy, or Biome directly. It sets up the backend environment (also in a worktree without its own venv), reruns the hooks until the generators (OpenAPI client, SDK, CLI, translations) stop changing files, and stages what they write. Commit only once it exits 0. To check files without staging (e.g. other edits are unstaged), run `scripts/precommit.sh --files <repo-relative paths>`. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
+*   **Agent Skills**: Issue tracker, triage labels and domain docs for skills are configured in `docs/agents/`.
 *   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
+
+## Development Process
+
+Follow [Our Development Process](CONTRIBUTING.md#our-development-process). At the start of new work:
+
+1. If the user gave an issue or link, read it with the tools you have; if you can't, ask them to paste it.
+2. If there is no GitHub issue yet, offer to draft one (title, body, `bug` or `enhancement`, source link) and create it once the user says yes. If it isn't clear yet what they want, suggest a grilling session first.
+3. Read the issue (see `docs/agents/issue-tracker.md`) and, if it has a linked PR (`closedByPullRequestsReferences`), the PR with `gh pr view <n> --json isDraft,reviews`. Propose the first matching next step:
+
+| State | Next step |
+|-------|-----------|
+| UI change without a linked, signed-off design | Ask for the design link and its sign-off |
+| `needs-triage` | Triage it (`/triage`): set a `ready-for-*`, `needs-info` or `wontfix` [label](CONTRIBUTING.md#labels) |
+| `needs-info` or `wontfix` | Nothing to build; say so |
+| Issue leaves open questions about what or how | Suggest a grilling session on the issue, or `/wayfinder` for big unclear work |
+| Bug with unknown cause | `diagnosing-bugs` |
+| Approach clear, no PR | Implement (`/implement`), for a bug with a regression test, and open a draft PR with `Closes #<n>` |
+| Draft PR | `code-review` against `main` and the issue, then the Copilot loop, up to 3 rounds |
+| Copilot has nothing useful left | Mark the PR ready, write the body with `pr-description` |
+
+These are suggestions, not requirements: propose one step at a time, wait for the user's yes, and go along when they skip a step. A grilling session uses the `grilling` skill, which is what `/grill-me` runs. Skills written as `/name` only start when the user types them; suggest the command. At every step, flag when an ADR is needed and write it with the `adr` skill.
 
 ## General Rules for Agents
 
