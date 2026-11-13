@@ -616,9 +616,9 @@ pkginfo==2.0 \
     --hash=sha256:98c7aaa804dfe017b0de65d4b41a2f4649a656f43d3c21525b13e8075716fa1b \
     --hash=sha256:f7b4f267881785582c923631a0fa7e275b0d390a5cbab54aa4ec0ecc7eddb375
     # via poetry
-platformdirs==4.13.5 \
-    --hash=sha256:05831adf87d392760f4b5c3a0a95579ab5a10b18b9b9bd43680dcb47544788a0 \
-    --hash=sha256:53d3ec4280b815c1e0b02edad7f9ee8fda1ba9c0865dd9c2e6e63849ce82fc1e
+platformdirs==4.14.5 \
+    --hash=sha256:32e9921db7385aa8169bee4fe9501923e5715ba9fb7ea3b9c69b0d8e0639f7a1 \
+    --hash=sha256:8e778c6fa421516f4d3369449f8df3b0e1b72c0e0005fe88e3ec772d0a14e750
     # via
     #   findpython
     #   poetry
