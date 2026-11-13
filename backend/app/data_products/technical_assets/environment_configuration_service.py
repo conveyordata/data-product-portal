@@ -147,8 +147,8 @@ class TechnicalAssetEnvironmentConfigurationService:
         return PluginContext.build(
             technical_asset.owner,
             technical_asset.namespace,
-            TechnicalMapping(technical_asset.technical_mapping),
-            technical_asset.id,
+            technical_asset_id=technical_asset.id,
+            technical_mapping=TechnicalMapping(technical_asset.technical_mapping),
         )
 
     def _validated_submission(
