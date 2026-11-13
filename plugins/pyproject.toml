@@ -2,7 +2,7 @@
 name = "data-product-portal-plugins"
 version = "0.8.1"
 description = "First-party technical asset plugins for Data Product Portal"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "data-product-portal>=0.8.1",
     "fastapi>=0.141.1",
@@ -31,7 +31,7 @@ snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguratio
 packages = [{ include = "portal_plugins", from = "." }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 
 [tool.mypy]
 ignore_missing_imports = true
