@@ -21,6 +21,7 @@ PORTAL_URL = "http://localhost:5050"
 
 # john.scientist is the admin user seeded in portal_seed.sql
 OWNER_ID = "b72fca38-17ff-4259-a075-5aaa5973343c"
+JANE_ID = "d9f3aae2-391e-46c1-aec6-a7ae1114a7da"
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +127,7 @@ def create_data_product(
     about: str,
     type_name: str,
     domain_name: str,
+    owner_id: str = OWNER_ID,
 ):
     type_id = get_type_id(type_name)
     domain_id = get_domain_id(domain_name)
@@ -139,7 +141,7 @@ def create_data_product(
         "type_id": type_id,
         "domain_id": domain_id,
         "lifecycle_id": lifecycle_id,
-        "owners": [OWNER_ID],
+        "owners": [owner_id],
         "tag_ids": [],
     }
 
@@ -184,6 +186,7 @@ def create_output_port(
     description: str,
     about: str,
     access_type: str,
+    owner_id: str = OWNER_ID,
 ) -> str:
     payload = {
         "name": name,
@@ -192,7 +195,7 @@ def create_output_port(
         "about": about,
         "access_type_id": get_access_type_id(access_type),
         **get_default_access_durations(),
-        "owners": [OWNER_ID],
+        "owners": [owner_id],
         "tag_ids": [],
     }
     response = requests.post(
@@ -247,7 +250,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Inventory Data",
         "namespace": "inventory-data",
         "description": "Daily stock snapshots and historical inventory levels by SKU and warehouse.",
-        "access_type": "Unrestricted",
+        "access_type": "Restricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -949,6 +952,7 @@ PRODUCTS = [
         ),
         "type_name": "source aligned",
         "domain_name": "Logistics",
+        "owner_id": JANE_ID,
     },
     {
         "name": "Sales Transaction Ledger",
@@ -1036,6 +1040,7 @@ def provision_product(product: dict):
         description=op_cfg["description"],
         about=add_osi_model_to_about(namespace, op_cfg["about"]),
         access_type=op_cfg["access_type"],
+        owner_id=product.get("owner_id", OWNER_ID),
     )
 
     # Link and approve both technical assets

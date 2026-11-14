@@ -11,7 +11,7 @@ from app.abstract_data_product.input_ports.model import InputPort as InputPortMo
 from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.logging import logger
-from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, SessionLocal
+from app.database.database import SessionLocal
 from app.settings import settings
 
 
@@ -76,7 +76,6 @@ def consumption_metrics() -> dict[str, Any]:
             )
             .where(InputPortModel.status == DecisionStatus.APPROVED)
             .group_by(AbstractDataProduct.abstract_data_product_type),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         ).all()
 
     counts_by_type = {adp_type.value: count for adp_type, count in rows}
@@ -100,7 +99,6 @@ def provisioning_metrics() -> dict[str, Any]:
                     func.cardinality(AbstractDataProduct.finalizers) > 0
                 ),
             ).group_by(AbstractDataProduct.abstract_data_product_type),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         ).all()
 
     counts_by_type = {

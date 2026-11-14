@@ -57,10 +57,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import (
-    access_function_filter_excluding_consumers,
-    ensure_output_port_exists,
-)
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -79,6 +76,7 @@ from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
+from app.database.visibility import output_port_visible_ignoring_consumption
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -264,11 +262,10 @@ class OutputPortService:
 
         stmt = (
             select(OutputPortModel)
+            .where(output_port_visible_ignoring_consumption(self.db, OutputPortModel))
             .order_by(ordered_by, OutputPortModel.name.asc())
             .limit(limit)
         )
-        if (user_id := self.db.info.get("current_user_id")) is not None:
-            stmt = stmt.where(access_function_filter_excluding_consumers(user_id))
         match assignment_filter:
             case AssignmentFilter.ALL:
                 pass

@@ -6,6 +6,7 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.global_.service import RoleAssignmentService
 from app.authorization.schema_response import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
@@ -62,11 +63,10 @@ def check_access(
     "/admin",
 )
 def is_admin(
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> IsAdminResponse:
-    authorizer = Authorization()
-
     return IsAdminResponse(
-        is_admin=authorizer.has_admin_role(user_id=user.id),
+        is_admin=RoleAssignmentService(db).is_admin(user.id),
         time=user.admin_expiry.isoformat() if user.admin_expiry else None,
     )

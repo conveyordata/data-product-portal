@@ -49,7 +49,7 @@ RUN poetry install --no-root
 # building the package metadata.
 COPY backend/README.md /README.md
 COPY backend/app /app
-RUN pip install --no-deps --no-build-isolation /
+RUN poetry install --only-root
 
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image

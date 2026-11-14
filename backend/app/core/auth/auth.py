@@ -6,8 +6,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
-from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError
-from app.core.auth.oidc import OIDCIdentity
+from app.core.auth.jwt import JWTToken, JWTTokenValid
+from app.core.auth.oidc import OIDCIdentity, is_address
+from app.core.logging import logger
 from app.database.database import get_system_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
@@ -17,27 +18,44 @@ from app.users.schema_request import UserCreate
 SYSTEM_ACCOUNT_BOT_EXTERNAL_ID = "systemaccount_bot"
 
 
-def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
+def update_db_user(
+    oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
+) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
+    email_owner = None
+    if not db_user or db_user.email != oidc_user.email:
+        email_owner = db.scalar(
+            select(UserModel).where(UserModel.email == oidc_user.email)
+        )
     if db_user:
-        db_user.email = oidc_user.email
+        if email_owner:
+            logger.warning(
+                f"Kept the email of user {db_user.id}: the new one belongs to another user"
+            )
+        else:
+            db_user.email = oidc_user.email
+        db_user.first_name = oidc_user.given_name
+        db_user.last_name = oidc_user.family_name
+    elif email_owner:
+        if not link_by_email:
+            logger.warning("Identity email belongs to a user with another subject")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="This email belongs to another account",
+            )
+        db_user = email_owner
+        db_user.external_id = token.sub
         db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
     else:
-        db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
-        if db_user:
-            db_user.external_id = oidc_user.sub
-            db_user.first_name = oidc_user.given_name
-            db_user.last_name = oidc_user.family_name
-        else:
-            created_user = UserCreate(
-                email=oidc_user.email,
-                external_id=oidc_user.sub,
-                first_name=oidc_user.given_name,
-                last_name=oidc_user.family_name,
-            )
-            db_user = UserModel(**created_user.model_dump())
-            db.add(db_user)
+        created_user = UserCreate(
+            email=oidc_user.email,
+            external_id=token.sub,
+            first_name=oidc_user.given_name,
+            last_name=oidc_user.family_name,
+        )
+        db_user = UserModel(**created_user.model_dump())
+        db.add(db_user)
 
     db.commit()
 
@@ -52,20 +70,99 @@ if settings.OIDC_ENABLED:
         return token
 
     def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing access token",
+            )
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
-            raise PyJWTError
-        return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired access token",
+            )
+        sub = jwt.valid_jwt_token.get(settings.OIDC_USER_ID_CLAIM)
+        if not sub or not isinstance(sub, str):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token lacks the user id claim",
+            )
+        return JWTToken(sub=sub, token=token, claims=jwt.valid_jwt_token)
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session),
     ) -> User:
-        response = httpx.post(
-            url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
+        if settings.OIDC_IDENTITY_SOURCE == "access_token":
+            oidc_user = _identity_from_claims(token)
+            return update_db_user(
+                oidc_user,
+                token,
+                db,
+                link_by_email=_email_verified(token.claims, oidc_user.email),
+            )
+        return update_db_user(_identity_from_userinfo(token), token, db)
+
+    def _identity_from_userinfo(token: JWTToken) -> OIDCIdentity:
+        try:
+            response = httpx.post(
+                url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
+            )
+        except httpx.HTTPError as e:
+            logger.warning(f"Userinfo unreachable: {type(e).__name__}")
+            raise _identity_provider_unavailable()
+        if response.status_code in (400, 401, 403):
+            logger.warning(
+                f"Userinfo rejected the access token: {response.status_code}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Userinfo rejected the access token",
+            )
+        if not response.is_success:
+            logger.warning(f"Userinfo failed with status {response.status_code}")
+            raise _identity_provider_unavailable()
+        try:
+            body = response.json()
+        except ValueError:
+            logger.warning(
+                "Userinfo answered with a body that is not JSON: "
+                f"{response.headers.get('content-type')}"
+            )
+            raise _identity_provider_unavailable()
+        try:
+            return OIDCIdentity.model_validate(body)
+        except ValueError as e:
+            logger.warning(f"Userinfo returned no usable identity: {type(e).__name__}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Userinfo returned no usable identity",
+            )
+
+    def _identity_from_claims(token: JWTToken) -> OIDCIdentity:
+        try:
+            return OIDCIdentity.from_claims(
+                token.claims, token.sub, settings.OIDC_EMAIL_CLAIM
+            )
+        except ValueError as e:
+            logger.warning(f"Access token lacks identity claims: {type(e).__name__}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token lacks identity claims",
+            )
+
+    def _email_verified(claims: dict, email: str) -> bool:
+        verified = claims.get("email_verified")
+        if verified is not True and verified != "true":
+            return False
+        verified_email = claims.get("email")
+        return is_address(verified_email) and verified_email.lower() == email.lower()
+
+    def _identity_provider_unavailable() -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Identity provider unavailable",
         )
-        oidc_user = OIDCIdentity.model_validate(response.json())
-        return update_db_user(oidc_user, token, db)
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)

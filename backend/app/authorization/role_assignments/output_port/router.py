@@ -6,6 +6,9 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
     CreateOutputPortRoleAssignment,
@@ -189,7 +192,7 @@ def create_output_port_role_assignment(
 
     approvers: Sequence[User] = ()
     if not (
-        is_admin := Authorization().has_admin_role(user_id=str(authenticated_user.id))
+        is_admin := GlobalRoleAssignmentService(db).is_admin(authenticated_user.id)
     ):
         approvers = service.users_with_authz_action(
             dataset_id=role_assignment.output_port_id,

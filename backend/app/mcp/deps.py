@@ -4,6 +4,7 @@ Kept in a separate module so both core portal tools and plugin tools can import
 these utilities without creating circular dependencies.
 """
 
+import asyncio
 from contextlib import contextmanager
 from typing import Any, Optional
 
@@ -20,6 +21,7 @@ from app.core.authz import Action, Authorization
 from app.core.logging import logger
 from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import db_session
+from app.database.visibility import acting_as
 from app.settings import settings
 from app.users.model import User
 from app.users.model import User as UserModel
@@ -45,13 +47,22 @@ class PortalOIDCProxy(OIDCProxy):
                 claims = pyjwt.decode(raw, options={"verify_signature": False})
                 extracted = {
                     k: claims[k]
-                    for k in ("sub", "email", "name", "given_name", "family_name")
+                    for k in {
+                        "sub",
+                        settings.OIDC_USER_ID_CLAIM,
+                        "email",
+                        "name",
+                        "given_name",
+                        "family_name",
+                    }
                     if k in claims
                 }
-                if extracted.get("sub"):
+                if extracted.get(settings.OIDC_USER_ID_CLAIM):
                     logger.debug(
                         f"[MCP] Extracted upstream claims from {key}: "
-                        f"sub={extracted.get('sub')!r}, email={extracted.get('email')!r}"
+                        f"{settings.OIDC_USER_ID_CLAIM}="
+                        f"{extracted.get(settings.OIDC_USER_ID_CLAIM)!r}, "
+                        f"email={extracted.get('email')!r}"
                     )
                     return extracted
             except Exception as exc:
@@ -66,10 +77,18 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
         from key_value.aio.stores.postgresql import PostgreSQLStore
 
-        from app.database.database import get_url
+        from app.database.database import get_password
 
         oidc = get_oidc()
-        client_storage = PostgreSQLStore(url=get_url())
+        client_storage = PostgreSQLStore(
+            host=settings.POSTGRES_SERVER,
+            port=settings.POSTGRES_PORT,
+            database=settings.POSTGRES_DB,
+            user=settings.POSTGRES_USER,
+            password=(lambda: asyncio.to_thread(get_password))  # type: ignore[arg-type]
+            if settings.POSTGRES_AUTH_MODE == "azure"
+            else settings.POSTGRES_PASSWORD or None,
+        )
         return PortalOIDCProxy(
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,
@@ -116,9 +135,12 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
     if not upstream_claims:
         raise ValueError("No upstream_claims found in access token")
 
-    sub = upstream_claims.get("sub")
+    sub = upstream_claims.get(settings.OIDC_USER_ID_CLAIM)
     if not sub:
-        raise ValueError(f"upstream_claims missing 'sub' claim: {upstream_claims!r}")
+        raise ValueError(
+            f"upstream_claims missing '{settings.OIDC_USER_ID_CLAIM}' claim: "
+            f"{upstream_claims!r}"
+        )
     logger.debug(f"[MCP] Resolving user from upstream_claims: sub={sub!r}")
 
     user_model = db.scalar(sa_select(UserModel).where(UserModel.external_id == sub))
@@ -132,12 +154,8 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
 
 @contextmanager
 def get_user_db_session(user: User = Depends(get_mcp_authenticated_user)):
-    with db_session() as db:
-        db.info["current_user_id"] = user.id
-        try:
-            yield db
-        finally:
-            db.info.pop("current_user_id", None)
+    with db_session() as db, acting_as(db, user.id):
+        yield db
 
 
 def authorize_data_product_read_integrations(

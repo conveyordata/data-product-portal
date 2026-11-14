@@ -16,7 +16,7 @@ RUN --mount=type=bind,src=./requirements-poetry.txt,dst=/requirements-poetry.txt
     apt-get update && apt-get upgrade -y && \
     pip install -r requirements-poetry.txt --require-hashes
 
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
 COPY ./dpp_agent ./dpp_agent

@@ -10,12 +10,19 @@ sidebar_position: 200
 
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
 
+### features
+
+- **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
+- **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
+
 ### bugfixes
 
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
 - **[API/UI]**: Users whose only role is on an Output Port of a Hidden Data Product can approve and deny its Technical Asset link requests again, and their pending actions no longer fail.
+- **[API/UI]**: Request, decision and revocation times are stored in UTC, also when the backend or database server is not in UTC. They used to be stored in the server's local time on such setups. Existing rows are not converted, so on those setups times recorded before the upgrade can show up to a few hours off.
+- **[Auth]**: When loading the current user, a missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
 
 ## 0.8.1
 

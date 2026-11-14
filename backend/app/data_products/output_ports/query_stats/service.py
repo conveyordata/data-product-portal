@@ -20,6 +20,7 @@ from app.data_products.output_ports.query_stats.schema_response import (
     OutputPortQueryStatsResponse,
     OutputPortQueryStatsResponses,
 )
+from app.shared.model import utc_today
 
 
 class QueryStatsGranularity(str, Enum):
@@ -76,7 +77,7 @@ class OutputPortStatsService:
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> OutputPortQueryStatsResponses:
-        start_date = date.today() - timedelta(days=day_range)
+        start_date = utc_today() - timedelta(days=day_range)
 
         # Build query with database-level aggregation if needed
         if granularity == QueryStatsGranularity.DAY:
@@ -272,7 +273,7 @@ class OutputPortStatsService:
         if not stats:
             return stats
 
-        buckets = self._build_buckets(range_start, date.today(), granularity)
+        buckets = self._build_buckets(range_start, utc_today(), granularity)
         consumers = self._extract_unique_consumers(stats)
         existing_data = self._build_existing_data_map(stats)
 

@@ -9,31 +9,18 @@ Load semantic models before any database operation. They contain business rules,
 
 ## Workflow
 
-### Step 1: Check for semantic models (MANDATORY FIRST STEP)
+### Step 1: Find your semantic models (MANDATORY FIRST STEP)
 
-Before calling any database tool, list the semantic models at `/products`:
+Your semantic models are the files listed under "Semantic Models" in your instructions. Use only those: other files under `/products` belong to data products you have no access to, so never list or read them.
 
-```python
-list_files(path="/products")
-```
+If no files are listed, skip to Step 5 and query directly.
 
-If the directory is empty or missing, skip to Step 5 and query directly.
+### Step 2: Load the listed models
 
-### Step 2: Load relevant models
-
-Load model files matching the user's question:
-
-| Question contains | Load |
-|---|---|
-| orders, revenue, transactions, payments, pricing | `sales-transaction-ledger/osi.yml` |
-| customers, users, sessions, acquisition, behavior | `customer-demographic-master/osi.yml` |
-| inventory, stock, warehouse, products, SKUs | `inventory-snapshot/osi.yml` |
-| unclear or multi-domain | all models |
+Before calling any database tool, read every listed file:
 
 ```python
-read_file(path="/products/sales-transaction-ledger/osi.yml")
-read_file(path="/products/customer-demographic-master/osi.yml")
-read_file(path="/products/inventory-snapshot/osi.yml")
+read_file(file_name="/products/<namespace>/osi.yml")
 ```
 
 ### Step 3: Extract from each model

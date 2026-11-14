@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy import UUID, Column, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import DataProductRoleAssignmentEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
-from app.shared.model import BaseORM, utcnow
+from app.shared.model import BaseORM, UTCDateTime, utcnow
 
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
@@ -42,10 +42,10 @@ class DataProductRoleAssignment(Base, BaseORM, EventTrackedMixin):
         Enum(DecisionStatus), default=DecisionStatus.PENDING
     )
 
-    requested_on = Column(DateTime(timezone=False), server_default=utcnow())
+    requested_on = Column(UTCDateTime(), server_default=utcnow())
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     requested_by: Mapped["User"] = relationship(foreign_keys=[requested_by_id])
-    decided_on = Column(DateTime(timezone=False))
+    decided_on = Column(UTCDateTime())
     decided_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     decided_by: Mapped["User"] = relationship(foreign_keys=[decided_by_id])
 

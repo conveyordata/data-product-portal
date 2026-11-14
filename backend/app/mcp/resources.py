@@ -92,7 +92,7 @@ def register_resources(mcp) -> None:
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> str:
         all_data_products = DataProductService(db).get_data_products(
-            current_user=user, assignment_filter=AssignmentFilter.ALL
+            assignment_filter=AssignmentFilter.ALL
         )
         all_output_ports = OutputPortService(db).search_output_ports(
             query=None,

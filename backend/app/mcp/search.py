@@ -43,7 +43,6 @@ def universal_search(
     query_results = {}
     if "data_products" in search_types:
         all_data_products = DataProductService(db).get_data_products(
-            current_user=user,
             assignment_filter=AssignmentFilter.ALL,
         )
         filtered_data_products = []
@@ -141,7 +140,6 @@ def search_data_products(
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_data_products = DataProductService(db).get_data_products(
-        current_user=user,
         assignment_filter=AssignmentFilter.ALL,
     )
     filtered_data_products = []
@@ -179,7 +177,6 @@ def get_consuming_products(
     output_port_id: str,
     data_product_id: str,
     db: Session = Depends(get_user_db_session),
-    user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     """Get consuming data products for a specific output port.
 
@@ -193,7 +190,7 @@ def get_consuming_products(
         List of consuming data products with their namespaces and descriptions.
     """
     consuming_products = InputPortService(db).get_consuming_data_products(
-        user, UUID(output_port_id), UUID(data_product_id)
+        UUID(output_port_id), UUID(data_product_id)
     )
     return {
         "output_port_id": output_port_id,
