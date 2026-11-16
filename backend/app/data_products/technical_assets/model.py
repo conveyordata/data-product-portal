@@ -62,7 +62,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         back_populates="technical_assets", lazy="joined"
     )
     configuration: Mapped["TechnicalAssetConfiguration"] = relationship(
-        lazy="joined", cascade="all, delete-orphan", single_parent=True
+        lazy="joined", cascade="all"
     )
 
     output_port_links: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
