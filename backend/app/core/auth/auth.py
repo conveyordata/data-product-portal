@@ -9,7 +9,7 @@ from app.core.auth.api_key import secured_api_key
 from app.core.auth.jwt import JWTToken, JWTTokenValid
 from app.core.auth.oidc import OIDCIdentity, is_address
 from app.core.logging import logger
-from app.database.database import get_system_db_session
+from app.database.database import SystemDbSession
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -66,10 +66,14 @@ def update_db_user(
 if settings.OIDC_ENABLED:
     from app.core.auth.jwt import oidc
 
-    def unvalidated_token(token: str = Depends(oidc.oidc_dependency)) -> str:
+    def unvalidated_token(
+        token: Annotated[str, Depends(oidc.oidc_dependency)] = "",
+    ) -> str:
         return token
 
-    def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
+    def secured_call(
+        token: Annotated[str, Depends(oidc.oidc_dependency)],
+    ) -> JWTToken:
         if not token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,8 +94,8 @@ if settings.OIDC_ENABLED:
         return JWTToken(sub=sub, token=token, claims=jwt.valid_jwt_token)
 
     def authorize_user(
-        token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_system_db_session),
+        token: Annotated[JWTToken, Depends(secured_call)],
+        db: SystemDbSession,
     ) -> User:
         if settings.OIDC_IDENTITY_SOURCE == "access_token":
             oidc_user = _identity_from_claims(token)
@@ -165,7 +169,8 @@ if settings.OIDC_ENABLED:
         )
 
     def api_key_authenticated(
-        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+        api_key: Annotated[bool, Depends(secured_api_key)],
+        jwt_token: Annotated[str, Depends(unvalidated_token)],
     ) -> JWTToken:
         if not api_key and not jwt_token:
             raise HTTPException(
@@ -177,8 +182,8 @@ if settings.OIDC_ENABLED:
             return JWTToken(sub=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID, token="")
 
     def get_authenticated_user(
-        token: JWTToken = Depends(api_key_authenticated),
-        db: Session = Depends(get_system_db_session, scope="function"),
+        token: Annotated[JWTToken, Depends(api_key_authenticated)],
+        db: SystemDbSession,
     ) -> User:
         result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
@@ -203,7 +208,7 @@ else:
 
     # The token dependency is replaced by the user we want to use in this mode
     def secured_call(
-        token: str = Depends(user),
+        token: Annotated[str, Depends(user)],
     ) -> JWTToken:
         return generate_default_jwt_token(user=token)
 
@@ -213,8 +218,8 @@ else:
         return JWTToken(sub=user, token="")
 
     def authorize_user(
-        token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_system_db_session, scope="function"),
+        token: Annotated[JWTToken, Depends(secured_call)],
+        db: SystemDbSession,
     ) -> User:
         if "@" not in token.sub:
             raise Exception("Default username must be an email address")
@@ -229,8 +234,8 @@ else:
         return update_db_user(oidc_user, token, db)
 
     def get_authenticated_user(
-        token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_system_db_session, scope="function"),
+        token: Annotated[JWTToken, Depends(secured_call)],
+        db: SystemDbSession,
     ) -> User:
         user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
@@ -240,6 +245,10 @@ else:
         return user
 
     def api_key_authenticated(
-        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+        api_key: Annotated[bool, Depends(secured_api_key)],
+        jwt_token: Annotated[str, Depends(unvalidated_token)],
     ) -> JWTToken:
         return secured_call(jwt_token)
+
+
+AuthenticatedUser = Annotated[User, Depends(get_authenticated_user)]

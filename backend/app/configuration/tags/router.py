@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.configuration.tags.schema_request import TagCreate, TagUpdate
 from app.configuration.tags.schema_response import (
@@ -12,7 +11,7 @@ from app.configuration.tags.schema_response import (
 from app.configuration.tags.service import TagService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 router = APIRouter(tags=["Configuration - Tags"], prefix="/v2/configuration/tags")
 
@@ -25,9 +24,7 @@ router = APIRouter(tags=["Configuration - Tags"], prefix="/v2/configuration/tags
         ),
     ],
 )
-def create_tag(
-    tag: TagCreate, db: Session = Depends(get_db_session, scope="function")
-) -> CreateTagResponse:
+def create_tag(tag: TagCreate, db: DbSession) -> CreateTagResponse:
     return TagService(db).create_tag(tag)
 
 
@@ -40,7 +37,9 @@ def create_tag(
     ],
 )
 def update_tag(
-    id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session, scope="function")
+    id: UUID,
+    tag: TagUpdate,
+    db: DbSession,
 ) -> UpdateTagResponse:
     return TagService(db).update_tag(id, tag)
 
@@ -53,12 +52,12 @@ def update_tag(
         ),
     ],
 )
-def remove_tag(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> None:
+def remove_tag(id: UUID, db: DbSession) -> None:
     return TagService(db).remove_tag(id)
 
 
 @router.get("")
-def get_tags(db: Session = Depends(get_db_session, scope="function")) -> TagsGet:
+def get_tags(
+    db: DbSession,
+) -> TagsGet:
     return TagsGet(tags=TagService(db).get_tags())

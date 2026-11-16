@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
@@ -45,7 +45,6 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
-from app.database.deps import get_db_session
 from app.graph.graph import Graph
 from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
@@ -80,7 +79,7 @@ def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> No
 
 
 class TechnicalAssetService:
-    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
+    def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = TechnicalAssetNamespaceValidator()
 

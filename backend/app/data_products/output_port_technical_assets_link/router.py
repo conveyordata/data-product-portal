@@ -2,10 +2,9 @@ from copy import deepcopy
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
-from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DataProductResolver,
@@ -32,12 +31,11 @@ from app.data_products.technical_assets.service import (
     TECHNICAL_ASSET_NOT_SHAREABLE_ERROR,
     TechnicalAssetService,
 )
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
-from app.users.schema import User
 
 router = APIRouter(
     tags=["Data Products - Technical assets"],
@@ -69,8 +67,8 @@ def approve_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     output_link = TechnicalAssetOutputPortService(db).approve_technical_asset_link(
         data_product_id=data_product_id,
@@ -111,8 +109,8 @@ def deny_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     output_link = TechnicalAssetOutputPortService(db).deny_technical_asset_link(
         data_product_id=data_product_id,
@@ -164,8 +162,8 @@ def link_output_port_to_technical_asset(
     output_port_id: UUID,
     link_request: LinkTechnicalAssetToOutputPortRequest,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> LinkTechnicalAssetsToOutputPortResponse:
     output_port_link = TechnicalAssetService(db).link_output_port_to_technical_asset(
         data_product_id,
@@ -226,8 +224,8 @@ def unlink_output_port_from_technical_asset(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: UnLinkTechnicalAssetToOutputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     technical_asset = TechnicalAssetService(db).unlink_output_port_from_technical_asset(
         data_product_id=data_product_id,

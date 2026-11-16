@@ -1,13 +1,11 @@
 import json
 from typing import Any, Optional
 
-from fastmcp.server.dependencies import AccessToken, get_access_token
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
-from app.core.auth.auth import get_authenticated_user
-from app.core.auth.jwt import JWTToken
 from app.core.logging.posthog_analytics import PosthogAnalyticsClient
-from app.database.deps import get_db_session
+from app.database.database import db_session
+from app.mcp.deps import get_mcp_authenticated_user
 
 
 class LoggingMiddleware(Middleware):
@@ -45,12 +43,7 @@ class LoggingMiddleware(Middleware):
     async def _get_user_id(self) -> Optional[str]:
         """Get the authenticated user ID, returning None if not available."""
         try:
-            access_token: AccessToken = get_access_token()
-            jwt_token = JWTToken(sub="", token=f"Bearer {access_token.token}")
-
-            db_session = get_db_session()
-            user = get_authenticated_user(token=jwt_token, db=db_session)
-            return str(user.id)
-
+            with db_session() as db:
+                return str(get_mcp_authenticated_user(db).id)
         except Exception:
             return None

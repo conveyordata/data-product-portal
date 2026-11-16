@@ -1,9 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
@@ -20,7 +19,7 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -30,7 +29,6 @@ from app.events.schema_response import (
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
-from app.users.schema import User
 
 INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE = {
     "description": "Invalid environment configuration",
@@ -68,7 +66,8 @@ router = APIRouter(
     ],
 )
 def get_data_product_technical_assets(
-    data_product_id: UUID, db: Session = Depends(get_db_session, scope="function")
+    data_product_id: UUID,
+    db: DbSession,
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
@@ -95,7 +94,7 @@ def get_data_product_technical_assets(
 def get_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetTechnicalAssetResponse:
     return GetTechnicalAssetResponse.model_validate(
         TechnicalAssetService(db).get_technical_asset_with_environment_values(
@@ -119,7 +118,7 @@ def get_technical_asset(
 def get_technical_asset_event_history(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetEventHistoryResponse:
     TechnicalAssetService(db).get_technical_asset(data_product_id, id)
     return GetEventHistoryResponse(
@@ -157,8 +156,8 @@ def get_technical_asset_event_history(
 def remove_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     technical_asset = TechnicalAssetService(db).remove_technical_asset(
         data_product_id, id
@@ -206,8 +205,8 @@ def update_technical_asset(
     data_product_id: UUID,
     id: UUID,
     technical_asset: TechnicalAssetUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> UpdateTechnicalAssetResponse:
     result = TechnicalAssetService(db).update_technical_asset(
         data_product_id, id, technical_asset
@@ -250,8 +249,8 @@ def update_technical_asset_environment_configuration(
     data_product_id: UUID,
     id: UUID,
     environment_configuration: TechnicalAssetEnvironmentConfigurationUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> UpdateTechnicalAssetResponse:
     result = TechnicalAssetService(db).update_technical_asset_environment_configuration(
         data_product_id, id, environment_configuration
@@ -294,7 +293,7 @@ def validate_technical_asset_environment_configuration(
     data_product_id: UUID,
     id: UUID,
     environment_configuration: TechnicalAssetEnvironmentConfigurationUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     TechnicalAssetService(db).validate_technical_asset_environment_configuration(
         data_product_id, id, environment_configuration
@@ -325,8 +324,8 @@ def update_technical_asset_status(
     data_product_id: UUID,
     id: UUID,
     technical_asset: TechnicalAssetStatusUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     TechnicalAssetService(db).update_technical_asset_status(
         data_product_id, id, technical_asset, actor=authenticated_user
@@ -356,7 +355,7 @@ def update_technical_asset_status(
 def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
     level: int = 3,
 ) -> Graph:
     return TechnicalAssetService(db).get_graph_data(data_product_id, id, level)
@@ -387,8 +386,8 @@ def get_technical_asset_graph_data(
 def create_technical_asset(
     data_product_id: UUID,
     technical_asset: CreateTechnicalAssetRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> CreateTechnicalAssetResponse:
     technical_asset = TechnicalAssetService(db).create_technical_asset(
         data_product_id, technical_asset
@@ -435,7 +434,7 @@ def create_technical_asset(
 def validate_new_technical_asset_environment_configuration(
     data_product_id: UUID,
     validation: NewTechnicalAssetEnvironmentConfigurationValidation,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     TechnicalAssetService(db).validate_new_technical_asset_environment_configuration(
         data_product_id, validation

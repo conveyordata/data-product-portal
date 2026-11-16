@@ -56,7 +56,7 @@ def override_unauthenticated_get_db():
         test_db.flush()
         test_db.expire_all()
         yield test_db
-        test_db.commit()  # noqa: allow-commit
+        test_db.commit()  # allow-commit
     finally:
         if test_db:
             test_db.close()
@@ -169,7 +169,7 @@ def clear_db(session: Session) -> None:
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
     AuthorizationService(session).reload_enforcer()
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
     reset_unique_fakers()
 
 

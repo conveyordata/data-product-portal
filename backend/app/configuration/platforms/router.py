@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -39,9 +40,10 @@ router = APIRouter(
 def get_platform_service_config(
     id: UUID,
     service_id: UUID,
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
+    platform_service_configuration_service: Annotated[
+        PlatformServiceConfigurationService,
+        Depends(PlatformServiceConfigurationService),
+    ],
 ) -> PlatformServiceConfiguration:
     if not (
         service_config
@@ -59,9 +61,10 @@ def get_platform_service_config(
 @router.get("/configs/{config_id}")
 def get_single_platform_service_configuration(
     config_id: UUID,
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
+    platform_service_configuration_service: Annotated[
+        PlatformServiceConfigurationService,
+        Depends(PlatformServiceConfigurationService),
+    ],
 ) -> PlatformServiceConfiguration:
     return platform_service_configuration_service.get_single_platform_service_configuration(
         config_id
@@ -70,9 +73,10 @@ def get_single_platform_service_configuration(
 
 @router.get("/configs")
 def get_all_platform_service_configurations(
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
+    platform_service_configuration_service: Annotated[
+        PlatformServiceConfigurationService,
+        Depends(PlatformServiceConfigurationService),
+    ],
 ) -> GetAllPlatformServiceConfigurationsResponse:
     return GetAllPlatformServiceConfigurationsResponse(
         platform_service_configurations=platform_service_configuration_service.get_all_platform_service_configurations()
@@ -81,7 +85,7 @@ def get_all_platform_service_configurations(
 
 @router.get("")
 def get_all_platforms(
-    platform_service: PlatformsService = Depends(PlatformsService),
+    platform_service: Annotated[PlatformsService, Depends(PlatformsService)],
 ) -> GetAllPlatformsResponse:
     return GetAllPlatformsResponse(platforms=platform_service.get_all_platforms())
 
@@ -89,7 +93,9 @@ def get_all_platforms(
 @router.get("/{id}/services")
 def get_platform_services(
     id: UUID,
-    platform_service_service: PlatformServiceService = Depends(PlatformServiceService),
+    platform_service_service: Annotated[
+        PlatformServiceService, Depends(PlatformServiceService)
+    ],
 ) -> GetPlatformServicesResponse:
     return GetPlatformServicesResponse(
         platform_services=platform_service_service.get_platform_services(id)

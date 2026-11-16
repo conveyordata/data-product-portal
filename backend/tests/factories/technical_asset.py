@@ -48,4 +48,4 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
         # This is broken somehow without an explicit commit
-        test_session.commit()  # noqa: allow-commit
+        test_session.commit()  # allow-commit

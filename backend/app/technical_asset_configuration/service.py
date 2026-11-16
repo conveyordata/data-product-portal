@@ -2,9 +2,8 @@ from inspect import getattr_static
 from typing import TYPE_CHECKING, Optional, Sequence
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.configuration.environments.model import (
     ENVIRONMENT_DISPLAY_ORDER,
@@ -12,7 +11,7 @@ from app.configuration.environments.model import (
 from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.platforms.platform_services.model import PlatformService
 from app.data_products.model import ensure_data_product_exists
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
@@ -33,7 +32,7 @@ from app.technical_asset_configuration.schema_response import (
 
 
 class PluginService:
-    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
+    def __init__(self, db: DbSession):
         self.db = db
 
     def get_all_technical_assets_ui_metadata(

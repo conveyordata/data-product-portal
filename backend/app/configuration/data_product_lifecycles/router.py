@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.configuration.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
@@ -17,7 +16,7 @@ from app.configuration.data_product_lifecycles.service import (
 )
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 router = APIRouter(
     tags=["Configuration - Data Product lifecycles"],
@@ -53,7 +52,7 @@ router = APIRouter(
 )
 def create_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleCreate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> CreateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).create_data_product_lifecycle(
         data_product_lifecycle
@@ -89,7 +88,7 @@ def create_data_product_lifecycle(
 def update_data_product_lifecycle(
     id: UUID,
     data_product_lifecycle: DataProductLifeCycleUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> UpdateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).update_data_product_lifecycle(
         id, data_product_lifecycle
@@ -106,14 +105,14 @@ def update_data_product_lifecycle(
 )
 def remove_data_product_lifecycle(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     return DataProductLifeCycleService(db).delete_data_product_lifecycle(id)
 
 
 @router.get("")
 def get_data_products_lifecycles(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> DataProductLifeCyclesGet:
     return DataProductLifeCyclesGet(
         data_product_life_cycles=DataProductLifeCycleService(
