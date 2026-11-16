@@ -206,7 +206,7 @@ def check_latest_migration_core(
     head = _core_head(plugins, url)
     down_revision = script.get_revision(head).down_revision
     if down_revision is not None and not isinstance(down_revision, str):
-        down_revision = down_revision[0]
+        raise ValueError(f"Core's latest revision {head} has multiple parents")
 
     command.downgrade(config, down_revision or "base")
     migrate_all(plugins, engine)

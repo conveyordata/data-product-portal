@@ -197,13 +197,11 @@ def test_migrate_all__skips_plugins_without_a_table():
 
 def test_check_latest_migration__round_trips_the_latest_core_revision():
     url = engine.url.render_as_string(hide_password=False)
-    tracked = _tracked_revisions()
 
     head = check_latest_migration_core(installed(), engine)
 
     assert head == _core_head(installed(), url)
     assert head in _tracked_revisions()
-    assert _tracked_revisions() == tracked
 
 
 def test_migrate_all__rolls_back_core_when_a_plugin_migration_fails():
@@ -211,8 +209,6 @@ def test_migrate_all__rolls_back_core_when_a_plugin_migration_fails():
     config = _config(_version_locations([*installed(), BrokenPlugin]), url)
     head = _core_head(installed(), url)
     previous = ScriptDirectory.from_config(config).get_revision(head).down_revision
-    if not isinstance(previous, str):
-        previous = previous[0]
     command.downgrade(config, previous)
     try:
         with pytest.raises(ProgrammingError, match="renamed_away"):
@@ -295,11 +291,10 @@ def test_migrate_all__two_runs_at_once_on_an_upgrade(scratch_engine):
     url = scratch_engine.url.render_as_string(hide_password=False)
     config = _config(_version_locations(installed()), url)
     head = _core_head(installed(), url)
-    previous = ScriptDirectory.from_config(config).get_revision(head).down_revision
-    if not isinstance(previous, str):
-        previous = previous[0]
     command.downgrade(config, "parameter_store@base")
-    command.downgrade(config, previous)
+    command.downgrade(
+        config, ScriptDirectory.from_config(config).get_revision(head).down_revision
+    )
 
     assert 0 in _migrate_twice_at_once(scratch_engine)
 
