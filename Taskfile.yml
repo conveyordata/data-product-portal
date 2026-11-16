@@ -170,7 +170,7 @@ tasks:
 
   poetry:reqs:
     desc: "Regenerate the hashed Poetry bootstrap requirements"
-    dir: backend
+    dir: tools/poetry
     cmds:
       - uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade
 

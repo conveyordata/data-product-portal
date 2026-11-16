@@ -37,7 +37,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
-COPY backend/requirements-poetry.txt .
+COPY tools/poetry/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /

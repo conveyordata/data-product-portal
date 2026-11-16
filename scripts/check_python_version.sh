@@ -13,6 +13,7 @@ fi
 found=(
   "backend/.python-version|$(minor < backend/.python-version)"
   "Dockerfile|$(grep -m1 -oE 'python:[0-9]+\.[0-9]+' Dockerfile | minor)"
+  "Taskfile.yml poetry:reqs|$(grep -m1 -oE 'requirements-poetry\.in .*--python-version [0-9]+\.[0-9]+' Taskfile.yml | grep -oE '[0-9]+\.[0-9]+$')"
   "plugins/pyproject.toml requires-python|$(grep -m1 -E '^requires-python = ' plugins/pyproject.toml | minor)"
   "plugins/pyproject.toml python|$(grep -m1 -E '^python = ' plugins/pyproject.toml | minor)"
   "mypy (backend) hook|$(hook backend)"

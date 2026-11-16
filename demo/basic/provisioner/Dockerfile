@@ -19,7 +19,7 @@ ENV POETRY_NO_INTERACTION=1 \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
-COPY demo/basic/provisioner/requirements-poetry.txt .
+COPY tools/poetry/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY demo/basic/provisioner/poetry.lock demo/basic/provisioner/pyproject.toml /
