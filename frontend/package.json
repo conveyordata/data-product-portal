@@ -85,7 +85,7 @@
         "@types/react-syntax-highlighter": "^15.5.13",
         "@vitejs/plugin-react": "^6.3.0",
         "esbuild": "^0.28.2",
-        "i18next-cli": "^1.87.0",
+        "i18next-cli": "^1.88.0",
         "jsdom": "^31.0.1",
         "knip": "^6.45.1",
         "msw": "^3.0.5",
