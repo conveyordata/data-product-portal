@@ -5,7 +5,7 @@ import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
-import { fireEvent, renderWithProviders, screen, waitFor } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 const currentUser = mockUsers[0];
 
@@ -59,6 +59,7 @@ describe('DataProductsTab', () => {
 
     it('filters data products by search term', async () => {
         setupMocks(mockDataProducts);
+        const user = userEvent.setup();
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
             currentUser,
@@ -70,7 +71,7 @@ describe('DataProductsTab', () => {
         });
 
         const searchInput = screen.getByPlaceholderText('Search Data Products by name');
-        fireEvent.change(searchInput, { target: { value: 'Customer' } });
+        await user.type(searchInput, 'Customer');
 
         await waitFor(() => {
             expect(screen.queryByText('Sales Analytics')).not.toBeInTheDocument();
@@ -80,6 +81,7 @@ describe('DataProductsTab', () => {
 
     it('shows no results when search matches nothing', async () => {
         setupMocks(mockDataProducts);
+        const user = userEvent.setup();
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
             currentUser,
@@ -90,7 +92,7 @@ describe('DataProductsTab', () => {
         });
 
         const searchInput = screen.getByPlaceholderText('Search Data Products by name');
-        fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
+        await user.type(searchInput, 'nonexistent');
 
         await waitFor(() => {
             expect(screen.queryByText('Sales Analytics')).not.toBeInTheDocument();

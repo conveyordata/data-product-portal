@@ -102,11 +102,9 @@ def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
         input_ports=InputPortService(db).get_consuming_data_products(
-            authenticated_user,
             output_port_id,
             data_product_id,
         )

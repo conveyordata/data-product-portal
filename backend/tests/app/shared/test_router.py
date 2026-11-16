@@ -1,10 +1,19 @@
-from fastapi.dependencies.models import Dependant
-from fastapi.routing import APIRoute
+from typing import Annotated
 
+import pytest
+from fastapi import Body, File, Form, Query, params
+from fastapi.dependencies.models import Dependant
+from fastapi.dependencies.utils import is_scalar_field
+from fastapi.routing import APIRoute
+from pydantic import AliasChoices, BaseModel, Field
+
+from app.core.authz.authorization import Enforcement
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_system_db_session
 from app.database.deps import get_db_session
 from app.main import app
 from app.open_api_export import custom_openapi
+from tests.route_util import iter_app_routes
 
 
 def test_endpoints_return_object_or_none():
@@ -184,50 +193,8 @@ def test_openapi_file_upload_uses_binary_schema():
     }
 
 
-def _iter_app_routes():
-    def walk(node):
-        if isinstance(node, APIRoute):
-            yield node
-            return
-
-        if type(node).__name__ == "_IncludedRouter":
-            for candidate in node.effective_candidates():
-                yield from walk(candidate)
-            return
-
-        if hasattr(node, "path") and hasattr(node, "dependencies"):
-            yield node
-
-    for route in app.routes:
-        yield from walk(route)
-
-
 def _route_has_authorization_enforce(route) -> bool:
-    dependencies = list(getattr(route, "dependencies", []) or [])
-    dependencies.extend(getattr(route.dependant, "dependencies", []) or [])
-
-    for dependency in dependencies:
-        call = getattr(dependency, "call", None)
-        if call is None:
-            continue
-
-        qualname = getattr(call, "__qualname__", "")
-        module = getattr(call, "__module__", "")
-        name = getattr(call, "__name__", "")
-
-        if (
-            "Authorization.enforce" in qualname
-            or "Authorization.enforce" in repr(call)
-            or qualname.startswith("Authorization.enforce.<locals>.inner")
-            or (name == "inner" and qualname.startswith("Authorization.enforce."))
-            or (
-                module.startswith("app.")
-                and qualname.startswith("Authorization.enforce.")
-            )
-        ):
-            return True
-
-    return False
+    return any(isinstance(d.call, Enforcement) for d in route.dependant.dependencies)
 
 
 def _iter_dependants(dependant: Dependant):
@@ -244,7 +211,7 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
     }
     missing = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         if not getattr(route, "path", "").startswith("/api/v2/"):
             continue
         # We only check data products paths
@@ -265,7 +232,7 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
 def test_db_session_dependencies_use_function_scope():
     invalid = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         for dependant in _iter_dependants(route.dependant):
             call = getattr(dependant, "call", None)
             if call not in {get_db_session, get_system_db_session}:
@@ -294,7 +261,7 @@ def test_routes_only_use_get_db_session():
 
     invalid = []
 
-    for route in _iter_app_routes():
+    for route in iter_app_routes():
         if route.path in exceptions:
             continue
         direct_calls = {
@@ -343,3 +310,98 @@ def test_routes_not_v2_are_deprecated():
     )
 
     assert not non_deprecated_old_routes, error_msg
+
+
+class _DataProductPayload(BaseModel):
+    data_product_id: str
+
+
+class _AliasedDataProductPayload(BaseModel):
+    data_product_id: str = Field(validation_alias=AliasChoices("dp", "data_product_id"))
+
+
+def _no_key_endpoint(): ...
+
+
+def _aliased_query_endpoint(data_product_id: Annotated[str, Query(alias="dp")]): ...
+
+
+def _aliased_body_endpoint(payload: _AliasedDataProductPayload): ...
+
+
+def _form_body_endpoint(payload: Annotated[_DataProductPayload, Form()]): ...
+
+
+def _file_body_endpoint(data_product_id: Annotated[bytes, File()]): ...
+
+
+def _list_query_endpoint(data_product_id: Annotated[list[str], Query()]): ...
+
+
+def _scalar_body_endpoint(data_product_id: Annotated[str, Body()]): ...
+
+
+def _embedded_body_endpoint(
+    data_product_id: Annotated[str, Body()], other: Annotated[str, Body()]
+): ...
+
+
+def _is_supported_key(dependant: Dependant, key: str) -> bool:
+    if any(p.name == key for p in dependant.path_params):
+        return True
+    if any(
+        p.name == key and p.alias == key and is_scalar_field(p)
+        for p in dependant.query_params
+    ):
+        return True
+    if len(dependant.body_params) != 1:
+        return False
+    body = dependant.body_params[0].field_info
+    if type(body) is not params.Body or body.embed:
+        return False
+    field = getattr(body.annotation, "model_fields", {}).get(key)
+    return field is not None and field.alias is None and field.validation_alias is None
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        _no_key_endpoint,
+        _aliased_query_endpoint,
+        _aliased_body_endpoint,
+        _form_body_endpoint,
+        _file_body_endpoint,
+        _list_query_endpoint,
+        _scalar_body_endpoint,
+        _embedded_body_endpoint,
+    ],
+)
+def test_is_supported_key__rejects_unsupported_shape(endpoint):
+    assert not _is_supported_key(APIRoute("/x", endpoint).dependant, "data_product_id")
+
+
+def _enforced_routes():
+    for route in iter_app_routes():
+        for dependency in route.dependant.dependencies:
+            enforcement = dependency.call
+            if (
+                isinstance(enforcement, Enforcement)
+                and enforcement.resolver is not EmptyResolver
+            ):
+                yield pytest.param(
+                    getattr(route, "original_route", route).dependant,
+                    enforcement.object_id,
+                    id=f"{','.join(sorted(route.methods))} {route.path}",
+                )
+
+
+def test_enforce__routes_discovered():
+    assert list(_enforced_routes())
+
+
+@pytest.mark.parametrize(("dependant", "key"), _enforced_routes())
+def test_enforce__object_id_resolvable_on_route(dependant: Dependant, key: str):
+    assert _is_supported_key(dependant, key), (
+        f"'{key}' is not declared in a supported shape, "
+        "see 'Resolving the object' in backend/app/core/authz/readme.md"
+    )

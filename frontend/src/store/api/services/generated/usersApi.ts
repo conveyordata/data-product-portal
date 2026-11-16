@@ -189,6 +189,7 @@ export type AuthorizationAction =
   | 313
   | 314
   | 315
+  | 316
   | 401
   | 402
   | 403
@@ -303,19 +304,14 @@ export type GroupsGetResponse = {
 };
 export type AccessDurationType = "permanent" | "time_bound";
 export type InputPortRequestDecision =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "cancelled";
+  "pending" | "approved" | "denied" | "cancelled";
 export type AccessMode = {
   id: string;
   name: string;
   description: string;
 };
 export type AbstractDataProductType =
-  | "unknown"
-  | "data_products"
-  | "explorations";
+  "unknown" | "data_products" | "explorations";
 export type AbstractDataProductInfo = {
   name: string;
   namespace: string;
@@ -324,9 +320,7 @@ export type AbstractDataProductInfo = {
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessFunction =
-  | "restricted"
-  | "private"
-  | "unrestricted";
+  "restricted" | "private" | "unrestricted";
 export type OutputPortAccessType = {
   id: string;
   name: string;
@@ -395,11 +389,39 @@ export type InputPortRequest = {
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
+export type TechnicalAsset = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: TechnicalAssetStatus;
+  technical_mapping: TechnicalMapping;
+  owner_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+};
+export type TechnicalAssetOutputPortRequest = {
+  id: string;
+  output_port_id: string;
+  output_port: OutputPort;
+  technical_asset_id: string;
+  technical_asset: TechnicalAsset;
+  status: DecisionStatus;
+  requested_on: string;
+  denied_on: string | null;
+  approved_on: string | null;
+  requested_by: User;
+  denied_by: User | null;
+  approved_by: User | null;
+  request_type?: "TechnicalAssetOutputPort";
+};
 export type AbstractDataProductStatus =
-  | "pending"
-  | "active"
-  | "archived"
-  | "deleting";
+  "pending" | "active" | "archived" | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"
@@ -421,38 +443,6 @@ export type DataProduct = {
   description: string;
   status: AbstractDataProductStatus;
   type: DataProductType;
-};
-export type OwnedTechnicalAsset = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  status: TechnicalAssetStatus;
-  technical_mapping: TechnicalMapping;
-  owner_id: string;
-  platform_id?: string | null;
-  service_id?: string | null;
-  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
-  configuration: {
-    name: string;
-    [key: string]: any;
-  };
-  owner: DataProduct;
-};
-export type TechnicalAssetOutputPortRequest = {
-  id: string;
-  output_port_id: string;
-  output_port: OutputPort;
-  technical_asset_id: string;
-  technical_asset: OwnedTechnicalAsset;
-  status: DecisionStatus;
-  requested_on: string;
-  denied_on: string | null;
-  approved_on: string | null;
-  requested_by: User;
-  denied_by: User | null;
-  approved_by: User | null;
-  request_type?: "TechnicalAssetOutputPort";
 };
 export type DataProductRoleAssignmentRequest = {
   id: string;

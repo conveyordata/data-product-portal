@@ -1,0 +1,27 @@
+import { describe, expect, it, vi } from 'vitest';
+import { NewAnnouncementModal } from '@/pages/output-port/components/dataset-tabs/announcements-tab/new-announcement-modal.tsx';
+import { renderWithProviders, screen, userEvent } from '@/tests/test-utils.tsx';
+
+describe('NewAnnouncementModal', () => {
+    it('shows required errors and counts characters under the fields', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(
+            <NewAnnouncementModal
+                dataProductId="data-product-id"
+                outputPortId="output-port-id"
+                consumerCount={4}
+                onClose={vi.fn()}
+            />,
+        );
+
+        expect(screen.getByText('This will notify 4 consumers.')).toBeInTheDocument();
+        await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+        expect(await screen.findByText('Please provide a title')).toBeInTheDocument();
+        expect(screen.getByText('Please provide a message')).toBeInTheDocument();
+
+        expect(screen.getByLabelText('Message')).toBeInTheDocument();
+        await user.type(screen.getByLabelText('Title'), 'New columns');
+        expect(screen.getByText('11 / 100')).toBeInTheDocument();
+    });
+});

@@ -1,8 +1,7 @@
 import uuid
 from typing import Any, Sequence
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, CheckConstraint, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists

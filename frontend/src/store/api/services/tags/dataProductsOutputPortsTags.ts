@@ -65,6 +65,21 @@ export const dataProductOutputPortTags = {
     deleteOutputPortQueryStat: {},
     updateOutputPortQueryStats: {},
     getOutputPortCuratedQueries: {},
+    getOutputPortAnnouncements: {
+        providesTags: (_, __, { id }) => [{ type: TagTypes.Announcements, id }],
+    },
+    createOutputPortAnnouncement: {
+        invalidatesTags: (_, __, { id }) => [
+            { type: TagTypes.Announcements, id },
+            { type: TagTypes.History, id },
+        ],
+    },
+    removeOutputPortAnnouncement: {
+        invalidatesTags: (_, __, { id }) => [
+            { type: TagTypes.Announcements, id },
+            { type: TagTypes.History, id },
+        ],
+    },
     getLatestDataQualitySummaryForOutputPort: {
         extraOptions: {
             suppressErrorToast: true,

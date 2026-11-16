@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[[ -d ${VIRTUAL_ENV:-} ]] || unset VIRTUAL_ENV
 
 # Extract all router files and check their coverage
 cd ./../backend || exit

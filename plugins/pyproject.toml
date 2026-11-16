@@ -1,10 +1,11 @@
 [project]
 name = "data-product-portal-plugins"
-version = "0.8.0"
+version = "0.8.1"
 description = "First-party technical asset plugins for Data Product Portal"
-requires-python = ">=3.13"
+authors = [{ email = "support@conveyordata.com" }]
+requires-python = ">=3.14"
 dependencies = [
-    "data-product-portal>=0.8.0",
+    "data-product-portal>=0.8.1",
     "fastapi>=0.141.1",
     "pydantic>=2.13.5",
     "sqlalchemy>=2.0.52",
@@ -31,7 +32,7 @@ snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguratio
 packages = [{ include = "portal_plugins", from = "." }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 
 [tool.mypy]
 ignore_missing_imports = true

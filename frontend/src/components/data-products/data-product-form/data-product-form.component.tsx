@@ -124,7 +124,9 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data Product created successfully'), type: 'success' });
-                posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
+                posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED, {
+                    visibility: request.visibility,
+                });
 
                 if (fromMarketplace) {
                     navigate({

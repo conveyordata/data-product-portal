@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
 import { ListTable } from '@/components/list-table/list-table.component.tsx';
-import { renderWithProviders, screen, userEvent, within } from '../../test-utils';
+import { renderWithProviders, screen, userEvent, within } from '@/tests/test-utils.tsx';
 
 type Row = { id: string; domain: string };
 
@@ -50,11 +50,12 @@ function renderTable(query: Partial<EmptyStateQuery> = {}, props: { loading?: bo
 
 describe('ListTable', () => {
     it('reports a failed load instead of showing rows, and retries', async () => {
+        const user = userEvent.setup();
         const refetch = vi.fn();
         renderTable({ isError: true, currentData: undefined, refetch });
 
         expect(screen.queryByText('Sales')).not.toBeInTheDocument();
-        await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+        await user.click(screen.getByRole('button', { name: 'Try again' }));
         expect(refetch).toHaveBeenCalledOnce();
         expect(screen.getByText("Couldn't load Data Products")).toBeInTheDocument();
     });
@@ -80,18 +81,19 @@ describe('ListTable', () => {
     });
 
     it('treats an active column filter as filtered, and clearing resets it', async () => {
+        const user = userEvent.setup();
         const onClear = vi.fn();
         const { onChange } = renderTable({}, { onClear });
 
-        await userEvent.click(screen.getByRole('button', { name: 'filter' }));
-        await userEvent.click(await screen.findByText('Finance'));
-        await userEvent.click(screen.getByRole('button', { name: 'OK' }));
+        await user.click(screen.getByRole('button', { name: 'filter' }));
+        await user.click(await screen.findByText('Finance'));
+        await user.click(screen.getByRole('button', { name: 'OK' }));
 
         expect(onChange).toHaveBeenCalled();
         const status = await screen.findByRole('status');
         expect(within(status).getByText('No Data Products match the current filters')).toBeInTheDocument();
 
-        await userEvent.click(within(status).getByRole('button', { name: 'Clear filters' }));
+        await user.click(within(status).getByRole('button', { name: 'Clear filters' }));
         expect(onClear).toHaveBeenCalledOnce();
         expect(await screen.findByRole('cell', { name: 'Sales' })).toBeInTheDocument();
     });

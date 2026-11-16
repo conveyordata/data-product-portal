@@ -3,8 +3,15 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
+from sqlalchemy import func, literal_column, select
+from sqlalchemy.orm import (
+    Session,
+    joinedload,
+    noload,
+    raiseload,
+    selectinload,
+    undefer,
+)
 from sqlalchemy.sql.base import ExecutableOption
 
 from app.abstract_data_product.graph_utils import (
@@ -50,10 +57,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import (
-    access_function_filter_excluding_consumers,
-    ensure_output_port_exists,
-)
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -71,7 +75,8 @@ from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import UNFILTERED
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
+from app.database.visibility import output_port_visible_ignoring_consumption
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -193,7 +198,7 @@ class OutputPortService:
                     DataProductModel.environments
                 ),
             ),
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
 
         if not output_port:
@@ -244,9 +249,12 @@ class OutputPortService:
                 .desc()
             )
 
-        stmt = select(OutputPortModel).order_by(ordered_by).limit(limit)
-        if (user_id := self.db.info.get("current_user_id")) is not None:
-            stmt = stmt.where(access_function_filter_excluding_consumers(user_id))
+        stmt = (
+            select(OutputPortModel)
+            .where(output_port_visible_ignoring_consumption(self.db, OutputPortModel))
+            .order_by(ordered_by)
+            .limit(limit)
+        )
         match assignment_filter:
             case AssignmentFilter.ALL:
                 pass
@@ -317,9 +325,12 @@ class OutputPortService:
     @staticmethod
     def _recalculate_search_vector(output_port: OutputPortModel) -> None:
         output_port.search_vector = func.setweight(
-            func.to_tsvector("english", output_port.name), "A"
+            func.to_tsvector("english", output_port.name), literal_column("'A'")
         ).op("||")(
-            func.setweight(func.to_tsvector("english", output_port.description), "B")
+            func.setweight(
+                func.to_tsvector("english", output_port.description),
+                literal_column("'B'"),
+            )
         )
 
     def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
@@ -553,13 +564,21 @@ class OutputPortService:
             select(OutputPortModel)
             .where(OutputPortModel.id == id)
             .where(OutputPortModel.data_product_id == data_product_id)
-            .options(
-                selectinload(OutputPortModel.data_product_links),
-                selectinload(OutputPortModel.technical_asset_links),
-            )
+            .options(selectinload(OutputPortModel.data_product_links))
         )
         if not output_port:
             raise output_port_not_found_exception(id)
+        technical_asset_links = self.db.scalars(
+            select(TechnicalAssetOutputPortAssociationModel)
+            .where(TechnicalAssetOutputPortAssociationModel.output_port_id == id)
+            .options(
+                noload("*"),
+                joinedload(
+                    TechnicalAssetOutputPortAssociationModel.technical_asset
+                ).options(noload("*"), joinedload(TechnicalAssetModel.configuration)),
+            ),
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+        ).all()
         nodes = [
             Node(
                 id=id,
@@ -592,7 +611,8 @@ class OutputPortService:
                 )
             )
 
-        for technical_asset_link in output_port.technical_asset_links:
+        owner = output_port.data_product
+        for technical_asset_link in technical_asset_links:
             technical_asset = technical_asset_link.technical_asset
             nodes.append(
                 Node(
@@ -614,23 +634,23 @@ class OutputPortService:
                     animated=technical_asset_link.status == DecisionStatus.APPROVED,
                 )
             )
-            if level >= 2:
+            if level >= 2 and owner is not None:
                 nodes.append(
                     Node(
-                        id=f"{technical_asset.owner.id}_2",
+                        id=f"{owner.id}_2",
                         data=NodeData(
-                            id=f"{technical_asset.owner.id}",
-                            name=technical_asset.owner.name,
-                            icon_key=technical_asset.owner.type.icon_key,
+                            id=f"{owner.id}",
+                            name=owner.name,
+                            icon_key=owner.type.icon_key,
                         ),
                         type=NodeType.dataProductNode,
                     )
                 )
                 edges.append(
                     Edge(
-                        id=f"{technical_asset.owner.id}-{technical_asset.id}-2",
+                        id=f"{owner.id}-{technical_asset.id}-2",
                         target=technical_asset.id,
-                        source=f"{technical_asset.owner.id}_2",
+                        source=f"{owner.id}_2",
                         animated=True,
                     )
                 )
@@ -638,7 +658,7 @@ class OutputPortService:
         # if no data outputs are linked yet, still show the owner data product
         if (
             level >= 2
-            and not output_port.technical_asset_links
+            and not technical_asset_links
             and output_port.data_product is not None
         ):
             nodes.append(

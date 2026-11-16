@@ -42,6 +42,9 @@
       "handlers": ["fileHandler", "consoleHandler"],
       "level": "WARNING",
       "propagate": false
+    },
+    "botocore": {
+      "level": "ERROR"
     }
   }
 }

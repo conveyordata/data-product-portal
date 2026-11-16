@@ -82,7 +82,7 @@ jobs:
         run: task setup:frontend
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: pip install -r .github/requirements-pre-commit.txt --require-hashes
 
       - name: Warm pre-commit hook environments
         run: pre-commit install-hooks

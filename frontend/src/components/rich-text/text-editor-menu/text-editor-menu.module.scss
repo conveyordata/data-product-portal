@@ -1,10 +1,4 @@
-@use "@/styles/globals";
-
 $text-type-dropdown-width: 120px;
-
-.menuBar {
-    margin-bottom: globals.$spacing-m;
-}
 
 .text-type-dropdown {
     width: $text-type-dropdown-width;

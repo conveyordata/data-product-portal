@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import Column, Integer, SmallInteger, String
+from sqlalchemy import UUID, Column, Integer, SmallInteger, String
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import mapped_column, validates
 
 from app.authorization.roles.schema import Prototype, Scope

@@ -1,7 +1,6 @@
 from datetime import date as DateType
 
-from sqlalchemy import ForeignKey, Integer, select
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, ForeignKey, Integer, select
 from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from app.data_products.model import DataProduct

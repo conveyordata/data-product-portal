@@ -26,7 +26,6 @@ export enum TagTypes {
     OutputPortRoleAssignments = 'OutputPortRoleAssignments',
     Domain = 'Domain',
     TechnicalAsset = 'TechnicalAsset',
-    Graph = 'Graph',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
     PlatformServiceConfig = 'PlatformServiceConfig',
@@ -39,6 +38,7 @@ export enum TagTypes {
     MyRequests = 'MyRequests',
     AccessDuration = 'AccessDuration',
     AccessMode = 'AccessMode',
+    Announcements = 'Announcements',
 }
 
 export const STATIC_TAG_ID = {

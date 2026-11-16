@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID, Column, Enum, String
 from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.configuration.data_product_types.enums import DataProductIconKey

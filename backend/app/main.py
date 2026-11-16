@@ -17,11 +17,13 @@ from app.abstract_data_product.background_tasks import check_stuck_deletions
 from app.abstract_data_product.input_ports.background_tasks import (
     expire_input_ports_task,
 )
+from app.authorization.role_assignments.global_.background_tasks import (
+    check_expired_admins,
+)
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
-from app.core.authz.background_tasks import check_expired_admins
 from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger

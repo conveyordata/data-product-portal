@@ -1,69 +1,40 @@
-import { Empty } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
-import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
+import { AboutEditor } from '@/components/about-editor/about-editor.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     useGetOutputPortQuery,
     useUpdateOutputPortAboutMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
-    datasetId: string;
+    outputPortId: string;
     dataProductId: string;
 };
 
-export function AboutTab({ datasetId, dataProductId }: Props) {
-    const { t } = useTranslation();
-    const { data: dataset, isFetching } = useGetOutputPortQuery({ id: datasetId, dataProductId });
-    const currentUser = useSelector(selectCurrentUser);
-    const [updateDatasetAbout, { isLoading }] = useUpdateOutputPortAboutMutation();
-
-    const { data: edit_access } = useCheckAccessQuery(
+export function AboutTab({ outputPortId, dataProductId }: Props) {
+    const query = useGetOutputPortQuery({ id: outputPortId, dataProductId });
+    const [updateOutputPortAbout, { isLoading: isSaving }] = useUpdateOutputPortAboutMutation();
+    const { data: editAccess } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
-    const canEdit = edit_access?.allowed || false;
-
-    if (isFetching) {
-        return <LoadingSpinner />;
-    }
-
-    if (!dataset || !currentUser) {
-        return <Empty />;
-    }
-
-    async function handleSubmit(content: string) {
-        if (canEdit) {
-            try {
-                await updateDatasetAbout({
-                    id: datasetId,
-                    dataProductId,
-                    outputPortAboutUpdate: { about: content },
-                }).unwrap();
-                dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            }
-        } else {
-            dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
-        }
-    }
 
     return (
-        <TextEditor
-            initialContent={dataset.about}
-            onSubmit={handleSubmit}
-            isLoading={isFetching}
-            isSubmitting={isLoading}
-            isDisabled={!canEdit}
+        <AboutEditor
+            source={{
+                query,
+                canEdit: editAccess?.allowed ?? false,
+                isSaving,
+                save: (about) =>
+                    updateOutputPortAbout({
+                        id: outputPortId,
+                        dataProductId,
+                        outputPortAboutUpdate: { about },
+                    }).unwrap(),
+            }}
         />
     );
 }

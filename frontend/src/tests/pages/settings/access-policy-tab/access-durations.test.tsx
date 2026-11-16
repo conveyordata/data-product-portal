@@ -7,6 +7,7 @@ import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-ut
 
 describe('AccessDurations', () => {
     it('auto-saves changes after a brief idle period and hides the save button', async () => {
+        const user = userEvent.setup();
         mockAccessDurationsGet();
         const mockSavedAccessDurations = {
             access_durations: [
@@ -25,7 +26,7 @@ describe('AccessDurations', () => {
         renderWithProviders(<AccessDurations />);
 
         const [firstCheckbox] = await screen.findAllByRole('checkbox');
-        await userEvent.click(firstCheckbox);
+        await user.click(firstCheckbox);
 
         await waitFor(
             () => {

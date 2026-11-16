@@ -1,10 +1,17 @@
 import os
 from enum import Enum
-from typing import Optional
+from typing import Optional, TypeGuard
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel, model_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    TypeAdapter,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -55,13 +62,65 @@ class OIDCIdentity(BaseModel):
     sub: str
     name: str
     given_name: str
-    family_name: str
+    family_name: str = ""
     email: str
     username: Optional[str] = None
     preferred_username: Optional[str] = None
 
     @model_validator(mode="before")
     def populate_username(cls, values):
+        if not isinstance(values, dict):
+            return values
         values["username"] = values.get("username") or values.get("preferred_username")
         values["given_name"] = values.get("given_name") or values.get("name")
         return values
+
+    @field_validator("email")
+    @classmethod
+    def require_address(cls, email: str) -> str:
+        if not is_address(email):
+            raise ValueError("email is not an address")
+        return _email.validate_python(email)
+
+    @classmethod
+    def from_claims(cls, claims: dict, sub: str, email_claim: str) -> "OIDCIdentity":
+        email = claims.get(email_claim)
+        if not is_address(email):
+            raise ValueError(f"claim {email_claim} holds no email address")
+        claims = {
+            k: " ".join(v.split()) for k, v in claims.items() if isinstance(v, str)
+        }
+        given_name = claims.get("given_name", "")
+        family_name = claims.get("family_name") or ""
+        if not given_name:
+            display_name = claims.get("name", "").strip(" ,")
+            if family_name and display_name.endswith(f" {family_name}"):
+                given_name = display_name.removesuffix(f" {family_name}")
+            elif "," in display_name:
+                last, _, first = display_name.partition(",")
+                given_name = first.strip()
+                family_name = family_name or last.strip()
+            else:
+                head, _, tail = display_name.rpartition(" ")
+                given_name = head or tail
+                family_name = family_name or (tail if head else "")
+        given_name = given_name or email.split("@")[0]
+        return cls(
+            sub=sub,
+            name=claims.get("name") or given_name,
+            given_name=given_name,
+            family_name=family_name,
+            email=email,
+            preferred_username=claims.get("preferred_username"),
+        )
+
+
+def is_address(value: object) -> TypeGuard[str]:
+    try:
+        _email.validate_python(value)
+    except ValidationError:
+        return False
+    return True
+
+
+_email = TypeAdapter(EmailStr)

@@ -39,9 +39,6 @@ export default defineConfig({
             filename: 'dependencies.html',
         }),
     ],
-    ssr: {
-        noExternal: ['posthog-js', '@posthog/react'],
-    },
     server: {
         port: 3000,
         open: true,

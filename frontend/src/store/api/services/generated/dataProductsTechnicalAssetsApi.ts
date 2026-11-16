@@ -414,6 +414,15 @@ export type Identity =
   | ({
       type: "user";
     } & UserIdentity);
+export type Announcement = {
+  id: string;
+  output_port_id: string;
+  type: AnnouncementType;
+  title: string;
+  message: string;
+  author: User | null;
+  created_at: string;
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -433,6 +442,7 @@ export type GetEventHistoryResponseItem = {
   technical_asset?: TechnicalAsset | null;
   exploration?: Exploration | null;
   identity?: Identity | null;
+  announcement?: Announcement | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -513,6 +523,12 @@ export enum EventEntityType {
   User = "user",
   Identity = "identity",
   Exploration = "exploration",
+  Announcement = "announcement",
+}
+export enum AnnouncementType {
+  ActionNeeded = "action_needed",
+  Warning = "warning",
+  Info = "info",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

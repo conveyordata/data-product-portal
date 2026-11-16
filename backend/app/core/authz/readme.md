@@ -83,6 +83,13 @@ But this action will give you rights to any data product you have access to.
 And visible data products will use the g("*", public_reader_role_id, product_id) wildcard to allow access to all users.
 
 
+## Resolving the object
+
+`Authorization.enforce` checks the object named by its `object_id` parameter (`id` by default).
+The resolver reads that value only from where the endpoint declares it, so a value of the same name elsewhere in the request is ignored.
+The key must be a path param, an unaliased single-value query param, or an unaliased field of a single JSON body model, and its value must be a string; anything else falls back to `*`.
+`tests/app/shared/test_router.py` fails for any enforced route that breaks this rule.
+
 ## Parent access
 
 We support a parent model, where a data product role for example can give access to all output ports under it.

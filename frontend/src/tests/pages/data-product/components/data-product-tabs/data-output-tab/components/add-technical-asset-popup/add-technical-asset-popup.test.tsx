@@ -98,8 +98,8 @@ describe('TechnicalAssetPopup', async () => {
 
         await user.click(screen.getByText('Configure access modes'));
 
-        await waitFor(() => expect(screen.getByText('Read Only')).toBeInTheDocument());
-        await user.click(screen.getByRole('checkbox', { name: /Select row 1/i }));
+        expect(await screen.findByText('Read Only')).toBeInTheDocument();
+        await user.click(screen.getAllByLabelText('Select row')[0]);
 
         const createButton = screen.getByRole('button', { name: /Create/i });
         await user.click(createButton);

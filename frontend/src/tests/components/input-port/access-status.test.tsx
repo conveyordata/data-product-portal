@@ -7,6 +7,7 @@ import {
     RenewalTag,
 } from '@/components/input-port/access-status.tsx';
 import { InputPortStatus, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
+import { mockExpiringSoonThreshold } from '@/tests/mocks/configurationAccessDurations.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 function isoInDays(days: number): string {
@@ -101,6 +102,7 @@ describe('IsExpiringSoonTag', () => {
     });
 
     it('shows "Expiring soon" when approved, within the threshold and no renewal pending', async () => {
+        mockExpiringSoonThreshold();
         renderWithProviders(
             <IsExpiringSoonTag status={InputPortStatus.Approved} validUntil={isoInDays(5)} renewalStatus={null} />,
         );

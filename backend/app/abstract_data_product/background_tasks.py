@@ -25,7 +25,6 @@ async def check_stuck_deletions() -> None:
                             AbstractDataProduct.status
                             == AbstractDataProductStatus.DELETING
                         ),
-                        execution_options={"skip_data_product_visibility_filter": True},
                     )
                     .scalars()
                     .all()

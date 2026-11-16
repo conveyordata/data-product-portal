@@ -64,6 +64,7 @@ export const NewDataProductForm = () => {
                 dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
                 posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED_NEW_DATA_PRODUCT, {
                     cartSize: cartOutputPorts?.length,
+                    visibility: request.visibility,
                 });
                 clearStorage();
                 navigate(createDataProductIdPath(response.id, DataProductTabKeys.InputPorts));

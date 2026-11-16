@@ -1,8 +1,7 @@
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
-import pytz
 from fastapi import HTTPException
 from sqlalchemy import select
 
@@ -79,7 +78,7 @@ class TestRequestInputPortsDuration:
         req = _request_for(ip, session)
         assert req.access_duration_type == AccessDurationType.TIME_BOUND
         assert req.requested_duration_days == 30
-        assert req.valid_until == datetime.now(pytz.utc).date() + timedelta(days=30)
+        assert req.valid_until == datetime.now(timezone.utc).date() + timedelta(days=30)
 
     def test_request_input_ports__private_output_port_no_access(self, session):
         actor = UserFactory()

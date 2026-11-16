@@ -4,6 +4,7 @@ from functools import cache
 from typing import Optional
 
 from sqlalchemy import (
+    UUID,
     Column,
     DateTime,
     ForeignKey,
@@ -13,7 +14,7 @@ from sqlalchemy import (
     Text,
     select,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, aliased, mapped_column, relationship
 
 from app.database.database import Base

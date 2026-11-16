@@ -27,7 +27,6 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.service import AuthService
-from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import (
@@ -130,10 +129,8 @@ def register_tools(mcp: FastMCP) -> None:
             {'database': '<fully-qualified db name>', 'bucket': '<s3 bucket name>', 'workgroup': '<workgroup name>'}
             or {'error': '...'} on failure.
         """
-        asset_uuid = UUID(technical_asset_id)
-        do = ensure_technical_asset_exists(asset_uuid, db=db)
-        technical_asset = TechnicalAssetService(db).get_technical_asset(
-            do.owner_id, id=asset_uuid
+        technical_asset = TechnicalAssetService(db).get_technical_asset_by_id(
+            UUID(technical_asset_id)
         )
 
         configuration: DataOutputConfiguration = technical_asset.configuration  # type: ignore[assignment]

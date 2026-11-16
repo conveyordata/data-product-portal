@@ -523,7 +523,7 @@ class TestGroupService:
                         )
                     )
 
-                assert exc_info.value.orig.pgcode == "55P03"
+                assert exc_info.value.orig.sqlstate == "55P03"
                 second_session.rollback()
 
             locked_group_id = second_session.scalar(

@@ -32,6 +32,10 @@ export const mockTimeBoundAccessEnabled = (enabled = true) => {
     server.use(http.get('*/api/v2/configuration/access_durations/enabled', () => HttpResponse.json({ enabled })));
 };
 
+export const mockExpiringSoonThreshold = (days = 14) => {
+    server.use(http.get(`${endpoint}/expiring_soon_threshold`, () => HttpResponse.json({ days })));
+};
+
 export const mockUpdateAccessDuration = (savedAccessDurations: AccessDuration[] = mockAccessDurations) => {
     server.use(
         http.put('*/api/v2/configuration/access_durations/:abstractDataProductType', () => {

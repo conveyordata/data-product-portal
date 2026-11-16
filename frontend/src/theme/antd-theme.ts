@@ -1,8 +1,13 @@
+import { FastColor } from '@ant-design/fast-color';
 import { type ThemeConfig, theme } from 'antd';
 
 const { getDesignToken } = theme;
 
 const token = getDesignToken();
+
+const colorPrimary = '#543EDC';
+const primaryTint = (alpha: number) =>
+    new FastColor(colorPrimary).setA(alpha).onBackground(token.colorBgContainer).toHexString();
 
 const spacingTokens = {
     sizeUnit: 4,
@@ -31,7 +36,7 @@ const datamindedThemeConfig: ThemeConfig = {
             dangerShadow: 'none', // Remove shadow from danger buttons to align with design
         },
         Menu: {
-            colorPrimaryBg: '#543EDC',
+            colorPrimaryBg: colorPrimary,
             darkItemBg: '#080635',
             itemBorderRadius: 10,
             darkPopupBg: '#080635',
@@ -43,6 +48,9 @@ const datamindedThemeConfig: ThemeConfig = {
         },
         Table: {
             headerBorderRadius: 8,
+            rowHoverBg: primaryTint(0.14),
+            bodySortBg: primaryTint(0.04),
+            headerSortActiveBg: primaryTint(0.1),
         },
         Input: {
             activeShadow: 'none',
@@ -56,7 +64,7 @@ const datamindedThemeConfig: ThemeConfig = {
         fontWeightStrong: 600,
         // -------- Brand Colors ---------
         // Primary
-        colorPrimary: '#543EDC',
+        colorPrimary,
         // Success
         colorSuccess: token.green6,
         colorSuccessBg: token.green1,

@@ -2,13 +2,9 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
-    Awaitable,
-    Callable,
     Sequence,
     TypeAlias,
     Union,
-    assert_never,
 )
 from uuid import UUID
 
@@ -17,10 +13,10 @@ from cachetools import Cache, TTLCache, cachedmethod
 from casbin import SyncedEnforcer, util
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_products.model import DataProductVisibility
 from app.database import database
 from app.database.deps import get_db_session
 from app.settings import settings
@@ -29,9 +25,6 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
-
-if TYPE_CHECKING:
-    from app.data_products.model import DataProduct
 
 ID: TypeAlias = Union[str, UUID]
 
@@ -70,7 +63,9 @@ def _has_access_through_consumer_role(
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
         self._reloading = False
-        self._adapter = sqlalchemy_adapter.Adapter(database.get_url())
+        engine = create_engine(database.get_url())
+        database.apply_auth(engine)
+        self._adapter = sqlalchemy_adapter.Adapter(engine)
         self._enforcer: SyncedEnforcer = self._initialize(self._adapter)
         self._cache: Cache = TTLCache(
             maxsize=settings.AUTHORIZER_CACHE_SIZE,
@@ -112,27 +107,8 @@ class Authorization(metaclass=Singleton):
         resolver: type[SubjectResolver],
         *,
         object_id: str = "id",
-    ) -> Callable[[Request, User, Session], Awaitable[None]]:
-        async def inner(
-            request: Request,
-            user: User = Depends(get_authenticated_user),
-            db: Session = Depends(get_db_session, scope="function"),
-        ) -> None:
-            context = await resolver.resolve_context(request, object_id, db)
-
-            if not cls().has_access(
-                sub=str(user.id),
-                dom=context.domain_id,
-                obj=context.object_id,
-                parent=context.parent_id,
-                act=action,
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You don't have permission to perform this action",
-                )
-
-        return inner
+    ) -> "Enforcement":
+        return Enforcement(action, resolver, object_id)
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
@@ -464,25 +440,6 @@ class Authorization(metaclass=Singleton):
         self._after_update()
         return bool(updates)
 
-    def has_read_access_to_data_product(
-        self, current_user: User, data_product: "DataProduct"
-    ) -> bool:
-
-        # The check for visibility is a performance optimization to avoid unnecessary
-        # has_access checks for discoverable data products.
-        match data_product.visibility:
-            case DataProductVisibility.DISCOVERABLE:
-                return True
-            case DataProductVisibility.HIDDEN:
-                return self.has_access(
-                    sub=str(current_user.id),
-                    obj=str(data_product.id),
-                    dom=str(data_product.domain_id),
-                    act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
-                )
-            case _:
-                assert_never(data_product.visibility)
-
     def assign_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
         """
         Assign multiple member-to-group inheritance relationships.
@@ -579,3 +536,30 @@ class Authorization(metaclass=Singleton):
 
         self._after_update()
         return True
+
+
+@dataclass(frozen=True)
+class Enforcement:
+    action: AuthorizationAction
+    resolver: type[SubjectResolver]
+    object_id: str
+
+    async def __call__(
+        self,
+        request: Request,
+        user: User = Depends(get_authenticated_user),
+        db: Session = Depends(get_db_session, scope="function"),
+    ) -> None:
+        context = await self.resolver.resolve_context(request, self.object_id, db)
+
+        if not Authorization().has_access(
+            sub=str(user.id),
+            dom=context.domain_id,
+            obj=context.object_id,
+            parent=context.parent_id,
+            act=self.action,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to perform this action",
+            )

@@ -1,4 +1,4 @@
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, Flex, type MenuProps, Typography, theme } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -95,7 +95,7 @@ export function UserMenu() {
     const switchUserItem: MenuItem | undefined = isAuthDisabled
         ? {
               key: 'SwitchUser',
-              icon: <UserOutlined />,
+              icon: <UserSwitchOutlined />,
               label: t('Switch user'),
               onClick: () => setIsSwitchUserOpen(true),
           }
@@ -130,13 +130,15 @@ export function UserMenu() {
                     {
                         <Badge
                             count={
-                                isAdmin?.is_admin
-                                    ? t('Admin powers until ') +
-                                      new Date(`${isAdmin?.time}Z`).toLocaleTimeString(undefined, {
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                      })
-                                    : 0
+                                !isAdmin?.is_admin
+                                    ? 0
+                                    : isAdmin.time
+                                      ? t('Admin powers until ') +
+                                        new Date(`${isAdmin.time}Z`).toLocaleTimeString(undefined, {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                      : t('Permanent Admin')
                             }
                             showZero={false}
                             color={colorPrimary}

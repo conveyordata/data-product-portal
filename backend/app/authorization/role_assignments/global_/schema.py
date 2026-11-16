@@ -20,7 +20,7 @@ class CreateGlobalRoleAssignment(BaseModel):
 
 
 class BecomeAdmin(BaseModel):
-    expiry: str
+    expiry: datetime
 
 
 class DecideGlobalRoleAssignment(BaseModel):

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -ex
+[[ -d ${VIRTUAL_ENV:-} ]] || unset VIRTUAL_ENV
 
 pushd backend
   set -a

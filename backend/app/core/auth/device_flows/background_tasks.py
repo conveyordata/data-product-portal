@@ -1,7 +1,6 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-import pytz
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
@@ -28,7 +27,7 @@ async def cleanup_device_flow_table_task() -> None:
 def cleanup_device_flow_table(db: Session):
     try:
         logger.info("Cleaning stale device flow entries")
-        now = datetime.now(tz=pytz.utc).replace(tzinfo=None)
+        now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
         cutoff = now - timedelta(minutes=settings.DEVICE_CODE_FLOW_EXPIRY_MINUTES)
         stmt = delete(DeviceFlowModel).where(DeviceFlowModel.max_expiry <= cutoff)
         res = db.execute(stmt)

@@ -25,6 +25,8 @@ export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefin
             return t('Exploration');
         case EventEntityType.Identity:
             return t('Identity');
+        case EventEntityType.Announcement:
+            return t('Announcement');
         default:
             return t('Unknown');
     }
@@ -50,6 +52,8 @@ export function getSubjectDisplayLabel(record: GetEventHistoryResponseItem): str
             return record.exploration?.name || '';
         case EventEntityType.Identity:
             return record.identity ? getIdentityDisplayName(record.identity) : '';
+        case EventEntityType.Announcement:
+            return '';
     }
 }
 
@@ -73,6 +77,8 @@ export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): stri
             return record.exploration?.name || '';
         case EventEntityType.Identity:
             return record.identity ? getIdentityDisplayName(record.identity) : '';
+        case EventEntityType.Announcement:
+            return record.announcement?.title || '';
         default:
             return '';
     }
@@ -384,6 +390,26 @@ export function getEventTypeDisplayName(
             return <Trans t={t} i18nKey="EventDatasetRemoved" defaults="Dataset removed" />;
         case EventType.DATASET_SETTING_UPDATED:
             return <Trans t={t} i18nKey="EventDatasetSettingUpdated" defaults="Dataset setting updated" />;
+        case EventType.ANNOUNCEMENT_CREATED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventAnnouncementCreated"
+                    defaults="Announcement posted: <element>{{entity}}</element>"
+                    values={{ entity }}
+                    components={{ element }}
+                />
+            );
+        case EventType.ANNOUNCEMENT_REMOVED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventAnnouncementRemoved"
+                    defaults="Announcement deleted: <element>{{entity}}</element>"
+                    values={{ entity }}
+                    components={{ element }}
+                />
+            );
         default:
             throw new Error(`Unsupported event type ${event_type}`);
     }
@@ -563,6 +589,9 @@ export function getNotificationDisplayName(
                     components={{ target, subject }}
                 />
             );
+        case EventType.ANNOUNCEMENT_CREATED:
+        case EventType.ANNOUNCEMENT_REMOVED:
+            return;
         default:
             throw new Error(`Unsupported event type ${event_type}`);
     }
@@ -665,6 +694,10 @@ function getEventTypeDisplayTranslation(
             return t('EventDatasetRemoved', { entity, entity_type });
         case EventType.DATASET_SETTING_UPDATED:
             return t('EventDatasetSettingUpdated', { entity, entity_type });
+        case EventType.ANNOUNCEMENT_CREATED:
+            return t('EventAnnouncementCreated', { entity, entity_type });
+        case EventType.ANNOUNCEMENT_REMOVED:
+            return t('EventAnnouncementRemoved', { entity, entity_type });
         default:
             throw new Error(`Unsupported event type ${event_type}`);
     }

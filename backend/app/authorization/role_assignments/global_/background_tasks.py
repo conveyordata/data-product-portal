@@ -1,0 +1,44 @@
+import asyncio
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.authorization.role_assignments.global_.admin import admin_expiry_in_future
+from app.authorization.role_assignments.global_.service import RoleAssignmentService
+from app.core.logging import logger
+from app.database.database import SessionLocal
+from app.users.model import User as UserModel
+
+CHECK_INTERVAL_SECONDS = 60  # run every minute
+
+
+async def revoke_expired_admins(db: Session) -> None:
+    service = RoleAssignmentService(db)
+    expired = (
+        db.execute(
+            select(UserModel)
+            .where(UserModel.admin_expiry.isnot(None))
+            .where(~admin_expiry_in_future)
+        )
+        .scalars()
+        .all()
+    )
+
+    if expired:
+        for user in expired:
+            service.revoke_admin(user)
+
+        db.commit()
+        logger.info(f"[Auth] Revoked {len(expired)} expired admin role(s)")
+
+
+async def check_expired_admins() -> None:
+    while True:
+        try:
+            with SessionLocal() as db:
+                await revoke_expired_admins(db)
+        except Exception as e:
+            # don't crash the loop if something fails
+            logger.warning(f"[Auth] Expiry check failed: {e}")
+
+        await asyncio.sleep(CHECK_INTERVAL_SECONDS)

@@ -12,6 +12,8 @@ from .access_mode_create import AccessModeCreate
 from .access_mode_update import AccessModeUpdate
 from .access_mode_with_type import AccessModeWithType
 from .access_response import AccessResponse
+from .announcement import Announcement
+from .announcement_type import AnnouncementType
 from .approve_link_between_technical_asset_and_output_port_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
 )
@@ -59,6 +61,8 @@ from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
+from .create_announcement import CreateAnnouncement
+from .create_announcement_response import CreateAnnouncementResponse
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -166,6 +170,7 @@ from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
 from .get_all_platforms_response import GetAllPlatformsResponse
+from .get_announcements_response import GetAnnouncementsResponse
 from .get_data_product_input_ports_response import GetDataProductInputPortsResponse
 from .get_data_product_output_ports_response import GetDataProductOutputPortsResponse
 from .get_data_product_response import GetDataProductResponse
@@ -308,8 +313,6 @@ from .output_port_status import OutputPortStatus
 from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
-from .owned_technical_asset import OwnedTechnicalAsset
-from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
 from .platform_service import PlatformService
@@ -441,6 +444,8 @@ __all__ = (
     "AccessModeUpdate",
     "AccessModeWithType",
     "AccessResponse",
+    "Announcement",
+    "AnnouncementType",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
     "AssignmentFilter",
@@ -468,6 +473,8 @@ __all__ = (
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
     "CloudEventTechnicalAssetEvent",
+    "CreateAnnouncement",
+    "CreateAnnouncementResponse",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -559,6 +566,7 @@ __all__ = (
     "GetAccessModes",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
+    "GetAnnouncementsResponse",
     "GetDataProductInputPortsResponse",
     "GetDataProductOutputPortsResponse",
     "GetDataProductResponse",
@@ -671,8 +679,6 @@ __all__ = (
     "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
-    "OwnedTechnicalAsset",
-    "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",
     "Platform",
     "PlatformService",

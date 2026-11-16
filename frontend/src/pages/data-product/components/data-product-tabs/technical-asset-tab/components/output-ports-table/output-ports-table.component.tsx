@@ -24,38 +24,30 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
     const { isVisible, handleOpen, handleClose } = useModal();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
 
-    const { data: access_create_dataset } = useCheckAccessQuery(
+    const { data: accessCreateOutputPort } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_OUTPUT_PORT,
         },
         { skip: !dataProductId },
     );
 
-    const { data: can_link_data_output } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK,
-        },
-        { skip: !dataProductId },
-    );
     const [searchTerm, setSearchTerm] = useState('');
-    const filteredDatasets = useMemo(() => {
+    const filteredOutputPorts = useMemo(() => {
         if (!searchTerm) return outputPorts;
         return outputPorts.filter(
-            (dataset) =>
-                dataset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                dataset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+            (op) =>
+                op?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                op?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         );
     }, [outputPorts, searchTerm]);
 
     if (!dataProduct) return null;
 
-    // TODO To be seen if these are the right ACCESS checks we want here or if we need to create new ones.
-    const canCreateDataset = (access_create_dataset?.allowed && can_link_data_output?.allowed) || false;
+    const canCreateOutputPort = accessCreateOutputPort?.allowed ?? false;
 
     return (
-        <Flex vertical gap={filteredDatasets.length === 0 ? 'large' : 'small'}>
+        <Flex vertical gap={filteredOutputPorts.length === 0 ? 'large' : 'small'}>
             <Flex vertical gap="middle">
                 <Flex justify="space-between" align="center">
                     <Typography.Title level={4} style={{ margin: 0 }}>
@@ -63,7 +55,7 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
                     </Typography.Title>
                     <Button
                         onClick={handleOpen}
-                        disabled={!canCreateDataset}
+                        disabled={!canCreateOutputPort}
                         type="primary"
                         loading={isLoadingDataProduct}
                     >
@@ -79,12 +71,12 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
             </Flex>
             <QueryList
                 query={outputPortsQuery}
-                items={filteredDatasets}
-                renderItem={(dataset) => (
+                items={filteredOutputPorts}
+                renderItem={(outputPort) => (
                     <OutputPortCard
-                        key={dataset.id}
+                        key={outputPort.id}
                         dataProductId={dataProductId}
-                        outputPortId={dataset.id}
+                        outputPortId={outputPort.id}
                         draggedDataOutputId={draggedDataOutputId}
                     />
                 )}

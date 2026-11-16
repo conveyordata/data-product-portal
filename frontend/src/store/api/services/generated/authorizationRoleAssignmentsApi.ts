@@ -363,6 +363,7 @@ export type AuthorizationAction =
   | 313
   | 314
   | 315
+  | 316
   | 401
   | 402
   | 403
@@ -432,10 +433,7 @@ export type DeleteDataProductRoleAssignmentResponse = {
   data_product_id: string;
 };
 export type AbstractDataProductStatus =
-  | "pending"
-  | "active"
-  | "archived"
-  | "deleting";
+  "pending" | "active" | "archived" | "deleting";
 export type DataProductIconKey =
   | "reporting"
   | "processing"
@@ -494,9 +492,7 @@ export type DeleteOutputPortRoleAssignmentResponse = {
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessFunction =
-  | "restricted"
-  | "private"
-  | "unrestricted";
+  "restricted" | "private" | "unrestricted";
 export type OutputPortAccessType = {
   id: string;
   name: string;

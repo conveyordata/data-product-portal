@@ -20,7 +20,7 @@ type TestStorePreloadedState = {
     cart?: { DatasetIds: string[] };
 };
 
-function createTestStore() {
+export function createTestStore() {
     const store = configureStore({
         reducer: {
             auth: authSlice,
@@ -72,5 +72,5 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
-export { fireEvent, screen, waitFor, within } from '@testing-library/react';
+export { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';

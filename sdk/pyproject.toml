@@ -1,10 +1,8 @@
 [project]
 name = "data-product-portal-sdk"
-version = "0.8.0"
+version = "0.8.1"
 description = "SDK for Data Product Portal"
-authors = [
-    {name = "Dataminded"}
-]
+authors = [{ email = "support@conveyordata.com" }]
 requires-python = ">=3.13"
 dependencies = [
     # HTTP client used by the generated api_client to make requests

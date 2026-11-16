@@ -1,3 +1,6 @@
+import pytest
+from fastapi import HTTPException
+
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
@@ -200,3 +203,37 @@ def test_universal_search(session):
     assert result["total_count"] == 2
     assert dp.id == result["results"]["data_products"][0]["id"]
     assert dp.domain.id == result["results"]["domains"][0]["id"]
+
+
+def test_get_technical_asset_details__hidden_data_product_without_access(session):
+    asset = TechnicalAssetFactory(
+        owner=DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    )
+
+    with (
+        as_user(session, UserFactory().id),
+        pytest.raises(HTTPException, match="Technical asset not found"),
+    ):
+        get_technical_asset_details(technical_asset_id=str(asset.id), db=session)
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_names"), [("needle", ["needle visible"]), ("zzz", [])]
+)
+def test_universal_search__technical_asset_of_hidden_data_product(
+    session, query, expected_names
+):
+    TechnicalAssetFactory(name="needle visible")
+    TechnicalAssetFactory(
+        name="needle hidden",
+        owner=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+    )
+
+    with as_user(session, UserFactory().id):
+        result = universal_search(
+            query=query, entity_types=["technical_assets"], db=session
+        )
+
+    assert [
+        asset.name for asset in result["results"]["technical_assets"]
+    ] == expected_names

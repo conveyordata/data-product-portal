@@ -7,6 +7,10 @@ data:
   POSTGRES_PORT: {{ .Values.database.port }}
   POSTGRES_SERVER: {{ default .Values.database.server }}
   POSTGRES_DB: {{ default .Values.database.dbname }}
+  POSTGRES_AUTH_MODE: {{ .Values.database.auth_mode | default "password" }}
+  {{- if .Values.database.sslmode }}
+  PGSSLMODE: {{ .Values.database.sslmode }}
+  {{- end }}
   CORS_ALLOWED_ORIGINS: {{ .Values.host }}
   OIDC_AUTHORITY: {{ .Values.oidc.authority }}
   OIDC_REDIRECT_URI: {{ .Values.oidc.redirect_uri }}

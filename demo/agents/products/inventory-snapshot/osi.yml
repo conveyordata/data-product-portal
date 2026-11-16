@@ -2,7 +2,7 @@ semantic_model:
   - name: logistics_domain
     description: Inventory and warehouse tracking for SwiftGear
     ai_context:
-      instructions: "Use inventory_latest for current stock levels. Use stock_levels for historical trends. Always filter out retired items for sellable stock. ALWAYS challenge the user if their premise is numerically incorrect based on the data."
+      instructions: "Use inventory_latest for current stock levels; it only holds active SKUs, so needs no retired filter. Use stock_levels for historical trends, always with is_retired = FALSE. ALWAYS challenge the user if their premise is numerically incorrect based on the data."
 
     datasets:
       - name: inventory_latest

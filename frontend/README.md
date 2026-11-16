@@ -66,11 +66,13 @@ const config = (() => {
 ## Running the front end locally for development
 
 First you need to install all project dependencies using NPM. Execute the following command:
+
 ```sh
 npm install
 ```
 
 To run a dev server please run:
+
 ```sh
 npm run dev
 ```
@@ -101,6 +103,7 @@ The English value of the translatable labels is deliberately being used as the t
 #### Using the useTranslation hook
 
 Use the `t` function from the useTranslation hook in your components or hooks:
+
 ```jsx
 import { useTranslation } from 'react-i18next';
 
@@ -147,6 +150,7 @@ export default myUtilityFunction;
 
 You can extract all translatable fields into JSON locales files that can be found in the 'public/locales/{language}'
 folders (e.g. [en/translation.json](public/locales/en/translation.json)) by executing the command below:
+
 ```sh
 npm run extract-translations
 ```
@@ -313,17 +317,18 @@ export default i18n;
 For more information on how to use i18next with React, please refer to
 the [react-i18next documentation](https://react.i18next.com/getting-started).
 
-
 ## Data Tracking
 
 This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
 
 To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
+
 - By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
 - By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
 
 When enabled, tracking is limited strictly to user interactions within the web interface.
 At the moment, it only captures the following:
+
 - clicks
 - timing of those clicks
 - path changes
@@ -331,7 +336,6 @@ At the moment, it only captures the following:
 - pageviews
 - search queries (for datasets, etc.)
   All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

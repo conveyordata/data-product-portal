@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-button.component.tsx';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
+import { NewAnnouncementsTag } from '@/components/announcements/new-announcements-tag.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
@@ -58,12 +59,20 @@ export const getDataProductDatasetsColumns = ({
                     />
                 );
                 return (
-                    <TableCellAvatar
-                        popover={{ title: popoverTitle, content: output_port.description }}
-                        linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
-                        icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
-                        title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
-                    />
+                    <Flex vertical align="flex-start" gap="small">
+                        <TableCellAvatar
+                            popover={{ title: popoverTitle, content: output_port.description }}
+                            linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
+                            icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
+                            title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
+                        />
+                        {isDatasetRequestApproved && (
+                            <NewAnnouncementsTag
+                                outputPortId={output_port.id}
+                                dataProductId={output_port.data_product_id}
+                            />
+                        )}
+                    </Flex>
                 );
             },
             sorter: sorter.stringSorter((input_port) => input_port.output_port.name),

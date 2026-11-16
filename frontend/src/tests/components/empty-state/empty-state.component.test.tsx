@@ -7,7 +7,7 @@ import {
     hasFailed,
     isAwaitingData,
 } from '@/components/empty-state/empty-state.component.tsx';
-import { renderWithProviders, screen, userEvent } from '../../test-utils';
+import { renderWithProviders, screen, userEvent } from '@/tests/test-utils.tsx';
 
 const baseProps = {
     icon: <span />,
@@ -36,6 +36,7 @@ describe('EmptyState', () => {
     });
 
     it('names the search term and offers to clear it instead of the action', async () => {
+        const user = userEvent.setup();
         const onClear = vi.fn();
         renderWithProviders(
             <EmptyState {...baseProps} subject="Data Products" filter={{ searchTerm: 'xx', onClear }} />,
@@ -45,7 +46,7 @@ describe('EmptyState', () => {
         expect(screen.queryByText('Create one')).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Create Data Product' })).not.toBeInTheDocument();
 
-        await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+        await user.click(screen.getByRole('button', { name: 'Clear search' }));
         expect(onClear).toHaveBeenCalledOnce();
     });
 
@@ -71,6 +72,7 @@ describe('EmptyState', () => {
     });
 
     it('reports a failed load instead of claiming nothing exists, and retries', async () => {
+        const user = userEvent.setup();
         const refetch = vi.fn();
         renderWithProviders(
             <EmptyState
@@ -83,7 +85,7 @@ describe('EmptyState', () => {
 
         expect(screen.getByText("Couldn't load Data Products")).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument();
-        await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+        await user.click(screen.getByRole('button', { name: 'Try again' }));
         expect(refetch).toHaveBeenCalledOnce();
     });
 

@@ -226,7 +226,9 @@ class DataProductReconciler(Reconciler):
             )
             for a in existing_assets
         ):
-            osi_cfg = next((c for c in configs if c.service.name == "OSI"), None)
+            osi_cfg = next(
+                (c for c in configs if c.service.name.lower() == "osi"), None
+            )
             if osi_cfg:
                 configuration = OSISemanticModelTechnicalAssetConfiguration(
                     model_name=f"{name} Semantic Model",
@@ -240,7 +242,9 @@ class DataProductReconciler(Reconciler):
             PostgreSQLTechnicalAssetConfiguration.from_configuration(a.configuration)
             for a in existing_assets
         ):
-            pg_cfg = next((c for c in configs if c.service.name == "PostgreSQL"), None)
+            pg_cfg = next(
+                (c for c in configs if c.service.name.lower() == "postgresql"), None
+            )
             if pg_cfg:
                 configuration = PostgreSQLTechnicalAssetConfiguration(
                     database=demo_db_name,

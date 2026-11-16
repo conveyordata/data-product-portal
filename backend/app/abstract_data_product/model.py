@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import Column, ForeignKey, String, func, select
+from sqlalchemy import UUID, Column, ForeignKey, String, func, select
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus

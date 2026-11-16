@@ -1,9 +1,10 @@
 import json
+from typing import Any
 
 import jwt
 from jwt.algorithms import RSAAlgorithm
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.auth.oidc import OIDCConfiguration
 from app.core.logging import logger
@@ -18,6 +19,7 @@ def get_oidc():
 class JWTToken(BaseModel):
     sub: str
     token: str
+    claims: dict[str, Any] = Field(default_factory=dict)
 
 
 class JWTTokenValid:
@@ -35,8 +37,8 @@ class JWTTokenValid:
             kid = jwk["kid"]
             public_keys[kid] = RSAAlgorithm.from_jwk(json.dumps(jwk))
 
-        kid = jwt.get_unverified_header(verifiable_token)["kid"]
         try:
+            kid = jwt.get_unverified_header(verifiable_token)["kid"]
             self.valid_jwt_token = jwt.decode(
                 jwt=verifiable_token,
                 key=public_keys[kid],
@@ -44,13 +46,13 @@ class JWTTokenValid:
                 issuer=self.oidc.authority,
                 audience=self.oidc.audience,
             )
-        except ExpiredSignatureError as e:
-            self.logger.debug("jwt token is expired", e)
+        except ExpiredSignatureError:
+            self.logger.debug("Access token rejected: expired")
             return False
         except PyJWTError as e:
-            self.logger.debug("Problem parsing jwt token", e)
+            self.logger.debug(f"Access token rejected: {e}")
             return False
         except Exception as e:
-            self.logger.debug("Generic exception: Problem parsing jwt token", e)
+            self.logger.warning(f"Access token rejected, unexpected error: {e!r}")
             return False
         return True

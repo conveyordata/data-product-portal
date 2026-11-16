@@ -12,6 +12,7 @@ from ..models.event_entity_type import EventEntityType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.announcement import Announcement
     from ..models.data_product import DataProduct
     from ..models.exploration import Exploration
     from ..models.group_identity import GroupIdentity
@@ -47,6 +48,7 @@ class GetEventHistoryResponseItem:
         technical_asset (None | TechnicalAsset | Unset):
         exploration (Exploration | None | Unset):
         identity (GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity):
+        announcement (Announcement | None | Unset):
     """
 
     id: UUID
@@ -67,9 +69,11 @@ class GetEventHistoryResponseItem:
     technical_asset: None | TechnicalAsset | Unset = UNSET
     exploration: Exploration | None | Unset = UNSET
     identity: GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity = UNSET
+    announcement: Announcement | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.announcement import Announcement  # noqa: PLC0415
         from ..models.data_product import DataProduct  # noqa: PLC0415
         from ..models.exploration import Exploration  # noqa: PLC0415
         from ..models.group_identity import GroupIdentity  # noqa: PLC0415
@@ -185,6 +189,14 @@ class GetEventHistoryResponseItem:
         else:
             identity = self.identity
 
+        announcement: dict[str, Any] | None | Unset
+        if isinstance(self.announcement, Unset):
+            announcement = UNSET
+        elif isinstance(self.announcement, Announcement):
+            announcement = self.announcement.to_dict()
+        else:
+            announcement = self.announcement
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -221,11 +233,14 @@ class GetEventHistoryResponseItem:
             field_dict["exploration"] = exploration
         if identity is not UNSET:
             field_dict["identity"] = identity
+        if announcement is not UNSET:
+            field_dict["announcement"] = announcement
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.announcement import Announcement  # noqa: PLC0415
         from ..models.data_product import DataProduct  # noqa: PLC0415
         from ..models.exploration import Exploration  # noqa: PLC0415
         from ..models.group_identity import GroupIdentity  # noqa: PLC0415
@@ -454,6 +469,23 @@ class GetEventHistoryResponseItem:
 
         identity = _parse_identity(d.pop("identity", UNSET))
 
+        def _parse_announcement(data: object) -> Announcement | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                announcement_type_0 = Announcement.from_dict(data)
+
+                return announcement_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(Announcement | None | Unset, data)
+
+        announcement = _parse_announcement(d.pop("announcement", UNSET))
+
         get_event_history_response_item = cls(
             id=id,
             name=name,
@@ -473,6 +505,7 @@ class GetEventHistoryResponseItem:
             technical_asset=technical_asset,
             exploration=exploration,
             identity=identity,
+            announcement=announcement,
         )
 
         get_event_history_response_item.additional_properties = d

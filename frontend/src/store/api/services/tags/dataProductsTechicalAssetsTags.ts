@@ -1,5 +1,6 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
@@ -68,7 +69,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     denyOutputPortTechnicalAssetLink: {
@@ -79,7 +80,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     linkOutputPortToTechnicalAsset: {
@@ -93,7 +94,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     unlinkOutputPortFromTechnicalAsset: {
@@ -104,7 +105,7 @@ export const dataProductTechnicalAssetsTags = {
         ) => [
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     createTechnicalAsset: {
@@ -113,6 +114,7 @@ export const dataProductTechnicalAssetsTags = {
                 type: TagTypes.DataProductTechnicalAssets,
                 id: dataProductId,
             },
+            { type: TagTypes.DataProduct, id: dataProductId },
         ],
     },
     getTechnicalAsset: {
@@ -124,7 +126,11 @@ export const dataProductTechnicalAssetsTags = {
         ],
     },
     removeTechnicalAsset: {
-        invalidatesTags: invalidateTagsTechnicalAsset,
+        invalidatesTags: (_, __, { dataProductId, id }) => [
+            { type: TagTypes.TechnicalAsset, id: STATIC_TAG_ID.LIST },
+            { type: TagTypes.DataProductTechnicalAssets, id: dataProductId },
+            { type: TagTypes.History, id },
+        ],
     },
     updateTechnicalAsset: {
         invalidatesTags: invalidateTagsTechnicalAsset,
@@ -140,5 +146,4 @@ export const dataProductTechnicalAssetsTags = {
     updateTechnicalAssetStatus: {
         invalidatesTags: invalidateTagsTechnicalAsset,
     },
-    getTechnicalAssetGraphData: {},
 } satisfies EndpointDefinitions;
