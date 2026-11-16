@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-minor() { grep -m1 -oE '[0-9]+\.[0-9]+'; }
+minor() { grep -m1 -oE '[0-9]+\.[0-9]+' | head -1; }
 hook() { sed -n "/name: mypy ($1)/,/- id:/p" .pre-commit-config.yaml | grep -m1 'language_version' | minor; }
 
-expected=$(grep -m1 -E '^python = ' backend/pyproject.toml | minor)
+expected=$(grep -m1 -E '^requires-python = ' backend/pyproject.toml | minor)
 if [[ -z "$expected" ]]; then
   echo "Could not read the Python version from backend/pyproject.toml"
   exit 1
