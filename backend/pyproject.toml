@@ -2,21 +2,19 @@
 name = "data-product-portal"
 version = "0.8.1"
 description = "Data Product Portal core"
+authors = [{ email = "support@conveyordata.com" }]
+readme = "README.md"
+requires-python = ">=3.14,<4.0"
+dynamic = ["dependencies"]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "data-product-portal"
-version = "0.8.1"
-description = "Data Product Portal core"
-authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
-readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
-python = "^3.14"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = ">=26.2,<28.0"
@@ -112,6 +110,15 @@ select = [
     "FURB",
     "PERF",
     "FLY",
+]
+ignore = ["TC001", "TC002", "TC003"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic_settings.BaseSettings",
+    "app.shared.schema.ORMModel",
+    "app.database.database.Base",
 ]
 
 [tool.ruff.lint.per-file-ignores]

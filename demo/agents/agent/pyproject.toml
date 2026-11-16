@@ -2,10 +2,7 @@
 name = "dpp-agent"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Pascal Knapen",email = "pascal.knapen@dataminded.com"}
-]
-readme = "README.md"
+authors = [{ email = "support@conveyordata.com" }]
 requires-python = ">=3.13,<3.15"
 dependencies = [
     "agno[os] (>=2.5.5,<3.0.0)",

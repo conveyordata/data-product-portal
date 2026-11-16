@@ -1,7 +1,5 @@
 import asyncio
-from collections.abc import Awaitable, Callable
 from contextlib import suppress
-from typing import Any
 
 from fastapi import FastAPI
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -83,36 +81,28 @@ class EventDispatcher:
 
     async def stop(self) -> None:
         # The queue stays open here so in-flight requests can still submit.
-        await self._wait_for(
-            self._idle.wait(),
-            _INFLIGHT_DRAIN_TIMEOUT_SECONDS,
-            "Timed out waiting for %s in-flight request(s) before webhook v2 shutdown",
-            lambda: self._inflight_requests,
-        )
+        try:
+            async with asyncio.timeout(_INFLIGHT_DRAIN_TIMEOUT_SECONDS):
+                await self._idle.wait()
+        except TimeoutError:
+            logger.warning(
+                "Timed out waiting for %s in-flight request(s) before webhook v2 shutdown",
+                self._inflight_requests,
+            )
 
         self._queue.shutdown(immediate=False)
-        await self._wait_for(
-            self._queue.join(),
-            _QUEUE_DRAIN_TIMEOUT_SECONDS,
-            "Timed out draining webhook v2 event queue, dropping %s queued batch(es)",
-            self._queue.qsize,
-        )
+        try:
+            async with asyncio.timeout(_QUEUE_DRAIN_TIMEOUT_SECONDS):
+                await self._queue.join()
+        except TimeoutError:
+            logger.warning(
+                "Timed out draining webhook v2 event queue, dropping %s queued batch(es)",
+                self._queue.qsize(),
+            )
 
         self._task.cancel()
         with suppress(asyncio.CancelledError):
             await self._task
-
-    @staticmethod
-    async def _wait_for(
-        awaitable: Awaitable[Any],
-        timeout: float,
-        message: str,
-        remaining: Callable[[], int],
-    ) -> None:
-        try:
-            await asyncio.wait_for(awaitable, timeout=timeout)
-        except TimeoutError:
-            logger.warning(message, remaining())
 
 
 def _log_task_result(task: asyncio.Task[None]) -> None:
