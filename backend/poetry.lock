@@ -2076,14 +2076,14 @@ protobuf = ["grpcio-tools (>=1.85.0)"]
 
 [[package]]
 name = "gunicorn"
-version = "27.0.0"
+version = "27.0.1"
 description = "WSGI HTTP Server for UNIX"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "gunicorn-27.0.0-py3-none-any.whl", hash = "sha256:1380f2f520abc3beb9e72cd2e728bd2d08a19b3ff6ac03ebd8da71d1798a4008"},
-    {file = "gunicorn-27.0.0.tar.gz", hash = "sha256:88d52e7c60b3af07bc8db431fbb450a94780f2cbe7c420c7cf1891392661c591"},
+    {file = "gunicorn-27.0.1-py3-none-any.whl", hash = "sha256:378b26b9a38adcf4592f28828233c1716acc55e833ea06bf48719782efaa0d10"},
+    {file = "gunicorn-27.0.1.tar.gz", hash = "sha256:b1514965361c8b7e8107a80aa2a92636878df1ccfac6dd204a676426e04d9e3e"},
 ]
 
 [package.extras]
@@ -6067,4 +6067,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "dd94cd2f105e9bc539bf79ee45797519b36b5cb4d68a023288299c138ed52d13"
+content-hash = "5dc3e4e4aea741876a0888fa08378bab72422a12dbd6785cc2b14e000732736a"
