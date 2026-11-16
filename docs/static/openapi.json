@@ -10857,6 +10857,7 @@
         "properties": {
           "expiry": {
             "type": "string",
+            "format": "date-time",
             "title": "Expiry"
           }
         },

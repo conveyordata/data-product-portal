@@ -1,11 +1,10 @@
 from base64 import urlsafe_b64encode
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from typing import Annotated
 from uuid import uuid4
 
 import httpx
-import pytz
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -53,7 +52,7 @@ def verify_auth_header(
 
 
 def utc_now() -> datetime:
-    return datetime.now(tz=pytz.utc).replace(tzinfo=None)
+    return datetime.now(tz=timezone.utc).replace(tzinfo=None)
 
 
 class DeviceFlowService:

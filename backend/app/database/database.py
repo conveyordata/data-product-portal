@@ -1,6 +1,7 @@
 import time
 from contextlib import contextmanager
-from typing import Any, Generator, Type, TypeVar
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any, Generator, Type, TypeVar
 from urllib.parse import quote_plus
 from uuid import UUID
 
@@ -13,7 +14,12 @@ from app.settings import settings
 from app.shared.model import BaseORM
 from app.shared.schema import ORMModel
 
+if TYPE_CHECKING:
+    from azure.identity import DefaultAzureCredential
+
 OM = TypeVar("OM", bound=ORMModel)
+
+AZURE_POSTGRES_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
 
 SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER = "skip_output_port_access_function_filter"
 SKIP_DATA_PRODUCT_VISIBILITY_FILTER = "skip_data_product_visibility_filter"
@@ -38,12 +44,34 @@ def ensure_exists(
 
 def get_url() -> str:
     user = quote_plus(settings.POSTGRES_USER)
-    password = quote_plus(settings.POSTGRES_PASSWORD)
+    password = quote_plus(settings.POSTGRES_PASSWORD or "")
     return (
         f"postgresql://{user}:"
         f"{password}@{settings.POSTGRES_SERVER}:"
         f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
+
+
+def get_password() -> str:
+    if settings.POSTGRES_AUTH_MODE == "azure":
+        return _azure_credential().get_token(AZURE_POSTGRES_SCOPE).token
+    return settings.POSTGRES_PASSWORD or ""
+
+
+def apply_auth(engine: Engine) -> None:
+    if settings.POSTGRES_AUTH_MODE == "azure":
+        event.listen(engine, "do_connect", _set_password)
+
+
+def _set_password(dialect, conn_rec, cargs, cparams) -> None:
+    cparams["password"] = get_password()
+
+
+@lru_cache
+def _azure_credential() -> "DefaultAzureCredential":
+    from azure.identity import DefaultAzureCredential
+
+    return DefaultAzureCredential()
 
 
 engine = create_engine(
@@ -56,6 +84,7 @@ engine = create_engine(
     pool_pre_ping=settings.DB_POOL_PRE_PING,
     pool_use_lifo=True,
 )
+apply_auth(engine)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 

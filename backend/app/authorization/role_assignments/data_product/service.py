@@ -23,6 +23,7 @@ from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
 from app.groups.model import GroupMembership
 from app.groups.service import GroupService
+from app.shared.model import naive_utc_now
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
@@ -109,7 +110,7 @@ class RoleAssignmentService:
             identity_id=identity_id,
             role_id=role_id,
             data_product_id=data_product_id,
-            requested_on=datetime.now(),
+            requested_on=naive_utc_now(),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
@@ -136,7 +137,7 @@ class RoleAssignmentService:
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
-            assignment.decided_on = datetime.now()
+            assignment.decided_on = naive_utc_now()
             assignment.decided_by_id = actor.id
 
         self.db.flush()

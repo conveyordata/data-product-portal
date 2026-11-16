@@ -1,9 +1,8 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Sequence
 from uuid import UUID
 
-import pytz
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -305,7 +304,7 @@ class TechnicalAssetService:
             output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
+            requested_on=datetime.now(tz=timezone.utc),
         )
         technical_asset.output_port_links.append(output_port_link)
         self.db.flush()

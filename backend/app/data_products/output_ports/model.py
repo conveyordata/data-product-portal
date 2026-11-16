@@ -10,9 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     String,
-    event,
     func,
-    or_,
     select,
 )
 from sqlalchemy.dialects.postgresql import TSVECTOR
@@ -24,18 +22,13 @@ from sqlalchemy.orm import (
     foreign,
     mapped_column,
     relationship,
-    with_loader_criteria,
 )
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.model import (
+from app.authorization.role_assignments.output_port.model import (  # noqa: TC001
     DatasetRoleAssignment,
 )
 from app.configuration.access_durations.enums import AccessDurationType
@@ -44,10 +37,6 @@ from app.configuration.output_port_access_types.model import (
     OutputPortAccessType,
 )
 from app.configuration.tags.model import Tag, tag_output_port_table
-from app.core.auth.db_utils import (
-    is_system_account,
-    is_user_admin,
-)
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
@@ -60,12 +49,10 @@ from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import (
-    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
     Base,
     ensure_exists,
 )
 from app.database.event_mixin import EventTrackedMixin
-from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -73,84 +60,6 @@ if TYPE_CHECKING:
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import (
         DataProduct,
-    )
-
-
-def _has_user_access_to_private_output_port(cls, user_id: uuid.UUID):
-    return (
-        select(DatasetRoleAssignment.id)
-        .where(DatasetRoleAssignment.output_port_id == cls.id)
-        .where(DatasetRoleAssignment.user_id == user_id)
-        .where(DatasetRoleAssignment.decision == DecisionStatus.APPROVED)
-        .exists()
-    )
-
-
-def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.UUID):
-    user_group_ids = (
-        select(GroupMembership.group_id)
-        .where(GroupMembership.member_identity_id == user_id)
-        .correlate_except(GroupMembership)
-    )
-
-    return (
-        select(DataProductRoleAssignment.id)
-        .where(DataProductRoleAssignment.data_product_id == cls.data_product_id)
-        .where(
-            or_(
-                DataProductRoleAssignment.identity_id == user_id,
-                DataProductRoleAssignment.identity_id.in_(user_group_ids),
-            )
-        )
-        .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
-        .exists()
-    )
-
-
-def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
-    input_ports = InputPort.__table__
-    assignments = DataProductRoleAssignment.__table__
-    user_group_ids = (
-        select(GroupMembership.group_id)
-        .where(GroupMembership.member_identity_id == user_id)
-        .correlate_except(GroupMembership)
-    )
-    return (
-        select(assignments.c.id)
-        .where(
-            or_(
-                assignments.c.identity_id == user_id,
-                assignments.c.identity_id.in_(user_group_ids),
-            ),
-            assignments.c.decision == DecisionStatus.APPROVED,
-            assignments.c.data_product_id.in_(
-                select(input_ports.c.consuming_abstract_data_product_id)
-                .where(
-                    input_ports.c.dataset_id == cls.id,
-                    input_ports.c.status == InputPortStatus.APPROVED,
-                )
-                .correlate_except(input_ports)
-            ),
-        )
-        .correlate_except(assignments)
-        .exists()
-    )
-
-
-def access_function_filter_excluding_consumers(user_id: uuid.UUID):
-    return or_(
-        OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
-        _has_user_access_to_private_output_port(OutputPort, user_id),
-        _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
-        is_user_admin(user_id),
-        is_system_account(user_id),
-    )
-
-
-def _access_function_filter_for_user(user_id: uuid.UUID):
-    return or_(
-        access_function_filter_excluding_consumers(user_id),
-        _has_user_access_through_input_port(OutputPort, user_id),
     )
 
 
@@ -339,27 +248,3 @@ def ensure_output_port_exists(
             detail=f"Required item {output_port_id} does not exist",
         )
     return output_port
-
-
-@event.listens_for(Session, "do_orm_execute")
-def enforce_private_output_port_filter(execute_state):
-    if not execute_state.is_select:
-        return
-
-    if execute_state.execution_options.get(SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER):
-        return
-
-    # The current user is only set while serving a request. Everything else
-    # (migrations, casbin, startup sync) is a system level operation that is not
-    # performed on behalf of a user and therefore has nothing to filter against.
-    user_id = execute_state.session.info.get("current_user_id")
-    if user_id is None:
-        return
-
-    execute_state.statement = execute_state.statement.options(
-        with_loader_criteria(
-            OutputPort,
-            lambda cls: _access_function_filter_for_user(user_id),
-            include_aliases=True,
-        )
-    )

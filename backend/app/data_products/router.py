@@ -570,14 +570,12 @@ def revoke_input_port_for_data_product(
 def get_data_products(
     db: Session = Depends(get_db_session, scope="function"),
     assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
-    current_user: User = Depends(get_authenticated_user),
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
             GetDataProductsResponseItem.model_validate(dp)
             for dp in DataProductService(db).get_data_products(
                 assignment_filter=assignment_filter,
-                current_user=current_user,
             )
         ]
     )

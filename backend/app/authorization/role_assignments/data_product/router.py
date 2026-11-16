@@ -29,6 +29,9 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
@@ -196,7 +199,7 @@ def create_data_product_role_assignment(
     )
 
     approvers: Sequence[User] = ()
-    if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
+    if not (is_admin := GlobalRoleAssignmentService(db).is_admin(user.id)):
         approvers = service.users_with_authz_action(
             data_product_id=role_assignment.data_product_id,
             action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,

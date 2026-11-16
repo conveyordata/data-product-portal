@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Sequence
 
-from sqlalchemy import UUID, Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy import UUID, Boolean, Column, ForeignKey, String
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -9,6 +9,7 @@ from app.database.database import ensure_exists
 from app.events.model import Event
 from app.identities.model import Identity
 from app.identities.type import IdentityType
+from app.shared.model import UTCDateTime
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
@@ -45,7 +46,7 @@ class User(Identity):
 
     has_seen_tour = Column(Boolean, default=False, nullable=False)
     can_become_admin = Column(Boolean, default=False, nullable=False)
-    admin_expiry = Column(DateTime(timezone=False), nullable=True)
+    admin_expiry = Column(UTCDateTime(), nullable=True)
 
     notifications: Mapped[list["Notification"]] = relationship(
         back_populates="user",

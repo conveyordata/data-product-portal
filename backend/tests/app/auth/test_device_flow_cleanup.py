@@ -1,6 +1,5 @@
 import datetime
 
-import pytz
 from sqlalchemy import select
 
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table
@@ -9,7 +8,7 @@ from app.core.auth.device_flows.schema import DeviceFlowStatus
 
 
 def test_device_flow_cleanup_removes_expired(session):
-    expired_time = datetime.datetime.now(tz=pytz.utc).replace(
+    expired_time = datetime.datetime.now(tz=datetime.timezone.utc).replace(
         tzinfo=None
     ) - datetime.timedelta(hours=24)
     for _ in range(3):
@@ -32,7 +31,7 @@ def test_device_flow_cleanup_removes_expired(session):
 
 
 def test_device_flow_cleanup_does_not_remove_active(session):
-    now = datetime.datetime.now(tz=pytz.utc).replace(tzinfo=None)
+    now = datetime.datetime.now(tz=datetime.timezone.utc).replace(tzinfo=None)
     future_expiry_time = now + datetime.timedelta(minutes=30)
     active = DeviceFlowModel(
         client_id="test-client",

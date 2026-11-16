@@ -15,6 +15,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 if TYPE_CHECKING:
     from app.abstract_data_product.input_ports.model import InputPort
@@ -114,3 +115,31 @@ class TestDataProductService:
         session.flush()
         DataProductService(session)._sync_consumer_reader_grouping(result.producer.id)
         assert not Authorization().has_access(**output_port_read)
+
+    def test_sync_consumer_reader_grouping__keeps_links_the_acting_user_cannot_see(
+        self, session
+    ):
+        result = self.setup_data_product_with_consumer()
+        other_output_port = OutputPortFactory(
+            data_product=result.producer,
+            access_function=OutputPortAccessFunction.PRIVATE,
+        )
+        other_consumer = DataProductFactory()
+        InputPortFactory(
+            output_port=other_output_port,
+            consuming_abstract_data_product=other_consumer,
+            status=InputPortStatus.APPROVED,
+        )
+        service = DataProductService(session)
+        service._sync_consumer_reader_grouping(result.producer.id)
+
+        with as_user(session, result.user.id):
+            service._sync_consumer_reader_grouping(result.producer.id)
+
+        links = {
+            (str(link.consumer_id), str(link.producer_output_port_id))
+            for link in Authorization().get_input_port_link(
+                producer_data_product_id=result.producer.id
+            )
+        }
+        assert (str(other_consumer.id), str(other_output_port.id)) in links

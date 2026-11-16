@@ -15,7 +15,7 @@ if not settings.DISABLED_AWS:
             "sts": session.client("sts"),
             "lambda": session.client("lambda"),
         }
-    except (AttributeError, NoRegionError, TokenRetrievalError, RuntimeError):
+    except AttributeError, NoRegionError, TokenRetrievalError, RuntimeError:
         logger.warning(
             "Could not instantiate AWS session. All AWS functionality will be disabled"
         )
@@ -40,7 +40,7 @@ def get_client(client_name: str) -> BaseClient:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=(
                 "AWS client is not initialized, "
-                "please update your code to be able to execute this request",
+                "please update your code to be able to execute this request"
             ),
         )
     return clients.get(client_name)

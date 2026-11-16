@@ -3,7 +3,6 @@ from logging.config import fileConfig
 from os.path import abspath, dirname
 
 from sqlalchemy import engine_from_config, pool
-from sqlalchemy.orm import Session
 
 from alembic import context
 
@@ -11,7 +10,7 @@ sys.path.insert(
     0, dirname(dirname(dirname(dirname(abspath(__file__)))))
 )  # Insert <.>/ # allows import from app.
 
-from app.database.database import UNFILTERED, get_url  # noqa: E402
+from app.database.database import apply_auth, get_url  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -72,10 +71,9 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    apply_auth(connectable)
 
     with connectable.connect() as connection:
-        Session(bind=connection).info["current_user_id"] = None
-        connection = connection.execution_options(**UNFILTERED)
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

@@ -143,7 +143,7 @@ It will install test dependencies, boot up the test database and run the tests.
 Run a baseline headless test against local backend (10 users, spawn 5/s, 1m):
 
 ```sh
-poetry run poe loadtest --headless -H http://localhost:5050 -u 10 -r 5 -t 1m
+task loadtest:backend -- --headless -H http://localhost:5050 -u 10 -r 5 -t 1m
 ```
 
 For more info see `backend/loadtest/locustfile.py`

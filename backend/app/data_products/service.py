@@ -1,11 +1,10 @@
 import copy
-from operator import and_
 from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, or_, select
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
@@ -16,9 +15,6 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
@@ -63,11 +59,11 @@ from app.data_products.schema_response import (
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
+from app.database.database import UNFILTERED
+from app.database.visibility import member_of
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.groups.service import GroupService
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -119,7 +115,8 @@ class DataProductService(AbstractDataProductService):
                     OutputPortModel.data_product_id == data_product_id,
                     InputPortModel.status == InputPortStatus.APPROVED,
                 )
-                .distinct()
+                .distinct(),
+                execution_options=UNFILTERED,
             ).tuples()
         )
 
@@ -156,7 +153,7 @@ class DataProductService(AbstractDataProductService):
     def sync_data_product_consumer_access(self) -> None:
         data_product_ids = self.db.scalars(
             select(DataProductModel.id),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+            execution_options=UNFILTERED,
         ).all()
         for data_product_id in data_product_ids:
             self._sync_consumer_reader_grouping(data_product_id)
@@ -219,7 +216,6 @@ class DataProductService(AbstractDataProductService):
     def get_data_products(
         self,
         *,
-        current_user: User,
         assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
         default_lifecycle = self.db.scalar(
@@ -236,24 +232,7 @@ class DataProductService(AbstractDataProductService):
             case AssignmentFilter.ALL:
                 pass
             case AssignmentFilter.ONLY_ASSIGNED:
-                user_group_ids = GroupService(
-                    self.db
-                ).get_groups_ids_identity_is_member_of(current_user.id)
-                query = query.where(
-                    DataProductModel.assignments.any(
-                        and_(
-                            DataProductRoleAssignment.decision
-                            == DecisionStatus.APPROVED,
-                            or_(
-                                DataProductRoleAssignment.identity_id
-                                == current_user.id,
-                                DataProductRoleAssignment.identity_id.in_(
-                                    user_group_ids
-                                ),
-                            ),
-                        )
-                    )
-                )
+                query = query.where(member_of(self.db, DataProductModel.id))
             case _:
                 assert_never(assignment_filter)
         query = query.order_by(asc(DataProductModel.name))
@@ -625,7 +604,7 @@ class DataProductService(AbstractDataProductService):
             select(DataProductModel.id).where(
                 DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
             ),
-            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+            execution_options=UNFILTERED,
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

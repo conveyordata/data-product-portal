@@ -66,10 +66,14 @@ begin
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'consumer aligned', 'Data product aligned with the needs of a specific consumer', 'REPORTING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO consumer_aligned_type_id;
 
     -- USERS
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@pharma.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'alice.baker@pharma.com', 'Alice', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO alice_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'bob.johnson@pharma.com', 'Bob', 'Johnson', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO bob_id;
-    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.researcher@pharma.com', true, 'Jane', 'Researcher', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO jane_id;
-    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.scientist@pharma.com', true, 'John', 'Scientist', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) ON CONFLICT (email) DO NOTHING returning id INTO john_id;
+    INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('a02d3714-97e3-40d8-92b7-3b018fd1229f', 'user', 'alice.baker@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('alice.baker@pharma.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', false, 'Alice', 'Baker', NULL, false) returning id INTO alice_id;
+    INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('35f2dd11-3119-4eb3-8f19-01b323131221', 'user', 'bob.johnson@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', false, 'Bob', 'Johnson', NULL, false) returning id INTO bob_id;
+    INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('d9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'user', 'jane.researcher@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', true, 'Jane', 'Researcher', NULL, true) returning id INTO jane_id;
+    INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('b72fca38-17ff-4259-a075-5aaa5973343c', 'user', 'john.scientist@pharma.com', timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', true, 'John', 'Scientist', NULL, true) returning id INTO john_id;
     -- ROLES
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('f80c101c-345c-4d5b-9524-57c55bd12d2d', 'Everyone', 'global', 1, 'This is the role that is used as fallback for users that don''t have another role', ARRAY [102, 104, 105], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('e43b6f7a-e776-49b2-9b51-117d8644d971', 'Owner', 'data_product', 2, 'The owner of a Data Product', ARRAY [301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 313, 314, 315, 316], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
@@ -99,7 +103,7 @@ begin
 
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin
-    INSERT into public.role_assignments_global (id, user_id, role_id, decision, requested_on, decided_on)
+    INSERT into public.role_assignments_global (id, identity_id, role_id, decision, requested_on, decided_on)
     SELECT gen_random_uuid(), id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP)
     FROM public.users WHERE email = 'john.scientist@pharma.com';
 

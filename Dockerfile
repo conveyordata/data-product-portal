@@ -37,7 +37,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
-COPY backend/requirements-poetry.txt .
+COPY tools/poetry/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
@@ -49,7 +49,7 @@ RUN poetry install --no-root
 # building the package metadata.
 COPY backend/README.md /README.md
 COPY backend/app /app
-RUN pip install --no-deps --no-build-isolation /
+RUN poetry install --only-root
 
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image

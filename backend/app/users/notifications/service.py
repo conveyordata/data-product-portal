@@ -12,10 +12,12 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment,
 )
-from app.core.authz.authorization import Authorization
 from app.data_products.output_ports.announcements.model import (
     Announcement as AnnouncementModel,
 )
@@ -70,7 +72,7 @@ class NotificationService:
                 detail=f"Notification {id} not found",
             )
 
-        is_admin = Authorization().has_admin_role(user_id=str(user.id))
+        is_admin = GlobalRoleAssignmentService(self.db).is_admin(user.id)
         is_owner = notification.user_id == user.id
         if not (is_admin or is_owner):
             raise HTTPException(

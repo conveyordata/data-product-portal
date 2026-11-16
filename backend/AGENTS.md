@@ -20,6 +20,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 *   When creating new endpoints check with the user if authorization is needed with `Authorization.enforce()`.
 In principle should always be present on non GET endpoints and sensitive GET endpoints.
 * Check if new actions need to be added.
+* Who sees a Data Product, Exploration, Technical Asset or Output Port is decided in `app/database/visibility.py`, and who is an admin in `app/authorization/role_assignments/global_/admin.py`; don't read `session.info` or write visibility or admin predicates elsewhere.
 
 ## SQLAlchemy
 *   SQLAlchemy: use `joined` lazy loading for 1:1 relationships; otherwise use `raise` and specify explicit eager loading.
@@ -28,7 +29,7 @@ In principle should always be present on non GET endpoints and sensitive GET end
 
 ## Testing
 
-*   Run `task test:backend` (or `poetry run pytest -v tests/` in the `backend` folder). Tests live in `backend/tests/`, organized to mirror `backend/app/`.
+*   Run `task test:backend` (or `poetry run pytest -v tests/` in the `backend` folder, after starting Postgres with `task db:up`). Tests live in `backend/tests/`, organized to mirror `backend/app/`.
 *   Name tests `test_<method_name>__<scenario>`.
 *   Use factories to build test data.
 *   Every new route must ship with full test coverage.
