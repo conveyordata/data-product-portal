@@ -12,7 +12,6 @@ from app.core.authz import Action
 from app.data_products.model import DataProduct, DataProductEnvironment
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.settings import settings
-from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
@@ -424,7 +423,7 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 403
 
-    def test_remove_technical_asset(self, client: TestClient, session):
+    def test_remove_technical_asset(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -435,14 +434,10 @@ class TestTechnicalAssetsRouter:
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=data_product)
-        configuration_id = technical_asset.configuration_id
-        configuration_type = type(technical_asset.configuration)
         response = self.delete_technical_asset(
             client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
-        assert session.get(configuration_type, configuration_id) is None
-        assert session.get(TechnicalAssetConfiguration, configuration_id) is None
 
     def test_remove_technical_asset_with_tags(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

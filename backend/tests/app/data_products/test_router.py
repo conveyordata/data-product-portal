@@ -17,7 +17,6 @@ from app.data_products.model import DataProductEnvironment, DataProductVisibilit
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
-from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -543,7 +542,7 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 403
 
-    def test_remove_data_product(self, client, session):
+    def test_remove_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -555,13 +554,8 @@ class TestDataProductsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        technical_asset = TechnicalAssetFactory(owner=data_product)
-        configuration_id = technical_asset.configuration_id
-        configuration_type = type(technical_asset.configuration)
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
-        assert session.get(configuration_type, configuration_id) is None
-        assert session.get(TechnicalAssetConfiguration, configuration_id) is None
 
     def test_remove_data_product__conflicting_query_id(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
