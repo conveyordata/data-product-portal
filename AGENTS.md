@@ -18,6 +18,7 @@ It consists of a 3-tier web architecture.
 *   `integrations/`: Platform-specific integration logic (Terraform, BitOL, data quality).
 *   `helm/`: Kubernetes deployment charts.
 *   `scripts/`: Build and utility scripts.
+*   `tools/poetry/`: Hashed requirements that install Poetry itself in every Docker image. Regenerate with `task poetry:reqs`.
 
 ## Workflow & Automation
 

@@ -65,6 +65,12 @@ updates:
     open-pull-requests-limit: 10
 
   - package-ecosystem: "pip"
+    directory: "/tools/poetry"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "pip"
     directory: "/.github"
     schedule:
       interval: "daily"

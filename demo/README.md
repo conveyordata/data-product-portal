@@ -21,7 +21,7 @@ Every demo should be self-contained in its own subdirectory and follow these req
 
 ## Python runtime
 
-The demo provisioners and agent server use the same pinned Python 3.14 image as the portal. Their hashed Poetry bootstrap requirements are generated for Python 3.14. Run `task poetry:sync` from this directory to copy the backend's bootstrap requirements to both provisioners.
+The demo provisioners and agent server use the same pinned Python 3.14 image as the portal. They install Poetry from the same hashed bootstrap requirements as the portal, in [`tools/poetry/`](../tools/poetry/), generated for Python 3.14. Dependabot only bumps the packages listed in `requirements-poetry.in` and sends security fixes for the rest, so run `task poetry:reqs` from the repository root now and then to update everything else.
 
 ## Existing Demos
 
