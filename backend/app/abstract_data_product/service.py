@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
-import pytz
 from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, contains_eager, selectinload
@@ -133,7 +132,7 @@ class AbstractDataProductService:
         request = InputPortRequestModel(
             justification=justification,
             requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
+            requested_on=datetime.now(tz=timezone.utc),
             access_duration_type=access_duration.access_duration_type,
             requested_duration_days=access_duration.days,
             input_port=input_port,
@@ -147,7 +146,7 @@ class AbstractDataProductService:
         ):
             InputPortService(self.db).approve_request(
                 request,
-                now=datetime.now(tz=pytz.utc),
+                now=datetime.now(tz=timezone.utc),
                 decided_by=actor if direct_grant else None,
                 decision_note="Access granted directly by output port owner"
                 if direct_grant
@@ -476,7 +475,7 @@ class AbstractDataProductService:
             )
 
         target.revoked_by = actor
-        target.revoked_at = datetime.now(tz=pytz.utc)
+        target.revoked_at = datetime.now(tz=timezone.utc)
         input_port.recompute_status()
         self.db.flush()
         InputPortService(self.db)._sync_hidden_data_product_access(
@@ -500,7 +499,7 @@ class AbstractDataProductService:
             )
 
         target.decided_by = actor
-        target.decided_on = datetime.now(tz=pytz.utc)
+        target.decided_on = datetime.now(tz=timezone.utc)
         target.decision = InputPortRequestDecision.CANCELLED
         input_port.recompute_status()
         self.db.flush()

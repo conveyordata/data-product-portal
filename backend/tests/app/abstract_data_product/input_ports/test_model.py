@@ -1,8 +1,6 @@
 import time
 from datetime import date, datetime, timedelta, timezone
 
-import pytz
-
 from app.abstract_data_product.input_ports.enums import (
     InputPortRequestDecision,
     InputPortStatus,
@@ -12,7 +10,7 @@ from app.shared.model import utc_today
 from tests.factories import InputPortFactory, InputPortRequestFactory
 
 TODAY = utc_today()
-NOW = datetime.now(pytz.utc)
+NOW = datetime.now(timezone.utc)
 
 
 class TestInputPortModel:

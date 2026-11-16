@@ -1,9 +1,8 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import cache
 from typing import Any, Optional
 
-import pytz
 from posthog import Posthog
 from sqlalchemy import func, select
 
@@ -55,7 +54,7 @@ class PosthogAnalyticsClient:
 
 
 def _seconds_until_next_midnight_utc() -> float:
-    now = datetime.now(tz=pytz.utc)
+    now = datetime.now(tz=timezone.utc)
     next_midnight = (now + timedelta(days=1)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )

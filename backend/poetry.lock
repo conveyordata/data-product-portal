@@ -4642,18 +4642,6 @@ dev = ["tox"]
 docs = ["furo", "sphinx"]
 
 [[package]]
-name = "pytz"
-version = "2026.6"
-description = "World timezone definitions, modern and historical"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "pytz-2026.6-py2.py3-none-any.whl", hash = "sha256:7fed3fee8fd6bd4a2b7b75a8d56021d0624127bf69bd5691f115db929ac570b3"},
-    {file = "pytz-2026.6.tar.gz", hash = "sha256:3b0fc2727707663d6e517936f444fd8a8b240f1fc32f4bf7ee03274245945284"},
-]
-
-[[package]]
 name = "pywin32"
 version = "312"
 description = "Python for Windows Extensions"
@@ -5475,18 +5463,6 @@ files = [
 ]
 
 [[package]]
-name = "types-pytz"
-version = "2026.6.0.20261031"
-description = "Typing stubs for pytz"
-optional = false
-python-versions = ">=3.10"
-groups = ["dev"]
-files = [
-    {file = "types_pytz-2026.6.0.20261031-py3-none-any.whl", hash = "sha256:d0d4fbe482edfb263440421866cba41d25daba37e5584e0cff6712a3b5a9d9e9"},
-    {file = "types_pytz-2026.6.0.20261031.tar.gz", hash = "sha256:8b559955f0c628f68159865c6f24835f4323c407a4408365b3676a074b524261"},
-]
-
-[[package]]
 name = "types-pyyaml"
 version = "6.0.12.20261103"
 description = "Typing stubs for PyYAML"
@@ -6091,4 +6067,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "c1d7b3bdc1a926a47e32dcf10235422e7dc0b462173d84f1f61c5b5119908c94"
+content-hash = "e4bb536e3b0d973107b7520ff31ab380b5cbfd99c7cc4da4f97043da2da56673"

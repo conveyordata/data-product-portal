@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Sequence
 from uuid import UUID
 
-import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, contains_eager
@@ -93,7 +92,7 @@ class TechnicalAssetOutputPortService:
 
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
-        current_link.approved_on = datetime.now(tz=pytz.utc)
+        current_link.approved_on = datetime.now(tz=timezone.utc)
         self.db.flush()
         return current_link
 
@@ -112,7 +111,7 @@ class TechnicalAssetOutputPortService:
         )
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
-        current_link.denied_on = datetime.now(tz=pytz.utc)
+        current_link.denied_on = datetime.now(tz=timezone.utc)
         self.db.flush()
         return current_link
 
