@@ -65,7 +65,6 @@ export const AuthLayout = () => {
     }, [handleAuthorizeUser, user]);
 
     useEffect(() => {
-        // This gets called when the user is authenticated
         const removeUserLoaded = events.addUserLoaded(async () => {
             try {
                 await handleAuthorizeUser();
@@ -94,12 +93,17 @@ export const AuthLayout = () => {
             });
         });
 
+        const removeUserUnloaded = events.addUserUnloaded(() => {
+            posthog.reset();
+        });
+
         return () => {
             removeUserLoaded();
             removeAccessTokenExpiring();
             removeAccessTokenExpired();
+            removeUserUnloaded();
         };
-    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
+    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect, posthog]);
 
     const userId = user?.id;
     useEffect(() => {
