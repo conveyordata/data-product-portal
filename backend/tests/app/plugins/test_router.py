@@ -326,22 +326,6 @@ class TestLinkPluginEndToEnd:
         assert response.status_code == 500
         assert "FakeLinkPlugin" in response.json()["detail"]
 
-    def test_get_plugin_url__azure_children_share_parent_url(self, client, monkeypatch):
-        monkeypatch.setattr(
-            settings,
-            "ENABLED_PLUGINS",
-            [
-                "AzureBlobTechnicalAssetConfiguration",
-                "AzureKeyVaultTechnicalAssetConfiguration",
-            ],
-        )
-        data_product = self._readable_data_product()
-
-        response = client.get(f"{ENDPOINT}/azure/url?id={data_product.id}")
-
-        assert response.status_code == 200, response.text
-        assert response.json()["url"] == "https://portal.azure.com/"
-
     @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
     def test_get_plugin_url__parent_platform_ignores_disabled_child(
         self, client, monkeypatch

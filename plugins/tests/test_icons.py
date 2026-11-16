@@ -9,7 +9,6 @@ def test_discovered__finds_every_first_party_plugin():
     assert {plugin.name for plugin in PLUGINS} == {
         "AgnoPlugin",
         "AzureBlobTechnicalAssetConfiguration",
-        "AzureKeyVaultTechnicalAssetConfiguration",
         "ConveyorPlugin",
         "DatabricksTechnicalAssetConfiguration",
         "GitHubPlugin",
