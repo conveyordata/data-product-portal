@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Any, Optional
 
@@ -43,7 +44,11 @@ class LoggingMiddleware(Middleware):
     async def _get_user_id(self) -> Optional[str]:
         """Get the authenticated user ID, returning None if not available."""
         try:
-            with db_session() as db:
-                return str(get_mcp_authenticated_user(db).id)
+            return await asyncio.to_thread(self._lookup_user_id)
         except Exception:
             return None
+
+    @staticmethod
+    def _lookup_user_id() -> str:
+        with db_session() as db:
+            return str(get_mcp_authenticated_user(db).id)
