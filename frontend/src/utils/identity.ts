@@ -47,10 +47,11 @@ export function getIdentityTypeLabel(identity: Identity, t: (key: string) => str
 }
 
 export function identityMatchesSearch(identity: Identity, searchTerm: string): boolean {
-    const value = searchTerm.toLowerCase();
+    const value = searchTerm.trim().toLowerCase();
 
     return (
         getIdentityDisplayName(identity).toLowerCase().includes(value) ||
-        getIdentitySecondaryLabel(identity).toLowerCase().includes(value)
+        getIdentitySecondaryLabel(identity).toLowerCase().includes(value) ||
+        identity.external_id.toLowerCase().includes(value)
     );
 }
