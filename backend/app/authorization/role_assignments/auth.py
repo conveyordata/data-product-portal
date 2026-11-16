@@ -9,7 +9,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.schema import (
     OutputPortRoleAssignment as OutputPortRoleAssignment,
 )
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 
 
 class AuthAssignment(Protocol):
@@ -49,7 +49,7 @@ class ResourceAuthAssignment(AuthAssignment):
         return assignment.role_id
 
     def add(self) -> bool:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         return authorizer.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
@@ -57,7 +57,7 @@ class ResourceAuthAssignment(AuthAssignment):
         )
 
     def remove(self) -> bool:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         return authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
@@ -68,7 +68,7 @@ class ResourceAuthAssignment(AuthAssignment):
         if self.previous_role_id is None:
             raise ValueError("Cannot swap roles without a previous role")
 
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         revoke = authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.previous_role_id),

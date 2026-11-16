@@ -13,7 +13,7 @@ from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.roles.schema import Scope
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.groups.model import Group
 from app.groups.schema_request import GroupCreate, GroupUpdate
@@ -149,7 +149,7 @@ class TestGroupService:
 
     def test_membership__immediately_adds_and_revokes_existing_group_access(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -184,13 +184,13 @@ class TestGroupService:
             member_identity_ids=[user.id],
         )
 
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -202,13 +202,13 @@ class TestGroupService:
             member_identity_ids=[user.id],
         )
 
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -217,7 +217,7 @@ class TestGroupService:
 
     def test_add_members__existing_member_immediately_inherits_new_group_data_product_role(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -238,7 +238,7 @@ class TestGroupService:
             role_id=group.id,
             resource_id=data_product.id,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -251,13 +251,13 @@ class TestGroupService:
             data_product_id=data_product.id,
             role_id=role.id,
         )
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=action,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(other_data_product.domain_id),
             obj=str(other_data_product.id),
@@ -269,7 +269,7 @@ class TestGroupService:
             role_id=role.id,
             resource_id=data_product.id,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -284,7 +284,7 @@ class TestGroupService:
 
     def test_delete_group_deleting_group_revokes_inherited_access(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -318,13 +318,13 @@ class TestGroupService:
             group_id=group.id,
             member_identity_ids=[user.id],
         )
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -332,13 +332,13 @@ class TestGroupService:
         )
 
         service.delete_group(group_id=group.id)
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -535,7 +535,7 @@ class TestGroupService:
             assert locked_group_id == group.id
 
     def test_add_members__assigns_membership_policies_in_batch(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         group = GroupFactory()
         first = UserFactory()
@@ -552,7 +552,7 @@ class TestGroupService:
             assert authorizer.has_global_role(user_id=member.id, role_id=group.id)
 
     def test_remove_members__revokes_only_removed_membership_policies(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         group = GroupFactory()
         removed = UserFactory()
@@ -574,7 +574,7 @@ class TestGroupService:
         assert authorizer.has_global_role(user_id=retained.id, role_id=group.id)
 
     def test_replace_members__updates_membership_policies(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         group = GroupFactory()
         removed = UserFactory()
@@ -722,7 +722,7 @@ class TestGroupService:
         assert second_member in session
 
     def test_delete_groups_batch__clears_subject_and_membership_policies(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         first_group = GroupFactory()
         second_group = GroupFactory()

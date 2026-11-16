@@ -39,7 +39,7 @@ from app.configuration.output_port_access_types.model import (
 )
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.context import discard_events
 from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
@@ -697,7 +697,7 @@ class OutputPortService:
     def _sync_public_reader_grouping(
         output_port_ids: Sequence[UUID], access_function: OutputPortAccessFunction
     ):
-        Authorization().sync_resource_roles(
+        CasbinPolicies().sync_resource_roles(
             user_id="*",
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=output_port_ids,
@@ -711,7 +711,7 @@ class OutputPortService:
             ),
             execution_options=UNFILTERED,
         ).all()
-        Authorization().sync_resource_roles(
+        CasbinPolicies().sync_resource_roles(
             user_id="*",
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=visible_output_port_ids,

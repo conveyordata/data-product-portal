@@ -16,7 +16,7 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from app.core.context import _pending_events
 from app.core.logging import logger
 from app.core.webhooks.events import V2Event
@@ -115,7 +115,7 @@ def everyone_role_permissions(session: Session):
         next_permissions = [int(action) for action in permissions]
 
         role.permissions = next_permissions
-        Authorization().sync_everyone_role_permissions(actions=permissions)
+        CasbinPolicies().sync_everyone_role_permissions(actions=permissions)
 
         try:
             yield
@@ -123,7 +123,9 @@ def everyone_role_permissions(session: Session):
             role = everyone_role()
             assert role is not None, "Failed to find the global 'everyone' role"
             role.permissions = original_permissions
-            Authorization().sync_everyone_role_permissions(actions=original_permissions)
+            CasbinPolicies().sync_everyone_role_permissions(
+                actions=original_permissions
+            )
 
     return _change_permissions
 
@@ -191,8 +193,8 @@ def admin() -> UserFactory:
 
 
 @pytest.fixture
-def authorizer() -> Authorization:
-    return Authorization()
+def authorizer() -> CasbinPolicies:
+    return CasbinPolicies()
 
 
 @contextmanager

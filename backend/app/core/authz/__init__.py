@@ -1,5 +1,5 @@
 from .actions import AuthorizationAction as Action
-from .authorization import Authorization
+from .authorization import Authorization, CasbinPolicies
 from .resolvers import (
     DataProductOutputPortAssociationResolver,
     DataProductResolver,
@@ -12,6 +12,7 @@ REDACTION_VALUE = "Redacted"
 __all__ = (
     "Action",
     "Authorization",
+    "CasbinPolicies",
     "TechnicalAssetOutputPortAssociationResolver",
     "DataProductOutputPortAssociationResolver",
     "DataProductResolver",

@@ -74,6 +74,16 @@ def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
     return _member(data_product_id, user_id)
 
 
+def consumes(db: Session, output_port_id: UUID, user_id: UUID) -> bool:
+    """Whether the user is a Member of a Data Product with an approved Input Port on the Output Port."""
+    return bool(
+        db.scalar(
+            select(_consumes(output_port_id, user_id)),
+            execution_options=UNFILTERED,
+        )
+    )
+
+
 def visible_ids(db: Session, ids: Iterable[UUID]) -> set[UUID]:
     """Unknown ids are left out, unless no user acts on the session: then all ids are returned."""
     ids = set(ids)

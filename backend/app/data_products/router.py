@@ -27,7 +27,7 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import AuthenticatedUser
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, CasbinPolicies, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
@@ -197,7 +197,7 @@ def _do_delete_data_product(
     authenticated_user: User,
 ) -> None:
     data_product = DataProductService(db).remove_data_product(id)
-    Authorization().clear_assignments_for_resource(resource_id=str(id))
+    CasbinPolicies().clear_assignments_for_resource(resource_id=str(id))
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_REMOVED,

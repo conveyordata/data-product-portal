@@ -3,7 +3,7 @@ import factory
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.roles import ADMIN_UUID
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 
 
 class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -18,7 +18,7 @@ class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
         if self.decision == DecisionStatus.APPROVED:
-            authorizer = Authorization()
+            authorizer = CasbinPolicies()
             if self.role_id == ADMIN_UUID:
                 authorizer.assign_admin_role(user_id=str(self.identity_id))
             else:

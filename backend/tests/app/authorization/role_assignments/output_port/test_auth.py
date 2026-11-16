@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.roles.schema import Role, Scope
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from tests.factories import (
     DatasetRoleAssignmentFactory,
     OutputPortFactory,
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class TestAuth:
-    def test_add(self, authorizer: Authorization):
+    def test_add(self, authorizer: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -38,7 +38,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    def test_remove(self, authorizer: Authorization):
+    def test_remove(self, authorizer: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -60,7 +60,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    def test_swap(self, authorizer: Authorization):
+    def test_swap(self, authorizer: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)

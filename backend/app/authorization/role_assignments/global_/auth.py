@@ -4,7 +4,7 @@ from uuid import UUID
 
 from app.authorization.role_assignments.auth import AuthAssignment
 from app.authorization.roles import ADMIN_UUID
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 
 from .schema import GlobalRoleAssignment
 
@@ -38,7 +38,7 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         return self.previous_role_id == ADMIN_UUID
 
     def add(self) -> bool:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
 
         if self.is_admin():
             return authorizer.assign_admin_role(user_id=str(self.user_id))
@@ -49,7 +49,7 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
             )
 
     def remove(self) -> bool:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         if self.is_admin():
             return authorizer.revoke_admin_role(user_id=str(self.user_id))
         else:
@@ -62,7 +62,7 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         if self.previous_role_id is None:
             raise ValueError("Cannot swap roles without a previous role")
 
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
 
         if self.was_admin():
             revoke = authorizer.revoke_admin_role(user_id=str(self.user_id))

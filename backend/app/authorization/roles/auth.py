@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from app.authorization.roles.schema import Prototype, Role, Scope
-from app.core.authz import Action, Authorization
+from app.core.authz import Action, CasbinPolicies
 
 
 @dataclass
@@ -24,7 +24,7 @@ class AuthRole(_AuthRole):
         )
 
     def sync(self) -> bool:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         if self.prototype == Prototype.EVERYONE:
             return authorizer.sync_everyone_role_permissions(actions=self.permissions)
         else:
@@ -33,7 +33,7 @@ class AuthRole(_AuthRole):
             )
 
     def remove(self) -> None:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         authorizer.remove_role_permissions(role_id=self.id)
 
         if self.scope == Scope.DATASET or self.scope == Scope.DATA_PRODUCT:

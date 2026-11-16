@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.users.model import User
 from app.users.service import UserService
 from tests.factories import (
@@ -185,7 +185,7 @@ class TestUserService:
 
     def test_remove_users_batch__clears_only_deleted_users_authorization(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         removed = UserFactory()

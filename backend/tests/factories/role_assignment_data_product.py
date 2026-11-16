@@ -4,7 +4,7 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from tests.factories import RoleFactory
 
 
@@ -21,7 +21,7 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
         if self.decision == DecisionStatus.APPROVED:
-            authorizer = Authorization()
+            authorizer = CasbinPolicies()
             authorizer.assign_resource_role(
                 role_id=str(self.role_id),
                 user_id=str(self.identity_id),

@@ -478,9 +478,6 @@ class AbstractDataProductService:
         target.revoked_at = datetime.now(tz=timezone.utc)
         input_port.recompute_status()
         self.db.flush()
-        InputPortService(self.db)._sync_hidden_data_product_access(
-            input_port.output_port.data_product_id
-        )
         return input_port
 
     def cancel_input_port_request(
@@ -511,10 +508,8 @@ class AbstractDataProductService:
         output_port_id: UUID,
     ) -> InputPortModel:
         input_port = self._get_input_port(id, output_port_id)
-        data_product_id = input_port.output_port.data_product_id
         self.db.delete(input_port)
         self.db.flush()
-        InputPortService(self.db)._sync_hidden_data_product_access(data_product_id)
         return input_port
 
     def send_input_port_requested_emails_to_output_port_owners(

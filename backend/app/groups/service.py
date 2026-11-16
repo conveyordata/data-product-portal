@@ -6,7 +6,7 @@ from sqlalchemy import asc, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.groups.model import Group, GroupMembership, ensure_group_exists
 from app.groups.schema_request import GroupCreate, GroupUpdate
 from app.groups.schema_response import (
@@ -26,7 +26,7 @@ from app.identities.type import IdentityType
 class GroupService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = Authorization()
+        self.authorizer = CasbinPolicies()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
         query = select(GroupMembership).order_by(

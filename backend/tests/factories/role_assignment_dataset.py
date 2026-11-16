@@ -4,7 +4,7 @@ import factory
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from app.data_products.output_ports.model import OutputPort
 from tests import test_session
 
@@ -43,7 +43,7 @@ class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
         if self.decision == DecisionStatus.APPROVED:
-            authorizer = Authorization()
+            authorizer = CasbinPolicies()
             authorizer.assign_resource_role(
                 role_id=str(self.role_id),
                 user_id=str(self.user_id),

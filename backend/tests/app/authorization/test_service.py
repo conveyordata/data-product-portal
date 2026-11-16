@@ -1,7 +1,7 @@
 from casbin_sqlalchemy_adapter import CasbinRule
 
 from app.authorization.service import AuthorizationService
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from tests.factories import (
@@ -15,7 +15,7 @@ from tests.factories.group import GroupFactory, GroupMembershipFactory
 
 
 class TestAuthorizationService:
-    def test_reload_enforcer(self, authorizer: Authorization, session):
+    def test_reload_enforcer(self, authorizer: CasbinPolicies, session):
         existing = len(session.query(CasbinRule).all())
 
         for i in range(5):
@@ -35,7 +35,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer_ensure_discoverable_data_products_sync(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         existing = len(session.query(CasbinRule).all())
 
@@ -55,7 +55,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer__syncs_group_data_product_access(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         user = UserFactory()
         group = GroupFactory()
@@ -73,7 +73,7 @@ class TestAuthorizationService:
         )
 
         AuthorizationService(session).reload_enforcer()
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -91,7 +91,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer__syncs_group_global_access(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         user = UserFactory()
         group = GroupFactory()
@@ -109,7 +109,7 @@ class TestAuthorizationService:
 
         AuthorizationService(session).reload_enforcer()
 
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -117,7 +117,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer__revokes_access_after_membership_removal(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         """
         This test ensures that the authorization service properly revokes access to a user after their membership is removed.
@@ -141,7 +141,7 @@ class TestAuthorizationService:
         service = AuthorizationService(session)
         service.reload_enforcer()
 
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -152,7 +152,7 @@ class TestAuthorizationService:
         session.flush()
         service.reload_enforcer()
 
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),

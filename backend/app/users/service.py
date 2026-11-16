@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
@@ -37,7 +37,7 @@ SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 class UserService:
     def __init__(self, db: Session):
         self.db = db
-        self.authorizer = Authorization()
+        self.authorizer = CasbinPolicies()
 
     def get_users(self) -> Sequence[UsersGet]:
         users = self.db.scalars(

@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.identities.schema_response import (
     IdentityBatchCreateError,
     IdentityBatchCreateResponse,
@@ -24,7 +24,7 @@ from app.machine_users.schema_response import (
 class MachineUserService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = Authorization()
+        self.authorizer = CasbinPolicies()
 
     def get_machine_users(self) -> Sequence[MachineUserGet]:
         return self.db.scalars(

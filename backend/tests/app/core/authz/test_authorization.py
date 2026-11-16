@@ -3,143 +3,119 @@ from uuid import uuid4
 
 from sqlalchemy import text  # noqa: TID251
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
-    Authorization,
-    InputPortLink,
-    _has_access_through_consumer_role,
-)
+from app.core.authz.authorization import Authorization, CasbinPolicies
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import engine
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
+    InputPortFactory,
+    OutputPortFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 ANY: str = "does_not_matter"
 ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
 
-class TestHasAccessThroughConsumerRole:
-    def test_returns_false_for_other_actions(self, authorizer: Authorization):
-        authorizer.assign_resource_role(
-            user_id="user", role_id="owner", resource_id="consumer"
+class TestHasAccess:
+    @staticmethod
+    def _consumer_member(status: InputPortStatus):
+        member = UserFactory()
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=member.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
         )
-        authorizer.add_input_port_link(
-            consumer_id="consumer",
-            producer_data_product_id="producer",
-            producer_output_port_id="output_port",
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+        InputPortFactory(
+            consuming_abstract_data_product=consumer, output_port=port, status=status
+        )
+        return member, port
+
+    @staticmethod
+    def _has_access(session, member, port, act: AuthorizationAction) -> bool:
+        return Authorization(session).has_access(
+            sub=str(member.id),
+            dom=str(port.data_product.domain_id),
+            obj=str(port.id),
+            parent=str(port.data_product_id),
+            act=act,
         )
 
-        assert not _has_access_through_consumer_role(
-            authorizer._enforcer,
-            sub="user",
-            role="owner",
-            resource="producer",
-            parent="*",
-            action=str(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+    def test_has_access__consumer_member_reads_invite_only_output_port(self, session):
+        member, port = self._consumer_member(InputPortStatus.APPROVED)
+
+        assert self._has_access(
+            session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
-    def test_returns_false_for_the_producer_data_product(
-        self, authorizer: Authorization
+    def test_has_access__consumer_member_through_a_group_reads_invite_only_output_port(
+        self, session
     ):
-        authorizer.add_input_port_link(
-            consumer_id="consumer",
-            producer_data_product_id="producer",
-            producer_output_port_id="output_port",
+        member = UserFactory()
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=member)
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=group.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
         )
-        authorizer.assign_resource_role(
-            user_id="user", role_id="owner", resource_id="consumer"
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+        InputPortFactory(consuming_abstract_data_product=consumer, output_port=port)
+
+        assert self._has_access(
+            session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
-        assert not _has_access_through_consumer_role(
-            authorizer._enforcer,
-            sub="user",
-            role="owner",
-            resource="producer",
-            parent="*",
-            action=str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
+    def test_has_access__consumer_member_is_denied_another_output_port(self, session):
+        member, port = self._consumer_member(InputPortStatus.APPROVED)
+        other_port = OutputPortFactory(
+            data_product=port.data_product,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
 
-    def test_returns_true_for_an_output_port_of_a_linked_producer(
-        self, authorizer: Authorization
-    ):
-        authorizer.add_input_port_link(
-            consumer_id="consumer",
-            producer_data_product_id="producer",
-            producer_output_port_id="consumed_output_port",
-        )
-        authorizer.assign_resource_role(
-            user_id="user", role_id="owner", resource_id="consumer"
+        assert not self._has_access(
+            session, member, other_port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
-        assert _has_access_through_consumer_role(
-            authorizer._enforcer,
-            sub="user",
-            role="owner",
-            resource="consumed_output_port",
-            parent="producer",
-            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+    def test_has_access__pending_consumer_is_denied(self, session):
+        member, port = self._consumer_member(InputPortStatus.PENDING)
+
+        assert not self._has_access(
+            session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
-        assert not _has_access_through_consumer_role(
-            authorizer._enforcer,
-            sub="user",
-            role="owner",
-            resource="other_output_port",
-            parent="producer",
-            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
-        )
+    def test_has_access__consuming_grants_no_other_action(self, session):
+        member, port = self._consumer_member(InputPortStatus.APPROVED)
 
-    def test_returns_false_when_role_exists_only_on_an_unlinked_consumer(
-        self, authorizer: Authorization
-    ):
-        authorizer.add_input_port_link(
-            consumer_id="linked_consumer",
-            producer_data_product_id="producer",
-            producer_output_port_id="output_port",
-        )
-        authorizer.assign_resource_role(
-            user_id="user",
-            role_id="owner",
-            resource_id="unlinked_consumer",
-        )
-
-        assert not _has_access_through_consumer_role(
-            authorizer._enforcer,
-            sub="user",
-            role="owner",
-            resource="output_port",
-            parent="producer",
-            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+        assert not self._has_access(
+            session, member, port, AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES
         )
 
 
 class TestAuthorization:
-    def test_get_consumer_links_returns_named_links(self, authorizer: Authorization):
-        authorizer.add_input_port_link(
-            consumer_id="consumer",
-            producer_data_product_id="producer",
-            producer_output_port_id="output_port",
-        )
-
-        assert authorizer.get_input_port_link(producer_data_product_id="producer") == {
-            InputPortLink(
-                consumer_id="consumer",
-                producer_data_product_id="producer",
-                producer_output_port_id="output_port",
-            )
-        }
-
-    def test_everyone_role(self, authorizer: Authorization):
+    def test_everyone_role(self, authorizer: CasbinPolicies):
         allowed = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
 
         authorizer.sync_everyone_role_permissions(actions=[allowed])
 
-        assert authorizer.has_access(sub=ANY, dom=ANY, obj=ANY, act=allowed) is True
-        assert authorizer.has_access(sub=ANY, dom=ANY, obj=ANY, act=denied) is False
+        assert authorizer._allows(sub=ANY, dom=ANY, obj=ANY, act=allowed) is True
+        assert authorizer._allows(sub=ANY, dom=ANY, obj=ANY, act=denied) is False
 
         # Clear role definition again
         authorizer.sync_everyone_role_permissions(actions=[])
-        assert authorizer.has_access(sub=ANY, dom=ANY, obj=ANY, act=allowed) is False
+        assert authorizer._allows(sub=ANY, dom=ANY, obj=ANY, act=allowed) is False
 
-    def test_resource_role(self, authorizer: Authorization):
+    def test_resource_role(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -149,62 +125,18 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[allowed])
         authorizer.assign_resource_role(user_id=user, role_id=role, resource_id=obj)
 
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is True
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=denied) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=allowed) is True
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=denied) is False
         assert (
-            authorizer.has_access(sub=user, dom=ANY, obj="other_resource", act=denied)
+            authorizer._allows(sub=user, dom=ANY, obj="other_resource", act=denied)
             is False
         )
 
         # Clear role assignment again
         authorizer.revoke_resource_role(user_id=user, role_id=role, resource_id=obj)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=allowed) is False
 
-    def test_access_through_consumer_role(self, authorizer: Authorization):
-        role = "test_role"
-        user = "test_user"
-        consumer = "consumer"
-        producer = "producer"
-        allowed = AuthorizationAction.HIDDEN__DATA_PRODUCT__READ
-        output_port_allowed = AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
-        denied = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
-
-        authorizer.sync_role_permissions(
-            role_id=role, actions=[allowed, output_port_allowed, denied]
-        )
-        authorizer.assign_resource_role(
-            user_id=user, role_id=role, resource_id=consumer
-        )
-        authorizer.add_input_port_link(
-            consumer_id=consumer,
-            producer_data_product_id=producer,
-            producer_output_port_id="output_port",
-        )
-
-        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
-        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=denied)
-        assert authorizer.has_access(
-            sub=user,
-            dom=ANY,
-            obj="output_port",
-            parent=producer,
-            act=output_port_allowed,
-        )
-
-        authorizer.remove_input_port_link(
-            consumer_id=consumer,
-            producer_data_product_id=producer,
-            producer_output_port_id="output_port",
-        )
-        assert not authorizer.has_access(
-            sub=user,
-            dom=ANY,
-            obj="output_port",
-            parent=producer,
-            act=output_port_allowed,
-        )
-
-    def test_wildcard_resource_role(self, authorizer: Authorization):
+    def test_wildcard_resource_role(self, authorizer: CasbinPolicies):
         role = "public_reader"
         obj = "test_resource"
         allowed = AuthorizationAction.HIDDEN__DATA_PRODUCT__READ
@@ -213,28 +145,18 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[allowed])
         authorizer.assign_resource_role(user_id="*", role_id=role, resource_id=obj)
 
+        assert authorizer._allows(sub="user_1", dom=ANY, obj=obj, act=allowed) is True
+        assert authorizer._allows(sub="user_2", dom=ANY, obj=obj, act=allowed) is True
+        assert authorizer._allows(sub="user_1", dom=ANY, obj=obj, act=denied) is False
         assert (
-            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=allowed) is True
-        )
-        assert (
-            authorizer.has_access(sub="user_2", dom=ANY, obj=obj, act=allowed) is True
-        )
-        assert (
-            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=denied) is False
-        )
-        assert (
-            authorizer.has_access(
-                sub="user_1", dom=ANY, obj="other_resource", act=allowed
-            )
+            authorizer._allows(sub="user_1", dom=ANY, obj="other_resource", act=allowed)
             is False
         )
 
         authorizer.revoke_resource_role(user_id="*", role_id=role, resource_id=obj)
-        assert (
-            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=allowed) is False
-        )
+        assert authorizer._allows(sub="user_1", dom=ANY, obj=obj, act=allowed) is False
 
-    def test_domain_role(self, authorizer: Authorization):
+    def test_domain_role(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         dom = "test_domain"
@@ -244,18 +166,17 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[allowed])
         authorizer.assign_domain_role(user_id=user, role_id=role, domain_id=dom)
 
-        assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is True
-        assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=denied) is False
+        assert authorizer._allows(sub=user, dom=dom, obj=ANY, act=allowed) is True
+        assert authorizer._allows(sub=user, dom=dom, obj=ANY, act=denied) is False
         assert (
-            authorizer.has_access(sub=user, dom="other_dom", obj=ANY, act=allowed)
-            is False
+            authorizer._allows(sub=user, dom="other_dom", obj=ANY, act=allowed) is False
         )
 
         # Clear role assignment again
         authorizer.revoke_domain_role(user_id=user, role_id=role, domain_id=dom)
-        assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
+        assert authorizer._allows(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
-    def test_data_product_role_applies_to_output_port(self, authorizer: Authorization):
+    def test_data_product_role_applies_to_output_port(self, authorizer: CasbinPolicies):
         role = "data_product_role"
         user = "test_user"
         data_product = "data_product"
@@ -267,14 +188,14 @@ class TestAuthorization:
             user_id=user, role_id=role, resource_id=data_product
         )
 
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=user,
             dom=ANY,
             obj=output_port,
             parent=data_product,
             act=action,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=user,
             dom=ANY,
             obj=output_port,
@@ -282,33 +203,33 @@ class TestAuthorization:
             act=action,
         )
 
-    def test_global_role(self, authorizer: Authorization, everyone_role_permissions):
+    def test_global_role(self, authorizer: CasbinPolicies, everyone_role_permissions):
         user = "test_user"
         role = "test_role"
         act = AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS
 
         with everyone_role_permissions(permissions=[]):
             authorizer.sync_role_permissions(role_id=role, actions=[act])
-            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+            assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=act) is False
 
             authorizer.assign_global_role(user_id=user, role_id=role)
-            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is True
+            assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=act) is True
 
             authorizer.revoke_global_role(user_id=user, role_id=role)
-            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+            assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=act) is False
 
-    def test_admin_role(self, authorizer: Authorization):
+    def test_admin_role(self, authorizer: CasbinPolicies):
         user = "test_user"
 
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
 
         authorizer.assign_admin_role(user_id=user)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is True
+        assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is True
 
         authorizer.revoke_admin_role(user_id=user)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
 
-    def test_role_removal(self, authorizer: Authorization):
+    def test_role_removal(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -317,13 +238,13 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[act])
         authorizer.assign_resource_role(user_id=user, role_id=role, resource_id=obj)
 
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is True
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=act) is True
 
         # Clear role assignment again
         authorizer.remove_role_permissions(role_id=role)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=act) is False
 
-    def test_multiple_permissions(self, authorizer: Authorization):
+    def test_multiple_permissions(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -333,12 +254,12 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=all_acts)
         authorizer.assign_resource_role(user_id=user, role_id=role, resource_id=obj)
 
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is True
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=act) is True
 
         authorizer.remove_role_permissions(role_id=role)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is False
+        assert authorizer._allows(sub=user, dom=ANY, obj=obj, act=act) is False
 
-    def test_clear_assignments_for_resource_role(self, authorizer: Authorization):
+    def test_clear_assignments_for_resource_role(self, authorizer: CasbinPolicies):
         role1 = "test_role"
         role2 = "other_role"
         user = "test_user"
@@ -364,7 +285,7 @@ class TestAuthorization:
             user_id=user, role_id=role2, resource_id=obj
         )
 
-    def test_clear_assignments_for_domain_role(self, authorizer: Authorization):
+    def test_clear_assignments_for_domain_role(self, authorizer: CasbinPolicies):
         role1 = "test_role"
         role2 = "other_role"
         user = "test_user"
@@ -384,7 +305,7 @@ class TestAuthorization:
         )
         assert authorizer.has_domain_role(user_id=user, role_id=role2, domain_id=dom)
 
-    def test_clear_assignments_for_global_role(self, authorizer: Authorization):
+    def test_clear_assignments_for_global_role(self, authorizer: CasbinPolicies):
         role1 = "test_role"
         role2 = "other_role"
         user = "test_user"
@@ -401,7 +322,7 @@ class TestAuthorization:
         assert not authorizer.has_global_role(user_id=user, role_id=role1)
         assert authorizer.has_global_role(user_id=user, role_id=role2)
 
-    def test_clear_assignments_for_user(self, authorizer: Authorization):
+    def test_clear_assignments_for_user(self, authorizer: CasbinPolicies):
         role = "test_role"
         user1 = "test_user"
         user2 = "other_user"
@@ -433,7 +354,7 @@ class TestAuthorization:
             user_id=user2, role_id=role, resource_id=obj
         )
 
-    def test_clear_assignments_for_resource(self, authorizer: Authorization):
+    def test_clear_assignments_for_resource(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         obj1 = "test_resource"
@@ -458,7 +379,7 @@ class TestAuthorization:
             user_id=user, role_id=role, resource_id=obj2
         )
 
-    def test_clear_assignments_for_domain(self, authorizer: Authorization):
+    def test_clear_assignments_for_domain(self, authorizer: CasbinPolicies):
         role = "test_role"
         user = "test_user"
         dom1 = "test_domain"
@@ -475,7 +396,7 @@ class TestAuthorization:
         )
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
-    def test_resource_role_inherited_from_group(self, authorizer: Authorization):
+    def test_resource_role_inherited_from_group(self, authorizer: CasbinPolicies):
         user = "test_user"
         group = "test_group"
         role = "test_role"
@@ -502,13 +423,13 @@ class TestAuthorization:
             resource_id=dp1,
         )
 
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=user,
             dom=ANY,
             obj=dp1,
             act=action,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=user,
             dom=ANY,
             obj=dp2,
@@ -516,7 +437,7 @@ class TestAuthorization:
         )
 
         authorizer.revoke_group_memberships(memberships=[(user, group)])
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=user,
             dom=ANY,
             obj=dp1,
@@ -525,7 +446,7 @@ class TestAuthorization:
 
     def test_global_role_inherited_from_group(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         everyone_role_permissions,
     ):
         user = "test_user"
@@ -538,7 +459,7 @@ class TestAuthorization:
             authorizer.assign_global_role(user_id=group, role_id=role)
             authorizer.assign_group_memberships(memberships=[(user, group)])
 
-            assert authorizer.has_access(
+            assert authorizer._allows(
                 sub=user,
                 dom=ANY,
                 obj=ANY,
@@ -547,7 +468,7 @@ class TestAuthorization:
 
             authorizer.revoke_group_memberships(memberships=[(user, group)])
 
-            assert not authorizer.has_access(
+            assert not authorizer._allows(
                 sub=user,
                 dom=ANY,
                 obj=ANY,
@@ -556,7 +477,7 @@ class TestAuthorization:
 
     def test_group_role_added_after_membership_is_inherited(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
     ):
         user = "test_user"
         group = "test_group"
@@ -568,7 +489,7 @@ class TestAuthorization:
 
         # Membership exists before the group receives the role.
         authorizer.assign_group_memberships(memberships=[(user, group)])
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=user,
             dom=ANY,
             obj=data_product,
@@ -580,7 +501,7 @@ class TestAuthorization:
             role_id=role,
             resource_id=data_product,
         )
-        assert authorizer.has_access(
+        assert authorizer._allows(
             sub=user,
             dom=ANY,
             obj=data_product,
@@ -592,7 +513,7 @@ class TestAuthorization:
             role_id=role,
             resource_id=data_product,
         )
-        assert not authorizer.has_access(
+        assert not authorizer._allows(
             sub=user,
             dom=ANY,
             obj=data_product,
@@ -600,7 +521,7 @@ class TestAuthorization:
         )
 
     def test_assign_group_memberships__assigns_resource_and_global_memberships(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         memberships = [
             ("first-user", "first-group"),
@@ -617,12 +538,12 @@ class TestAuthorization:
             assert authorizer.has_global_role(user_id=member_id, role_id=group_id)
 
     def test_assign_group_memberships__empty_list_does_nothing(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         assert not authorizer.assign_group_memberships(memberships=[])
 
     def test_assign_group_memberships__existing_memberships_are_ignored(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         memberships = [("user", "group")]
         authorizer.assign_group_memberships(memberships=memberships)
@@ -636,7 +557,7 @@ class TestAuthorization:
         assert authorizer.has_global_role(user_id="user", role_id="group")
 
     def test_assign_group_memberships__adds_missing_policy_from_mixed_batch(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         existing = ("existing-user", "existing-group")
         missing = ("missing-user", "missing-group")
@@ -657,7 +578,7 @@ class TestAuthorization:
             )
 
     def test_revoke_group_memberships__revokes_resource_and_global_memberships(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         memberships = [
             ("first-user", "first-group"),
@@ -675,7 +596,7 @@ class TestAuthorization:
             assert not authorizer.has_global_role(user_id=member_id, role_id=group_id)
 
     def test_assign_group_memberships__reconciles_policies_from_another_worker(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         suffix = uuid4().hex
         persisted_elsewhere = (
@@ -713,7 +634,7 @@ class TestAuthorization:
             )
 
     def test_revoke_group_memberships__does_not_remove_unrelated_memberships(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         removed = ("removed-user", "removed-group")
         retained = ("retained-user", "retained-group")
@@ -731,7 +652,7 @@ class TestAuthorization:
         assert authorizer.has_global_role(user_id=retained[0], role_id=retained[1])
 
     def test_revoke_group_memberships__removes_present_policy_from_mixed_batch(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         existing = ("existing-user", "existing-group")
         missing = ("missing-user", "missing-group")
@@ -751,7 +672,7 @@ class TestAuthorization:
         )
 
     def test_revoke_group_memberships__reconciles_policies_from_another_worker(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         suffix = uuid4().hex
         locally_known = (
@@ -790,13 +711,13 @@ class TestAuthorization:
             )
 
     def test_revoke_group_memberships__empty_list_does_nothing(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         assert not authorizer.revoke_group_memberships(memberships=[])
 
     def test_clear_assignments_for_identities__clears_all_assignment_types(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
     ):
         removed = ["first-user", "second-user"]
         retained = "retained-user"
@@ -848,12 +769,12 @@ class TestAuthorization:
 
     def test_clear_assignments_for_identities__empty_list_does_nothing(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
     ):
         assert not authorizer.clear_assignments_for_identities(identity_ids=[])
 
     def test_clear_assignments_for_identities__removes_policy_from_another_worker(
-        self, authorizer: Authorization
+        self, authorizer: CasbinPolicies
     ):
         suffix = uuid4().hex
         user = f"remote-user-{suffix}"
@@ -966,7 +887,7 @@ class TestAuthorization:
 
 
 class TestCrossWorkerStaleness:
-    def test_auto_reload_resolves_stale_policy(self, authorizer: Authorization):
+    def test_auto_reload_resolves_stale_policy(self, authorizer: CasbinPolicies):
         """Regression test: a role assigned by another worker (direct DB write) is
         invisible until the enforcer reloads and the TTL cache expires."""
         role = "staleness_role"
@@ -975,9 +896,7 @@ class TestCrossWorkerStaleness:
         action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
 
         authorizer.sync_role_permissions(role_id=role, actions=[action])
-        assert (
-            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is False
-        )
+        assert authorizer._allows(sub=user, dom="*", obj=resource, act=action) is False
 
         # Another worker writes the assignment directly to DB, bypassing the enforcer
         with engine.begin() as conn:
@@ -990,18 +909,14 @@ class TestCrossWorkerStaleness:
             )
 
         # In-memory is stale: still denied despite the DB change
-        assert (
-            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is False
-        )
+        assert authorizer._allows(sub=user, dom="*", obj=resource, act=action) is False
 
         # Simulate start_auto_load_policy firing and the TTL cache expiring
         authorizer._enforcer.load_policy()
         authorizer._cache.clear()
 
         # Access is now correctly granted
-        assert (
-            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is True
-        )
+        assert authorizer._allows(sub=user, dom="*", obj=resource, act=action) is True
 
         # Cleanup
         with engine.begin() as conn:

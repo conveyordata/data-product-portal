@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.groups.service import GroupService
 from app.machine_users.model import MachineUser
 from app.machine_users.schema_request import (
@@ -273,7 +273,7 @@ class TestMachineUserService:
 
     def test_delete_machine_users_batch__clears_only_deleted_authorization(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         removed = MachineUserFactory()

@@ -3,11 +3,13 @@ import uuid
 from fastapi.testclient import TestClient
 
 from app.authorization.schema_response import AccessResponse
-from app.core.authz import Action, Authorization
+from app.core.authz import Action, CasbinPolicies
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    InputPortFactory,
     OutputPortFactory,
     RoleFactory,
     UserFactory,
@@ -26,7 +28,7 @@ class TestAuthorizationRouter:
         assert access.allowed is False
 
     def test_check_access_authorized(
-        self, client: TestClient, authorizer: Authorization
+        self, client: TestClient, authorizer: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role_id = uuid.uuid4()
@@ -48,7 +50,7 @@ class TestAuthorizationRouter:
         assert access.allowed is True
 
     def test_check_access_authorized_by_data_product_role(
-        self, client: TestClient, authorizer: Authorization
+        self, client: TestClient, authorizer: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -58,6 +60,49 @@ class TestAuthorizationRouter:
         DataProductRoleAssignmentFactory(
             role_id=role.id, identity_id=user.id, data_product_id=data_product.id
         )
+
+        response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
+
+        assert response.status_code == 200
+        assert AccessResponse(**response.json()).allowed is True
+
+    def test_check_access__consumer_member_reads_invite_only_output_port(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        InputPortFactory(
+            consuming_abstract_data_product=consumer, output_port=output_port
+        )
+        action = Action.HIDDEN__OUTPUT_PORT__READ
+
+        response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
+
+        assert response.status_code == 200
+        assert AccessResponse(**response.json()).allowed is True
+
+    def test_check_access__owner_member_reads_invite_only_output_port(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        output_port = OutputPortFactory(
+            data_product=data_product, access_function=OutputPortAccessFunction.PRIVATE
+        )
+        action = Action.HIDDEN__OUTPUT_PORT__READ
 
         response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
 

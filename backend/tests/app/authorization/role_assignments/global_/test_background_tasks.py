@@ -6,7 +6,7 @@ from app.authorization.role_assignments.global_.background_tasks import (
 )
 from app.authorization.role_assignments.global_.service import RoleAssignmentService
 from app.authorization.roles import ADMIN_UUID
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from tests.factories import GlobalRoleAssignmentFactory, UserFactory
 
 NOW = datetime.now(timezone.utc)
@@ -14,7 +14,7 @@ NOW = datetime.now(timezone.utc)
 
 class TestRevokeExpiredAdmins:
     def test_revoke_expired_admins__lapsed_expiry_revokes_role_and_clears_expiry(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         user = UserFactory(admin_expiry=NOW - timedelta(days=1))
         authorizer.assign_admin_role(user_id=user.id)
@@ -27,7 +27,7 @@ class TestRevokeExpiredAdmins:
         assert RoleAssignmentService(session).is_admin(user.id) is False
 
     def test_revoke_expired_admins__keeps_permanent_admin_role(
-        self, authorizer: Authorization, session
+        self, authorizer: CasbinPolicies, session
     ):
         user = UserFactory(admin_expiry=NOW - timedelta(days=1))
         GlobalRoleAssignmentFactory(identity_id=user.id, role_id=ADMIN_UUID)
@@ -41,7 +41,7 @@ class TestRevokeExpiredAdmins:
 
     def test_revoke_expired_admins__future_expiry_is_untouched(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         user = UserFactory(admin_expiry=NOW + timedelta(days=1))
@@ -55,7 +55,7 @@ class TestRevokeExpiredAdmins:
 
     def test_revoke_expired_admins__no_expiry_is_ignored(
         self,
-        authorizer: Authorization,
+        authorizer: CasbinPolicies,
         session,
     ):
         user = UserFactory(admin_expiry=None)

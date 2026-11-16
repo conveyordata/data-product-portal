@@ -18,7 +18,7 @@ from app.authorization.role_assignments.global_.schema import (
 )
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.database.database import ensure_exists
 from app.shared.model import naive_utc_now, to_naive_utc
 from app.users.model import User as UserModel
@@ -121,7 +121,7 @@ class RoleAssignmentService:
         return bool(self.db.scalar(select(is_user_admin(user_id))))
 
     def sync_admin_role(self, user_id: UUID) -> None:
-        authorizer = Authorization()
+        authorizer = CasbinPolicies()
         if self.is_admin(user_id):
             authorizer.assign_admin_role(user_id=str(user_id))
         else:
