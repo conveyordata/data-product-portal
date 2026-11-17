@@ -193,7 +193,7 @@ def admin() -> UserFactory:
 
 
 @pytest.fixture
-def authorizer() -> CasbinPolicies:
+def policies() -> CasbinPolicies:
     return CasbinPolicies()
 
 

@@ -21,8 +21,8 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
         if self.decision == DecisionStatus.APPROVED:
-            authorizer = CasbinPolicies()
-            authorizer.assign_resource_role(
+            policies = CasbinPolicies()
+            policies.assign_resource_role(
                 role_id=str(self.role_id),
                 user_id=str(self.identity_id),
                 resource_id=str(self.data_product_id),

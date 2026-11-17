@@ -37,7 +37,7 @@ OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
 class AuthorizationService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = CasbinPolicies()
+        self.policies = CasbinPolicies()
 
     def check_access(
         self,
@@ -59,7 +59,7 @@ class AuthorizationService:
         )
 
     def reload_enforcer(self) -> None:
-        self.authorizer.pause_enforcer_for_reload()
+        self.policies.pause_enforcer_for_reload()
 
         changed_roles, total_roles = self._sync_roles()
         logger.info(f"Synced {changed_roles}/{total_roles} roles to the casbin table")
@@ -94,7 +94,7 @@ class AuthorizationService:
         self._sync_group_memberships()
         logger.info("Synced group membership edges to the casbin table")
 
-        self.authorizer.start_enforcer_after_reload()
+        self.policies.start_enforcer_after_reload()
 
         logger.info(
             "Authorization reload done - the casbin table"
@@ -155,12 +155,12 @@ class AuthorizationService:
         for user_id in self.db.scalars(
             select(UserModel.id).where(admin_expiry_in_future)
         ):
-            self.authorizer.assign_admin_role(user_id=str(user_id))
+            self.policies.assign_admin_role(user_id=str(user_id))
 
     def _sync_data_products_reader_role(self):
         from app.data_products.service import DataProductService
 
-        self.authorizer.sync_role_permissions(
+        self.policies.sync_role_permissions(
             role_id=DATA_PRODUCT_READER_ROLE,
             actions=[AuthorizationAction.HIDDEN__DATA_PRODUCT__READ],
         )
@@ -169,7 +169,7 @@ class AuthorizationService:
     def _sync_output_ports_reader_role(self):
         from app.data_products.output_ports.service import OutputPortService
 
-        self.authorizer.sync_role_permissions(
+        self.policies.sync_role_permissions(
             role_id=OUTPUT_PORT_READER_ROLE,
             actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
         )
@@ -186,4 +186,4 @@ class AuthorizationService:
                 )
             )
         ]
-        self.authorizer.assign_group_memberships(memberships=memberships)
+        self.policies.assign_group_memberships(memberships=memberships)

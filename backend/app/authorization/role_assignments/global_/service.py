@@ -121,11 +121,11 @@ class RoleAssignmentService:
         return bool(self.db.scalar(select(is_user_admin(user_id))))
 
     def sync_admin_role(self, user_id: UUID) -> None:
-        authorizer = CasbinPolicies()
+        policies = CasbinPolicies()
         if self.is_admin(user_id):
-            authorizer.assign_admin_role(user_id=str(user_id))
+            policies.assign_admin_role(user_id=str(user_id))
         else:
-            authorizer.revoke_admin_role(user_id=str(user_id))
+            policies.revoke_admin_role(user_id=str(user_id))
 
     def ensure_can_become_admin(self, user: UserModel) -> None:
         if not user.can_become_admin:

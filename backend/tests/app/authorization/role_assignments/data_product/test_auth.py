@@ -22,12 +22,12 @@ if TYPE_CHECKING:
 
 
 class TestAuth:
-    def test_add(self, authorizer: CasbinPolicies):
+    def test_add(self, policies: CasbinPolicies):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
@@ -38,16 +38,16 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
-    def test_remove(self, authorizer: CasbinPolicies):
+    def test_remove(self, policies: CasbinPolicies):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
@@ -58,15 +58,15 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         DataProductAuthAssignment(assignment).remove()
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
-    def test_swap(self, authorizer: CasbinPolicies):
+    def test_swap(self, policies: CasbinPolicies):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -80,17 +80,17 @@ class TestAuth:
         )
 
         DataProductAuthAssignment(assignment).add()
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
         assignment.role_id = new_role.id
         DataProductAuthAssignment(assignment, previous_role_id=role.id).swap()
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id),
             role_id=str(new_role.id),
             resource_id=str(data_product.id),

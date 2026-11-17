@@ -53,7 +53,7 @@ class Authorization:
         act: AuthorizationAction,
         parent: str = "*",
     ) -> bool:
-        if CasbinPolicies()._allows(sub=sub, dom=dom, obj=obj, act=act, parent=parent):
+        if CasbinPolicies().allows(sub=sub, dom=dom, obj=obj, act=act, parent=parent):
             return True
         if act != AuthorizationAction.HIDDEN__OUTPUT_PORT__READ:
             return False
@@ -101,7 +101,7 @@ class CasbinPolicies(metaclass=Singleton):
         Singleton.deregister(cls)
 
     @cachedmethod(lambda self: self._cache)
-    def _allows(
+    def allows(
         self,
         *,
         sub: str,

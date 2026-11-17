@@ -185,48 +185,48 @@ class TestUserService:
 
     def test_remove_users_batch__clears_only_deleted_users_authorization(
         self,
-        authorizer: CasbinPolicies,
+        policies: CasbinPolicies,
         session,
     ):
         removed = UserFactory()
         retained = UserFactory()
 
-        authorizer.assign_resource_role(
+        policies.assign_resource_role(
             user_id=removed.id,
             role_id="resource-role",
             resource_id="resource",
         )
-        authorizer.assign_domain_role(
+        policies.assign_domain_role(
             user_id=removed.id,
             role_id="domain-role",
             domain_id="domain",
         )
-        authorizer.assign_global_role(
+        policies.assign_global_role(
             user_id=removed.id,
             role_id="global-role",
         )
-        authorizer.assign_global_role(
+        policies.assign_global_role(
             user_id=retained.id,
             role_id="retained-role",
         )
 
         UserService(session).remove_users_batch([removed.id])
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=removed.id,
             role_id="resource-role",
             resource_id="resource",
         )
-        assert not authorizer.has_domain_role(
+        assert not policies.has_domain_role(
             user_id=removed.id,
             role_id="domain-role",
             domain_id="domain",
         )
-        assert not authorizer.has_global_role(
+        assert not policies.has_global_role(
             user_id=removed.id,
             role_id="global-role",
         )
-        assert authorizer.has_global_role(
+        assert policies.has_global_role(
             user_id=retained.id,
             role_id="retained-role",
         )

@@ -24,7 +24,7 @@ from app.machine_users.schema_response import (
 class MachineUserService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = CasbinPolicies()
+        self.policies = CasbinPolicies()
 
     def get_machine_users(self) -> Sequence[MachineUserGet]:
         return self.db.scalars(
@@ -116,7 +116,7 @@ class MachineUserService:
 
     def delete_machine_user(self, machine_user_id: UUID) -> None:
         machine_user = ensure_machine_user_exists(machine_user_id, self.db)
-        self.authorizer.clear_assignments_for_user(user_id=machine_user.id)
+        self.policies.clear_assignments_for_user(user_id=machine_user.id)
         self.db.delete(machine_user)
         self.db.flush()
 
@@ -126,7 +126,7 @@ class MachineUserService:
             select(MachineUser).where(MachineUser.id.in_(ids))
         ).all()
 
-        self.authorizer.clear_assignments_for_identities(
+        self.policies.clear_assignments_for_identities(
             identity_ids=[machine_user.id for machine_user in machine_users],
         )
 

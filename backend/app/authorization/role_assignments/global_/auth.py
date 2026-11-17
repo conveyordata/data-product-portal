@@ -38,22 +38,22 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         return self.previous_role_id == ADMIN_UUID
 
     def add(self) -> bool:
-        authorizer = CasbinPolicies()
+        policies = CasbinPolicies()
 
         if self.is_admin():
-            return authorizer.assign_admin_role(user_id=str(self.user_id))
+            return policies.assign_admin_role(user_id=str(self.user_id))
         else:
-            return authorizer.assign_global_role(
+            return policies.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
 
     def remove(self) -> bool:
-        authorizer = CasbinPolicies()
+        policies = CasbinPolicies()
         if self.is_admin():
-            return authorizer.revoke_admin_role(user_id=str(self.user_id))
+            return policies.revoke_admin_role(user_id=str(self.user_id))
         else:
-            return authorizer.revoke_global_role(
+            return policies.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
@@ -62,20 +62,20 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         if self.previous_role_id is None:
             raise ValueError("Cannot swap roles without a previous role")
 
-        authorizer = CasbinPolicies()
+        policies = CasbinPolicies()
 
         if self.was_admin():
-            revoke = authorizer.revoke_admin_role(user_id=str(self.user_id))
+            revoke = policies.revoke_admin_role(user_id=str(self.user_id))
         else:
-            revoke = authorizer.revoke_global_role(
+            revoke = policies.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.previous_role_id),
             )
 
         if self.is_admin():
-            assign = authorizer.assign_admin_role(user_id=str(self.user_id))
+            assign = policies.assign_admin_role(user_id=str(self.user_id))
         else:
-            assign = authorizer.assign_global_role(
+            assign = policies.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )

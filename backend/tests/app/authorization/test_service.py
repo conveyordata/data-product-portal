@@ -15,11 +15,11 @@ from tests.factories.group import GroupFactory, GroupMembershipFactory
 
 
 class TestAuthorizationService:
-    def test_reload_enforcer(self, authorizer: CasbinPolicies, session):
+    def test_reload_enforcer(self, policies: CasbinPolicies, session):
         existing = len(session.query(CasbinRule).all())
 
         for i in range(5):
-            authorizer.assign_resource_role(
+            policies.assign_resource_role(
                 user_id="test", role_id="test", resource_id=f"test_{i}"
             )
 
@@ -35,7 +35,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer_ensure_discoverable_data_products_sync(
-        self, authorizer: CasbinPolicies, session
+        self, policies: CasbinPolicies, session
     ):
         existing = len(session.query(CasbinRule).all())
 
@@ -55,7 +55,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer__syncs_group_data_product_access(
-        self, authorizer: CasbinPolicies, session
+        self, policies: CasbinPolicies, session
     ):
         user = UserFactory()
         group = GroupFactory()
@@ -73,25 +73,25 @@ class TestAuthorizationService:
         )
 
         AuthorizationService(session).reload_enforcer()
-        assert authorizer._allows(
+        assert policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         )
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id),
             role_id=str(group.id),
             resource_id="*",
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id),
             role_id=str(group.id),
             resource_id=str(data_product.id),
         )
 
     def test_reload_enforcer__syncs_group_global_access(
-        self, authorizer: CasbinPolicies, session
+        self, policies: CasbinPolicies, session
     ):
         user = UserFactory()
         group = GroupFactory()
@@ -109,7 +109,7 @@ class TestAuthorizationService:
 
         AuthorizationService(session).reload_enforcer()
 
-        assert authorizer._allows(
+        assert policies.allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -117,7 +117,7 @@ class TestAuthorizationService:
         )
 
     def test_reload_enforcer__revokes_access_after_membership_removal(
-        self, authorizer: CasbinPolicies, session
+        self, policies: CasbinPolicies, session
     ):
         """
         This test ensures that the authorization service properly revokes access to a user after their membership is removed.
@@ -141,7 +141,7 @@ class TestAuthorizationService:
         service = AuthorizationService(session)
         service.reload_enforcer()
 
-        assert authorizer._allows(
+        assert policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -152,7 +152,7 @@ class TestAuthorizationService:
         session.flush()
         service.reload_enforcer()
 
-        assert not authorizer._allows(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),

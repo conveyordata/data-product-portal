@@ -28,9 +28,9 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
-        authorizer = CasbinPolicies()
+        policies = CasbinPolicies()
         if self.id != ADMIN_UUID:
-            authorizer.sync_role_permissions(
+            policies.sync_role_permissions(
                 role_id=str(self.id), actions=self.permissions
             )
 

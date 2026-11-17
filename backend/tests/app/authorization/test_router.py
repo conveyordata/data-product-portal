@@ -28,18 +28,18 @@ class TestAuthorizationRouter:
         assert access.allowed is False
 
     def test_check_access_authorized(
-        self, client: TestClient, authorizer: CasbinPolicies
+        self, client: TestClient, policies: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role_id = uuid.uuid4()
         resource_id = uuid.uuid4()
         action = Action.GLOBAL__DELETE_USER
 
-        authorizer.sync_role_permissions(
+        policies.sync_role_permissions(
             role_id=str(role_id),
             actions=[action],
         )
-        authorizer.assign_resource_role(
+        policies.assign_resource_role(
             user_id=str(user.id), role_id=str(role_id), resource_id=str(resource_id)
         )
 
@@ -50,7 +50,7 @@ class TestAuthorizationRouter:
         assert access.allowed is True
 
     def test_check_access_authorized_by_data_product_role(
-        self, client: TestClient, authorizer: CasbinPolicies
+        self, client: TestClient, policies: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()

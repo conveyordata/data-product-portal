@@ -26,7 +26,7 @@ from app.identities.type import IdentityType
 class GroupService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = CasbinPolicies()
+        self.policies = CasbinPolicies()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
         query = select(GroupMembership).order_by(
@@ -117,8 +117,8 @@ class GroupService:
         memberships = self.list_memberships(group.id)
 
         # Remove assignments where the group itself is the subject.
-        self.authorizer.clear_assignments_for_user(user_id=group.id)
-        self.authorizer.revoke_group_memberships(
+        self.policies.clear_assignments_for_user(user_id=group.id)
+        self.policies.revoke_group_memberships(
             memberships=[
                 (membership.member_identity_id, group.id) for membership in memberships
             ]
@@ -133,10 +133,10 @@ class GroupService:
             .options(selectinload(Group.memberships))
         ).all()
 
-        self.authorizer.clear_assignments_for_identities(
+        self.policies.clear_assignments_for_identities(
             identity_ids=[group.id for group in groups],
         )
-        self.authorizer.revoke_group_memberships(
+        self.policies.revoke_group_memberships(
             memberships=[
                 (membership.member_identity_id, group.id)
                 for group in groups
@@ -268,7 +268,7 @@ class GroupService:
         memberships = [
             (member_identity_id, group_id) for member_identity_id in member_identity_ids
         ]
-        self.authorizer.assign_group_memberships(memberships=memberships)
+        self.policies.assign_group_memberships(memberships=memberships)
 
     def _remove_members_auth(
         self, group_id: UUID, member_identity_ids: Iterable[UUID]
@@ -276,7 +276,7 @@ class GroupService:
         memberships = [
             (member_identity_id, group_id) for member_identity_id in member_identity_ids
         ]
-        self.authorizer.revoke_group_memberships(memberships=memberships)
+        self.policies.revoke_group_memberships(memberships=memberships)
 
     def _insert_member_ids(
         self, group_id: UUID, member_identity_ids: set[UUID]

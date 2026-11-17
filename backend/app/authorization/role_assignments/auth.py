@@ -49,16 +49,16 @@ class ResourceAuthAssignment(AuthAssignment):
         return assignment.role_id
 
     def add(self) -> bool:
-        authorizer = CasbinPolicies()
-        return authorizer.assign_resource_role(
+        policies = CasbinPolicies()
+        return policies.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
 
     def remove(self) -> bool:
-        authorizer = CasbinPolicies()
-        return authorizer.revoke_resource_role(
+        policies = CasbinPolicies()
+        return policies.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
@@ -68,13 +68,13 @@ class ResourceAuthAssignment(AuthAssignment):
         if self.previous_role_id is None:
             raise ValueError("Cannot swap roles without a previous role")
 
-        authorizer = CasbinPolicies()
-        revoke = authorizer.revoke_resource_role(
+        policies = CasbinPolicies()
+        revoke = policies.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.previous_role_id),
             resource_id=str(self.resource_id),
         )
-        assign = authorizer.assign_resource_role(
+        assign = policies.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),

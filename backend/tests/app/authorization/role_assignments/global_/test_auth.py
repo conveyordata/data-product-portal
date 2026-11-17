@@ -12,64 +12,58 @@ if TYPE_CHECKING:
 
 
 class TestAuth:
-    def test_add(self, authorizer: CasbinPolicies):
+    def test_add(self, policies: CasbinPolicies):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
+        assert not policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
         GlobalRoleAssignmentFactory(
             identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
+        assert policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
 
-    def test_add_admin(self, authorizer: CasbinPolicies):
+    def test_add_admin(self, policies: CasbinPolicies):
         user: User = UserFactory()
         admin = RoleFactory.admin()
-        assert not authorizer.has_admin_role(user_id=str(user.id))
+        assert not policies.has_admin_role(user_id=str(user.id))
         GlobalRoleAssignmentFactory(
             identity_id=user.id,
             role_id=admin.id,
             decision=DecisionStatus.APPROVED,
         )
-        assert authorizer.has_admin_role(user_id=str(user.id))
+        assert policies.has_admin_role(user_id=str(user.id))
 
-    def test_remove(self, authorizer: CasbinPolicies):
+    def test_remove(self, policies: CasbinPolicies):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
+        assert not policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
+        assert policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
         GlobalAuthAssignment(assignment).remove()
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
+        assert not policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
 
-    def test_remove_admin(self, authorizer: CasbinPolicies):
+    def test_remove_admin(self, policies: CasbinPolicies):
         user: User = UserFactory()
         admin = RoleFactory.admin()
-        assert not authorizer.has_admin_role(user_id=str(user.id))
+        assert not policies.has_admin_role(user_id=str(user.id))
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
             identity_id=user.id,
             role_id=admin.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_admin_role(user_id=str(user.id))
+        assert policies.has_admin_role(user_id=str(user.id))
         GlobalAuthAssignment(assignment).remove()
-        assert not authorizer.has_admin_role(user_id=str(user.id))
+        assert not policies.has_admin_role(user_id=str(user.id))
 
-    def test_swap(self, authorizer: CasbinPolicies):
+    def test_swap(self, policies: CasbinPolicies):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
@@ -80,13 +74,11 @@ class TestAuth:
         )
 
         GlobalAuthAssignment(assignment).add()
-        assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
-        assert not authorizer.has_admin_role(user_id=str(user.id))
+        assert policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
+        assert not policies.has_admin_role(user_id=str(user.id))
 
         assignment.role_id = RoleFactory.admin().id
         GlobalAuthAssignment(assignment, previous_role_id=role.id).swap()
 
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
-        assert authorizer.has_admin_role(user_id=str(user.id))
+        assert not policies.has_global_role(user_id=str(user.id), role_id=str(role.id))
+        assert policies.has_admin_role(user_id=str(user.id))
