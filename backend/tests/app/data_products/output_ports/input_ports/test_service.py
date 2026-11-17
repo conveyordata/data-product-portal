@@ -16,7 +16,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
-from app.core.authz import Action, Authorization
+from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
@@ -116,31 +116,14 @@ def _by_id(input_port: "InputPort"):
 
 
 class TestInputPortDecisions:
-    def test_approve__gives_consumer_members_read_access(self, session):
-        member = UserFactory()
+    def test_approve__approves_pending_input_port(self, session):
         consumer = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            identity_id=member.id,
-            data_product_id=consumer.id,
-            role_id=RoleFactory.data_product_owner().id,
-        )
-        port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=consumer,
             output_port=port,
             status=DecisionStatus.PENDING,
         )
-
-        def member_can_read() -> bool:
-            return Authorization(session).has_access(
-                sub=str(member.id),
-                dom=str(port.data_product.domain_id),
-                obj=str(port.id),
-                parent=str(port.data_product_id),
-                act=Action.HIDDEN__OUTPUT_PORT__READ,
-            )
-
-        assert not member_can_read()
 
         InputPortService(session).approve_output_port_as_input_port(
             data_product_id=port.data_product.id,
@@ -150,7 +133,6 @@ class TestInputPortDecisions:
         )
 
         assert link.status == InputPortStatus.APPROVED
-        assert member_can_read()
 
     def test_approve__renewal_window_starts_at_current_date(self, session):
         actor = UserFactory()

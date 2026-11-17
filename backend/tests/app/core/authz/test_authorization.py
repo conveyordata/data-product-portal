@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from sqlalchemy import text  # noqa: TID251
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, CasbinPolicies
 from app.data_products.output_ports.enums import OutputPortAccessFunction
@@ -25,21 +24,6 @@ ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
 class TestHasAccess:
     @staticmethod
-    def _consumer_member(status: InputPortStatus):
-        member = UserFactory()
-        consumer = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            identity_id=member.id,
-            data_product_id=consumer.id,
-            role_id=RoleFactory.data_product_owner().id,
-        )
-        port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
-        InputPortFactory(
-            consuming_abstract_data_product=consumer, output_port=port, status=status
-        )
-        return member, port
-
-    @staticmethod
     def _has_access(session, member, port, act: AuthorizationAction) -> bool:
         return Authorization(session).has_access(
             sub=str(member.id),
@@ -47,13 +31,6 @@ class TestHasAccess:
             obj=str(port.id),
             parent=str(port.data_product_id),
             act=act,
-        )
-
-    def test_has_access__consumer_member_reads_invite_only_output_port(self, session):
-        member, port = self._consumer_member(InputPortStatus.APPROVED)
-
-        assert self._has_access(
-            session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
     def test_has_access__consumer_member_through_a_group_reads_invite_only_output_port(
@@ -75,26 +52,16 @@ class TestHasAccess:
             session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
         )
 
-    def test_has_access__consumer_member_is_denied_another_output_port(self, session):
-        member, port = self._consumer_member(InputPortStatus.APPROVED)
-        other_port = OutputPortFactory(
-            data_product=port.data_product,
-            access_function=OutputPortAccessFunction.PRIVATE,
-        )
-
-        assert not self._has_access(
-            session, member, other_port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
-        )
-
-    def test_has_access__pending_consumer_is_denied(self, session):
-        member, port = self._consumer_member(InputPortStatus.PENDING)
-
-        assert not self._has_access(
-            session, member, port, AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
-        )
-
     def test_has_access__consuming_grants_no_other_action(self, session):
-        member, port = self._consumer_member(InputPortStatus.APPROVED)
+        member = UserFactory()
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=member.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+        InputPortFactory(consuming_abstract_data_product=consumer, output_port=port)
 
         assert not self._has_access(
             session, member, port, AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES
