@@ -3910,14 +3910,14 @@ files = [
 
 [[package]]
 name = "posthog"
-version = "7.91.0"
+version = "7.91.1"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.91.0-py3-none-any.whl", hash = "sha256:8197f913d6207c552aba46a0a9aa0b423cab24958b25acbfd722a6ded7e68ea4"},
-    {file = "posthog-7.91.0.tar.gz", hash = "sha256:b1f2e6a062dd8734da563eb7b3c36b8535386e4423661f36f0b683bb0926c5f7"},
+    {file = "posthog-7.91.1-py3-none-any.whl", hash = "sha256:22ce67d6ea2adb523920edb00033a8c49377704c523513f6afe168eded5e0b98"},
+    {file = "posthog-7.91.1.tar.gz", hash = "sha256:e4b3d34854860d814c04b276057c52282bab8fa0d1636d01e44868b32037649c"},
 ]
 
 [package.dependencies]
@@ -6067,4 +6067,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "6f9cc1400a5271e2bd6180a822c62627191442c7383dfe8f4c2885de4f5391a6"
+content-hash = "30185879350076736a265a7fe31113e506beb21f2c2b9d03168d74ba95dd2589"
