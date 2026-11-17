@@ -123,22 +123,6 @@ func (s *EnvironmentGetItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *GetDataProductResponse) setDefaults() {
-	{
-		val := DataProductVisibility("discoverable")
-		s.Visibility = val
-	}
-}
-
-// setDefaults set default value of fields.
-func (s *GetDataProductsResponseItem) setDefaults() {
-	{
-		val := DataProductVisibility("discoverable")
-		s.Visibility = val
-	}
-}
-
-// setDefaults set default value of fields.
 func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")

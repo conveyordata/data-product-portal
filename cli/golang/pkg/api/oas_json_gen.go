@@ -14416,7 +14416,6 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode GetDataProductResponse to nil")
 	}
 	var requiredBitSet [2]uint8
-	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -15081,7 +15080,6 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode GetDataProductsResponseItem to nil")
 	}
 	var requiredBitSet [2]uint8
-	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
