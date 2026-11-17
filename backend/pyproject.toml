@@ -16,7 +16,7 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python-dotenv = "^1.2.3"
-fastapi = "0.141.1"
+fastapi = "0.162.7"
 gunicorn = ">=27.0.1,<28.0"
 uvicorn = ">=0.52.4,<0.55.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
