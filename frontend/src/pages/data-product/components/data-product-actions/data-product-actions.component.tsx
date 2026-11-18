@@ -137,7 +137,7 @@ export function DataProductActions({ dataProductId }: Props) {
     return (
         <Flex vertical className={styles.actionsContainer}>
             {canRequestAccess && allowRequesting && (
-                <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
+                <DataProductRequestAccessButton dataProductId={dataProductId} user={user} />
             )}
             <Flex vertical className={styles.accessDataContainer}>
                 <DataAccessTileGrid

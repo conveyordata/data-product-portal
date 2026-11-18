@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
@@ -84,9 +86,50 @@ class TestDataProductRoleAssignmentsService:
             assert pending_old.id in requests_ids
             assert approved_old.id not in requests_ids
 
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    def test_get_user_requests__includes_requests_on_behalf_of_identities(
+        self, session, identity_factory
+    ):
+        user = UserFactory()
+        other_user = UserFactory()
+        identity = identity_factory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        submitted = DataProductRoleAssignmentFactory(
+            identity_id=identity.id,
+            requested_by=user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        received = DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            requested_by=other_user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=identity.id,
+            requested_by=other_user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        with as_user(session, user.id):
+            requests = RoleAssignmentService(session).get_user_requests(user, True)
+
+        assert {request.id for request in requests} == {submitted.id, received.id}
+
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
     def test_get_pending_data_product_role_assignments__includes_group_permissions(
         self,
         session,
+        identity_factory,
     ):
         approver = UserFactory()
         requester = UserFactory()
@@ -110,7 +153,7 @@ class TestDataProductRoleAssignmentsService:
             requested_by=requester,
         )
         pending_assignment = DataProductRoleAssignmentFactory(
-            identity_id=requester.id,
+            identity_id=identity_factory().id,
             data_product_id=data_product.id,
             role_id=requested_role.id,
             decision=DecisionStatus.PENDING,

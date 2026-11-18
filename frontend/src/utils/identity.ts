@@ -1,24 +1,22 @@
 import type {
-    DataProductRoleAssignmentResponse,
     GroupIdentity,
     MachineUserIdentity,
     UserIdentity,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 export type Identity = UserIdentity | GroupIdentity | MachineUserIdentity;
 
-export type UserDataProductRoleAssignment = Omit<DataProductRoleAssignmentResponse, 'identity'> & {
-    identity: UserIdentity;
-};
+export const IDENTITY_TYPES: Identity['type'][] = ['user', 'group', 'machine_user'];
+
+const sorter = new Sorter<Identity>();
+export const compareIdentities = sorter.cascadedSorter(
+    sorter.stringSorter((identity) => (identity.type === 'user' ? identity.last_name : identity.display_name)),
+    sorter.stringSorter((identity) => (identity.type === 'user' ? identity.first_name : undefined)),
+);
 
 export function isUserIdentity(identity: Identity): identity is UserIdentity {
     return identity.type === 'user';
-}
-
-export function isUserDataProductRoleAssignment(
-    assignment: DataProductRoleAssignmentResponse,
-): assignment is UserDataProductRoleAssignment {
-    return isUserIdentity(assignment.identity);
 }
 
 export function getIdentityDisplayName(identity: Identity): string {

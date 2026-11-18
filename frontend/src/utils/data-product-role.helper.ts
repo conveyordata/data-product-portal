@@ -1,11 +1,8 @@
-import {
-    type UserIdentity,
-    useListDataProductRoleAssignmentsQuery,
-} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus, Prototype } from '@/types/roles';
-import { isUserDataProductRoleAssignment } from '@/utils/identity.ts';
+import type { Identity } from '@/utils/identity.ts';
 
-export function useGetDataProductOwners(dataProductId: string | undefined): UserIdentity[] | undefined {
+export function useGetDataProductOwners(dataProductId: string | undefined): Identity[] | undefined {
     const { data: roleAssignments } = useListDataProductRoleAssignmentsQuery(
         {
             dataProductId,
@@ -15,7 +12,6 @@ export function useGetDataProductOwners(dataProductId: string | undefined): User
     );
 
     return roleAssignments?.role_assignments
-        .filter(isUserDataProductRoleAssignment)
         .filter((assignment) => assignment.role?.prototype === Prototype.OWNER)
         .map((assignment) => assignment.identity);
 }

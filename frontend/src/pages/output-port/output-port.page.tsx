@@ -6,7 +6,7 @@ import { useLocation, useNavigate, useParams } from 'react-router';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
+import { IdentityAccessOverview } from '@/components/data-access/identity-access-overview/identity-access-overview.component';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
@@ -138,7 +138,10 @@ export function OutputPort() {
             <Flex vertical className={styles.sidebar}>
                 <DatasetActions datasetId={datasetId} />
                 <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
-                <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
+                <IdentityAccessOverview
+                    identities={datasetOwners?.map((owner) => ({ ...owner, type: 'user' }))}
+                    title={t('Output Port Owners')}
+                />
             </Flex>
         </Flex>
     );

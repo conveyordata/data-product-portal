@@ -1,12 +1,23 @@
 import { HttpResponse, http } from 'msw';
+import { type ComponentProps, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { IdentitySelector } from '@/components/identity-selector/identity-selector.component.tsx';
+import { IdentitySelector as ControlledIdentitySelector } from '@/components/identity-selector/identity-selector.component.tsx';
 import type { GroupsGetResponse } from '@/store/api/services/generated/groupsApi.ts';
 import type { MachineUsersGetResponse } from '@/store/api/services/generated/machineUsersApi.ts';
 import type { GetUsersResponse } from '@/store/api/services/generated/usersApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
+import { IDENTITY_TYPES } from '@/utils/identity.ts';
+
+function IdentitySelector(
+    props: Omit<ComponentProps<typeof ControlledIdentitySelector>, 'identityTypes' | 'onIdentityTypesChange'>,
+) {
+    const [identityTypes, setIdentityTypes] = useState(IDENTITY_TYPES);
+    return (
+        <ControlledIdentitySelector {...props} identityTypes={identityTypes} onIdentityTypesChange={setIdentityTypes} />
+    );
+}
 
 const groups: GroupsGetResponse['groups'] = [
     { id: 'group-1', display_name: 'Finance Team', external_id: 'team-finance-external' },
@@ -41,21 +52,36 @@ describe('IdentitySelector', () => {
         const onSelect = vi.fn();
         renderWithProviders(<IdentitySelector onSelect={onSelect} />);
 
-        const userRow = await screen.findByRole('row', { name: /Alice Smith/ });
+        const userRow = await screen.findByLabelText('Select Alice Smith (User)');
         expect(within(userRow).getByText('alice@example.com')).toBeInTheDocument();
         expect(within(userRow).getByText('User')).toBeInTheDocument();
-        const groupRow = screen.getByRole('row', { name: /Finance Team/ });
+        const groupRow = screen.getByLabelText('Select Finance Team (Group)');
         expect(within(groupRow).getByText('Group')).toBeInTheDocument();
-        const machineRow = screen.getByRole('row', { name: /ETL Runner/ });
+        const machineRow = screen.getByLabelText('Select ETL Runner (Machine User)');
         expect(within(machineRow).getByText('Machine User')).toBeInTheDocument();
 
-        await user.click(within(userRow).getByRole('button', { name: 'Select Alice Smith (User)' }));
-        await user.click(within(groupRow).getByRole('button', { name: 'Select Finance Team (Group)' }));
-        await user.click(within(machineRow).getByRole('button', { name: 'Select ETL Runner (Machine User)' }));
+        expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+        await user.click(within(userRow).getByText('alice@example.com'));
+        await user.click(groupRow);
+        await user.click(within(machineRow).getByText('ETL Runner'));
 
         expect(onSelect).toHaveBeenNthCalledWith(1, expect.objectContaining({ id: '1', type: 'user' }));
         expect(onSelect).toHaveBeenNthCalledWith(2, expect.objectContaining({ id: 'group-1', type: 'group' }));
         expect(onSelect).toHaveBeenNthCalledWith(3, expect.objectContaining({ id: 'machine-1', type: 'machine_user' }));
+    });
+
+    it.each(['{Enter}', ' '])('selects a focused identity with %s', async (key) => {
+        mockIdentities();
+        const user = userEvent.setup();
+        const onSelect = vi.fn();
+        renderWithProviders(<IdentitySelector onSelect={onSelect} />);
+
+        const row = await screen.findByLabelText('Select Alice Smith (User)');
+        row.focus();
+        expect(row).toHaveFocus();
+        await user.keyboard(key);
+
+        expect(onSelect).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: '1', type: 'user' }));
     });
 
     it.each([
@@ -108,7 +134,9 @@ describe('IdentitySelector', () => {
 
         await user.clear(search);
         await user.click(within(screen.getByTitle('2')).getByRole('button'));
-        await user.click(screen.getByRole('checkbox', { name: 'Users' }));
+        await user.click(screen.getByLabelText('Type', { selector: 'input' }));
+        await user.click(screen.getByText('Users', { selector: '.ant-select-item-option-content' }));
+        await user.keyboard('{Escape}');
         expect(screen.getByText('Showing 1-2 of 2 identities')).toBeInTheDocument();
         expect(screen.getByText('Finance Team')).toBeInTheDocument();
         expect(screen.getByText('ETL Runner')).toBeInTheDocument();
@@ -124,20 +152,92 @@ describe('IdentitySelector', () => {
         await screen.findByText('Alice Smith');
 
         for (const label of ['Users', 'Groups', 'Machine Users']) {
-            const checkbox = screen.getByRole('checkbox', { name: label });
-            expect(checkbox).toBeChecked();
-            await user.click(checkbox);
+            const tag = screen.getByText(label).closest<HTMLElement>('.ant-select-selection-item');
+            if (!tag) throw new Error(`No tag contains ${label}`);
+            await user.click(within(tag).getByLabelText('close'));
         }
         expect(screen.getByText('No identities match the current filters')).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: /^Select / })).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/^Select /)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole('button', { name: 'Clear filters' }));
         expect(screen.getByText('Alice Smith')).toBeInTheDocument();
         expect(screen.getByText('Finance Team')).toBeInTheDocument();
         expect(screen.getByText('ETL Runner')).toBeInTheDocument();
-        for (const checkbox of screen.getAllByRole('checkbox')) {
-            expect(checkbox).toBeChecked();
+        for (const label of ['Users', 'Groups', 'Machine Users']) {
+            expect(screen.getByText(label).closest('.ant-select-selection-item')).toBeInTheDocument();
         }
+    });
+
+    it('cycles Name and Type independently without clearing, with Type taking priority', async () => {
+        mockIdentities();
+        const user = userEvent.setup();
+        renderWithProviders(<IdentitySelector onSelect={vi.fn()} />);
+        await screen.findByText('Alice Smith');
+        const names = () => screen.getAllByLabelText(/^Select /).map((row) => row.getAttribute('aria-label'));
+        const typeHeader = screen.getByText('Type', { selector: '.ant-table-column-title' });
+
+        expect(names()).toEqual([
+            'Select Alice Smith (User)',
+            'Select Bob Jones (User)',
+            'Select ETL Runner (Machine User)',
+            'Select Finance Team (Group)',
+        ]);
+        await user.click(screen.getByText('Name'));
+        expect(names()).toEqual([
+            'Select Finance Team (Group)',
+            'Select ETL Runner (Machine User)',
+            'Select Bob Jones (User)',
+            'Select Alice Smith (User)',
+        ]);
+        await user.click(screen.getByText('Name'));
+        expect(screen.getByText('Name').closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        expect(names()).toEqual([
+            'Select Alice Smith (User)',
+            'Select Bob Jones (User)',
+            'Select ETL Runner (Machine User)',
+            'Select Finance Team (Group)',
+        ]);
+        await user.click(typeHeader);
+        expect(names()).toEqual([
+            'Select Finance Team (Group)',
+            'Select ETL Runner (Machine User)',
+            'Select Alice Smith (User)',
+            'Select Bob Jones (User)',
+        ]);
+        await user.click(typeHeader);
+        expect(names()).toEqual([
+            'Select Alice Smith (User)',
+            'Select Bob Jones (User)',
+            'Select ETL Runner (Machine User)',
+            'Select Finance Team (Group)',
+        ]);
+        await user.click(screen.getByText('Name'));
+        expect(typeHeader.closest('th')).toHaveAttribute('aria-sort', 'descending');
+        expect(screen.getByText('Name').closest('th')).toHaveAttribute('aria-sort', 'descending');
+        expect(names()).toEqual([
+            'Select Bob Jones (User)',
+            'Select Alice Smith (User)',
+            'Select ETL Runner (Machine User)',
+            'Select Finance Team (Group)',
+        ]);
+        await user.click(typeHeader);
+        expect(typeHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        expect(screen.getByText('Name').closest('th')).toHaveAttribute('aria-sort', 'descending');
+        expect(names()).toEqual([
+            'Select Finance Team (Group)',
+            'Select ETL Runner (Machine User)',
+            'Select Bob Jones (User)',
+            'Select Alice Smith (User)',
+        ]);
+        await user.click(screen.getByText('Name'));
+        expect(typeHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        expect(screen.getByText('Name').closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        expect(names()).toEqual([
+            'Select Finance Team (Group)',
+            'Select ETL Runner (Machine User)',
+            'Select Alice Smith (User)',
+            'Select Bob Jones (User)',
+        ]);
     });
 
     it('distinguishes an empty directory from a failed request or filtered result', async () => {
@@ -186,13 +286,16 @@ describe('IdentitySelector', () => {
         );
         await screen.findByText('Alice Smith');
         expect(screen.queryByText('Finance Team')).not.toBeInTheDocument();
-        const selectUser = screen.getByRole('button', { name: 'Select Alice Smith (User)' });
-        expect(selectUser).toBeDisabled();
+        const selectUser = screen.getByLabelText('Select Alice Smith (User)');
+        expect(selectUser).toHaveAttribute('aria-disabled', 'true');
+        expect(selectUser).toHaveAttribute('tabindex', '-1');
         await user.click(selectUser);
+        selectUser.focus();
+        await user.keyboard('{Enter} ');
         expect(onSelect).not.toHaveBeenCalled();
 
         rerender(<IdentitySelector onSelect={onSelect} identityIdsToHide={['group-1']} />);
-        await waitFor(() => expect(selectUser).toBeEnabled());
+        await waitFor(() => expect(selectUser).toHaveAttribute('aria-disabled', 'false'));
         await user.click(selectUser);
         expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: '1', type: 'user' }));
     });

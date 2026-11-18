@@ -385,7 +385,10 @@ class TestDataProductRoleAssignmentsRouter:
         self.test_delete_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
-    def test_delete_last_owner_assignment(self, client: TestClient):
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    def test_delete_last_owner_assignment(self, client: TestClient, identity_factory):
         data_product: DataProduct = DataProductFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -396,7 +399,7 @@ class TestDataProductRoleAssignmentsRouter:
             identity_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
         role = RoleFactory.data_product_owner()
-        user_1, user_2 = UserFactory.create_batch(2)
+        user_1, user_2 = UserFactory(), identity_factory()
         assignment_1 = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             identity_id=user_1.id,
@@ -413,21 +416,32 @@ class TestDataProductRoleAssignmentsRouter:
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"]
+            == "A data product must always be owned by at least one identity"
+        )
 
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    @pytest.mark.parametrize("operation", ["delete", "modify"])
     def test_delete_last_approved_owner_assignment__other_owner_pending(
-        self, client: TestClient
+        self, client: TestClient, identity_factory, operation
     ):
         data_product: DataProduct = DataProductFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATA_PRODUCT__DELETE_USER],
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__DELETE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
+            ],
         )
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
         role = RoleFactory.data_product_owner()
-        user_1, user_2 = UserFactory.create_batch(2)
+        user_1, user_2 = identity_factory(), UserFactory()
         approved = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             identity_id=user_1.id,
@@ -440,8 +454,18 @@ class TestDataProductRoleAssignmentsRouter:
             decision=DecisionStatus.PENDING,
         )
 
-        response = client.delete(f"{ENDPOINT}/{approved.id}")
+        response = (
+            client.delete(f"{ENDPOINT}/{approved.id}")
+            if operation == "delete"
+            else client.put(
+                f"{ENDPOINT}/{approved.id}", json={"role_id": str(authz_role.id)}
+            )
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"]
+            == "A data product must always be owned by at least one identity"
+        )
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()

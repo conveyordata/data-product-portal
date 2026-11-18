@@ -195,7 +195,10 @@ class RoleAssignmentService:
         query = (
             select(DataProductRoleAssignmentModel)
             .filter(
-                DataProductRoleAssignmentModel.identity_id == user.id,
+                or_(
+                    DataProductRoleAssignmentModel.identity_id == user.id,
+                    DataProductRoleAssignmentModel.requested_by_id == user.id,
+                ),
             )
             .order_by(asc(DataProductRoleAssignmentModel.requested_on))
         )

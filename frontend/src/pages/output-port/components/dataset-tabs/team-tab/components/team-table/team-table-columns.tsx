@@ -68,7 +68,7 @@ export const getDatasetTeamColumns = ({
 
                 return (
                     <RoleChangeForm
-                        initialRole={role}
+                        role={role}
                         onRoleChange={(role) => onRoleChange(role, id)}
                         disabled={disabled || !canEdit || !isApproved}
                         scope={Scope.DATASET}

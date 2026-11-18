@@ -1,13 +1,11 @@
-import { Alert, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
+import { Alert, Button, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useDebouncedCallback } from 'use-debounce';
 import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
@@ -25,8 +23,14 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductOwners } from '@/utils/data-product-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import {
+    getIdentityDisplayName,
+    getIdentitySecondaryLabel,
+    getIdentityTypeLabel,
+    identityMatchesSearch,
+} from '@/utils/identity.ts';
 
 const { TextArea } = Input;
 
@@ -44,14 +48,15 @@ export const DataProductFormItems = <T extends DataProductCreate>({
 }: Props<T>) => {
     const form = formT as unknown as FormInstance<DataProductCreate>;
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser);
 
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
     const { data: { environments } = {}, isFetching: isFetchingEnvironments } = useGetEnvironmentsQuery();
     const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
         useGetDataProductsTypesQuery();
-    const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
+    const usersQuery = useGetUsersQuery(undefined, { skip: mode !== 'create' });
+    const { isFetching: isFetchingUsers } = usersQuery;
+    const owners = useGetDataProductOwners(currentDataProduct?.id);
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [
         sanitizeResourceName,
@@ -109,10 +114,14 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         label: type.name,
         value: type.id,
     }));
-    const userSelectOptions = dataProductOwners.map((owner) => ({
-        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+    const ownerSelectOptions = (
+        mode === 'create'
+            ? (usersQuery.currentData?.users ?? []).map((user) => ({ ...user, type: 'user' as const }))
+            : (owners ?? [])
+    ).map((owner) => ({
+        label: `${getIdentityDisplayName(owner)} (${getIdentityTypeLabel(owner, t)}: ${getIdentitySecondaryLabel(owner)})`,
         value: owner.id,
-        disabled: owner.id === currentUser?.id,
+        identity: owner,
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
@@ -150,9 +159,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         [validateResourceName],
     );
 
-    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
-
-    if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
+    if (mode === 'edit' && (!currentDataProduct || owners === undefined)) {
         return <Skeleton active />;
     }
 
@@ -187,17 +194,33 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 tooltip={t('The owners of the Data Product')}
                 rules={[
                     {
-                        required: mode === 'create',
+                        required: true,
                         message: t('Please select at least one owner for the Data Product'),
                     },
                 ]}
+                extra={
+                    mode === 'create' && usersQuery.isError ? (
+                        <Alert
+                            type="error"
+                            title={t("Couldn't load {{subject}}", { subject: t('users') })}
+                            showIcon
+                            action={
+                                <Button size="small" onClick={() => usersQuery.refetch()}>
+                                    {t('Try again')}
+                                </Button>
+                            }
+                        />
+                    ) : undefined
+                }
             >
                 <Select
                     loading={isFetchingUsers}
                     mode="multiple"
-                    options={userSelectOptions}
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    disabled={mode !== 'create'}
+                    options={ownerSelectOptions}
+                    showSearch={{
+                        filterOption: (search, option) => !!option && identityMatchesSearch(option.identity, search),
+                    }}
+                    disabled={mode !== 'create' || !usersQuery.currentData}
                     tokenSeparators={[',']}
                 />
             </Form.Item>

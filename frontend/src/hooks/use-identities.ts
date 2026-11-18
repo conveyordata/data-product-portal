@@ -4,10 +4,10 @@ import { useGetMachineUsersQuery } from '@/store/api/services/generated/machineU
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import type { Identity } from '@/utils/identity.ts';
 
-export function useIdentities() {
-    const users = useGetUsersQuery();
-    const groups = useGetGroupsQuery();
-    const machineUsers = useGetMachineUsersQuery();
+export function useIdentities(options: { skip?: boolean } = {}) {
+    const users = useGetUsersQuery(undefined, options);
+    const groups = useGetGroupsQuery(undefined, options);
+    const machineUsers = useGetMachineUsersQuery(undefined, options);
 
     const currentData = useMemo<Identity[] | undefined>(() => {
         if (!users.currentData || !groups.currentData || !machineUsers.currentData) {

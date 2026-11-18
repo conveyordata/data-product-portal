@@ -1,46 +1,49 @@
-import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
+import { Badge, Button, Popconfirm, Space, type TableColumnsType, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
-
+import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
-import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component';
+import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi';
 import { DecisionStatus, Prototype, Scope } from '@/types/roles';
-import type { UserDataProductRoleAssignment } from '@/utils/identity.ts';
+import { compareIdentities, getIdentityDisplayName, getIdentityTypeLabel } from '@/utils/identity.ts';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductUsers: UserDataProductRoleAssignment[];
-    onRemoveUserAccess: (assignmentId: string) => void;
+    assignments: DataProductRoleAssignmentResponse[];
+    onRemoveAccess: (assignmentId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
     onRoleChange: (role: Role, assignmentId: string) => void;
-    isRemovingUser: boolean;
-    isLoading: boolean;
+    isSaving: boolean;
     canApprove: boolean;
     canEdit: boolean;
     canRemove: boolean;
 };
-export const getDataProductUsersTableColumns = ({
+export const getDataProductTeamTableColumns = ({
     t,
-    dataProductUsers,
-    onRemoveUserAccess,
+    assignments,
+    onRemoveAccess,
     onAcceptAccessRequest,
     onRejectAccessRequest,
-    isLoading,
+    isSaving,
     onRoleChange,
-    isRemovingUser,
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<UserDataProductRoleAssignment> => {
-    const sorter = new Sorter<UserDataProductRoleAssignment>();
-    const numberOfOwners = dataProductUsers.filter(
-        (assignment) => assignment.role?.prototype === Prototype.OWNER,
+}: Props): TableColumnsType<DataProductRoleAssignmentResponse> => {
+    const sorter = new Sorter<DataProductRoleAssignmentResponse>();
+    const numberOfOwners = assignments.filter(
+        (assignment) =>
+            assignment.decision === DecisionStatus.Approved && assignment.role?.prototype === Prototype.OWNER,
     ).length;
-    const lockOwners = numberOfOwners <= 1;
+    const isLastOwner = (assignment: DataProductRoleAssignmentResponse) =>
+        numberOfOwners <= 1 &&
+        assignment.decision === DecisionStatus.Approved &&
+        assignment.role?.prototype === Prototype.OWNER;
+    const ownerRequirement = t('A Data Product must have at least one approved owner');
 
     return [
         {
@@ -50,35 +53,47 @@ export const getDataProductUsersTableColumns = ({
         },
         {
             title: t('Name'),
-            dataIndex: 'identity.first_name',
+            key: 'identity',
             render: (_, { identity }) => {
-                return <UserAvatarWithEmail user={identity} />;
+                return <IdentityAvatarWithDetails identity={identity} />;
             },
-            width: '50%',
-            sorter: sorter.cascadedSorter(
-                sorter.stringSorter((assignment) => assignment.identity.last_name),
-                sorter.stringSorter((assignment) => assignment.identity.first_name),
-            ),
+            width: '35%',
+            sorter: (left, right) => compareIdentities(left.identity, right.identity),
             defaultSortOrder: 'ascend',
+        },
+        {
+            title: t('Type'),
+            key: 'identityType',
+            render: (_, { identity }) => getIdentityTypeLabel(identity, t),
+            ...new FilterSettings(assignments, (assignment) => getIdentityTypeLabel(assignment.identity, t)),
+            sorter: sorter.stringSorter((assignment) => getIdentityTypeLabel(assignment.identity, t)),
         },
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: Role, { id, decision }: UserDataProductRoleAssignment) => {
-                const isApproved = decision === DecisionStatus.Approved;
-                const disabled = role.prototype === Prototype.OWNER && lockOwners;
+            render: (_, assignment) => {
+                const { role, id, decision } = assignment;
+                const locked = isLastOwner(assignment);
 
                 return (
-                    <RoleChangeForm
-                        initialRole={role}
-                        onRoleChange={(role) => onRoleChange(role, id)}
-                        disabled={disabled || !canEdit || !isApproved}
-                        scope={Scope.DATA_PRODUCT}
-                    />
+                    <Tooltip title={locked ? ownerRequirement : undefined}>
+                        <div>
+                            <RoleChangeForm
+                                role={role}
+                                allowOwner={assignment.identity.type === 'user'}
+                                ariaLabel={t('Role for {{name}}', {
+                                    name: getIdentityDisplayName(assignment.identity),
+                                })}
+                                onRoleChange={(role) => onRoleChange(role, id)}
+                                disabled={locked || isSaving || !canEdit || decision !== DecisionStatus.Approved}
+                                scope={Scope.DATA_PRODUCT}
+                            />
+                        </div>
+                    </Tooltip>
                 );
             },
             width: '25%',
-            ...new FilterSettings(dataProductUsers, (assignment) => assignment.role?.name ?? ''),
+            ...new FilterSettings(assignments, (assignment) => assignment.role?.name ?? t('No role assigned')),
             sorter: sorter.stringSorter((assignment) => assignment.role?.name),
         },
         {
@@ -92,73 +107,77 @@ export const getDataProductUsersTableColumns = ({
                     />
                 );
             },
-            width: '20%',
-            ...new FilterSettings(dataProductUsers, (assignment) =>
-                getRoleAssignmentStatusLabel(t, assignment.decision),
-            ),
+            width: '15%',
+            ...new FilterSettings(assignments, (assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
             sorter: sorter.stringSorter((assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
         },
         {
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { identity, id, decision }: UserDataProductRoleAssignment) => (
-                <Space>
-                    {decision === DecisionStatus.Pending ? (
-                        <Space>
+            render: (_, assignment) => {
+                const { identity, id, decision, role } = assignment;
+                const locked = isLastOwner(assignment);
+                return (
+                    <Space>
+                        {decision === DecisionStatus.Pending ? (
+                            <Space>
+                                <Popconfirm
+                                    title={t('Approve role request')}
+                                    description={t('Are you sure you want to allow access to {{name}}?', {
+                                        name: getIdentityDisplayName(identity),
+                                    })}
+                                    onConfirm={() => onAcceptAccessRequest(id)}
+                                    placement="leftTop"
+                                    okText={t('Confirm')}
+                                    cancelText={t('Cancel')}
+                                    okButtonProps={{ loading: isSaving }}
+                                    autoAdjustOverflow={true}
+                                >
+                                    <Button disabled={isSaving || !canApprove || !role} type="link" size="small">
+                                        {t('Accept')}
+                                    </Button>
+                                </Popconfirm>
+                                <Popconfirm
+                                    title={t('Reject role request')}
+                                    description={t('Are you sure you want to deny access to {{name}}?', {
+                                        name: getIdentityDisplayName(identity),
+                                    })}
+                                    onConfirm={() => onRejectAccessRequest(id)}
+                                    placement="leftTop"
+                                    okText={t('Confirm')}
+                                    cancelText={t('Cancel')}
+                                    okButtonProps={{ loading: isSaving }}
+                                    autoAdjustOverflow={true}
+                                >
+                                    <Button disabled={isSaving || !canApprove} type="link" size="small">
+                                        {t('Reject')}
+                                    </Button>
+                                </Popconfirm>
+                            </Space>
+                        ) : (
                             <Popconfirm
-                                title={t('Allow User')}
-                                description={t('Are you sure you want to allow access to user {{name}}?', {
-                                    name: identity.first_name,
+                                title={t('Remove team member')}
+                                description={t('Are you sure you want to remove {{name}} from the Data Product?', {
+                                    name: getIdentityDisplayName(identity),
                                 })}
-                                onConfirm={() => onAcceptAccessRequest(id)}
+                                onConfirm={() => onRemoveAccess(id)}
                                 placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
-                                okButtonProps={{ loading: isLoading }}
+                                okButtonProps={{ loading: isSaving }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type="link">
-                                    {t('Accept')}
-                                </Button>
+                                <Tooltip title={locked ? ownerRequirement : undefined}>
+                                    <Button disabled={locked || isSaving || !canRemove} type="link" size="small">
+                                        {t('Remove')}
+                                    </Button>
+                                </Tooltip>
                             </Popconfirm>
-                            <Popconfirm
-                                title={t('Remove User')}
-                                description={t('Are you sure you want to deny access to user {{name}}?', {
-                                    name: identity.first_name,
-                                })}
-                                onConfirm={() => onRejectAccessRequest(id)}
-                                placement="leftTop"
-                                okText={t('Confirm')}
-                                cancelText={t('Cancel')}
-                                okButtonProps={{ loading: isLoading }}
-                                autoAdjustOverflow={true}
-                            >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type="link">
-                                    {t('Reject')}
-                                </Button>
-                            </Popconfirm>
-                        </Space>
-                    ) : (
-                        <Popconfirm
-                            title={t('Remove User')}
-                            description={t('Are you sure you want to remove {{name}} from the Data Product?', {
-                                name: identity.first_name,
-                            })}
-                            onConfirm={() => onRemoveUserAccess(id)}
-                            placement="leftTop"
-                            okText={t('Confirm')}
-                            cancelText={t('Cancel')}
-                            okButtonProps={{ loading: isRemovingUser }}
-                            autoAdjustOverflow={true}
-                        >
-                            <Button loading={isRemovingUser} disabled={isRemovingUser || !canRemove} type="link">
-                                {t('Remove')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                </Space>
-            ),
+                        )}
+                    </Space>
+                );
+            },
         },
     ];
 };

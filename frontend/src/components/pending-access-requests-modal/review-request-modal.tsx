@@ -1,4 +1,4 @@
-import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import {
     Avatar,
     Badge,
@@ -30,6 +30,7 @@ import {
     OutputPortOutlined,
     TechnicalAssetOutlined,
 } from '@/components/icons';
+import { IdentityIcon } from '@/components/identity-avatar/identity-avatar.component.tsx';
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
@@ -263,7 +264,7 @@ function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): R
                 name: getIdentityDisplayName(identity),
                 email: getIdentitySecondaryLabel(identity),
                 type: getIdentityTypeLabel(identity, t),
-                icon: <UserOutlined />,
+                icon: <IdentityIcon type={identity.type} />,
             },
             target: {
                 name: action.data_product.name,
@@ -456,21 +457,36 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
             >
                 <Flex vertical gap="middle">
                     <Flex gap="small" align="stretch">
-                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3 }}>
+                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3, minWidth: 0 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
-                                    {t('Requesting Consumer')}
+                                    {action.request_type === RequestType_DataProductRoleAssignment
+                                        ? t('Identity')
+                                        : t('Requesting Consumer')}
                                 </Typography.Text>
                                 <Flex align="center" gap="small">
                                     <Avatar
                                         icon={details.source.icon}
                                         style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
                                     />
-                                    <Flex vertical>
+                                    <Flex vertical style={{ minWidth: 0 }}>
                                         {typeof details.source.name === 'string' ? (
                                             <Typography.Text strong>{details.source.name}</Typography.Text>
                                         ) : (
                                             details.source.name
+                                        )}
+                                        {action.request_type === RequestType_DataProductRoleAssignment && (
+                                            <>
+                                                <Typography.Text type="secondary">
+                                                    {details.source.type}
+                                                </Typography.Text>
+                                                <Typography.Text
+                                                    type="secondary"
+                                                    ellipsis={{ tooltip: details.source.email }}
+                                                >
+                                                    {details.source.email}
+                                                </Typography.Text>
+                                            </>
                                         )}
                                     </Flex>
                                 </Flex>
