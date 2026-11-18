@@ -10,8 +10,9 @@ Look at your own UI change before the user does. A side-by-side with main catche
 ## Steps
 
 1. Make sure the dev app runs: frontend on `localhost:3000` and backend on `localhost:5050` with `OIDC_ENABLED=false`, so every page opens as the sample user John without a login. The frontend must run from the checkout that holds your change.
-   - Check for a listener first with `lsof -nP -iTCP:3000 -sTCP:LISTEN`: the user often has their own dev server there. Reuse it only when it runs from your checkout (`lsof -a -p <pid> -d cwd`) and pages open as John; leave it running either way.
-   - If you start one, stop it afterwards by the PID listening on its port: `kill $(lsof -nP -iTCP:3000 -sTCP:LISTEN -t)`.
+   - Check for a listener first with `lsof -nP -iTCP:3000 -sTCP:LISTEN -t` and its folder with `lsof -a -p <pid> -d cwd`. The user often has their own dev server there: reuse it when it runs from your checkout's `frontend/` and pages open as John, and leave it running. When it runs from another checkout, stop and ask the user; that server is theirs.
+   - When port 3000 is free, start your own from `frontend/` with `npm run dev -- --strictPort`, so Vite fails instead of moving to another port. Record the PID listening on 3000 (the `vite` process, not `npm`, which leaves Vite running when killed) and confirm its folder is your checkout.
+   - Afterwards, stop exactly that recorded PID with `kill <pid>`.
 2. Run, from the repository:
 
    ```bash
