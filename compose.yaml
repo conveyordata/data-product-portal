@@ -1,3 +1,5 @@
+name: data-product-portal
+
 services:
   mailhog:
     image: mailhog/mailhog

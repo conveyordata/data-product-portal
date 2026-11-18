@@ -1,3 +1,10 @@
+import os
+from hashlib import sha256
+from pathlib import Path
+
+checkout = sha256(str(Path(__file__).resolve().parent).encode()).hexdigest()[:8]
+os.environ["POSTGRES_DB"] = f"{os.environ['POSTGRES_DB']}_{checkout}"
+
 from importlib.metadata import EntryPoint, entry_points
 
 from sqlalchemy import create_engine

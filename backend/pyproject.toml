@@ -123,9 +123,8 @@ runtime-evaluated-base-classes = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S311"]
-"tests/__init__.py" = ["TID251"]
+"tests/__init__.py" = ["TID251", "E402"]
 "tests/factories/**" = ["TID251"]
-"tests/seed_random_data.py" = ["TID251"]
 "app/database/alembic/versions/*.py" = ["TID251"]
 
 [tool.ruff.lint.isort]
