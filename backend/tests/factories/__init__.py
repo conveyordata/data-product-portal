@@ -40,6 +40,7 @@ from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
 from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
 from .technical_asset_configuration import (
+    SizingConfigurationFactory,
     SizingTechnicalAssetConfigurationFactory,
     TechnicalAssetConfigurationFactory,
 )
@@ -98,6 +99,7 @@ factories = [
     RoleFactory,
     TechnicalAssetConfigurationFactory,
     SizingTechnicalAssetConfigurationFactory,
+    SizingConfigurationFactory,
     TagFactory,
     UserFactory,
     TechnicalAssetFactory,
