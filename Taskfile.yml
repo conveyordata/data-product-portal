@@ -130,7 +130,6 @@ tasks:
       - poetry install --with test
       - docker compose up -d postgresql
       - poetry run pytest -v
-      - docker compose kill
 
   coverage:backend:
     desc: "Run the backend tests with a coverage report"
