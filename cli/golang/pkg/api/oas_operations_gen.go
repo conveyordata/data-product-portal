@@ -167,6 +167,7 @@ const (
 	RevokeInputPortForExplorationOperation                     OperationName = "RevokeInputPortForExploration"
 	RevokeOutputPortAsInputPortOperation                       OperationName = "RevokeOutputPortAsInputPort"
 	SanitizeResourceNameOperation                              OperationName = "SanitizeResourceName"
+	SearchDataProductsOperation                                OperationName = "SearchDataProducts"
 	SearchOutputPortsOperation                                 OperationName = "SearchOutputPorts"
 	SetCanBecomeAdminOperation                                 OperationName = "SetCanBecomeAdmin"
 	SetValueForDataProductOperation                            OperationName = "SetValueForDataProduct"

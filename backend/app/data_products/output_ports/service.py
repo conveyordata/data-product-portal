@@ -71,6 +71,7 @@ from app.data_products.output_ports.schema_response import (
     OutputPortAccessDuration,
     output_port_not_found_exception,
 )
+from app.data_products.service import DataProductService
 from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
@@ -460,6 +461,7 @@ class OutputPortService:
         self.db.flush()
         self._sync_public_reader_grouping([model.id], model.access_function)
         self.recalculate_search(model.id)
+        DataProductService(self.db).recalculate_search(data_product_id)
         return model
 
     def remove_output_port(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
@@ -472,6 +474,7 @@ class OutputPortService:
 
         result = copy.deepcopy(output_port)
         self.db.delete(output_port)
+        DataProductService(self.db).recalculate_search(data_product_id)
         return result
 
     def update_output_port(
@@ -519,6 +522,7 @@ class OutputPortService:
                 [current_output_port.id], current_output_port.access_function
             )
         self.recalculate_search(id)
+        DataProductService(self.db).recalculate_search(data_product_id)
 
         return current_output_port.id
 
