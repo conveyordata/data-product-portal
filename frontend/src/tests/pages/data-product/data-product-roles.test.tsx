@@ -110,10 +110,61 @@ describe('Data Product identity roles', () => {
         expect((await findRow('Finance Team')).getByText('Group')).toBeInTheDocument();
         expect((await findRow('ETL Runner')).getByText('Machine User')).toBeInTheDocument();
         expect((await findRow('Alice Smith')).getByText('alice@example.com')).toBeInTheDocument();
-        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), 'TEAM-FINANCE-EXTERNAL');
+        await user.type(screen.getByPlaceholderText('Search by name or email'), 'FINANCE TEAM');
         expect(screen.queryByText('Alice Smith')).not.toBeInTheDocument();
         expect(screen.getByLabelText('Role for Finance Team')).toBeEnabled();
         expect((await findRow('Finance Team')).getByText('Remove').closest('button')).toBeEnabled();
+    });
+
+    it('disables assignment controls until the mutation and assignment refresh finish', async () => {
+        const state = mockRoles();
+        let finishMutation!: () => void;
+        let finishRefresh!: () => void;
+        const mutation = new Promise<void>((resolve) => {
+            finishMutation = resolve;
+        });
+        const refresh = new Promise<void>((resolve) => {
+            finishRefresh = resolve;
+        });
+        let saved = false;
+        const refreshing = vi.fn();
+        server.use(
+            http.post(endpoint, async () => {
+                await mutation;
+                const created = assignment(mockGroup);
+                state.assignments.push(created);
+                saved = true;
+                return HttpResponse.json(created);
+            }),
+            http.get(endpoint, async () => {
+                if (saved) {
+                    refreshing();
+                    await refresh;
+                }
+                return HttpResponse.json({ role_assignments: state.assignments });
+            }),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<TeamTab dataProductId="dp-1" />);
+        await findRow('Alice Smith');
+        await user.click(screen.getByText('Add team member'));
+        await screen.findByLabelText('Assign role to Finance Team');
+        try {
+            await selectRole(user, 'Assign role to Finance Team', 'Member');
+            expect(screen.getByLabelText('Assign role to Finance Team')).toBeDisabled();
+            expect(screen.getByLabelText('Assign role to ETL Runner')).toBeDisabled();
+            expect(screen.getByLabelText('Search identities')).toBeDisabled();
+            finishMutation();
+            await waitFor(() => expect(refreshing).toHaveBeenCalled());
+            expect(screen.getByLabelText('Assign role to Finance Team')).toBeDisabled();
+            expect(screen.getByLabelText('Assign role to ETL Runner')).toBeDisabled();
+            finishRefresh();
+            await waitFor(() => expect(screen.queryByLabelText('Assign role to Finance Team')).not.toBeInTheDocument());
+            expect(screen.getByLabelText('Assign role to ETL Runner')).toBeEnabled();
+        } finally {
+            finishMutation();
+            finishRefresh();
+        }
     });
 
     it.each([mockGroup, mockMachineUser])(
@@ -158,16 +209,11 @@ describe('Data Product identity roles', () => {
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await findRow('Alice Smith');
-        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), identity.display_name);
+        await user.type(screen.getByPlaceholderText('Search by name or email'), identity.display_name);
         await user.click(screen.getByText('Add team member'));
-        await user.click(
-            await screen.findByLabelText(
-                `Select ${identity.display_name} (${identity.type === 'group' ? 'Group' : 'Machine User'})`,
-            ),
-        );
+        await screen.findByLabelText(`Assign role to ${identity.display_name}`);
         expect(create).not.toHaveBeenCalled();
-        await selectRole(user, 'Role', 'Member');
-        await user.click(screen.getByText('Assign role'));
+        await selectRole(user, `Assign role to ${identity.display_name}`, 'Member');
 
         await waitFor(() =>
             expect(create).toHaveBeenCalledExactlyOnceWith({
@@ -176,10 +222,13 @@ describe('Data Product identity roles', () => {
                 role_id: memberRole.id,
             }),
         );
-        await waitFor(() => expect(screen.queryByText('Change identity')).not.toBeInTheDocument());
+        await waitFor(() =>
+            expect(screen.queryByLabelText(`Assign role to ${identity.display_name}`)).not.toBeInTheDocument(),
+        );
+        await user.click(screen.getByText('Cancel'));
         await findRow(identity.display_name);
         await user.click(screen.getByLabelText(`Role for ${identity.display_name}`, { selector: 'input' }));
-        const ownerOption = await screen.findByText('Owner', { selector: '.ant-select-item-option-content' });
+        const ownerOption = await screen.findByText('Owner', { selector: '.ant-select-item-option-content span' });
         expect(ownerOption.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
         await user.click(await screen.findByText('Editor', { selector: '.ant-select-item-option-content' }));
         await waitFor(() =>
@@ -193,110 +242,71 @@ describe('Data Product identity roles', () => {
         await waitFor(() => expect(screen.queryByText(identity.display_name)).not.toBeInTheDocument());
     });
 
-    it('allows selecting Owner before a user and keeps it when changing users', async () => {
+    it('assigns different roles to multiple identities without closing the modal', async () => {
+        const state = mockRoles([]);
+        const create = vi.fn();
+        server.use(
+            http.post(endpoint, async ({ request }) => {
+                const body = await request.json();
+                create(body);
+                const created =
+                    create.mock.calls.length === 1
+                        ? assignment(currentIdentity, { role: ownerRole })
+                        : assignment(mockGroup, { role: editorRole });
+                state.assignments.push(created);
+                return HttpResponse.json(created);
+            }),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<TeamTab dataProductId="dp-1" />);
+        await waitFor(() => expect(screen.getByText('Add team member').closest('button')).toBeEnabled());
+        await user.click(screen.getByText('Add team member'));
+        await screen.findByLabelText('Assign role to Alice Smith');
+        expect(screen.queryByText('Assign role', { exact: true })).not.toBeInTheDocument();
+        await selectRole(user, 'Assign role to Alice Smith', 'Owner');
+        await waitFor(() => expect(screen.queryByLabelText('Assign role to Alice Smith')).not.toBeInTheDocument());
+        await waitFor(() => expect(screen.getByLabelText('Assign role to Finance Team')).toBeEnabled());
+        await selectRole(user, 'Assign role to Finance Team', 'Editor');
+        await waitFor(() => expect(screen.queryByLabelText('Assign role to Finance Team')).not.toBeInTheDocument());
+        expect(create.mock.calls).toEqual([
+            [{ data_product_id: 'dp-1', identity_id: currentIdentity.id, role_id: ownerRole.id }],
+            [{ data_product_id: 'dp-1', identity_id: mockGroup.id, role_id: editorRole.id }],
+        ]);
+        expect(screen.getByLabelText('Assign role to ETL Runner')).toBeInTheDocument();
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
+    });
+
+    it.each([mockGroup, mockMachineUser])('disables Owner for a $type and explains why on hover', async (identity) => {
         mockRoles([]);
         const create = vi.fn();
         server.use(
             http.post(endpoint, async ({ request }) => {
                 create(await request.json());
-                return HttpResponse.json(assignment(currentIdentity, { role: ownerRole }));
+                return HttpResponse.json(assignment(identity));
             }),
         );
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await waitFor(() => expect(screen.getByText('Add team member').closest('button')).toBeEnabled());
         await user.click(screen.getByText('Add team member'));
-        await screen.findByLabelText('Select Finance Team (Group)');
-        expect(screen.getByLabelText('Select ETL Runner (Machine User)')).toBeInTheDocument();
-        await selectRole(user, 'Role', 'Owner');
-        expect(screen.queryByLabelText('Select Finance Team (Group)')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Select ETL Runner (Machine User)')).not.toBeInTheDocument();
-        expect(screen.queryByText('Groups')).not.toBeInTheDocument();
-        expect(screen.queryByText('Machine Users')).not.toBeInTheDocument();
-        await user.click(await screen.findByLabelText('Select Bob Jones (User)'));
-        await user.click(screen.getByText('Change identity'));
-        expect(screen.getByText('Owner', { selector: '.ant-select-content' })).toBeInTheDocument();
-        await user.click(await screen.findByLabelText('Select Alice Smith (User)'));
-        await user.click(screen.getByText('Assign role'));
+        await user.click(await screen.findByLabelText(`Assign role to ${identity.display_name}`));
+        const ownerOption = await screen.findByText('Owner', { selector: '.ant-select-item-option-content span' });
+        expect(ownerOption.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
+        expect(screen.queryByText('Only users can be Data Product owners')).not.toBeInTheDocument();
+        await user.hover(ownerOption);
+        expect(await screen.findByText('Only users can be Data Product owners')).toBeInTheDocument();
+        await user.click(ownerOption);
+        expect(create).not.toHaveBeenCalled();
+        await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
 
         await waitFor(() =>
             expect(create).toHaveBeenCalledExactlyOnceWith({
                 data_product_id: 'dp-1',
-                identity_id: currentIdentity.id,
-                role_id: ownerRole.id,
+                identity_id: identity.id,
+                role_id: memberRole.id,
             }),
         );
     });
-
-    it('does not reselect Users or change other role filters when selecting Owner', async () => {
-        mockRoles([]);
-        const user = userEvent.setup();
-        renderWithProviders(<TeamTab dataProductId="dp-1" />);
-        await waitFor(() => expect(screen.getByText('Add team member').closest('button')).toBeEnabled());
-        await user.click(screen.getByText('Add team member'));
-        await screen.findByLabelText('Select Alice Smith (User)');
-        await user.click(screen.getByLabelText('Type', { selector: 'input' }));
-        await user.click(screen.getByText('Users', { selector: '.ant-select-item-option-content' }));
-        await selectRole(user, 'Role', 'Member');
-        expect(screen.getByLabelText('Select Finance Team (Group)')).toBeInTheDocument();
-        expect(screen.getByLabelText('Select ETL Runner (Machine User)')).toBeInTheDocument();
-        expect(screen.queryByLabelText('Select Alice Smith (User)')).not.toBeInTheDocument();
-
-        await selectRole(user, 'Role', 'Owner');
-        expect(screen.getByText('No identities match the current filters')).toBeInTheDocument();
-        expect(screen.queryByLabelText(/^Select /)).not.toBeInTheDocument();
-    });
-
-    it.each([mockGroup, mockMachineUser])(
-        'clears and disables the owner role when switching to a $type',
-        async (identity) => {
-            mockRoles([]);
-            const create = vi.fn();
-            server.use(
-                http.post(endpoint, async ({ request }) => {
-                    create(await request.json());
-                    return HttpResponse.json(assignment(identity));
-                }),
-            );
-            const user = userEvent.setup();
-            renderWithProviders(<TeamTab dataProductId="dp-1" />);
-            await waitFor(() => expect(screen.getByText('Add team member').closest('button')).toBeEnabled());
-            await user.click(screen.getByText('Add team member'));
-            await user.click(await screen.findByLabelText('Select Alice Smith (User)'));
-            await selectRole(user, 'Role', 'Owner');
-            await user.click(screen.getByText('Change identity'));
-            expect(screen.getByText('Owner', { selector: '.ant-select-content' })).toBeInTheDocument();
-            await user.click(screen.getByLabelText('Type', { selector: 'input' }));
-            await user.click(
-                screen.getByText(identity.type === 'group' ? 'Groups' : 'Machine Users', {
-                    selector: '.ant-select-item-option-content',
-                }),
-            );
-            await user.click(
-                await screen.findByLabelText(
-                    `Select ${identity.display_name} (${identity.type === 'group' ? 'Group' : 'Machine User'})`,
-                ),
-            );
-            expect(screen.getByText('Only users can be Data Product owners')).toBeInTheDocument();
-            await user.click(screen.getByText('Assign role'));
-            expect(await screen.findByText('Please select a role')).toBeInTheDocument();
-            expect(create).not.toHaveBeenCalled();
-
-            await user.click(screen.getByLabelText('Role', { selector: 'input' }));
-            const ownerOption = await screen.findByText('Owner', { selector: '.ant-select-item-option-content' });
-            expect(ownerOption.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
-            await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
-            await user.click(screen.getByText('Assign role'));
-
-            await waitFor(() =>
-                expect(create).toHaveBeenCalledExactlyOnceWith({
-                    data_product_id: 'dp-1',
-                    identity_id: identity.id,
-                    role_id: memberRole.id,
-                }),
-            );
-        },
-    );
 
     it('hides approved and pending identities even when the team search hides them, but permits retrying denied requests', async () => {
         mockRoles([
@@ -307,12 +317,12 @@ describe('Data Product identity roles', () => {
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await findRow('Alice Smith');
-        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), 'nobody');
+        await user.type(screen.getByPlaceholderText('Search by name or email'), 'nobody');
         await user.click(screen.getByText('Add team member'));
 
-        expect(await screen.findByLabelText('Select ETL Runner (Machine User)')).toBeEnabled();
-        expect(screen.queryByLabelText('Select Alice Smith (User)')).not.toBeInTheDocument();
-        expect(screen.queryByLabelText('Select Finance Team (Group)')).not.toBeInTheDocument();
+        expect(await screen.findByLabelText('Assign role to ETL Runner')).toBeEnabled();
+        expect(screen.queryByLabelText('Assign role to Alice Smith')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Assign role to Finance Team')).not.toBeInTheDocument();
     });
 
     it('lets an approved identity receive a replacement when its role has been deleted', async () => {
@@ -354,21 +364,28 @@ describe('Data Product identity roles', () => {
         expect((await findRow('Finance Team')).getByText('Member')).toBeInTheDocument();
     });
 
-    it('keeps the selected identity and role available for retry after a failed assignment', async () => {
-        mockRoles();
+    it('keeps an identity available for retry after a failed assignment', async () => {
+        const state = mockRoles();
         server.use(http.post(endpoint, () => HttpResponse.json({ detail: 'Assignment failed' }, { status: 500 })));
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await findRow('Alice Smith');
         await user.click(screen.getByText('Add team member'));
-        await user.click(await screen.findByLabelText('Select Finance Team (Group)'));
-        await selectRole(user, 'Role', 'Member');
-        await user.click(screen.getByText('Assign role'));
+        await screen.findByLabelText('Assign role to Finance Team');
+        await selectRole(user, 'Assign role to Finance Team', 'Member');
 
         await screen.findByText('Failed to assign role');
         expect(screen.getByText('Finance Team')).toBeInTheDocument();
-        expect(screen.getByLabelText('Role', { selector: 'input' }).closest('.ant-select')).toHaveTextContent('Member');
-        await waitFor(() => expect(screen.getByText('Assign role').closest('button')).toBeEnabled());
+        await waitFor(() => expect(screen.getByLabelText('Assign role to Finance Team')).toBeEnabled());
+        server.use(
+            http.post(endpoint, () => {
+                const created = assignment(mockGroup);
+                state.assignments.push(created);
+                return HttpResponse.json(created);
+            }),
+        );
+        await selectRole(user, 'Assign role to Finance Team', 'Member');
+        await waitFor(() => expect(screen.queryByLabelText('Assign role to Finance Team')).not.toBeInTheDocument());
     });
 
     it('does not offer requests from the Team tab when the user cannot assign roles', async () => {

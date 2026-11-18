@@ -7,8 +7,6 @@ import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 export type Identity = UserIdentity | GroupIdentity | MachineUserIdentity;
 
-export const IDENTITY_TYPES: Identity['type'][] = ['user', 'group', 'machine_user'];
-
 const sorter = new Sorter<Identity>();
 export const compareIdentities = sorter.cascadedSorter(
     sorter.stringSorter((identity) => (identity.type === 'user' ? identity.last_name : identity.display_name)),
@@ -49,7 +47,6 @@ export function identityMatchesSearch(identity: Identity, searchTerm: string): b
 
     return (
         getIdentityDisplayName(identity).toLowerCase().includes(value) ||
-        getIdentitySecondaryLabel(identity).toLowerCase().includes(value) ||
-        identity.external_id.toLowerCase().includes(value)
+        (identity.type === 'user' && identity.email.toLowerCase().includes(value))
     );
 }

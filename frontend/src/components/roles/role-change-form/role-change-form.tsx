@@ -1,4 +1,4 @@
-import { Flex, Select } from 'antd';
+import { Flex, Select, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { type Role, type Scope, useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
@@ -7,14 +7,23 @@ import { Prototype } from '@/types/roles';
 import styles from './role-change-form.module.scss';
 
 type Props = {
-    role: Role | null;
+    role?: Role | null;
     onRoleChange: (role: Role) => void;
     disabled?: boolean;
     ariaLabel?: string;
     allowOwner?: boolean;
+    placeholder?: string;
     scope: Scope;
 };
-export function RoleChangeForm({ role, onRoleChange, disabled = true, scope, ariaLabel, allowOwner = true }: Props) {
+export function RoleChangeForm({
+    role = null,
+    onRoleChange,
+    disabled = true,
+    scope,
+    ariaLabel,
+    allowOwner = true,
+    placeholder,
+}: Props) {
     const { t } = useTranslation();
     const { data: { roles = [] } = {}, isLoading } = useGetRolesQuery(scope);
 
@@ -31,8 +40,17 @@ export function RoleChangeForm({ role, onRoleChange, disabled = true, scope, ari
                 disabled={disabled}
                 loading={isLoading}
                 options={options}
-                value={role?.id}
-                placeholder={t('No role assigned')}
+                optionRender={({ label, data }) =>
+                    data.disabled ? (
+                        <Tooltip title={t('Only users can be Data Product owners')}>
+                            <span style={{ display: 'block' }}>{label}</span>
+                        </Tooltip>
+                    ) : (
+                        label
+                    )
+                }
+                value={role?.id ?? null}
+                placeholder={placeholder ?? t('No role assigned')}
                 onChange={(id: string) => {
                     const selectedRole = roles.find((role) => role.id === id);
                     if (selectedRole && (allowOwner || selectedRole.prototype !== Prototype.OWNER)) {
