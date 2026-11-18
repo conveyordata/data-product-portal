@@ -1,7 +1,7 @@
 """Drop the Casbin consumer links
 
 Revision ID: 8d92ae03b40d
-Revises: f9c2a3a993da
+Revises: 5c7e2a91b4d3
 Create Date: 2026-11-16 22:46:00.000000
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "8d92ae03b40d"
-down_revision: Union[str, None] = "f9c2a3a993da"
+down_revision: Union[str, None] = "5c7e2a91b4d3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
