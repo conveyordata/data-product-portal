@@ -1,4 +1,18 @@
-import { Alert, Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
+import {
+    Alert,
+    Collapse,
+    Flex,
+    Form,
+    type FormInstance,
+    type FormProps,
+    Input,
+    Radio,
+    Segmented,
+    Select,
+    Space,
+    Switch,
+    Typography,
+} from 'antd';
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
@@ -52,6 +66,7 @@ type ServiceConfig = {
 };
 
 type AccessModeType = 'single' | 'multiple';
+type AccessModeVariant = 'Current: cards' | 'A: link' | 'B: collapse' | 'C: switch';
 
 export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = 500 }: Props) {
     const { t } = useTranslation();
@@ -95,7 +110,14 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const [validateNamespace] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
-    const accessMode = Form.useWatch('access_mode_type', form) as 'single' | 'multiple' | undefined;
+    const accessMode = Form.useWatch('access_mode_type', form) as AccessModeType | undefined;
+    const [accessModeVariant, setAccessModeVariant] = useState<AccessModeVariant>('Current: cards');
+    const setAccessModeType = (type: AccessModeType) => {
+        form.setFieldValue('access_mode_type', type);
+        if (type === 'single') {
+            form.setFieldValue('access_mode_ids', []);
+        }
+    };
 
     const [fetchResultString, { isLoading: isFetchingResultString }] = useRenderTechnicalAssetAccessPathMutation();
 
@@ -270,6 +292,32 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
     };
 
+    const accessModeTable = (
+        <Form.Item
+            name="access_mode_ids"
+            label={t('Access modes')}
+            extra={t('Consumers choose one of these access modes when they request access.')}
+            initialValue={[]}
+            hidden={accessMode !== 'multiple'}
+            dependencies={['access_mode_type']}
+            rules={[
+                {
+                    validator: async (_, value) => {
+                        if (accessMode === 'multiple' && (!value || value.length === 0)) {
+                            return Promise.reject(new Error(t('Please select at least one access mode')));
+                        }
+                    },
+                },
+            ]}
+        >
+            <AccessModeSelector
+                accessModes={accessModesForSelectedPlugin}
+                loading={isFetchingAccessModes}
+                selectionMode="multiple"
+            />
+        </Form.Item>
+    );
+
     return (
         <Form
             form={form}
@@ -403,56 +451,106 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                         resultLabel={pluginMetadata.result_label ?? ''}
                         resultTooltip={pluginMetadata.result_tooltip ?? ''}
                     />
-                    {accessModesForSelectedPlugin.length > 0 && (
-                        <Form.Item<TechnicalAssetsCreateForm>
-                            name="access_mode_type"
-                            label={t('Access mode')}
-                            initialValue="single"
-                            rules={[{ required: true, message: t('Please select an access mode') }]}
-                        >
-                            <CardSelection<AccessModeType>
-                                style={{ padding: '4px' }}
-                                options={[
-                                    {
-                                        value: 'single',
-                                        title: t('Single access mode'),
-                                        description: t(
-                                            'Assign one access level to all users who connect to this asset.',
-                                        ),
-                                    },
-                                    {
-                                        value: 'multiple',
-                                        title: t('Configure access modes'),
-                                        description: t(
-                                            "Define multiple access modes for this asset. You'll be able to create custom access levels with specific permissions, connection strings, and configurations.",
-                                        ),
-                                    },
-                                ]}
-                            />
-                        </Form.Item>
-                    )}
-                    <Form.Item
-                        name="access_mode_ids"
-                        label={t('Access modes')}
-                        initialValue={[]}
-                        hidden={accessMode !== 'multiple'}
-                        dependencies={['access_mode_type']}
-                        rules={[
-                            {
-                                validator: async (_, value) => {
-                                    if (accessMode === 'multiple' && (!value || value.length === 0)) {
-                                        return Promise.reject(new Error(t('Please select at least one access mode')));
-                                    }
-                                },
-                            },
-                        ]}
-                    >
-                        <AccessModeSelector
-                            accessModes={accessModesForSelectedPlugin}
-                            loading={isFetchingAccessModes}
-                            selectionMode="multiple"
-                        />
+                    <Form.Item<TechnicalAssetsCreateForm> name="access_mode_type" initialValue="single" hidden>
+                        <Input />
                     </Form.Item>
+                    {accessModesForSelectedPlugin.length > 0 && (
+                        <>
+                            <Form.Item label="Prototype variant">
+                                <Segmented<AccessModeVariant>
+                                    options={['Current: cards', 'A: link', 'B: collapse', 'C: switch']}
+                                    value={accessModeVariant}
+                                    onChange={setAccessModeVariant}
+                                />
+                            </Form.Item>
+                            {accessModeVariant === 'Current: cards' && (
+                                <>
+                                    <Form.Item label={t('Access mode')} required>
+                                        <CardSelection<AccessModeType>
+                                            style={{ padding: '4px' }}
+                                            value={accessMode}
+                                            onChange={setAccessModeType}
+                                            options={[
+                                                {
+                                                    value: 'single',
+                                                    title: t('Single access mode'),
+                                                    description: t(
+                                                        'Assign one access level to all users who connect to this asset.',
+                                                    ),
+                                                },
+                                                {
+                                                    value: 'multiple',
+                                                    title: t('Configure access modes'),
+                                                    description: t(
+                                                        "Define multiple access modes for this asset. You'll be able to create custom access levels with specific permissions, connection strings, and configurations.",
+                                                    ),
+                                                },
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    {accessModeTable}
+                                </>
+                            )}
+                            {accessModeVariant === 'A: link' && (
+                                <>
+                                    <Form.Item label={t('Access mode')}>
+                                        <Flex vertical>
+                                            {accessMode !== 'multiple' && (
+                                                <Typography.Text type="secondary">
+                                                    {t('All consumers get the same access to this asset.')}
+                                                </Typography.Text>
+                                            )}
+                                            <Typography.Link
+                                                onClick={() =>
+                                                    setAccessModeType(accessMode === 'multiple' ? 'single' : 'multiple')
+                                                }
+                                            >
+                                                {accessMode === 'multiple'
+                                                    ? t('Use a single access mode')
+                                                    : t('Offer multiple access modes…')}
+                                            </Typography.Link>
+                                        </Flex>
+                                    </Form.Item>
+                                    {accessModeTable}
+                                </>
+                            )}
+                            {accessModeVariant === 'B: collapse' && (
+                                <Form.Item>
+                                    <Collapse
+                                        ghost
+                                        activeKey={accessMode === 'multiple' ? ['access_modes'] : []}
+                                        onChange={(keys) => setAccessModeType(keys.length > 0 ? 'multiple' : 'single')}
+                                        items={[
+                                            {
+                                                key: 'access_modes',
+                                                label: t('Access modes (optional)'),
+                                                forceRender: true,
+                                                children: accessModeTable,
+                                            },
+                                        ]}
+                                    />
+                                </Form.Item>
+                            )}
+                            {accessModeVariant === 'C: switch' && (
+                                <>
+                                    <Form.Item label={t('Access mode')}>
+                                        <Flex gap="small" align="center">
+                                            <Switch
+                                                checked={accessMode === 'multiple'}
+                                                onChange={(checked) =>
+                                                    setAccessModeType(checked ? 'multiple' : 'single')
+                                                }
+                                            />
+                                            <Typography.Text>
+                                                {t('Let consumers choose between access modes')}
+                                            </Typography.Text>
+                                        </Flex>
+                                    </Form.Item>
+                                    {accessModeTable}
+                                </>
+                            )}
+                        </>
+                    )}
                 </>
             )}
         </Form>
