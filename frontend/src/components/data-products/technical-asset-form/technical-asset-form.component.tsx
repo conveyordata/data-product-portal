@@ -32,6 +32,7 @@ import {
 } from '@/store/api/services/generated/pluginsApi';
 import {
     ResourceNameModel,
+    ResourceNameValidityType,
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
@@ -270,15 +271,25 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         { label: t('Custom'), value: 'custom' },
     ];
 
+    const technicalAssetType = pluginMetadata?.plugin;
     const validateNamespaceCallback = useCallback(
-        (namespace: string) =>
-            validateNamespace({
-                dataProductId: dataProductId,
-                resourceName: namespace,
-                model: ResourceNameModel.OutputPort,
-            }).unwrap(),
-        [validateNamespace, dataProductId],
+        async (namespace: string) =>
+            technicalAssetType
+                ? validateNamespace({
+                      dataProductId: dataProductId,
+                      resourceName: namespace,
+                      model: ResourceNameModel.TechnicalAsset,
+                      technicalAssetType,
+                  }).unwrap()
+                : { validity: ResourceNameValidityType.Valid },
+        [validateNamespace, dataProductId, technicalAssetType],
     );
+
+    useEffect(() => {
+        if (technicalAssetType && form.getFieldValue('namespace')) {
+            form.validateFields(['namespace']);
+        }
+    }, [form, technicalAssetType]);
 
     const latestPreview = useRef(0);
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {

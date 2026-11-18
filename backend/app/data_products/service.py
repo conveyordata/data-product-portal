@@ -5,7 +5,7 @@ from warnings import deprecated
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, selectinload, undefer
+from sqlalchemy.orm import joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
@@ -30,10 +30,6 @@ from app.configuration.tags.schema import Tag
 from app.core import context
 from app.core.authz import Authorization
 from app.core.aws.get_url import _get_data_product_role_arn
-from app.core.namespace.validation import (
-    NamespaceValidator,
-    TechnicalAssetNamespaceValidator,
-)
 from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import (
@@ -73,11 +69,6 @@ from app.users.schema import User
 
 
 class DataProductService(AbstractDataProductService):
-    def __init__(self, db: Session):
-        super().__init__(db)
-        self.namespace_validator = NamespaceValidator(DataProductModel)
-        self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
-
     @staticmethod
     def _sync_public_reader_grouping(
         data_product_id: UUID, visibility: DataProductVisibility
