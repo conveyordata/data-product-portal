@@ -1,11 +1,15 @@
 import asyncio
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt as pyjwt
 import pytest
 
-from app.mcp.deps import PortalOIDCProxy, get_mcp_authenticated_user
+from app.mcp.deps import (
+    MCP_USER_ID_STATE_KEY,
+    PortalOIDCProxy,
+    get_mcp_authenticated_user,
+)
 from app.settings import settings
 from tests.factories import UserFactory
 
@@ -21,6 +25,13 @@ ENTRA_ID_TOKEN = {
 def user_id_claim(monkeypatch):
     monkeypatch.setattr(settings, "OIDC_ENABLED", True)
     monkeypatch.setattr(settings, "OIDC_USER_ID_CLAIM", "oid")
+
+
+@pytest.fixture
+def fastmcp_context():
+    context = MagicMock(set_state=AsyncMock())
+    with patch("app.mcp.deps.get_context", return_value=context):
+        yield context
 
 
 def mcp_access_token(upstream_claims):
@@ -42,15 +53,28 @@ class TestMcpUserIdClaim:
         assert claims["oid"] == "object-id-1"
 
     def test_get_mcp_authenticated_user__looks_up_configured_user_id_claim(
-        self, user_id_claim, session
+        self, user_id_claim, session, fastmcp_context
     ):
         user = UserFactory(external_id="object-id-1")
         token = mcp_access_token(ENTRA_ID_TOKEN)
 
         with patch("app.mcp.deps.get_access_token", return_value=token):
-            found = get_mcp_authenticated_user(db=session)
+            found = asyncio.run(get_mcp_authenticated_user(db=session))
 
         assert found.id == user.id
+
+    def test_get_mcp_authenticated_user__stores_user_id_in_request_state(
+        self, user_id_claim, session, fastmcp_context
+    ):
+        user = UserFactory(external_id="object-id-1")
+        token = mcp_access_token(ENTRA_ID_TOKEN)
+
+        with patch("app.mcp.deps.get_access_token", return_value=token):
+            asyncio.run(get_mcp_authenticated_user(db=session))
+
+        fastmcp_context.set_state.assert_awaited_once_with(
+            MCP_USER_ID_STATE_KEY, user.id, serializable=False
+        )
 
     def test_get_mcp_authenticated_user__missing_user_id_claim_is_rejected(
         self, user_id_claim, session
@@ -62,4 +86,4 @@ class TestMcpUserIdClaim:
             patch("app.mcp.deps.get_access_token", return_value=token),
             pytest.raises(ValueError, match="missing 'oid'"),
         ):
-            get_mcp_authenticated_user(db=session)
+            asyncio.run(get_mcp_authenticated_user(db=session))

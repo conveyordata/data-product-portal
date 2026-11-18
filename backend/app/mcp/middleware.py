@@ -1,12 +1,12 @@
-import asyncio
 import json
+from contextlib import suppress
 from typing import Any, Optional
+from uuid import UUID
 
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
 from app.core.logging.posthog_analytics import PosthogAnalyticsClient
-from app.database.database import db_session
-from app.mcp.deps import get_mcp_authenticated_user
+from app.mcp.deps import MCP_USER_ID_STATE_KEY
 
 
 class LoggingMiddleware(Middleware):
@@ -25,30 +25,27 @@ class LoggingMiddleware(Middleware):
             "method": context.method,
             "payload": self._extract_payload(context.message),
         }
-        user_id = await self._get_user_id()
-        self.posthog.capture(
-            distinct_id=user_id or "unknown",
-            event="MCP Method Call API",
-            properties=entry,
-        )
+        try:
+            return await call_next(context)
+        finally:
+            self.posthog.capture(
+                distinct_id=await self._get_user_id(context) or "unknown",
+                event="MCP Method Call API",
+                properties=entry,
+                timestamp=context.timestamp,
+            )
 
-        return await call_next(context)
+    @staticmethod
+    async def _get_user_id(context: MiddlewareContext) -> Optional[UUID]:
+        with suppress(Exception):
+            if (ctx := context.fastmcp_context) is not None:
+                return await ctx.get_state(MCP_USER_ID_STATE_KEY)
+        return None
 
-    def _extract_payload(self, message: Any) -> str:
+    @staticmethod
+    def _extract_payload(message: Any) -> str:
         """Return JSON-encoded payload or placeholder string."""
         try:
             return json.dumps(message, default=lambda o: vars(o), ensure_ascii=False)
         except Exception:
             return "<non-serializable>"
-
-    async def _get_user_id(self) -> Optional[str]:
-        """Get the authenticated user ID, returning None if not available."""
-        try:
-            return await asyncio.to_thread(self._lookup_user_id)
-        except Exception:
-            return None
-
-    @staticmethod
-    def _lookup_user_id() -> str:
-        with db_session() as db:
-            return str(get_mcp_authenticated_user(db).id)
