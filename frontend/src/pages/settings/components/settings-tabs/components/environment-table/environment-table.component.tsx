@@ -6,7 +6,7 @@ import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import {
     type EnvironmentGetItem,
     useGetEnvironmentsQuery,
-    useUpdateEnvironmentIsGlobalMutation,
+    useUpdateEnvironmentMutation,
 } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { getEnvironmentTableColumns } from './environment-table-columns';
@@ -15,18 +15,32 @@ export function EnvironmentTable() {
     const { t } = useTranslation();
     const environmentsQuery = useGetEnvironmentsQuery();
     const { data, refetch } = environmentsQuery;
-    const [updateIsGlobal, { isLoading: isUpdating }] = useUpdateEnvironmentIsGlobalMutation();
+    const [updateEnvironment, { isLoading: isUpdating }] = useUpdateEnvironmentMutation();
 
-    const handleToggleGlobal = async (environment: EnvironmentGetItem, isGlobal: boolean) => {
+    const handleChangePosition = async (environment: EnvironmentGetItem, position: number | null) => {
         try {
-            await updateIsGlobal({ id: environment.id, environmentUpdateGlobal: { is_global: isGlobal } }).unwrap();
+            await updateEnvironment({ id: environment.id, environmentUpdate: { position } }).unwrap();
             refetch();
         } catch (_e) {
             dispatchMessage({ content: t('Failed to update environment'), type: 'error' });
         }
     };
 
-    const columns = getEnvironmentTableColumns({ t, onToggleGlobal: handleToggleGlobal });
+    const handleToggleGlobal = async (environment: EnvironmentGetItem, isGlobal: boolean) => {
+        try {
+            await updateEnvironment({ id: environment.id, environmentUpdate: { is_global: isGlobal } }).unwrap();
+            refetch();
+        } catch (_e) {
+            dispatchMessage({ content: t('Failed to update environment'), type: 'error' });
+        }
+    };
+
+    const columns = getEnvironmentTableColumns({
+        t,
+        onToggleGlobal: handleToggleGlobal,
+        onChangePosition: handleChangePosition,
+        disabled: isUpdating || isUpdating,
+    });
 
     return (
         <Flex vertical gap="large">
@@ -41,7 +55,7 @@ export function EnvironmentTable() {
                     title: t('No Environments yet'),
                     description: t('Environments are the places data lands, such as development and production.'),
                 }}
-                loading={isUpdating}
+                loading={isUpdating || isUpdating}
                 rowKey={(record) => record.id}
                 rowHoverable
                 size="small"

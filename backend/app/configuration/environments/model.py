@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Boolean, Column, Integer, String
 
 from app.database.database import Base
 from app.shared.model import BaseORM
@@ -15,3 +15,7 @@ class Environment(Base, BaseORM):
     context = Column(String)
     is_default = Column(Boolean, default=False)
     is_global = Column(Boolean, default=True, nullable=False)
+    position = Column(Integer, nullable=True)
+
+
+ENVIRONMENT_DISPLAY_ORDER = (Environment.position.asc().nulls_last(), Environment.name)

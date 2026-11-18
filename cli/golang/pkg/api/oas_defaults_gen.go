@@ -123,6 +123,14 @@ func (s *EnvironmentGetItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) setDefaults() {
+	{
+		val := TechnicalMapping("default")
+		s.TechnicalMapping.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")
@@ -231,6 +239,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 	{
 		val := bool(false)
 		s.NotConfigured.SetTo(val)
+	}
+	{
+		var defaultVal0 []EnvironmentUIMetadata
+		s.EnvironmentUIMetadata = defaultVal0
 	}
 	{
 		val := string("Resulting path")

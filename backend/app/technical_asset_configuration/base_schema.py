@@ -1,11 +1,13 @@
 from abc import ABC
 from base64 import b64encode
+from dataclasses import dataclass
+from enum import Enum
 from functools import cache
 from importlib import resources
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, get_args
 from uuid import UUID
 
-from pydantic import computed_field
+from pydantic import ConfigDict, Field, computed_field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -30,6 +32,7 @@ from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
 if TYPE_CHECKING:
+    from app.configuration.environments.model import Environment as EnvironmentModel
     from app.data_products.model import DataProduct as DataProductModel
 
 
@@ -47,7 +50,8 @@ class SelectOption(ORMModel):
     """Option for select UI elements"""
 
     label: str
-    value: str | bool
+    value: str | bool | int
+    disabled: Optional[bool] = None
 
 
 class UIElementCheckbox(ORMModel):
@@ -62,6 +66,7 @@ class UIElementRadio(ORMModel):
 
 class UIElementSelect(ORMModel):
     max_count: Optional[int] = 1
+    initial_value: Optional[str] = None
     options: Optional[list[SelectOption]] = None  # Additional options for select fields
 
 
@@ -152,9 +157,181 @@ class PluginContext(ORMModel):
         )
 
 
+class EnvironmentFieldError(ORMModel):
+    environment_id: UUID
+    field: Optional[str] = None
+    message: str
+
+
+class EnvironmentConfigurationError(Exception):
+    def __init__(self, errors: list[EnvironmentFieldError]):
+        super().__init__("Invalid environment configuration")
+        self.errors = errors
+
+
+@dataclass(frozen=True)
+class EnvironmentField:
+    label: str
+    type: UIElementType
+    default: Any
+    options: Optional[list[SelectOption]]
+    default_per_environment: dict[str, Any]
+    disabled_per_environment: dict[str, set[Any]]
+    tooltip: Optional[str]
+
+
+def env_field(
+    label: str,
+    type: UIElementType,
+    default: Any,
+    options: Optional[list[SelectOption]] = None,
+    default_per_environment: Optional[dict[str, Any]] = None,
+    disabled_per_environment: Optional[dict[str, set[Any]]] = None,
+    tooltip: Optional[str] = None,
+) -> Any:
+    info = Field()
+    info.metadata.append(
+        EnvironmentField(
+            label=label,
+            type=type,
+            default=default,
+            options=options,
+            default_per_environment=default_per_environment or {},
+            disabled_per_environment=disabled_per_environment or {},
+            tooltip=tooltip,
+        )
+    )
+    return info
+
+
+def _raw(value: Any) -> Any:
+    return value.value if isinstance(value, Enum) else value
+
+
+class EnvironmentSettings(ORMModel):
+    model_config = ConfigDict(extra="forbid")
+
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
+        for name, (annotation, declaration) in cls.environment_fields().items():
+            problem = cls._declaration_problem(annotation, declaration)
+            if problem:
+                raise TypeError(f"{cls.__name__}.{name}: {problem}")
+
+    @classmethod
+    def environment_fields(cls) -> dict[str, tuple[Any, EnvironmentField]]:
+        fields = {}
+        for name, info in cls.model_fields.items():
+            declaration = next(
+                (item for item in info.metadata if isinstance(item, EnvironmentField)),
+                None,
+            )
+            if declaration is None:
+                raise TypeError(
+                    f"{cls.__name__}.{name} must be declared with env_field"
+                )
+            fields[name] = (info.annotation, declaration)
+        return fields
+
+    @classmethod
+    def defaults(cls, environment: "EnvironmentModel") -> dict[str, Any]:
+        defaults = {}
+        for name, (_, declaration) in cls.environment_fields().items():
+            value = _raw(
+                declaration.default_per_environment.get(
+                    environment.acronym, declaration.default
+                )
+            )
+            if isinstance(value, str):
+                value = value.replace("{environment}", environment.acronym)
+            defaults[name] = value
+        return defaults
+
+    @classmethod
+    def allowed_options(cls, environment: "EnvironmentModel") -> dict[str, set[Any]]:
+        return {
+            name: {
+                _raw(option.value)
+                for option in declaration.options
+                if option.value
+                not in declaration.disabled_per_environment.get(
+                    environment.acronym, set()
+                )
+            }
+            for name, (_, declaration) in cls.environment_fields().items()
+            if declaration.options is not None
+        }
+
+    @classmethod
+    def ui_metadata(cls, environment: "EnvironmentModel") -> list[UIElementMetadata]:
+        defaults = cls.defaults(environment)
+        allowed = cls.allowed_options(environment)
+        elements = []
+        for name, (_, declaration) in cls.environment_fields().items():
+            control: dict[str, Any] = {}
+            if declaration.options is not None:
+                options = [
+                    SelectOption(
+                        label=option.label,
+                        value=str(_raw(option.value)),
+                        disabled=_raw(option.value) not in allowed[name],
+                    )
+                    for option in declaration.options
+                ]
+                if declaration.type == UIElementType.Select:
+                    control["select"] = UIElementSelect(
+                        initial_value=str(defaults[name]), options=options
+                    )
+                else:
+                    control["radio"] = UIElementRadio(
+                        initial_value=str(defaults[name]), options=options
+                    )
+            elif declaration.type == UIElementType.Checkbox:
+                control["checkbox"] = UIElementCheckbox(initial_value=defaults[name])
+            else:
+                control["string"] = UIElementString(initial_value=str(defaults[name]))
+            elements.append(
+                UIElementMetadata(
+                    name=name,
+                    label=declaration.label,
+                    tooltip=declaration.tooltip,
+                    required=True,
+                    type=declaration.type,
+                    **control,
+                )
+            )
+        return elements
+
+    @staticmethod
+    def _declaration_problem(
+        annotation: Any, declaration: EnvironmentField
+    ) -> Optional[str]:
+        if type(None) in get_args(annotation):
+            return "per-Environment fields are required, Optional isn't supported yet"
+        is_enum = isinstance(annotation, type) and issubclass(annotation, Enum)
+        if declaration.type in (UIElementType.Select, UIElementType.Radio):
+            if not is_enum or declaration.options is None:
+                return f"{declaration.type.value} needs an Enum type and options"
+            values = [_raw(option.value) for option in declaration.options]
+            if len(values) != len(annotation) or set(values) != {
+                member.value for member in annotation
+            }:
+                return "options must list every member of the Enum exactly once"
+            return None
+        if declaration.options is not None:
+            return f"{declaration.type.value} takes no options"
+        if declaration.type == UIElementType.Checkbox and annotation is not bool:
+            return "checkbox needs a bool type"
+        if declaration.type == UIElementType.String and is_enum:
+            return "an Enum needs a select or radio"
+        return None
+
+
 class TechnicalAssetPlugin(ORMModel, ABC):
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
+    environment_configuration: ClassVar[Optional[type[EnvironmentSettings]]] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -175,6 +352,14 @@ class TechnicalAssetPlugin(ORMModel, ABC):
 
     def validate_configuration(self, context: PluginContext, db: Session) -> None:
         """Raise when the configuration isn't acceptable, on create with the default technical mapping."""
+
+    def validate_environment_configuration(
+        self,
+        values: dict[UUID, dict[str, Any]],
+        context: PluginContext,
+        db: Session,
+    ) -> None:
+        """Raise EnvironmentConfigurationError when the values of all Environments, keyed by environment id, aren't acceptable."""
 
     @classmethod
     def get_url(

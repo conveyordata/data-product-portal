@@ -689,8 +689,8 @@ type UpdateDomainRes interface {
 	updateDomainRes()
 }
 
-type UpdateEnvironmentIsGlobalRes interface {
-	updateEnvironmentIsGlobalRes()
+type UpdateEnvironmentRes interface {
+	updateEnvironmentRes()
 }
 
 type UpdateGroupRes interface {
@@ -729,6 +729,10 @@ type UpdateTagRes interface {
 	updateTagRes()
 }
 
+type UpdateTechnicalAssetEnvironmentConfigurationRes interface {
+	updateTechnicalAssetEnvironmentConfigurationRes()
+}
+
 type UpdateTechnicalAssetRes interface {
 	updateTechnicalAssetRes()
 }
@@ -741,6 +745,14 @@ type UpdateThemeSettingsRes interface {
 	updateThemeSettingsRes()
 }
 
+type ValidateNewTechnicalAssetEnvironmentConfigurationRes interface {
+	validateNewTechnicalAssetEnvironmentConfigurationRes()
+}
+
 type ValidateResourceNameRes interface {
 	validateResourceNameRes()
+}
+
+type ValidateTechnicalAssetEnvironmentConfigurationRes interface {
+	validateTechnicalAssetEnvironmentConfigurationRes()
 }

@@ -16,7 +16,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.environments.platform_service_configurations.service import (
     EnvironmentPlatformServiceConfigurationService,
 )
-from app.configuration.environments.schema_request import EnvironmentUpdateGlobal
+from app.configuration.environments.schema_request import EnvironmentUpdate
 from app.configuration.environments.schema_response import (
     Environment,
     EnvironmentsGet,
@@ -107,12 +107,12 @@ def get_environments(
         ),
     ],
 )
-def update_environment_is_global(
+def update_environment(
     id: UUID,
-    environment_update: EnvironmentUpdateGlobal,
+    environment_update: EnvironmentUpdate,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> Environment:
-    return EnvironmentService(db).update_is_global(id, environment_update.is_global)
+    return EnvironmentService(db).update_environment(id, environment_update)
 
 
 @router.get("/{id}/configs")

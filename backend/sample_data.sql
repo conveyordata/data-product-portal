@@ -227,13 +227,13 @@ INSERT INTO public.roles (id, name, scope, prototype, description, permissions, 
 INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('db8d7a76-c50b-4e95-8549-8da86f48e7c2', 'Member', 'dataset', 0, 'A regular team member of a Dataset', ARRAY[413], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
 
 -- ENVIRONMENTS
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ returned_environment_id_dev }}'::uuid, 'development', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_DEV }}', 'dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at, position) VALUES ('{{ returned_environment_id_dev }}'::uuid, 'development', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_DEV }}', 'dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL, 1);
 
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ returned_environment_id_prd }}'::uuid, 'production', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_PRD }}', 'prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at, position) VALUES ('{{ returned_environment_id_prd }}'::uuid, 'production', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_PRD }}', 'prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL, 2);
 
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_dev }}'::uuid, 'azure_development', '', 'azure_dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at, position) VALUES ('{{ azure_environment_id_dev }}'::uuid, 'azure_development', '', 'azure_dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL, 3);
 
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_prd }}'::uuid, 'azure_production', '', 'azure_prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at, position) VALUES ('{{ azure_environment_id_prd }}'::uuid, 'azure_production', '', 'azure_prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL, 4);
 
 INSERT INTO public.env_platform_configs (id, environment_id, platform_id, config, created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p

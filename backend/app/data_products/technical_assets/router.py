@@ -7,11 +7,14 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
+    NewTechnicalAssetEnvironmentConfigurationValidation,
+    TechnicalAssetEnvironmentConfigurationUpdate,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
+    GetTechnicalAssetResponse,
     GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
@@ -28,6 +31,23 @@ from app.events.service import EventService
 from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
+
+INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE = {
+    "description": "Invalid environment configuration",
+    "content": {
+        "application/json": {
+            "example": {
+                "detail": [
+                    {
+                        "environment_id": "random environment id",
+                        "field": "size",
+                        "message": "Option is not allowed in this environment",
+                    }
+                ]
+            }
+        }
+    },
+}
 
 router = APIRouter(
     tags=["Data Products - Technical assets"],
@@ -76,9 +96,11 @@ def get_technical_asset(
     data_product_id: UUID,
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
-) -> GetTechnicalAssetsResponseItem:
-    return GetTechnicalAssetsResponseItem.model_validate(
-        TechnicalAssetService(db).get_technical_asset(data_product_id, id)
+) -> GetTechnicalAssetResponse:
+    return GetTechnicalAssetResponse.model_validate(
+        TechnicalAssetService(db).get_technical_asset_with_environment_values(
+            data_product_id, id
+        )
     )
 
 
@@ -202,6 +224,84 @@ def update_technical_asset(
 
 
 @router.put(
+    "/{id}/environment_configuration",
+    responses={
+        404: {
+            "description": "Technical asset not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Technical asset id not found"}
+                }
+            },
+        },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
+def update_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    environment_configuration: TechnicalAssetEnvironmentConfigurationUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> UpdateTechnicalAssetResponse:
+    result = TechnicalAssetService(db).update_technical_asset_environment_configuration(
+        data_product_id, id, environment_configuration
+    )
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_OUTPUT_UPDATED,
+            subject_id=id,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
+            actor_id=authenticated_user.id,
+        )
+    )
+    return result
+
+
+@router.post(
+    "/{id}/environment_configuration/validate",
+    responses={
+        404: {
+            "description": "Technical asset not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Technical asset id not found"}
+                }
+            },
+        },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
+def validate_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    environment_configuration: TechnicalAssetEnvironmentConfigurationUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    TechnicalAssetService(db).validate_technical_asset_environment_configuration(
+        data_product_id, id, environment_configuration
+    )
+
+
+@router.put(
     "/{id}/status",
     responses={
         404: {
@@ -307,3 +407,36 @@ def create_technical_asset(
         data_product_id=technical_asset.owner_id, event_id=event_id
     )
     return CreateTechnicalAssetResponse(id=technical_asset.id)
+
+
+@router.post(
+    "/environment_configuration/validate",
+    responses={
+        404: {
+            "description": "Data product not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required item random id does not exist"}
+                }
+            },
+        },
+        422: INVALID_ENVIRONMENT_CONFIGURATION_RESPONSE,
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
+def validate_new_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    validation: NewTechnicalAssetEnvironmentConfigurationValidation,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    TechnicalAssetService(db).validate_new_technical_asset_environment_configuration(
+        data_product_id, validation
+    )
