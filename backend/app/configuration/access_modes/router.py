@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -37,7 +38,7 @@ router = APIRouter(
 )
 def create_access_mode(
     access_mode: AccessModeCreate,
-    access_mode_service: AccessModeService = Depends(AccessModeService),
+    access_mode_service: Annotated[AccessModeService, Depends(AccessModeService)],
 ) -> AccessMode:
     return AccessMode.model_validate(
         access_mode_service.create_access_mode(access_mode)
@@ -55,7 +56,7 @@ def create_access_mode(
 def update_access_mode(
     id: UUID,
     update: AccessModeUpdate,
-    access_mode_service: AccessModeService = Depends(AccessModeService),
+    access_mode_service: Annotated[AccessModeService, Depends(AccessModeService)],
 ) -> AccessMode:
     return AccessMode.model_validate(access_mode_service.update_access_mode(id, update))
 
@@ -70,7 +71,7 @@ def update_access_mode(
     ),
 )
 def get_access_modes(
-    access_mode_service: AccessModeService = Depends(AccessModeService),
+    access_mode_service: Annotated[AccessModeService, Depends(AccessModeService)],
 ) -> GetAccessModes:
     return GetAccessModes(
         access_modes=[
@@ -95,6 +96,6 @@ def get_access_modes(
 )
 def delete_access_mode(
     id: UUID,
-    access_mode_service: AccessModeService = Depends(AccessModeService),
+    access_mode_service: Annotated[AccessModeService, Depends(AccessModeService)],
 ) -> None:
     access_mode_service.delete_access_mode(id)

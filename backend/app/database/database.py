@@ -1,11 +1,11 @@
 import time
 from contextlib import contextmanager
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Generator, Type, TypeVar
+from typing import TYPE_CHECKING, Annotated, Any, Generator, Type, TypeVar
 from urllib.parse import quote_plus
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import Column, Engine, create_engine, event
 from sqlalchemy.orm import Mapper, Query, Session, declarative_base, sessionmaker
 
@@ -166,3 +166,6 @@ def get_system_db_session() -> Generator[Session]:
     """
     with db_session() as db:
         yield db
+
+
+SystemDbSession = Annotated[Session, Depends(get_system_db_session, scope="function")]

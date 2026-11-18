@@ -11,16 +11,14 @@ from uuid import UUID
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, TTLCache, cachedmethod
 from casbin import SyncedEnforcer, util
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import HTTPException, Request, status
 from opentelemetry import trace
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.database import database
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.settings import settings
-from app.users.schema import User
 from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
@@ -547,8 +545,8 @@ class Enforcement:
     async def __call__(
         self,
         request: Request,
-        user: User = Depends(get_authenticated_user),
-        db: Session = Depends(get_db_session, scope="function"),
+        user: AuthenticatedUser,
+        db: DbSession,
     ) -> None:
         context = await self.resolver.resolve_context(request, self.object_id, db)
 

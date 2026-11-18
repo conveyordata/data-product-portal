@@ -3,7 +3,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
-from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.service import (
@@ -22,14 +21,14 @@ from app.authorization.role_assignments.output_port.schema import (
     UpdateOutputPortRoleAssignment,
 )
 from app.authorization.role_assignments.output_port.service import RoleAssignmentService
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     EmptyResolver,
     OutputPortResolver,
     OutputPortRoleAssignmentResolver,
 )
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
@@ -52,8 +51,8 @@ router = APIRouter(prefix="/v2/authz/role_assignments/output_port")
 )
 def delete_output_port_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> DeleteOutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
     if assignment.decision is DecisionStatus.APPROVED:
@@ -100,11 +99,11 @@ def convert_to_role_assignment(
 
 @router.get("")
 def list_output_port_role_assignments(
+    db: DbSession,
     output_port_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListOutputPortRoleAssignmentsResponse:
     return ListOutputPortRoleAssignmentsResponse(
         role_assignments=[
@@ -131,8 +130,8 @@ def list_output_port_role_assignments(
 )
 def request_output_port_role_assignment(
     request: RequestOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> OutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).create_assignment(
         dataset_id=request.output_port_id,
@@ -168,8 +167,8 @@ def request_output_port_role_assignment(
 )
 def create_output_port_role_assignment(
     request: CreateOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     role_assignment = service.create_assignment(
@@ -227,8 +226,8 @@ def create_output_port_role_assignment(
 def decide_output_port_role_assignment(
     id: UUID,
     request: DecideOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     service.ensure_can_decide(id, request.decision)
@@ -280,8 +279,8 @@ def decide_output_port_role_assignment(
 def modify_output_port_role_assignment(
     id: UUID,
     request: ModifyOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id

@@ -355,7 +355,7 @@ class OutputPortService:
             if batch_datasets:
                 self._recalculate_embeddings_and_search_vector(batch_datasets)
         # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
-        self.db.commit()  # noqa: allow-commit
+        self.db.commit()  # allow-commit
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []

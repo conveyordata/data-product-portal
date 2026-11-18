@@ -315,7 +315,7 @@ def test_configuration_write__with_rows_hidden_from_user(
     if admin:
         configuration_manager.admin_expiry = datetime(2099, 1, 1)
     params = case.setup(hidden)
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
 
     response = client.request(
         case.method,

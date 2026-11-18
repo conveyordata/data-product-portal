@@ -1,4 +1,5 @@
 import os
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader
@@ -22,7 +23,7 @@ def is_valid_api_key(api_key: ApiKey) -> bool:
 header_scheme = APIKeyHeader(name="x-key", auto_error=False)
 
 
-def secured_api_key(key: str = Depends(header_scheme)) -> bool:
+def secured_api_key(key: Annotated[str, Depends(header_scheme)]) -> bool:
     if not key:
         return False
     result = is_valid_api_key(ApiKey(token=key))

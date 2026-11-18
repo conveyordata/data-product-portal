@@ -1,11 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.groups.schema_request import (
     GroupCreate,
     GroupMembersAdd,
@@ -32,7 +31,7 @@ router = APIRouter(tags=["Groups"], prefix="/v2/groups")
 
 @router.get("")
 def get_groups(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupsGetResponse:
     return GroupsGetResponse(groups=GroupService(db).get_groups())
 
@@ -52,7 +51,7 @@ def get_groups(
 )
 def get_group(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupGet:
     return GroupService(db).get_group(id)
 
@@ -85,7 +84,7 @@ def get_group(
 )
 def create_group(
     group: GroupCreate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupCreateResponse:
     return GroupService(db).create_group(group)
 
@@ -109,7 +108,7 @@ def create_group(
 def update_group(
     id: UUID,
     group: GroupUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupUpdateResponse:
     return GroupService(db).update_group(id, group)
 
@@ -122,7 +121,7 @@ def update_group(
 )
 def create_groups_batch(
     request: IdentityBatchCreateRequest[GroupCreate],
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> IdentityBatchCreateResponse:
     return GroupService(db).create_groups_batch(request.items)
 
@@ -136,7 +135,7 @@ def create_groups_batch(
 )
 def delete_groups_batch(
     request: IdentityBatchDeleteRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     GroupService(db).delete_groups_batch(request.ids)
 
@@ -160,7 +159,7 @@ def delete_groups_batch(
 )
 def delete_group(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     GroupService(db).delete_group(group_id=id)
 
@@ -180,7 +179,7 @@ def delete_group(
 )
 def get_group_members(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupMembershipsGetResponse:
     return GroupMembershipsGetResponse(
         members=GroupService(db).get_members(id),
@@ -222,7 +221,7 @@ def get_group_members(
 def add_group_members(
     id: UUID,
     request: GroupMembersAdd,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     GroupService(db).add_members(
         group_id=id,
@@ -265,7 +264,7 @@ def add_group_members(
 def replace_group_members(
     id: UUID,
     request: GroupMembersReplace,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     GroupService(db).replace_members(
         group_id=id,
@@ -298,7 +297,7 @@ def replace_group_members(
 def remove_group_members(
     id: UUID,
     request: GroupMembersRemove,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     GroupService(db).remove_members(
         group_id=id,

@@ -1,9 +1,9 @@
+from typing import Annotated
 from uuid import UUID
 
 import yaml
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.contract.schema_request import BitolContractRequest
@@ -12,7 +12,7 @@ from app.data_products.output_ports.contract.schema_response import (
 )
 from app.data_products.output_ports.contract.service import OutputPortContractService
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 router = APIRouter(
     tags=["Data Products - Output Ports - Contract"],
@@ -39,7 +39,7 @@ router = APIRouter(
 def get_output_port_schema(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> OutputPortSchemaResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortContractService(db).get_schema(ds.id)
@@ -67,7 +67,7 @@ def ingest_output_port_contract(
     data_product_id: UUID,
     id: UUID,
     contract: BitolContractRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> OutputPortSchemaResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortContractService(db).ingest_contract(ds.id, contract)
@@ -94,8 +94,8 @@ def ingest_output_port_contract(
 def ingest_output_port_contract_yaml(
     data_product_id: UUID,
     id: UUID,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db_session, scope="function"),
+    file: Annotated[UploadFile, File()],
+    db: DbSession,
 ) -> OutputPortSchemaResponse:
     try:
         payload = yaml.safe_load(file.file.read())

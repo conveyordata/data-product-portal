@@ -1,7 +1,6 @@
 import uuid
 
 import pytest
-from sqlalchemy import select
 
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
@@ -14,15 +13,13 @@ from tests.factories import (
     EnvironmentFactory,
     PlatformServiceFactory,
     RoleFactory,
+    SizingConfigurationFactory,
     SizingTechnicalAssetConfigurationFactory,
     TagFactory,
     TechnicalAssetFactory,
     UserFactory,
 )
-from tests.fixtures.sizing_plugin.model import (
-    NAME,
-    SizingConfiguration,
-)
+from tests.fixtures.sizing_plugin.model import NAME
 from tests.fixtures.sizing_plugin.schema import (
     SizingTechnicalAssetConfiguration,
 )
@@ -32,13 +29,27 @@ ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
 
 @pytest.fixture
-def dev():
-    return EnvironmentFactory(name="dev", acronym="dev", is_global=False)
+def dev_position():
+    return None
 
 
 @pytest.fixture
-def prd():
-    return EnvironmentFactory(name="prd", acronym="prd", is_global=False)
+def prd_position():
+    return None
+
+
+@pytest.fixture
+def dev(dev_position):
+    return EnvironmentFactory(
+        name="dev", acronym="dev", is_global=False, position=dev_position
+    )
+
+
+@pytest.fixture
+def prd(prd_position):
+    return EnvironmentFactory(
+        name="prd", acronym="prd", is_global=False, position=prd_position
+    )
 
 
 @pytest.fixture
@@ -68,30 +79,25 @@ def member(data_product):
     return user
 
 
-@pytest.fixture
-def stored_asset(session, data_product, dev, prd):
+def store_asset(data_product, values):
     configuration = SizingTechnicalAssetConfigurationFactory()
     asset = TechnicalAssetFactory(owner=data_product, configuration=configuration)
-    session.add_all(
-        [
-            SizingConfiguration(
-                configuration_id=configuration.id,
-                environment_id=dev.id,
-                size="small",
-                replicas=1,
-                label="path-dev",
-            ),
-            SizingConfiguration(
-                configuration_id=configuration.id,
-                environment_id=prd.id,
-                size="medium",
-                replicas=2,
-                label="path-prd",
-            ),
-        ]
-    )
-    session.commit()  # noqa: allow-commit
+    for environment, row in values.items():
+        SizingConfigurationFactory(
+            configuration_id=configuration.id, environment_id=environment.id, **row
+        )
     return asset
+
+
+@pytest.fixture
+def stored_asset(data_product, dev, prd):
+    return store_asset(
+        data_product,
+        {
+            dev: {"size": "small", "replicas": 1, "label": "path-dev"},
+            prd: {"size": "medium", "replicas": 2, "label": "path-prd"},
+        },
+    )
 
 
 def create_payload(data_product, **extra):
@@ -325,17 +331,13 @@ class TestGetTechnicalAsset:
         }
 
     def test_get_technical_asset__errors_on_missing_row(
-        self, client, session, member, data_product, stored_asset, prd
+        self, client, member, data_product, dev, prd
     ):
-        row = session.scalar(
-            select(SizingConfiguration).where(
-                SizingConfiguration.environment_id == prd.id
-            )
+        asset = store_asset(
+            data_product, {dev: {"size": "small", "replicas": 1, "label": "path-dev"}}
         )
-        session.delete(row)
-        session.commit()  # noqa: allow-commit
 
-        response = get_asset(client, stored_asset.id, data_product)
+        response = get_asset(client, asset.id, data_product)
 
         assert response.status_code == 500
         assert f"environment {prd.name}" in response.json()["detail"]
@@ -397,19 +399,19 @@ class TestUpdateEnvironmentConfiguration:
         assert_event_not_in_queue("technical_asset.event", capture_events)
 
     def test_update_technical_asset_environment_configuration__keeps_unchanged_disabled_option(
-        self, client, session, member, data_product, stored_asset, dev, prd
+        self, client, member, data_product, dev, prd
     ):
-        row = session.scalar(
-            select(SizingConfiguration).where(
-                SizingConfiguration.environment_id == dev.id
-            )
+        asset = store_asset(
+            data_product,
+            {
+                dev: {"size": "large", "replicas": 1, "label": "path-dev"},
+                prd: {"size": "medium", "replicas": 2, "label": "path-prd"},
+            },
         )
-        row.size = "large"
-        session.commit()  # noqa: allow-commit
 
         kept = put_values(
             client,
-            stored_asset,
+            asset,
             {
                 str(dev.id): {"size": "large", "replicas": 5, "label": "l"},
                 str(prd.id): {"size": "medium", "replicas": 2, "label": "l"},
@@ -417,7 +419,7 @@ class TestUpdateEnvironmentConfiguration:
         )
         changed = put_values(
             client,
-            stored_asset,
+            asset,
             {
                 str(dev.id): {"size": "huge", "replicas": 5, "label": "l"},
                 str(prd.id): {"size": "medium", "replicas": 2, "label": "l"},
@@ -692,18 +694,16 @@ class TestPluginForm:
         assert response.json()["environment_ui_metadata"] == []
 
     @pytest.mark.parametrize(
-        ("positions", "expected"),
+        ("dev_position", "prd_position", "expected"),
         [
-            ((None, None), ["dev", "prd"]),
-            ((2, 1), ["prd", "dev"]),
-            ((None, 1), ["prd", "dev"]),
+            (None, None, ["dev", "prd"]),
+            (2, 1, ["prd", "dev"]),
+            (None, 1, ["prd", "dev"]),
         ],
     )
     def test_get_plugin_form__orders_environment_metadata(
-        self, client, session, dev, prd, positions, expected
+        self, client, dev, prd, dev_position, prd_position, expected
     ):
-        dev.position, prd.position = positions
-        session.commit()  # noqa: allow-commit
         names = {str(dev.id): "dev", str(prd.id): "prd"}
 
         response = client.get(f"/api/v2/plugins/{NAME}/form")
@@ -713,12 +713,10 @@ class TestPluginForm:
             for item in response.json()["environment_ui_metadata"]
         ] == expected
 
+    @pytest.mark.parametrize(("dev_position", "prd_position"), [(2, 1)])
     def test_get_technical_asset__orders_environments_by_position(
-        self, client, session, data_product, dev, prd, stored_asset
+        self, client, data_product, stored_asset, dev_position, prd_position
     ):
-        dev.position, prd.position = 2, 1
-        session.commit()  # noqa: allow-commit
-
         response = get_asset(client, stored_asset.id, data_product)
 
         assert [e["environment"]["name"] for e in response.json()["environments"]] == [
