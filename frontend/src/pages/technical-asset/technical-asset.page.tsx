@@ -1,11 +1,10 @@
-import { EditOutlined, ProductOutlined } from '@ant-design/icons';
-import { Flex, Space, Typography } from 'antd';
+import { ProductOutlined } from '@ant-design/icons';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -21,11 +20,9 @@ import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 import { TechnicalAssetActions } from './components/technical-asset-actions/technical-asset-actions.component.tsx';
 import { TechnicalAssetTabs } from './components/technical-asset-tabs/technical-asset-tabs.tsx';
-import styles from './technical-asset.module.scss';
 
 export function TechnicalAsset() {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { dataOutputId = '', dataProductId = '' } = useParams();
 
     const { data: dataOutput, isLoading } = useGetTechnicalAssetQuery(
@@ -57,14 +54,6 @@ export function TechnicalAsset() {
 
     const dataOutputOwners = useGetDataProductOwners(dataProduct?.id);
 
-    const { data: edit_access } = useCheckAccessQuery(
-        {
-            resource: dataProduct?.id,
-            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
-        },
-        { skip: !dataProduct },
-    );
-    const canEdit = edit_access?.allowed || false;
     const { data: updateAccess } = useCheckAccessQuery(
         {
             resource: dataProduct?.id,
@@ -72,71 +61,50 @@ export function TechnicalAsset() {
         },
         { skip: !dataProduct },
     );
-
-    function navigateToEditPage() {
-        if (canEdit && dataOutputId && dataOutput && !isLoading) {
-            navigate(
-                getDynamicRoutePath(
-                    ApplicationPaths.DataOutputEdit,
-                    DynamicPathParams.DataOutputId,
-                    dataOutputId,
-                ).replace(`:${DynamicPathParams.DataProductId}`, dataOutput.owner.id),
-            );
-        }
-    }
+    const canEdit = updateAccess?.allowed || false;
 
     if (isLoading || !dataOutput) {
         return <LoadingSpinner />;
     }
 
     return (
-        <Flex className={styles.dataOutputContainer}>
-            <Flex vertical className={styles.content}>
-                <Flex className={styles.headerContainer}>
-                    <Space className={styles.header}>
-                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon} size="large" />
-                        <Typography.Title level={3} ellipsis={{ tooltip: dataOutput?.name, rows: 2 }}>
-                            {dataOutput?.name}
-                        </Typography.Title>
-                    </Space>
-                    {canEdit && (
-                        <Space className={styles.editIcon}>
-                            <CircleIconButton
-                                icon={<EditOutlined />}
-                                tooltip={t('Edit Technical Asset')}
-                                onClick={navigateToEditPage}
-                            />
-                        </Space>
-                    )}
-                </Flex>
-                {/* Main content */}
-                <Flex className={styles.mainContent}>
-                    {/* Data Product description */}
-                    <Flex vertical className={styles.overview}>
-                        <TechnicalAssetDescription
-                            status={dataOutput.status}
-                            namespace={dataOutput.namespace}
-                            type={dataOutput.configuration.name}
-                            description={dataOutput.description}
-                            tags={dataOutput.tags}
-                            accessModes={dataOutput.access_modes}
-                            environments={dataOutput.environments}
-                        />
-                        <TechnicalAssetTabs
-                            technicalAsset={dataOutput}
-                            dataProductId={dataProductId}
-                            canEdit={updateAccess?.allowed || false}
-                            isLoading={isLoading}
-                        />
-                    </Flex>
-                </Flex>
-            </Flex>
-            {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <TechnicalAssetActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
-                {/*  Data Product owners overview */}
-                <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
-            </Flex>
-        </Flex>
+        <DetailPageLayout
+            icon={<CustomSvgIconLoader iconComponent={dataOutputTypeIcon} size="large" />}
+            title={dataOutput.name}
+            edit={
+                canEdit
+                    ? {
+                          path: getDynamicRoutePath(
+                              ApplicationPaths.DataOutputEdit,
+                              DynamicPathParams.DataOutputId,
+                              dataOutputId,
+                          ).replace(`:${DynamicPathParams.DataProductId}`, dataOutput.owner.id),
+                          tooltip: t('Edit Technical Asset'),
+                      }
+                    : undefined
+            }
+            sidebar={
+                <>
+                    <TechnicalAssetActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
+                    <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
+                </>
+            }
+        >
+            <TechnicalAssetDescription
+                status={dataOutput.status}
+                namespace={dataOutput.namespace}
+                type={dataOutput.configuration.name}
+                description={dataOutput.description}
+                tags={dataOutput.tags}
+                accessModes={dataOutput.access_modes}
+                environments={dataOutput.environments}
+            />
+            <TechnicalAssetTabs
+                technicalAsset={dataOutput}
+                dataProductId={dataProductId}
+                canEdit={canEdit}
+                isLoading={isLoading}
+            />
+        </DetailPageLayout>
     );
 }

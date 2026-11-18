@@ -1,12 +1,11 @@
-import { EditOutlined, ProductOutlined, ShopOutlined } from '@ant-design/icons';
-import { Flex, Typography } from 'antd';
+import { ProductOutlined, ShopOutlined } from '@ant-design/icons';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
+import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
@@ -21,11 +20,9 @@ import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProduc
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
-import styles from './output-port.module.scss';
 
 export function OutputPort() {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { datasetId = '', dataProductId = '' } = useParams();
 
     const { data: outputPort, isLoading } = useGetOutputPortQuery(
@@ -89,57 +86,43 @@ export function OutputPort() {
 
     const datasetOwners = useGetDatasetOwners(outputPort?.id);
 
-    function navigateToDatasetEditPage() {
-        navigate(
-            ApplicationPaths.MarketPlaceOutputPortEdit.replace(`:${DynamicPathParams.DatasetId}`, datasetId).replace(
-                `:${DynamicPathParams.DataProductId}`,
-                dataProductId,
-            ),
-        );
-    }
-
     if (isLoading || isLoadingDataProductAccess || isLoadingDataProduct) return <LoadingSpinner />;
 
     if (!outputPort) return null;
 
     return (
-        <Flex className={styles.datasetContainer}>
-            <Flex vertical className={styles.datasetContent}>
-                <Flex className={styles.datasetHeaderContainer}>
-                    <Flex className={styles.datasetHeader} align="center">
-                        <CustomSvgIconLoader iconComponent={outputPortBorderIcon} size="large" />
-                        <Typography.Title level={3}>{outputPort?.name}</Typography.Title>
-                        <OutputPortAccessIcon accessType={outputPort.access_type} />
-                    </Flex>
-                    {canEdit && (
-                        <CircleIconButton
-                            icon={<EditOutlined />}
-                            tooltip={t('Edit Output Port')}
-                            onClick={navigateToDatasetEditPage}
-                        />
-                    )}
-                </Flex>
-                <Flex vertical className={styles.datasetOverview}>
-                    <OutputPortDescription
-                        lifecycle={outputPort.lifecycle}
-                        data_product={data_product}
-                        description={outputPort.description}
-                        domain={outputPort.domain.name}
-                        namespace={outputPort.namespace}
-                        tags={[
-                            ...outputPort.tags,
-                            ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
-                        ]}
-                    />
-                    <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
-                </Flex>
-            </Flex>
-            {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <DatasetActions datasetId={datasetId} />
-                <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
-                <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
-            </Flex>
-        </Flex>
+        <DetailPageLayout
+            icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} size="large" />}
+            title={outputPort.name}
+            titleExtra={<OutputPortAccessIcon accessType={outputPort.access_type} />}
+            edit={
+                canEdit
+                    ? {
+                          path: ApplicationPaths.MarketPlaceOutputPortEdit.replace(
+                              `:${DynamicPathParams.DatasetId}`,
+                              datasetId,
+                          ).replace(`:${DynamicPathParams.DataProductId}`, dataProductId),
+                          tooltip: t('Edit Output Port'),
+                      }
+                    : undefined
+            }
+            sidebar={
+                <>
+                    <DatasetActions datasetId={datasetId} />
+                    <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
+                    <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
+                </>
+            }
+        >
+            <OutputPortDescription
+                lifecycle={outputPort.lifecycle}
+                data_product={data_product}
+                description={outputPort.description}
+                domain={outputPort.domain.name}
+                namespace={outputPort.namespace}
+                tags={[...outputPort.tags, ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag }))]}
+            />
+            <DatasetTabs datasetId={outputPort.id} dataProductId={dataProductId} isLoading={isLoading} />
+        </DetailPageLayout>
     );
 }
