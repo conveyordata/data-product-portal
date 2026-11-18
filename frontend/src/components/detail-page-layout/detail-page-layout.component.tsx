@@ -53,7 +53,7 @@ export function DetailPageLayout({ icon, title, titleExtra, edit, sidebar, child
                 </Flex>
             </Col>
             {sidebar && !sidebarCollapsed && (
-                <Col flex="320px">
+                <Col flex="280px">
                     <Flex vertical gap="large" align="flex-start">
                         {sidebar}
                     </Flex>

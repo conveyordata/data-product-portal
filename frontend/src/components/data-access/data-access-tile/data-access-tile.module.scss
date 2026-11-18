@@ -7,7 +7,6 @@ $icon-size: calc(#{$tile-size} / 2);
     align-items: center;
     gap: globals.$column-gap-badge;
     width: $tile-size;
-    min-width: max-content;
 }
 
 .radio-button {
@@ -44,5 +43,7 @@ $icon-size: calc(#{$tile-size} / 2);
 }
 
 .label {
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
 }
