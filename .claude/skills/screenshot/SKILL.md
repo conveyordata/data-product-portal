@@ -10,9 +10,8 @@ Look at your own UI change before the user does. A side-by-side with main catche
 ## Steps
 
 1. Make sure the dev app runs: frontend on `localhost:3000` and backend on `localhost:5050` with `OIDC_ENABLED=false`, so every page opens as the sample user John without a login. The frontend must run from the checkout that holds your change.
-   - Check for a listener first with `lsof -nP -iTCP:3000 -sTCP:LISTEN -t` and its folder with `lsof -a -p <pid> -d cwd`. The user often has their own dev server there: reuse it when it runs from your checkout's `frontend/` and pages open as John, and leave it running. When it runs from another checkout, stop and ask the user; that server is theirs.
-   - When port 3000 is free, start your own from `frontend/` with `npm run dev -- --strictPort`, so Vite fails instead of moving to another port. Record the PID listening on 3000 (the `vite` process, not `npm`, which leaves Vite running when killed) and confirm its folder is your checkout.
-   - Afterwards, stop exactly that recorded PID with `kill <pid>`.
+   - Check port 3000 before starting anything: `lsof -nP -iTCP:3000 -sTCP:LISTEN -t`, and the owner's folder with `lsof -a -p <pid> -d cwd`. A server from your checkout's `frontend/` that opens pages as John can be reused and left running; one from another checkout is the user's, so ask them. Starting while a server runs would still overwrite `public/config.js` and Vite's dependency cache under it.
+   - When the port is free, start the frontend as a background command, `npm --prefix frontend run dev -- --strictPort --open false`, and stop it afterwards by stopping that background task, which ends Vite too. `--strictPort` makes Vite fail instead of moving to another port; `--open false` keeps it from opening a browser tab.
 2. Run, from the repository:
 
    ```bash

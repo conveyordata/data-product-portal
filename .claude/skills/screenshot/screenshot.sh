@@ -1,20 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+    echo "${1:+$1. }Usage: $0 [--compare <ref>] [--width <px>]... <out-dir> <page>..." >&2
+    exit 1
+}
+
 compare=""
 widths=()
 args=()
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --compare) compare=$2; shift 2 ;;
+        --compare)
+            [[ -n ${2:-} && ${2:-} != --* ]] || usage "--compare needs a git ref"
+            compare=$2; shift 2 ;;
         --width)
-            [[ ${2:-} =~ ^[0-9]+$ ]] || { echo "--width takes a number of pixels, got '${2:-}'" >&2; exit 1; }
+            [[ ${2:-} =~ ^[1-9][0-9]*$ ]] || usage "--width takes a number of pixels, got '${2:-}'"
             widths+=("$2"); shift 2 ;;
-        --*) echo "Unknown option $1" >&2; exit 1 ;;
+        --*) usage "Unknown option $1" ;;
         *) args+=("$1"); shift ;;
     esac
 done
-[[ ${#widths[@]} -gt 0 ]] && export SHOOT_WIDTHS="${widths[*]}"
+[[ ${#args[@]} -ge 2 ]] || usage "Give an output folder and at least one page"
+if [[ ${#widths[@]} -gt 0 ]]; then
+    export SHOOT_WIDTHS="${widths[*]}"
+else
+    unset SHOOT_WIDTHS
+fi
 out=${args[0]}
 mkdir -p "$out"
 
