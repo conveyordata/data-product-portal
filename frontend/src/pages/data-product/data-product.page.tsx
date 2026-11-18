@@ -1,13 +1,12 @@
-import Icon, { EditOutlined, LeftOutlined, ProductOutlined, RightOutlined } from '@ant-design/icons';
-import { Flex, Space, Splitter, Typography } from 'antd';
-import clsx from 'clsx';
-import { useEffect, useMemo, useState } from 'react';
+import { ProductOutlined } from '@ant-design/icons';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
 import { DataProductVisibilityIcon } from '@/components/data-products/data-product-visibility-icon.tsx';
+import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
@@ -23,13 +22,11 @@ import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
-import styles from './data-product.module.scss';
 
 export function DataProduct() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { dataProductId = '' } = useParams();
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
@@ -68,15 +65,6 @@ export function DataProduct() {
 
     const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
 
-    const navigateToEditPage = () => {
-        const destination = getDynamicRoutePath(
-            ApplicationPaths.DataProductEdit,
-            DynamicPathParams.DataProductId,
-            dataProductId,
-        );
-        return navigate(destination);
-    };
-
     //Only show the spinner when we have no data product to show, if we have one, we want to continue
     //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
     if (isFetchingDataProduct && !dataProduct) return <LoadingSpinner />;
@@ -87,57 +75,39 @@ export function DataProduct() {
     }
 
     return (
-        <Splitter className={styles.invisibleSplitter}>
-            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false}>
-                <Flex vertical gap="middle">
-                    <Flex justify="space-between">
-                        <Flex gap="middle" align="center" justify="center">
-                            <Icon
-                                component={dataProductTypeIcon}
-                                className={clsx([styles.defaultIcon, styles.iconBorder])}
-                            />
-                            <Typography.Title
-                                level={3}
-                                ellipsis={{ tooltip: dataProduct?.name, rows: 2 }}
-                                style={{ margin: 0 }}
-                            >
-                                {dataProduct?.name}
-                            </Typography.Title>
-                            <DataProductVisibilityIcon visibility={dataProduct?.visibility} />
-                        </Flex>
-                        <Space>
-                            {canEdit && (
-                                <CircleIconButton
-                                    icon={<EditOutlined />}
-                                    tooltip={t('Edit Data Product')}
-                                    onClick={navigateToEditPage}
-                                />
-                            )}
-                            <CircleIconButton
-                                icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
-                                tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
-                                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                            />
-                        </Space>
-                    </Flex>
-                    <DataProductDescription
-                        lifecycle={dataProduct.lifecycle}
-                        type={dataProduct.type.name}
-                        description={dataProduct.description}
-                        domain={dataProduct.domain.name}
-                        namespace={dataProduct.namespace}
-                        environments={dataProduct.environments}
-                        tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
-                    />
-                    <DataProductTabs dataProductId={dataProduct.id} />
-                </Flex>
-            </Splitter.Panel>
-            <Splitter.Panel size={sidebarCollapsed ? '0%' : '20%'} resizable={false}>
-                <Flex vertical className={styles.sidebarPanel}>
+        <DetailPageLayout
+            icon={<CustomSvgIconLoader iconComponent={dataProductTypeIcon} hasRoundBorder />}
+            title={dataProduct.name}
+            titleExtra={<DataProductVisibilityIcon visibility={dataProduct.visibility} />}
+            edit={
+                canEdit
+                    ? {
+                          path: getDynamicRoutePath(
+                              ApplicationPaths.DataProductEdit,
+                              DynamicPathParams.DataProductId,
+                              dataProductId,
+                          ),
+                          tooltip: t('Edit Data Product'),
+                      }
+                    : undefined
+            }
+            sidebar={
+                <>
                     <DataProductActions dataProductId={dataProductId} />
                     <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
-                </Flex>
-            </Splitter.Panel>
-        </Splitter>
+                </>
+            }
+        >
+            <DataProductDescription
+                lifecycle={dataProduct.lifecycle}
+                type={dataProduct.type.name}
+                description={dataProduct.description}
+                domain={dataProduct.domain.name}
+                namespace={dataProduct.namespace}
+                environments={dataProduct.environments}
+                tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
+            />
+            <DataProductTabs dataProductId={dataProduct.id} />
+        </DetailPageLayout>
     );
 }
