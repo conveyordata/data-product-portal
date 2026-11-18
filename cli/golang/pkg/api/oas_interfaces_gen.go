@@ -629,6 +629,10 @@ type SanitizeResourceNameRes interface {
 	sanitizeResourceNameRes()
 }
 
+type SearchDataProductsRes interface {
+	searchDataProductsRes()
+}
+
 type SearchOutputPortsRes interface {
 	searchOutputPortsRes()
 }

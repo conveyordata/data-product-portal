@@ -990,6 +990,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/resource_names/sanitize
 	SanitizeResourceName(ctx context.Context, params SanitizeResourceNameParams) (SanitizeResourceNameRes, error)
+	// SearchDataProducts invokes search_data_products operation.
+	//
+	// Search Data Products.
+	//
+	// GET /api/v2/search/data_products
+	SearchDataProducts(ctx context.Context, params SearchDataProductsParams) (SearchDataProductsRes, error)
 	// SearchOutputPorts invokes search_output_ports operation.
 	//
 	// Search Output Ports.
@@ -11571,6 +11577,103 @@ func (c *Client) sendSanitizeResourceName(ctx context.Context, params SanitizeRe
 	}()
 
 	result, err := decodeSanitizeResourceNameResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SearchDataProducts invokes search_data_products operation.
+//
+// Search Data Products.
+//
+// GET /api/v2/search/data_products
+func (c *Client) SearchDataProducts(ctx context.Context, params SearchDataProductsParams) (SearchDataProductsRes, error) {
+	res, err := c.sendSearchDataProducts(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendSearchDataProducts(ctx context.Context, params SearchDataProductsParams) (res SearchDataProductsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/search/data_products"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "query" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "query",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Query.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "assignment_filter" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "assignment_filter",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AssignmentFilter.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeSearchDataProductsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

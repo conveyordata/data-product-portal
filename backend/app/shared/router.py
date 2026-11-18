@@ -38,6 +38,7 @@ from app.graph.router import router as graph
 from app.groups.router import router as group
 from app.machine_users.router import router as machine_user
 from app.resource_names.router import router as resource_name
+from app.search_data_products.router import router as search_data_products
 from app.search_output_ports.router import router as search_output_ports
 from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
@@ -51,6 +52,7 @@ router = (
 
 router.include_router(authorization)
 router.include_router(search_output_ports)
+router.include_router(search_data_products)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)
