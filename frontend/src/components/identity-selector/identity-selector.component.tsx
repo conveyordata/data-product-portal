@@ -71,6 +71,7 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
         <Flex vertical gap="middle">
             <Input.Search
                 type="search"
+                data-cy="identity-selector-search"
                 aria-label={t('Search identities')}
                 placeholder={t('Search by name, email, or external ID')}
                 allowClear

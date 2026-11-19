@@ -116,6 +116,92 @@ describe('Data Product identity roles', () => {
         expect((await findRow('Finance Team')).getByText('Remove').closest('button')).toBeEnabled();
     });
 
+    it.each([
+        {
+            column: 'Type',
+            ascending: ['Finance Team', 'ETL Runner', 'Bob Adams', 'Charlie Adams', 'Alice Zulu'],
+            descending: ['Bob Adams', 'Charlie Adams', 'Alice Zulu', 'ETL Runner', 'Finance Team'],
+        },
+        {
+            column: 'Role',
+            ascending: ['Charlie Adams', 'Finance Team', 'Bob Adams', 'ETL Runner', 'Alice Zulu'],
+            descending: ['Bob Adams', 'ETL Runner', 'Alice Zulu', 'Charlie Adams', 'Finance Team'],
+        },
+        {
+            column: 'Status',
+            ascending: ['Charlie Adams', 'ETL Runner', 'Alice Zulu', 'Bob Adams', 'Finance Team'],
+            descending: ['Bob Adams', 'Finance Team', 'Charlie Adams', 'ETL Runner', 'Alice Zulu'],
+        },
+    ])('cycles $column sorting while keeping Name active', async ({ column, ascending, descending }) => {
+        mockRoles([
+            assignment({ ...currentIdentity, id: 'alice', first_name: 'Alice', last_name: 'Zulu' }),
+            assignment(
+                { ...currentIdentity, id: 'bob', first_name: 'Bob', last_name: 'Adams' },
+                { decision: DecisionStatus.Pending },
+            ),
+            assignment(
+                { ...currentIdentity, id: 'charlie', first_name: 'Charlie', last_name: 'Adams' },
+                { role: editorRole },
+            ),
+            assignment(mockGroup, { role: editorRole, decision: DecisionStatus.Pending }),
+            assignment(mockMachineUser),
+        ]);
+        const user = userEvent.setup();
+        renderWithProviders(<TeamTab dataProductId="dp-1" />);
+        await screen.findByText('Alice Zulu');
+        const names = () =>
+            screen
+                .getAllByText(/^(Alice Zulu|Bob Adams|Charlie Adams|Finance Team|ETL Runner)$/)
+                .map((name) => name.textContent);
+        const nameOrder = ['Bob Adams', 'Charlie Adams', 'ETL Runner', 'Finance Team', 'Alice Zulu'];
+        const nameHeader = screen.getByText('Name', { selector: 'th .ant-table-column-title' });
+        const header = screen.getByText(column, { selector: 'th .ant-table-column-title' });
+        expect(names()).toEqual(nameOrder);
+        await user.click(header);
+        expect(names()).toEqual(ascending);
+        expect(nameHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        await user.click(header);
+        expect(names()).toEqual(descending);
+        await user.click(header);
+        expect(header.closest('th')).not.toHaveAttribute('aria-sort');
+        expect(names()).toEqual(nameOrder);
+        await user.click(nameHeader);
+        expect(names()).toEqual([...nameOrder].reverse());
+        await user.click(nameHeader);
+        expect(nameHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+        await user.click(header);
+        expect(names()).toEqual(ascending);
+    });
+
+    it('combines Type, Role and Status ordering with Name as the final tie-breaker', async () => {
+        mockRoles([
+            assignment({ ...currentIdentity, id: 'alice', first_name: 'Alice', last_name: 'Zulu' }),
+            assignment(
+                { ...currentIdentity, id: 'bob', first_name: 'Bob', last_name: 'Adams' },
+                { decision: DecisionStatus.Pending },
+            ),
+            assignment(
+                { ...currentIdentity, id: 'charlie', first_name: 'Charlie', last_name: 'Adams' },
+                { role: editorRole },
+            ),
+            assignment({ ...currentIdentity, id: 'dana', first_name: 'Dana', last_name: 'Smith' }),
+            assignment(mockGroup),
+        ]);
+        const user = userEvent.setup();
+        renderWithProviders(<TeamTab dataProductId="dp-1" />);
+        await screen.findByText('Alice Zulu');
+        for (const column of ['Type', 'Role', 'Status']) {
+            await user.click(screen.getByText(column, { selector: 'th .ant-table-column-title' }));
+        }
+        const names = () =>
+            screen
+                .getAllByText(/^(Alice Zulu|Bob Adams|Charlie Adams|Dana Smith|Finance Team)$/)
+                .map((name) => name.textContent);
+        expect(names()).toEqual(['Finance Team', 'Charlie Adams', 'Dana Smith', 'Alice Zulu', 'Bob Adams']);
+        await user.click(screen.getByText('Name', { selector: 'th .ant-table-column-title' }));
+        expect(names()).toEqual(['Finance Team', 'Charlie Adams', 'Alice Zulu', 'Dana Smith', 'Bob Adams']);
+    });
+
     it('disables assignment controls until the mutation and assignment refresh finish', async () => {
         const state = mockRoles();
         let finishMutation!: () => void;

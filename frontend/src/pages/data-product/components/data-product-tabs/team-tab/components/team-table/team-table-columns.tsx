@@ -57,17 +57,21 @@ export const getDataProductTeamTableColumns = ({
             render: (_, { identity }) => {
                 return <IdentityAvatarWithDetails identity={identity} />;
             },
-            width: '35%',
-            sorter: (left, right) => compareIdentities(left.identity, right.identity),
+            width: '50%',
+            sorter: { compare: (left, right) => compareIdentities(left.identity, right.identity), multiple: 1 },
             defaultSortOrder: 'ascend',
+            sortDirections: ['ascend', 'descend', 'ascend'],
         },
         {
             title: t('Type'),
             key: 'identityType',
-            width: '20%',
+            width: '15%',
             render: (_, { identity }) => getIdentityTypeLabel(identity, t),
             ...new FilterSettings(assignments, (assignment) => getIdentityTypeLabel(assignment.identity, t)),
-            sorter: sorter.stringSorter((assignment) => getIdentityTypeLabel(assignment.identity, t)),
+            sorter: {
+                compare: sorter.stringSorter((assignment) => getIdentityTypeLabel(assignment.identity, t)),
+                multiple: 4,
+            },
         },
         {
             title: t('Role'),
@@ -93,9 +97,9 @@ export const getDataProductTeamTableColumns = ({
                     </Tooltip>
                 );
             },
-            width: '25%',
+            width: '20%',
             ...new FilterSettings(assignments, (assignment) => assignment.role?.name ?? t('No role assigned')),
-            sorter: sorter.stringSorter((assignment) => assignment.role?.name),
+            sorter: { compare: sorter.stringSorter((assignment) => assignment.role?.name), multiple: 3 },
         },
         {
             title: t('Status'),
@@ -108,9 +112,12 @@ export const getDataProductTeamTableColumns = ({
                     />
                 );
             },
-            width: '15%',
+            width: '10%',
             ...new FilterSettings(assignments, (assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
-            sorter: sorter.stringSorter((assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
+            sorter: {
+                compare: sorter.stringSorter((assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
+                multiple: 2,
+            },
         },
         {
             title: t('Actions'),
