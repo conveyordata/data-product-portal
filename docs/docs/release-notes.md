@@ -8,7 +8,7 @@ sidebar_position: 200
 
 ### breaking changes
 
-- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
+- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Data Product Owner assignments require a user. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
 
 ### features

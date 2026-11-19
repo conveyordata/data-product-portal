@@ -1270,17 +1270,28 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 403
 
-    @pytest.mark.parametrize(
-        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
-    )
-    def test_create_data_product__identity_owner(
+    @pytest.mark.parametrize("identity_factory", [GroupFactory, MachineUserFactory])
+    def test_create_data_product__rejects_non_user_owner(
         self,
         payload,
         client,
         user_with_create_data_product_rights,
         identity_factory,
     ):
-        identity = identity_factory()
+        payload["owners"] = [str(identity_factory().id)]
+
+        response = self.create_data_product(client, payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Only users can be Data Product owners"
+
+    def test_create_data_product__user_owner(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+    ):
+        identity = UserFactory()
         payload["owners"] = [str(identity.id)]
 
         response = self.create_data_product(client, payload)

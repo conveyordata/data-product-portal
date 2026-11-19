@@ -23,6 +23,8 @@ from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
 from app.groups.model import GroupMembership
 from app.groups.service import GroupService
+from app.identities.model import ensure_identity_exists
+from app.identities.type import IdentityType
 from app.shared.model import naive_utc_now
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -77,6 +79,7 @@ class RoleAssignmentService:
         self, data_product_id: UUID, role_id: UUID, identity_id: UUID, *, actor: User
     ) -> DataProductRoleAssignment:
         self.ensure_is_data_product_scope(role_id)
+        self._ensure_owner_is_user(role_id, identity_id)
         dp = ensure_data_product_exists(data_product_id, self.db)
         if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
@@ -127,6 +130,12 @@ class RoleAssignmentService:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
+        target_role_id = request.role_id or assignment.role_id
+        if target_role_id is not None and (
+            request.role_id is not None or request.decision == DecisionStatus.APPROVED
+        ):
+            self._ensure_owner_is_user(target_role_id, assignment.identity_id)
+
         if (role_id := request.role_id) is not None:
             self.ensure_is_data_product_scope(role_id)
             assignment.role_id = role_id
@@ -158,6 +167,18 @@ class RoleAssignmentService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",
+            )
+
+    def _ensure_owner_is_user(self, role_id: UUID, identity_id: UUID) -> None:
+        role = self.db.get(Role, role_id)
+        if (
+            role is not None
+            and role.prototype == Prototype.OWNER
+            and ensure_identity_exists(identity_id, self.db).type != IdentityType.USER
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only users can be Data Product owners",
             )
 
     def _guard_against_illegal_owner_removal(

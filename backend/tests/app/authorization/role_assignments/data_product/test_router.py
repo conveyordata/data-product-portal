@@ -40,6 +40,81 @@ IDENTITY_CASES = [
 
 class TestDataProductRoleAssignmentsRouter:
     @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    @pytest.mark.parametrize("operation", ["create", "request", "modify", "approve"])
+    def test_owner_assignment__requires_user(
+        self, client: TestClient, identity_factory, operation
+    ):
+        data_product = DataProductFactory()
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authorization_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=actor.id,
+            role_id=authorization_role.id,
+            data_product_id=data_product.id,
+        )
+        request_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(identity_id=actor.id, role_id=request_role.id)
+        identity = identity_factory()
+        owner_role = RoleFactory.data_product_owner()
+        if operation in ("create", "request"):
+            response = client.post(
+                ENDPOINT if operation == "create" else f"{ENDPOINT}/request",
+                json={
+                    "data_product_id": str(data_product.id),
+                    "identity_id": str(identity.id),
+                    "role_id": str(owner_role.id),
+                },
+            )
+        else:
+            assignment = DataProductRoleAssignmentFactory(
+                data_product_id=data_product.id,
+                identity_id=identity.id,
+                role_id=(
+                    owner_role.id if operation == "approve" else authorization_role.id
+                ),
+                decision=DecisionStatus.PENDING,
+            )
+            response = (
+                client.put(
+                    f"{ENDPOINT}/{assignment.id}",
+                    json={"role_id": str(owner_role.id)},
+                )
+                if operation == "modify"
+                else client.post(
+                    f"{ENDPOINT}/{assignment.id}/decide",
+                    json={"decision": DecisionStatus.APPROVED},
+                )
+            )
+
+        if identity.type == IdentityType.USER:
+            assert response.status_code == status.HTTP_200_OK, response.text
+            assert response.json()["role"]["id"] == str(owner_role.id)
+        else:
+            assert response.status_code == status.HTTP_400_BAD_REQUEST, response.text
+            assert response.json()["detail"] == "Only users can be Data Product owners"
+            assignments = client.get(
+                ENDPOINT,
+                params={"identity_id": str(identity.id)},
+            ).json()["role_assignments"]
+            if operation in ("create", "request"):
+                assert assignments == []
+            else:
+                assert assignments[0]["decision"] == DecisionStatus.PENDING
+                assert assignments[0]["role"]["id"] == str(assignment.role_id)
+
+    @pytest.mark.parametrize(
         ("identity_factory", "identity_type", "detail_field"),
         IDENTITY_CASES,
     )

@@ -2,6 +2,9 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from app.authorization.role_assignments.data_product.schema import (
+    UpdateDataProductRoleAssignment,
+)
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
@@ -21,6 +24,46 @@ from tests.session_util import as_user
 
 
 class TestDataProductRoleAssignmentsService:
+    @pytest.mark.parametrize("identity_factory", [GroupFactory, MachineUserFactory])
+    @pytest.mark.parametrize("operation", ["deny", "demote"])
+    def test_update_assignment__allows_removing_non_user_ownership(
+        self, session, identity_factory, operation
+    ):
+        actor = UserFactory()
+        data_product = DataProductFactory()
+        owner_role = RoleFactory.data_product_owner()
+        DataProductRoleAssignmentFactory(
+            identity_id=actor.id,
+            data_product_id=data_product.id,
+            role_id=owner_role.id,
+        )
+        assignment = DataProductRoleAssignmentFactory(
+            identity_id=identity_factory().id,
+            data_product_id=data_product.id,
+            role_id=owner_role.id,
+            decision=(
+                DecisionStatus.PENDING
+                if operation == "deny"
+                else DecisionStatus.APPROVED
+            ),
+        )
+        request = (
+            UpdateDataProductRoleAssignment(
+                id=assignment.id, decision=DecisionStatus.DENIED
+            )
+            if operation == "deny"
+            else UpdateDataProductRoleAssignment(
+                id=assignment.id, role_id=RoleFactory(scope=Scope.DATA_PRODUCT).id
+            )
+        )
+
+        updated = RoleAssignmentService(session).update_assignment(request, actor=actor)
+
+        if operation == "deny":
+            assert updated.decision == DecisionStatus.DENIED
+        else:
+            assert updated.role_id == request.role_id
+
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
         data_product = DataProductFactory()
