@@ -1,5 +1,5 @@
 import { SafetyCertificateOutlined } from '@ant-design/icons';
-import { Form, Modal, Select } from 'antd';
+import { Flex, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
 import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
@@ -21,11 +21,8 @@ type Props = {
     onClose: () => void;
 } & ({ mode: 'assign'; initialIdentity?: never } | { mode: 'request'; initialIdentity: UserIdentity });
 
-type Values = { roleId: string };
-
 export function DataProductRoleModal({ dataProductId, mode, initialIdentity, onClose }: Props) {
     const { t } = useTranslation();
-    const [form] = Form.useForm<Values>();
     const rolesQuery = useGetRolesQuery(Scope.DATA_PRODUCT);
     const assignmentsQuery = useListDataProductRoleAssignmentsQuery({ dataProductId });
     const [assignRole, { isLoading: isAssigning }] = useCreateDataProductRoleAssignmentMutation();
@@ -73,13 +70,10 @@ export function DataProductRoleModal({ dataProductId, mode, initialIdentity, onC
         <Modal
             open
             title={mode === 'assign' ? t('Add team member') : t('Request Data Product role')}
-            width={{ xs: '95%', md: '80%', lg: '60%' }}
+            width={mode === 'assign' ? { xs: '95%', md: '80%', lg: '60%' } : undefined}
+            centered={mode === 'request'}
             onCancel={onClose}
-            onOk={() => form.submit()}
-            footer={mode === 'assign' ? (_, { CancelBtn }) => <CancelBtn /> : undefined}
-            okText={t('Request role')}
-            okButtonProps={{ disabled: !isReady }}
-            confirmLoading={isSubmitting}
+            footer={(_, { CancelBtn }) => <CancelBtn />}
             cancelButtonProps={{ disabled: isSubmitting }}
         >
             {loadFailed ? (
@@ -95,6 +89,7 @@ export function DataProductRoleModal({ dataProductId, mode, initialIdentity, onC
                 />
             ) : mode === 'assign' ? (
                 <IdentitySelector
+                    actionTitle={t('Add member')}
                     identityIdsToHide={assignedIdentityIds}
                     disabled={isSubmitting || !isReady}
                     renderAction={(identity, disabled) => (
@@ -109,31 +104,20 @@ export function DataProductRoleModal({ dataProductId, mode, initialIdentity, onC
                     )}
                 />
             ) : (
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={({ roleId }: Values) => handleSubmit(initialIdentity, roleId)}
-                    disabled={isSubmitting}
-                >
-                    <Form.Item label={t('Identity')} required>
+                <Flex align="center" justify="space-between" gap="middle">
+                    <div style={{ minWidth: 0, flex: 1 }}>
                         <IdentityAvatarWithDetails identity={initialIdentity} />
-                    </Form.Item>
-                    <Form.Item<Values>
-                        label={t('Role')}
-                        name="roleId"
-                        rules={[{ required: true, message: t('Please select a role') }]}
-                    >
-                        <Select
-                            loading={rolesQuery.isFetching}
+                    </div>
+                    <div style={{ width: '40%' }}>
+                        <RoleChangeForm
+                            scope={Scope.DATA_PRODUCT}
+                            ariaLabel={t('Role')}
+                            placeholder={t('Select a role')}
                             disabled={isSubmitting || !isReady}
-                            options={rolesQuery.currentData?.roles.map((role) => ({
-                                value: role.id,
-                                label: role.name,
-                            }))}
-                            notFoundContent={t('No roles available')}
+                            onRoleChange={(role) => handleSubmit(initialIdentity, role.id)}
                         />
-                    </Form.Item>
-                </Form>
+                    </div>
+                </Flex>
             )}
         </Modal>
     );

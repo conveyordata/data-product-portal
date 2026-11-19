@@ -45,7 +45,7 @@ export function TeamTab({ dataProductId }: Props) {
             <Flex vertical gap="middle">
                 <Flex gap="small">
                     <Input.Search
-                        placeholder={t('Search by name or email')}
+                        placeholder={t('Search by name, email, or external ID')}
                         allowClear
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}

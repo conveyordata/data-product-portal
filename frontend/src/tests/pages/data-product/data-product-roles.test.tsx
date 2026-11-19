@@ -110,7 +110,7 @@ describe('Data Product identity roles', () => {
         expect((await findRow('Finance Team')).getByText('Group')).toBeInTheDocument();
         expect((await findRow('ETL Runner')).getByText('Machine User')).toBeInTheDocument();
         expect((await findRow('Alice Smith')).getByText('alice@example.com')).toBeInTheDocument();
-        await user.type(screen.getByPlaceholderText('Search by name or email'), 'FINANCE TEAM');
+        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), 'TEAM-FINANCE-EXTERNAL');
         expect(screen.queryByText('Alice Smith')).not.toBeInTheDocument();
         expect(screen.getByLabelText('Role for Finance Team')).toBeEnabled();
         expect((await findRow('Finance Team')).getByText('Remove').closest('button')).toBeEnabled();
@@ -209,7 +209,7 @@ describe('Data Product identity roles', () => {
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await findRow('Alice Smith');
-        await user.type(screen.getByPlaceholderText('Search by name or email'), identity.display_name);
+        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), identity.display_name);
         await user.click(screen.getByText('Add team member'));
         await screen.findByLabelText(`Assign role to ${identity.display_name}`);
         expect(create).not.toHaveBeenCalled();
@@ -317,7 +317,7 @@ describe('Data Product identity roles', () => {
         const user = userEvent.setup();
         renderWithProviders(<TeamTab dataProductId="dp-1" />);
         await findRow('Alice Smith');
-        await user.type(screen.getByPlaceholderText('Search by name or email'), 'nobody');
+        await user.type(screen.getByPlaceholderText('Search by name, email, or external ID'), 'nobody');
         await user.click(screen.getByText('Add team member'));
 
         expect(await screen.findByLabelText('Assign role to ETL Runner')).toBeEnabled();
@@ -454,8 +454,8 @@ describe('Data Product identity roles', () => {
 
         expect(await screen.findByText('Alice Smith')).toBeInTheDocument();
         expect(screen.queryByText('Change identity')).not.toBeInTheDocument();
+        expect(screen.queryByText('Request role', { exact: true })).not.toBeInTheDocument();
         await selectRole(user, 'Role', 'Member');
-        await user.click(screen.getByText('Request role'));
 
         await waitFor(() =>
             expect(requestRole).toHaveBeenCalledExactlyOnceWith({
@@ -465,6 +465,49 @@ describe('Data Product identity roles', () => {
             }),
         );
         expect(loadDirectory).not.toHaveBeenCalled();
+    });
+
+    it('disables the inline request selector while submitting and allows retrying the same role after failure', async () => {
+        mockRoles([]);
+        let finishRequest!: () => void;
+        const pending = new Promise<void>((resolve) => {
+            finishRequest = resolve;
+        });
+        const requestRole = vi.fn();
+        server.use(
+            http.post(`${endpoint}/request`, async ({ request }) => {
+                requestRole(await request.json());
+                await pending;
+                return HttpResponse.json({ detail: 'Request failed' }, { status: 500 });
+            }),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<DataProductRequestAccessButton dataProductId="dp-1" user={mockUsers[0]} />);
+        await user.click(screen.getByText('Join Team'));
+        await screen.findByText('Alice Smith');
+        try {
+            await selectRole(user, 'Role', 'Member');
+            expect(screen.getByLabelText('Role')).toBeDisabled();
+            finishRequest();
+            await screen.findByText('Failed to request role');
+            await waitFor(() => expect(screen.getByLabelText('Role')).toBeEnabled());
+            server.use(
+                http.post(`${endpoint}/request`, async ({ request }) => {
+                    requestRole(await request.json());
+                    return HttpResponse.json(assignment(currentIdentity, { decision: DecisionStatus.Pending }));
+                }),
+            );
+            await selectRole(user, 'Role', 'Member');
+            await waitFor(() => expect(screen.queryByLabelText('Role')).not.toBeInTheDocument());
+            expect(requestRole).toHaveBeenCalledTimes(2);
+            expect(requestRole).toHaveBeenLastCalledWith({
+                data_product_id: 'dp-1',
+                identity_id: currentIdentity.id,
+                role_id: memberRole.id,
+            });
+        } finally {
+            finishRequest();
+        }
     });
 
     describe.each([mockGroup, mockMachineUser])('$type pending requests', (identity) => {

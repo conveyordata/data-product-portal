@@ -2,12 +2,12 @@ import { TeamOutlined } from '@ant-design/icons';
 import { Flex, Input, type TableColumnsType, Typography } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
 import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { useIdentities } from '@/hooks/use-identities.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     getIdentityDisplayName,
-    getIdentitySecondaryLabel,
     getIdentityTypeLabel,
     type Identity,
     identityMatchesSearch,
@@ -19,11 +19,12 @@ const compareNames = new Sorter<Identity>().stringSorter(getIdentityDisplayName)
 
 type Props = {
     renderAction?: (identity: Identity, disabled: boolean) => ReactNode;
+    actionTitle?: ReactNode;
     identityIdsToHide?: string[];
     disabled?: boolean;
 };
 
-export function IdentitySelector({ renderAction, identityIdsToHide, disabled = false }: Props) {
+export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide, disabled = false }: Props) {
     const { t } = useTranslation();
     const identitiesQuery = useIdentities();
     const actionsDisabled = disabled || identitiesQuery.isFetching;
@@ -43,24 +44,12 @@ export function IdentitySelector({ renderAction, identityIdsToHide, disabled = f
             sorter: { compare: compareNames, multiple: 1 },
             defaultSortOrder: 'ascend',
             sortDirections: ['ascend', 'descend', 'ascend'],
-            render: (_, identity) => (
-                <Flex align="center" justify="space-between" gap="small">
-                    <Flex vertical style={{ minWidth: 0, flex: 1 }}>
-                        <Typography.Text ellipsis={{ tooltip: getIdentityDisplayName(identity) }}>
-                            {getIdentityDisplayName(identity)}
-                        </Typography.Text>
-                        <Typography.Text type="secondary" ellipsis={{ tooltip: getIdentitySecondaryLabel(identity) }}>
-                            {getIdentitySecondaryLabel(identity)}
-                        </Typography.Text>
-                    </Flex>
-                    {renderAction && <div style={{ width: '40%' }}>{renderAction(identity, actionsDisabled)}</div>}
-                </Flex>
-            ),
+            render: (_, identity) => <IdentityAvatarWithDetails identity={identity} />,
         },
         {
             key: 'type',
             title: t('Type'),
-            width: '25%',
+            width: '20%',
             ...new FilterSettings(identitiesQuery.currentData ?? [], (identity) => getIdentityTypeLabel(identity, t)),
             sorter: {
                 compare: (left, right) => getIdentityTypeLabel(left, t).localeCompare(getIdentityTypeLabel(right, t)),
@@ -69,13 +58,21 @@ export function IdentitySelector({ renderAction, identityIdsToHide, disabled = f
             render: (_, identity) => <Typography.Text>{getIdentityTypeLabel(identity, t)}</Typography.Text>,
         },
     ];
+    if (renderAction) {
+        columns.push({
+            key: 'action',
+            title: actionTitle,
+            width: '25%',
+            render: (_, identity) => renderAction(identity, actionsDisabled),
+        });
+    }
 
     return (
         <Flex vertical gap="middle">
             <Input.Search
                 type="search"
                 aria-label={t('Search identities')}
-                placeholder={t('Search by name or email')}
+                placeholder={t('Search by name, email, or external ID')}
                 allowClear
                 disabled={disabled}
                 value={searchTerm}
@@ -105,7 +102,7 @@ export function IdentitySelector({ renderAction, identityIdsToHide, disabled = f
                 pagination={{
                     current: pagination.current,
                     pageSize: pagination.pageSize,
-                    placement: ['topEnd'],
+                    placement: ['bottomEnd'],
                     size: 'small',
                     showSizeChanger: false,
                     disabled,
@@ -117,7 +114,6 @@ export function IdentitySelector({ renderAction, identityIdsToHide, disabled = f
                         }),
                 }}
                 onChange={handlePaginationChange}
-                rowHoverable={false}
                 rowKey="id"
                 size="small"
                 tableLayout="fixed"

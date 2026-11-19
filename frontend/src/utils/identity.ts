@@ -47,6 +47,7 @@ export function identityMatchesSearch(identity: Identity, searchTerm: string): b
 
     return (
         getIdentityDisplayName(identity).toLowerCase().includes(value) ||
-        (identity.type === 'user' && identity.email.toLowerCase().includes(value))
+        (identity.type === 'user' && identity.email.toLowerCase().includes(value)) ||
+        identity.external_id.toLowerCase().includes(value)
     );
 }

@@ -42,12 +42,13 @@ function filterMenu() {
 }
 
 describe('IdentitySelector', () => {
-    it('renders caller actions in the Name cell without selecting rows', async () => {
+    it('renders caller actions in a separate unsortable last column without selecting rows', async () => {
         mockIdentities();
         const user = userEvent.setup();
         const onAction = vi.fn();
         renderWithProviders(
             <IdentitySelector
+                actionTitle="Add member"
                 renderAction={(identity, disabled) => (
                     <button type="button" disabled={disabled} onClick={() => onAction(identity)}>
                         Use {getIdentityDisplayName(identity)}
@@ -58,7 +59,9 @@ describe('IdentitySelector', () => {
         await screen.findByText('Alice Smith');
         const cell = screen.getByText('Alice Smith').closest('td');
         if (!cell) throw new Error('Missing Name cell');
-        expect(within(cell).getByText('Use Alice Smith')).toBeInTheDocument();
+        expect(within(cell).queryByText('Use Alice Smith')).not.toBeInTheDocument();
+        expect(screen.getByText('Use Alice Smith').closest('td')).toBe(cell.parentElement?.lastElementChild);
+        expect(screen.getByText('Add member', { selector: 'th' })).not.toHaveAttribute('aria-sort');
         await user.click(screen.getByText('Alice Smith'));
         expect(onAction).not.toHaveBeenCalled();
         expect(screen.queryByText('Actions')).not.toBeInTheDocument();
@@ -75,6 +78,9 @@ describe('IdentitySelector', () => {
         ['ALICE@EXAMPLE.COM', 'Alice Smith'],
         ['FINANCE TEAM', 'Finance Team'],
         ['ETL RUNNER', 'ETL Runner'],
+        ['EXT-1', 'Alice Smith'],
+        ['TEAM-FINANCE-EXTERNAL', 'Finance Team'],
+        ['SERVICE-PRINCIPAL-ID', 'ETL Runner'],
     ])('searches %s locally', async (search, expectedName) => {
         const handlers = mockIdentities();
         const user = userEvent.setup();
@@ -87,18 +93,6 @@ describe('IdentitySelector', () => {
             expect(handler).toHaveBeenCalledTimes(1);
         }
     });
-
-    it.each(['EXT-1', 'TEAM-FINANCE-EXTERNAL', 'SERVICE-PRINCIPAL-ID'])(
-        'does not search external ID %s',
-        async (search) => {
-            mockIdentities();
-            const user = userEvent.setup();
-            renderWithProviders(<IdentitySelector />);
-            await screen.findByText('Alice Smith');
-            await user.type(screen.getByLabelText('Search identities'), search);
-            expect(screen.getByText(`No identities match "${search}"`)).toBeInTheDocument();
-        },
-    );
 
     it('paginates locally and resets the page and total when search or header filters change', async () => {
         const users = Array.from({ length: 12 }, (_, index) => ({
