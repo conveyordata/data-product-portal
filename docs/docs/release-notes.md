@@ -8,10 +8,12 @@ sidebar_position: 200
 
 ### breaking changes
 
+- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
 
 ### features
 
+- **[UI]**: Data Product teams can now include groups and machine users alongside users. The Add team member modal provides a searchable identity table with type filtering and a role selector. The Owner option is available only for users.
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 
@@ -38,7 +40,6 @@ sidebar_position: 200
 - **[SDK]**: `update_environment_is_global` is renamed to `update_environment`, and its body `EnvironmentUpdateGlobal` to `EnvironmentUpdate`, in the Python SDK and the CLI's `pkg/api`. The same `PATCH /api/v2/configuration/environments/{id}` now also sets the Environment `position`, and only changes the fields you send. `SelectOption.value` can now also be an integer, so its type in the SDK and the CLI widens to include one.
 - **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
 - **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
-- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
 
 ### features
 
