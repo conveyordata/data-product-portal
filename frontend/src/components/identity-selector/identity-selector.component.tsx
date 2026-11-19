@@ -1,5 +1,5 @@
 import { TeamOutlined } from '@ant-design/icons';
-import { Flex, Input, type TableColumnsType, Typography } from 'antd';
+import { Col, Flex, type FlexProps, Input, Row, type TableColumnsType, type TableProps, Typography } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
@@ -22,13 +22,28 @@ type Props = {
     actionTitle?: ReactNode;
     identityIdsToHide?: string[];
     disabled?: boolean;
+    gap?: FlexProps['gap'];
+    columns?: (identities: Identity[], disabled: boolean) => TableColumnsType<Identity>;
+    search?: { value: string; onChange: (value: string) => void; span: number };
+    tableProps?: Pick<TableProps<Identity>, 'pagination' | 'tableLayout' | 'scroll' | 'rowClassName' | 'rowHoverable'>;
 };
 
-export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide, disabled = false }: Props) {
+export function IdentitySelector({
+    renderAction,
+    actionTitle,
+    identityIdsToHide,
+    disabled = false,
+    gap = 'middle',
+    columns: buildColumns,
+    search,
+    tableProps,
+}: Props) {
     const { t } = useTranslation();
     const identitiesQuery = useIdentities();
     const actionsDisabled = disabled || identitiesQuery.isFetching;
-    const [searchTerm, setSearchTerm] = useState('');
+    const [localSearchTerm, setLocalSearchTerm] = useState('');
+    const searchTerm = search?.value ?? localSearchTerm;
+    const setSearchTerm = search?.onChange ?? setLocalSearchTerm;
     const filteredIdentities = useMemo(() => {
         const hiddenIds = new Set(identityIdsToHide);
         return (identitiesQuery.currentData ?? []).filter(
@@ -68,24 +83,28 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
     }
 
     return (
-        <Flex vertical gap="middle">
-            <Input.Search
-                type="search"
-                data-cy="identity-selector-search"
-                aria-label={t('Search identities')}
-                placeholder={t('Search by name, email, or external ID')}
-                allowClear
-                disabled={disabled}
-                value={searchTerm}
-                onChange={(event) => {
-                    setSearchTerm(event.target.value);
-                    handleCurrentPageChange(1);
-                }}
-            />
+        <Flex vertical gap={gap}>
+            <Row gutter={16}>
+                <Col span={search?.span ?? 24}>
+                    <Input.Search
+                        type="search"
+                        data-cy="identity-selector-search"
+                        aria-label={t('Search identities')}
+                        placeholder={t('Search by name, email, or external ID')}
+                        allowClear
+                        disabled={disabled}
+                        value={searchTerm}
+                        onChange={(event) => {
+                            setSearchTerm(event.target.value);
+                            handleCurrentPageChange(1);
+                        }}
+                    />
+                </Col>
+            </Row>
             <ListTable<Identity>
                 query={identitiesQuery}
                 dataSource={filteredIdentities}
-                columns={columns}
+                columns={buildColumns ? buildColumns(filteredIdentities, actionsDisabled) : columns}
                 subject={t('identities')}
                 emptyState={{
                     icon: <TeamOutlined />,
@@ -119,6 +138,7 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
                 size="small"
                 tableLayout="fixed"
                 scroll={{ x: 560 }}
+                {...tableProps}
             />
         </Flex>
     );

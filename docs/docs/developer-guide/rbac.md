@@ -151,14 +151,14 @@ Modifying a role affects all identities currently assigned that role. Changes ta
 
 ### Global Role Assignment
 
-Global roles for users are assigned by administrators through the People page:
+Global roles for users, groups and machine users are assigned by administrators through the People page:
 
 1. Navigate to **People** (requires admin privileges)
-2. Find the user you want to assign a role to
-3. Select the desired role from the dropdown in the **Role** column
+2. Find the identity you want to assign a role to
+3. Select the desired role from the dropdown in the **Global Role** column
 4. The assignment takes effect immediately
 
-Users can also be granted the ability to elevate to temporary admin by checking the **"Can become admin"** checkbox.
+Only users can be granted the ability to elevate to temporary admin by checking the **"Can become admin"** checkbox.
 
 ### Data Product Role Assignment
 

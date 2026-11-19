@@ -1,25 +1,32 @@
-import { Checkbox, Select, type TableColumnsType } from 'antd';
+import { Checkbox, Flex, Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { GlobalRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
-import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
-import { type GlobalRoleAssignment, Prototype } from '@/types/roles';
+import { DecisionStatus, type GlobalRoleAssignment, Prototype } from '@/types/roles';
+import { getIdentityDisplayName, getIdentityTypeLabel, type Identity } from '@/utils/identity.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './people-table.module.scss';
 
 type SelectorProps = {
     role: GlobalRoleAssignment | null;
-    everyone: Role | undefined;
     options: { label: string; value: string }[];
     onChange: (value: string) => void;
     disabled?: boolean;
 };
-function RoleSelector({ role, everyone, options, onChange, disabled = false }: SelectorProps) {
+function RoleSelector({ role, options, onChange, disabled = false }: SelectorProps) {
     return (
         <Select
             className={styles.select}
-            defaultValue={role?.role.name ?? everyone?.name}
+            value={
+                role && role.decision !== DecisionStatus.Approved
+                    ? null
+                    : role?.role.prototype === Prototype.ADMIN
+                      ? ''
+                      : (role?.role.id ?? '')
+            }
+            placeholder={role?.role.name}
             options={options}
             onChange={(value: string) => onChange(value)}
             disabled={disabled}
@@ -29,27 +36,35 @@ function RoleSelector({ role, everyone, options, onChange, disabled = false }: S
 
 export const getPeopleTableColumns = ({
     t,
-    users: data,
+    identities: data,
+    assignments,
     canAssignRole,
     allRoles,
     onChange,
     changeCheckbox,
+    isSaving,
 }: {
     t: TFunction;
-    users: UsersGet[];
+    identities: Identity[];
+    assignments: GlobalRoleAssignmentResponse[];
     canAssignRole: boolean;
     allRoles: Role[];
     onChange: (identity_id: string, value: string, original: GlobalRoleAssignment | null) => void;
     changeCheckbox: (user_id: string, can_become_admin: boolean) => void;
-}): TableColumnsType<UsersGet> => {
-    const sorter = new Sorter<UsersGet>();
+    isSaving: boolean;
+}): TableColumnsType<Identity> => {
+    const sorter = new Sorter<Identity>();
+    const emailOrExternalId = (identity: Identity) =>
+        identity.type === 'user' ? identity.email : identity.external_id;
+    const roleFor = (identity: Identity) =>
+        assignments.find((assignment) => assignment.identity.id === identity.id) ?? null;
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
     const options = allRoles.map((role) => ({
         label: role.name,
         value: role.prototype === Prototype.EVERYONE ? '' : role.id,
     }));
 
-    const columns: TableColumnsType<UsersGet> = [
+    const columns: TableColumnsType<Identity> = [
         {
             title: t('Id'),
             dataIndex: 'id',
@@ -59,32 +74,45 @@ export const getPeopleTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             ellipsis: { showTitle: false },
-            width: 4,
             render: (_, record) => {
-                return <TableCellItem text={`${record.first_name} ${record.last_name}`} />;
+                return <TableCellItem text={getIdentityDisplayName(record)} />;
             },
-            ...new FilterSettings(data, (user) => (user.first_name !== null ? user.first_name : '')),
-            sorter: sorter.stringSorter((user) => user.first_name),
+            sorter: { compare: sorter.stringSorter(getIdentityDisplayName), multiple: 1 },
             defaultSortOrder: 'ascend',
+            sortDirections: ['ascend', 'descend', 'ascend'],
         },
         {
-            title: t('Email'),
-            dataIndex: 'email',
+            title: t('Email / External ID'),
+            key: 'email_or_external_id',
             ellipsis: { showTitle: false },
-            width: 4,
-            render: (email) => {
-                return <TableCellItem text={email} />;
+            render: (_, identity) => {
+                const text = emailOrExternalId(identity);
+                return <TableCellItem text={text} tooltip={{ content: text }} />;
             },
-            ...new FilterSettings(data, (user) => (user.email !== null ? user.email : '')),
-            sorter: sorter.stringSorter((user) => user.email),
-            defaultSortOrder: 'ascend',
+            sorter: {
+                compare: sorter.stringSorter(emailOrExternalId),
+                multiple: 3,
+            },
+        },
+        {
+            title: t('Type'),
+            key: 'type',
+            width: '15%',
+            render: (_, identity) => <TableCellItem text={getIdentityTypeLabel(identity, t)} />,
+            ...new FilterSettings(data, (identity) => getIdentityTypeLabel(identity, t)),
+            sorter: { compare: sorter.stringSorter((identity) => getIdentityTypeLabel(identity, t)), multiple: 4 },
         },
         {
             title: t('Global Role'),
             dataIndex: 'global_role',
             ellipsis: { showTitle: false },
-            width: 4,
-            render: (role: GlobalRoleAssignment | null, user: UsersGet) => {
+            width: '15%',
+            sorter: {
+                compare: sorter.stringSorter((identity) => roleFor(identity)?.role.name ?? everyone?.name),
+                multiple: 2,
+            },
+            render: (_, identity) => {
+                const role = roleFor(identity);
                 let name = role?.role.name;
                 if (role?.role.prototype === Prototype.ADMIN) {
                     name = everyone?.name;
@@ -93,10 +121,10 @@ export const getPeopleTableColumns = ({
                     return (
                         <TableCellItem>
                             <RoleSelector
-                                everyone={everyone}
                                 role={role}
-                                onChange={(value: string) => onChange(user.id, value, role)}
+                                onChange={(value: string) => onChange(identity.id, value, role)}
                                 options={options}
+                                disabled={isSaving}
                             />
                         </TableCellItem>
                     );
@@ -111,13 +139,17 @@ export const getPeopleTableColumns = ({
             title: t('Can become admin'),
             dataIndex: 'can_become_admin',
             ellipsis: { showTitle: false },
-            width: 2,
+            width: 160,
             render: (_, user) => {
+                if (user.type !== 'user') return null;
                 return (
-                    <Checkbox
-                        checked={user.can_become_admin}
-                        onChange={(e) => changeCheckbox(user.id, e.target.checked)}
-                    />
+                    <Flex justify="center">
+                        <Checkbox
+                            checked={user.can_become_admin}
+                            disabled={isSaving}
+                            onChange={(e) => changeCheckbox(user.id, e.target.checked)}
+                        />
+                    </Flex>
                 );
             },
         });
