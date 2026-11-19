@@ -1,16 +1,14 @@
 from typing import Sequence
 
-from fastapi import Depends
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.configuration.platforms.model import Platform as PlatformModel
 from app.configuration.platforms.schema_response import Platform
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 
 class PlatformService:
-    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
+    def __init__(self, db: DbSession):
         self.db = db
 
     def get_all_platforms(self) -> Sequence[Platform]:

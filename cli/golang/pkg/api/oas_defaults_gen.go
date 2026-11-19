@@ -123,18 +123,10 @@ func (s *EnvironmentGetItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *GetDataProductResponse) setDefaults() {
+func (s *NewTechnicalAssetEnvironmentConfigurationValidation) setDefaults() {
 	{
-		val := DataProductVisibility("discoverable")
-		s.Visibility = val
-	}
-}
-
-// setDefaults set default value of fields.
-func (s *GetDataProductsResponseItem) setDefaults() {
-	{
-		val := DataProductVisibility("discoverable")
-		s.Visibility = val
+		val := TechnicalMapping("default")
+		s.TechnicalMapping.SetTo(val)
 	}
 }
 
@@ -247,6 +239,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 	{
 		val := bool(false)
 		s.NotConfigured.SetTo(val)
+	}
+	{
+		var defaultVal0 []EnvironmentUIMetadata
+		s.EnvironmentUIMetadata = defaultVal0
 	}
 	{
 		val := string("Resulting path")

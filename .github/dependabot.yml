@@ -63,6 +63,10 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      opentelemetry:
+        patterns:
+          - "opentelemetry-*"
 
   - package-ecosystem: "pip"
     directory: "/tools/poetry"

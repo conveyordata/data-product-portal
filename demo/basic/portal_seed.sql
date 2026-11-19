@@ -142,7 +142,7 @@ begin
     UPDATE public.platform_service_configs SET "config" = '["clean","master"]' WHERE service_id = glue_service_id;
 
     -- ENVIRONMENTS
-    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;
+    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at, position) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 1) returning id INTO environment_id_dev;
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), environment_id_dev, aws_id, (SELECT id FROM public.platform_services WHERE platform_id = aws_id AND lower(name) = 'parameterstore'), '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', environment_id_dev, postgresql_id, postgresql_service_id, '[{"identifier":"database", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
@@ -346,5 +346,17 @@ begin
         (sales_crm_customers_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
         (sales_erp_orders_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
         (logistics_wms_shipments_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP));
+
+    INSERT INTO public.postgresql_environment_configurations (configuration_id, environment_id, engine_version, size, storage_gb, instance_name)
+    SELECT t.configuration_id, dpe.environment_id,
+        CASE WHEN e.acronym = 'prd' THEN '16' ELSE '17' END,
+        CASE WHEN e.acronym = 'prd' THEN 'medium' ELSE 'small' END,
+        CASE WHEN e.acronym = 'prd' THEN 50 ELSE 20 END,
+        replace(p."schema", '_', '-') || CASE WHEN e.acronym = 'prd' THEN '' ELSE '-' || e.acronym END
+    FROM public.data_outputs t
+    JOIN public.postgresql_technical_asset_configurations p ON p.id = t.configuration_id
+    JOIN public.data_product_environments dpe ON dpe.data_product_id = t.owner_id
+    JOIN public.environments e ON e.id = dpe.environment_id
+    WHERE t.configuration_id IN (sales_crm_customers_do_config_id, sales_erp_orders_do_config_id, logistics_wms_shipments_do_config_id);
 
 end $$;

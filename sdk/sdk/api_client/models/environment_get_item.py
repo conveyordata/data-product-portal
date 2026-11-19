@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -22,6 +22,7 @@ class EnvironmentGetItem:
         context (str):
         is_default (bool | Unset):  Default: False.
         is_global (bool | Unset):  Default: True.
+        position (int | None | Unset):
     """
 
     id: UUID
@@ -30,6 +31,7 @@ class EnvironmentGetItem:
     context: str
     is_default: bool | Unset = False
     is_global: bool | Unset = True
+    position: int | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -45,6 +47,12 @@ class EnvironmentGetItem:
 
         is_global = self.is_global
 
+        position: int | None | Unset
+        if isinstance(self.position, Unset):
+            position = UNSET
+        else:
+            position = self.position
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -59,6 +67,8 @@ class EnvironmentGetItem:
             field_dict["is_default"] = is_default
         if is_global is not UNSET:
             field_dict["is_global"] = is_global
+        if position is not UNSET:
+            field_dict["position"] = position
 
         return field_dict
 
@@ -77,6 +87,15 @@ class EnvironmentGetItem:
 
         is_global = d.pop("is_global", UNSET)
 
+        def _parse_position(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        position = _parse_position(d.pop("position", UNSET))
+
         environment_get_item = cls(
             id=id,
             name=name,
@@ -84,6 +103,7 @@ class EnvironmentGetItem:
             context=context,
             is_default=is_default,
             is_global=is_global,
+            position=position,
         )
 
         environment_get_item.additional_properties = d

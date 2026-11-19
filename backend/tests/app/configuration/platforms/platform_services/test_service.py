@@ -12,7 +12,7 @@ from app.plugins.registry import plugin_registry
 
 def _ensure(session) -> None:
     PlatformServiceService(session).ensure_for_plugins(plugin_registry.discovered())
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
 
 
 def _service(session, key: str) -> PlatformService:
@@ -45,7 +45,7 @@ def test_ensure_for_plugins__adds_a_service_for_every_plugin_with_a_form(session
 def test_ensure_for_plugins__updates_the_templates_of_an_existing_service(session):
     _ensure(session)
     _service(session, "s3").result_string_template = "old"
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
 
     _ensure(session)
 
@@ -60,7 +60,7 @@ def test_ensure_for_plugins__keeps_the_options_an_admin_filled_in(session):
         .where(PlatformServiceConfiguration.service_id == s3.id)
         .values(config='["datalake"]')
     )
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
 
     _ensure(session)
 

@@ -1,8 +1,8 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import count
 
 from app.abstract_data_product.input_ports.model import InputPortRequest
@@ -13,7 +13,7 @@ from app.configuration.access_modes.schema_request import (
 )
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import UNFILTERED
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from app.technical_asset_configuration.service import PluginService
 
@@ -34,8 +34,8 @@ CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR = HTTPException(
 class AccessModeService:
     def __init__(
         self,
-        db: Session = Depends(get_db_session, scope="function"),
-        plugin_service: PluginService = Depends(PluginService),
+        db: DbSession,
+        plugin_service: Annotated[PluginService, Depends(PluginService)],
     ) -> None:
         self.db = db
         self.plugin_service = plugin_service

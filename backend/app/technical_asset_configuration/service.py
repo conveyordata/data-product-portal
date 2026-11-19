@@ -2,13 +2,16 @@ from inspect import getattr_static
 from typing import TYPE_CHECKING, Optional, Sequence
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
+from app.configuration.environments.model import (
+    ENVIRONMENT_DISPLAY_ORDER,
+)
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.platforms.platform_services.model import PlatformService
 from app.data_products.model import ensure_data_product_exists
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
@@ -22,13 +25,14 @@ from app.technical_asset_configuration.base_schema import (
     TechnicalAssetPlugin,
 )
 from app.technical_asset_configuration.schema_response import (
+    EnvironmentUIMetadata,
     PlatformTile,
     UIElementMetadataResponse,
 )
 
 
 class PluginService:
-    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
+    def __init__(self, db: DbSession):
         self.db = db
 
     def get_all_technical_assets_ui_metadata(
@@ -64,6 +68,7 @@ class PluginService:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
                 ui_metadata=plugin_class.get_ui_metadata(self.db),
+                environment_ui_metadata=self._environment_ui_metadata(plugin_class),
                 plugin=plugin_class.name,
                 icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
@@ -94,6 +99,22 @@ class PluginService:
                 detailed_name=platform_meta.detailed_name,
                 has_environments=platform_meta.has_environments,
             )
+
+    def _environment_ui_metadata(
+        self, plugin_class: type[TechnicalAssetPlugin]
+    ) -> list[EnvironmentUIMetadata]:
+        settings = plugin_class.environment_configuration
+        if settings is None:
+            return []
+        return [
+            EnvironmentUIMetadata(
+                environment_id=environment.id,
+                ui_metadata=settings.ui_metadata(environment),
+            )
+            for environment in self.db.scalars(
+                select(EnvironmentModel).order_by(*ENVIRONMENT_DISPLAY_ORDER)
+            )
+        ]
 
     def get_platform_tiles(self) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""

@@ -2,11 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from sqlalchemy.orm import Session
 
 from app.core.auth.device_flows.schema import DeviceFlow, OIDCTokenResponse
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
-from app.database.database import get_system_db_session
+from app.database.database import SystemDbSession
 
 router = APIRouter(prefix="/device")
 
@@ -15,9 +14,9 @@ router = APIRouter(prefix="/device")
 async def get_device_token(
     request: Request,
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
-    client_id: str = Query(default="", deprecated=True),
+    db: SystemDbSession,
+    client_id: Annotated[str, Query(deprecated=True)] = "",
     scope: str = "openid",
-    db: Session = Depends(get_system_db_session, scope="function"),
 ) -> DeviceFlow:
     return DeviceFlowService().get_device_token(auth_client_id, db, request, scope)
 
@@ -28,8 +27,8 @@ async def get_jwt_token(
     device_code: str,
     grant_type: str,
     auth_client_id: Annotated[str, Depends(verify_auth_header)],
-    client_id: str = Query(default="", deprecated=True),
-    db: Session = Depends(get_system_db_session, scope="function"),
+    db: SystemDbSession,
+    client_id: Annotated[str, Query(deprecated=True)] = "",
 ) -> OIDCTokenResponse:
     return DeviceFlowService().get_jwt_token(
         request, auth_client_id, device_code, grant_type, db
@@ -40,14 +39,15 @@ async def get_jwt_token(
 async def request_user_code_processing(
     code: str,
     request: Request,
-    db: Session = Depends(get_system_db_session, scope="function"),
+    db: SystemDbSession,
 ) -> HTMLResponse:
     return DeviceFlowService().request_user_code_processing(code, request, db)
 
 
 @router.get("/deny", include_in_schema=False, name="device_flow_deny")
 def deny_device_flow(
-    device_code: str, db: Session = Depends(get_system_db_session, scope="function")
+    device_code: str,
+    db: SystemDbSession,
 ) -> RedirectResponse:
     return DeviceFlowService().deny_device_flow(device_code, db)
 
@@ -57,7 +57,7 @@ def allow_device_flow(
     client_id: str,
     device_code: str,
     request: Request,
-    db: Session = Depends(get_system_db_session, scope="function"),
+    db: SystemDbSession,
 ) -> RedirectResponse:
     return DeviceFlowService().allow_device_flow(client_id, device_code, db, request)
 
@@ -66,6 +66,6 @@ def allow_device_flow(
 def process_authz_code_callback(
     code: str,
     state: str,
-    db: Session = Depends(get_system_db_session, scope="function"),
+    db: SystemDbSession,
 ) -> HTMLResponse:
     return DeviceFlowService().process_authz_code_callback(code, state, db)

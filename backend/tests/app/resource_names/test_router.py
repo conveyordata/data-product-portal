@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi import HTTPException
 from starlette.testclient import TestClient
@@ -67,4 +69,4 @@ class TestResourceNamesRouter:
         but forgot to implement it. This ensures we have 100% coverage of this router
         """
         with pytest.raises(HTTPException):
-            validate_resource_name("bla", "unknown model")  # type: ignore[arg-type]
+            validate_resource_name("bla", "unknown model", db=MagicMock())  # type: ignore[arg-type]

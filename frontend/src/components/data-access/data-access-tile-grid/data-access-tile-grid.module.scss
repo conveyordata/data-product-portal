@@ -4,8 +4,3 @@
     @extend .container;
     gap: globals.$spacing-l;
 }
-
-.radio-button-container {
-    display: flex;
-    gap: globals.$spacing-m;
-}

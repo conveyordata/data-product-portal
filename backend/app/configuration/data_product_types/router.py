@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.configuration.data_product_types.schema_request import (
     DataProductTypeCreate,
@@ -16,7 +15,7 @@ from app.configuration.data_product_types.schema_response import (
 from app.configuration.data_product_types.service import DataProductTypeService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 router = APIRouter(
     tags=["Configuration - Data Product types"],
@@ -25,9 +24,7 @@ router = APIRouter(
 
 
 @router.get("/{id}")
-def get_data_product_type(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> DataProductTypeGet:
+def get_data_product_type(id: UUID, db: DbSession) -> DataProductTypeGet:
     return DataProductTypeService(db).get_data_product_type(id)
 
 
@@ -59,7 +56,7 @@ def get_data_product_type(
 )
 def create_data_product_type(
     data_product_type: DataProductTypeCreate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> CreateDataProductTypeResponse:
     return DataProductTypeService(db).create_data_product_type(data_product_type)
 
@@ -75,7 +72,7 @@ def create_data_product_type(
 def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> UpdateDataProductTypeResponse:
     return DataProductTypeService(db).update_data_product_type(id, data_product_type)
 
@@ -88,9 +85,7 @@ def update_data_product_type(
         ),
     ],
 )
-def remove_data_product_type(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> None:
+def remove_data_product_type(id: UUID, db: DbSession) -> None:
     return DataProductTypeService(db).remove_data_product_type(id)
 
 
@@ -103,14 +98,16 @@ def remove_data_product_type(
     ],
 )
 def migrate_data_product_type(
-    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session, scope="function")
+    from_id: UUID,
+    to_id: UUID,
+    db: DbSession,
 ) -> None:
     return DataProductTypeService(db).migrate_data_product_type(from_id, to_id)
 
 
 @router.get("")
 def get_data_products_types(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> DataProductTypesGet:
     return DataProductTypesGet(
         data_product_types=DataProductTypeService(db).get_data_product_types()

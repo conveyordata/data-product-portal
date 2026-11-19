@@ -16,11 +16,11 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python-dotenv = "^1.2.3"
-fastapi = "0.141.1"
+fastapi = "0.162.7"
 gunicorn = ">=27.0.1,<28.0"
 uvicorn = ">=0.52.4,<0.55.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
-pydantic-settings = "^2.15.0"
+pydantic-settings = "^2.16.3"
 typer = ">=0.27.2,<0.30.0"
 requests = "^2.34.2"
 httpx = "^0.28.1"
@@ -32,7 +32,7 @@ psycopg = { version = "^3.3.0", extras = ["binary"] }
 pyyaml = "^6.0.3"
 pyjwt = "^2.14.0"
 shortuuid = "^1.0.13"
-boto3 = "^1.43.93"
+boto3 = "^1.44.3"
 jinja2 = "^3.1.6"
 asgi-correlation-id = "^5.0.1"
 cryptography = "^50.0.1"
@@ -42,17 +42,17 @@ asyncpg = ">=0.31,<0.33"
 cachetools = ">=7.1.8,<9.0.0"
 greenlet = "^3.5.5"
 h11 = "^0.16.0"
-fastmcp = "4.1.8"
-posthog = "^7.53.0"
-authlib = "1.9.5"
+fastmcp = "4.2.0"
+posthog = "^7.91.1"
+authlib = "1.9.6"
 fastembed = ">=0.8,<0.10"
 pgvector = "^0.5.0"
-opentelemetry-api = "^1.39.1"
-opentelemetry-sdk = "^1.39.1"
-opentelemetry-exporter-otlp = "^1.39.1"
-opentelemetry-instrumentation-fastapi = "^0.64b0"
-opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
-opentelemetry-distro = "^0.64b0"
+opentelemetry-api = "^1.45.2"
+opentelemetry-sdk = "^1.45.2"
+opentelemetry-exporter-otlp = "^1.45.2"
+opentelemetry-instrumentation-fastapi = "^0.66b2"
+opentelemetry-instrumentation-sqlalchemy = "^0.66b2"
+opentelemetry-distro = "^0.66b2"
 pycasbin = "^2.8.0"
 azure-identity = "^1.27.0"
 
@@ -92,7 +92,7 @@ select = [
     "E9",
     "F",
     "I",
-    "FAST001", "FAST003", #Currently Fast002 is disabled it leads to many changes
+    "FAST001", "FAST002", "FAST003",
     "YTT", #flake-2020 rules, check for YTT bugs
     "ASYNC", #flake8 async rules
     "S", #flake-8 bandit, security rules
@@ -123,9 +123,8 @@ runtime-evaluated-base-classes = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S311"]
-"tests/__init__.py" = ["TID251"]
+"tests/__init__.py" = ["TID251", "E402"]
 "tests/factories/**" = ["TID251"]
-"tests/seed_random_data.py" = ["TID251"]
 "app/database/alembic/versions/*.py" = ["TID251"]
 
 [tool.ruff.lint.isort]

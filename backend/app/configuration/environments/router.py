@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_configurations.schema_response import (
     EnvironmentPlatformConfigGet,
@@ -16,7 +15,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.environments.platform_service_configurations.service import (
     EnvironmentPlatformServiceConfigurationService,
 )
-from app.configuration.environments.schema_request import EnvironmentUpdateGlobal
+from app.configuration.environments.schema_request import EnvironmentUpdate
 from app.configuration.environments.schema_response import (
     Environment,
     EnvironmentsGet,
@@ -24,7 +23,7 @@ from app.configuration.environments.schema_response import (
 from app.configuration.environments.service import EnvironmentService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 
 router = APIRouter(
     tags=["Configuration - Environments"], prefix="/v2/configuration/environments"
@@ -32,9 +31,7 @@ router = APIRouter(
 
 
 @router.get("/{id}")
-def get_environment(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> Environment:
+def get_environment(id: UUID, db: DbSession) -> Environment:
     return EnvironmentService(db).get_environment(id)
 
 
@@ -48,7 +45,7 @@ def get_environment(
 )
 def get_environment_configs_by_id(
     config_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentConfigsGetItem:
     return EnvironmentPlatformServiceConfigurationService(
         db
@@ -67,7 +64,7 @@ def get_environment_platform_service_config(
     id: UUID,
     platform_id: UUID,
     service_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentConfigsGetItem:
     return EnvironmentPlatformServiceConfigurationService(
         db
@@ -85,7 +82,7 @@ def get_environment_platform_service_config(
 def get_environment_platform_config(
     id: UUID,
     platform_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentPlatformConfigGet:
     return EnvironmentPlatformConfigurationService(db).get_environment_platform_config(
         id, platform_id
@@ -94,7 +91,7 @@ def get_environment_platform_config(
 
 @router.get("")
 def get_environments(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentsGet:
     return EnvironmentsGet(environments=EnvironmentService(db).get_environments())
 
@@ -107,18 +104,18 @@ def get_environments(
         ),
     ],
 )
-def update_environment_is_global(
+def update_environment(
     id: UUID,
-    environment_update: EnvironmentUpdateGlobal,
-    db: Session = Depends(get_db_session, scope="function"),
+    environment_update: EnvironmentUpdate,
+    db: DbSession,
 ) -> Environment:
-    return EnvironmentService(db).update_is_global(id, environment_update.is_global)
+    return EnvironmentService(db).update_environment(id, environment_update)
 
 
 @router.get("/{id}/configs")
 def get_environment_configs(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentConfigsGet:
     return EnvironmentConfigsGet(
         environment_configs=EnvironmentPlatformServiceConfigurationService(
@@ -133,7 +130,7 @@ def get_environment_configs(
 def get_environment_platform_service_config_for_all_envs(
     platform_id: UUID,
     service_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> EnvironmentConfigsGet:
     return EnvironmentPlatformServiceConfigurationService(
         db

@@ -1,11 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.identities.schema_request import (
     IdentityBatchCreateRequest,
     IdentityBatchDeleteRequest,
@@ -31,7 +30,7 @@ router = APIRouter(
 
 @router.get("")
 def get_machine_users(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> MachineUsersGetResponse:
     return MachineUsersGetResponse(
         machine_users=MachineUserService(db).get_machine_users(),
@@ -53,7 +52,7 @@ def get_machine_users(
 )
 def get_machine_user(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> MachineUserGet:
     return MachineUserService(db).get_machine_user(id)
 
@@ -83,7 +82,7 @@ def get_machine_user(
 )
 def create_machine_user(
     machine_user: MachineUserCreate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> MachineUserCreateResponse:
     return MachineUserService(db).create_machine_user(machine_user)
 
@@ -112,7 +111,7 @@ def create_machine_user(
 def update_machine_user(
     id: UUID,
     machine_user: MachineUserUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> MachineUserUpdateResponse:
     return MachineUserService(db).update_machine_user(id, machine_user)
 
@@ -130,7 +129,7 @@ def update_machine_user(
 )
 def create_machine_users_batch(
     request: IdentityBatchCreateRequest[MachineUserCreate],
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> IdentityBatchCreateResponse:
     return MachineUserService(db).create_machine_users_batch(request.items)
 
@@ -149,7 +148,7 @@ def create_machine_users_batch(
 )
 def delete_machine_users_batch(
     request: IdentityBatchDeleteRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     MachineUserService(db).delete_machine_users_batch(request.ids)
 
@@ -178,6 +177,6 @@ def delete_machine_users_batch(
 )
 def delete_machine_user(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     MachineUserService(db).delete_machine_user(id)

@@ -40,6 +40,7 @@ class PosthogAnalyticsClient:
         distinct_id: Any,
         event: str,
         properties: Optional[dict[str, Any]] = None,
+        timestamp: Optional[datetime] = None,
     ) -> None:
         if not self._client:
             return
@@ -48,6 +49,7 @@ class PosthogAnalyticsClient:
                 distinct_id=str(distinct_id),
                 event=event,
                 properties=properties,
+                timestamp=timestamp,
             )
         except Exception:
             logger.warning(f"Failed to send posthog event '{event}'", exc_info=True)
@@ -139,8 +141,7 @@ async def report_daily_metrics() -> None:
     """
     Daily background task that reports metrics to the Data Product Portal team.
     """
-    posthog = get_posthog_client()
-    if not posthog:
+    if not (posthog := get_posthog_client()):
         return
     while True:
         await asyncio.sleep(_seconds_until_next_midnight_utc())

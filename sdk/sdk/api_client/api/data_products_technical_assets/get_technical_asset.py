@@ -7,7 +7,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_technical_assets_response_item import GetTechnicalAssetsResponseItem
+from ...models.get_technical_asset_response import GetTechnicalAssetResponse
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -30,9 +30,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> GetTechnicalAssetsResponseItem | HTTPValidationError | None:
+) -> GetTechnicalAssetResponse | HTTPValidationError | None:
     if response.status_code == 200:
-        response_200 = GetTechnicalAssetsResponseItem.from_dict(response.json())
+        response_200 = GetTechnicalAssetResponse.from_dict(response.json())
 
         return response_200
 
@@ -49,7 +49,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetTechnicalAssetsResponseItem | HTTPValidationError]:
+) -> Response[GetTechnicalAssetResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -63,7 +63,7 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetTechnicalAssetsResponseItem | HTTPValidationError]:
+) -> Response[GetTechnicalAssetResponse | HTTPValidationError]:
     """Get Technical Asset
 
     Args:
@@ -75,7 +75,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetTechnicalAssetsResponseItem | HTTPValidationError]
+        Response[GetTechnicalAssetResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -95,7 +95,7 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetTechnicalAssetsResponseItem | HTTPValidationError | None:
+) -> GetTechnicalAssetResponse | HTTPValidationError | None:
     """Get Technical Asset
 
     Args:
@@ -107,7 +107,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetTechnicalAssetsResponseItem | HTTPValidationError
+        GetTechnicalAssetResponse | HTTPValidationError
     """
 
     return sync_detailed(
@@ -122,7 +122,7 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetTechnicalAssetsResponseItem | HTTPValidationError]:
+) -> Response[GetTechnicalAssetResponse | HTTPValidationError]:
     """Get Technical Asset
 
     Args:
@@ -134,7 +134,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetTechnicalAssetsResponseItem | HTTPValidationError]
+        Response[GetTechnicalAssetResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -152,7 +152,7 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> GetTechnicalAssetsResponseItem | HTTPValidationError | None:
+) -> GetTechnicalAssetResponse | HTTPValidationError | None:
     """Get Technical Asset
 
     Args:
@@ -164,7 +164,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetTechnicalAssetsResponseItem | HTTPValidationError
+        GetTechnicalAssetResponse | HTTPValidationError
     """
 
     return (

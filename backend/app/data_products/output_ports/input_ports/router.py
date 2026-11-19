@@ -1,11 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.service import AbstractDataProductService
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import (
     Action,
     Authorization,
@@ -23,12 +22,11 @@ from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
-from app.users.schema import User
 
 router = APIRouter(
     tags=["Data Products - Output ports - Input ports"],
@@ -52,8 +50,8 @@ def grant_output_port_access(
     data_product_id: UUID,
     output_port_id: UUID,
     body: GrantOutputPortAccessRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = AbstractDataProductService(db).grant_output_port_access(
         consumer_id=body.consuming_abstract_data_product_id,
@@ -101,7 +99,7 @@ def grant_output_port_access(
 def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
         input_ports=InputPortService(db).get_consuming_data_products(
@@ -127,8 +125,8 @@ def approve_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: ApproveOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     approved_input_port = InputPortService(db).approve_output_port_as_input_port(
         data_product_id=data_product_id,
@@ -173,8 +171,8 @@ def deny_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: DenyOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = InputPortService(db).deny_output_port_as_input_port(
         data_product_id=data_product_id,
@@ -219,8 +217,8 @@ def renew_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: RenewOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = AbstractDataProductService(db).renew_output_port_as_input_port(
         data_product_id=data_product_id,
@@ -262,8 +260,8 @@ def revoke_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: RevokeOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = InputPortService(db).revoke_output_port_as_input_port(
         data_product_id=data_product_id,
@@ -311,8 +309,8 @@ def remove_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: RemoveOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = InputPortService(db).remove_output_port_as_input_port(
         data_product_id=data_product_id,

@@ -1,5 +1,4 @@
 import { usePostHog } from '@posthog/react';
-import { sha256 } from 'js-sha256';
 import { useCallback, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
@@ -66,8 +65,7 @@ export const AuthLayout = () => {
     }, [handleAuthorizeUser, user]);
 
     useEffect(() => {
-        // This gets called when the user is authenticated
-        events.addUserLoaded(async () => {
+        const removeUserLoaded = events.addUserLoaded(async () => {
             try {
                 await handleAuthorizeUser();
             } catch (_e) {
@@ -79,7 +77,7 @@ export const AuthLayout = () => {
             }
         });
 
-        events.addAccessTokenExpiring(async () => {
+        const removeAccessTokenExpiring = events.addAccessTokenExpiring(async () => {
             await signinSilent({
                 extraQueryParams: {
                     ...oidcCognitoParams,
@@ -87,24 +85,38 @@ export const AuthLayout = () => {
             });
         });
 
-        events.addAccessTokenExpired(async () => {
+        const removeAccessTokenExpired = events.addAccessTokenExpired(async () => {
             await signoutRedirect({
                 extraQueryParams: {
                     ...oidcCognitoParams,
                 },
             });
         });
-    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
 
+        const removeUserUnloaded = events.addUserUnloaded(() => {
+            posthog.reset();
+        });
+
+        return () => {
+            removeUserLoaded();
+            removeAccessTokenExpiring();
+            removeAccessTokenExpired();
+            removeUserUnloaded();
+        };
+    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect, posthog]);
+
+    const userId = user?.id;
     useEffect(() => {
-        if (user?.email) {
-            const hashed_id = sha256(user.email);
-            posthog.identify(hashed_id);
+        if (isSettingUserCredentialsInStore) {
+            return;
+        }
+        if (userId) {
+            posthog.identify(userId);
         } else {
             // user not logged in properly
             posthog.reset();
         }
-    }, [user, posthog]);
+    }, [isSettingUserCredentialsInStore, userId, posthog]);
 
     if (activeNavigator) {
         switch (activeNavigator) {

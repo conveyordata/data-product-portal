@@ -124,7 +124,9 @@ async def lifespan(app: FastAPI):
         posthog.shutdown()
 
 
-mcp.add_middleware(LoggingMiddleware())
+if get_posthog_client():
+    mcp.add_middleware(LoggingMiddleware())
+
 _mcp_host = settings.MCP_BASE_URL or settings.HOST
 _mcp_allowed_hosts = [urllib.parse.urlparse(_mcp_host).hostname] if _mcp_host else []
 mcp_app = mcp.http_app(

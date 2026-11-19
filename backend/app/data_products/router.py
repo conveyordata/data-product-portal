@@ -26,7 +26,7 @@ from app.authorization.role_assignments.enums import AssignmentFilter, DecisionS
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
 from app.data_products.output_ports.service import OutputPortService
@@ -53,7 +53,7 @@ from app.data_products.schema_response import (
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -90,8 +90,8 @@ router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 def create_data_product(
     data_product: DataProductCreate,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> CreateDataProductResponse:
     created_data_product = DataProductService(db).create_data_product(data_product)
     created_id = created_data_product.id
@@ -181,8 +181,8 @@ def _assign_owner_role_assignments(
 )
 def remove_data_product(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     service = DataProductService(db)
     can_delete = service.mark_for_deletion(id)
@@ -221,7 +221,7 @@ def _do_delete_data_product(
 def add_data_product_finalizer(
     id: UUID,
     request: FinalizerRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     DataProductService(db).add_finalizer(id, request.finalizer)
 
@@ -235,8 +235,8 @@ def add_data_product_finalizer(
 def remove_data_product_finalizer(
     id: UUID,
     finalizer: str,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     should_delete = DataProductService(db).remove_finalizer(id, finalizer)
     if should_delete:
@@ -264,8 +264,8 @@ def remove_data_product_finalizer(
 def update_data_product(
     id: UUID,
     data_product: DataProductUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> UpdateDataProductResponse:
     result = DataProductService(db).update_data_product(id, data_product)
     EventService(db).create_event(
@@ -301,8 +301,8 @@ def update_data_product(
 def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     DataProductService(db).update_data_product_about(id, data_product)
     EventService(db).create_event(
@@ -336,8 +336,8 @@ def update_data_product_about(
 def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     DataProductService(db).update_data_product_status(id, data_product)
     EventService(db).create_event(
@@ -363,8 +363,8 @@ def update_data_product_status(
 def update_data_product_usage(
     id: UUID,
     usage: DataProductUsageUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     DataProductService(db).update_data_product_usage(id, usage)
     EventService(db).create_event(
@@ -388,7 +388,9 @@ def update_data_product_usage(
     ],
 )
 def get_data_product_graph_data(
-    id: UUID, db: Session = Depends(get_db_session, scope="function"), level: int = 3
+    id: UUID,
+    db: DbSession,
+    level: int = 3,
 ) -> Graph:
     return DataProductService(db).get_graph_data(id, level)
 
@@ -407,8 +409,8 @@ def set_value_for_data_product(
     id: UUID,
     setting_id: UUID,
     value: str,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
     EventService(db).create_event(
@@ -489,8 +491,8 @@ def request_input_ports_for_data_product(
     id: UUID,
     body: RequestInputPortsForDataProductRequest,
     background_tasks: BackgroundTasks,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: AuthenticatedUser,
+    db: DbSession,
 ) -> RequestInputPortsForDataProductResponse:
     input_ports = DataProductService(db).request_input_ports(
         id,
@@ -515,8 +517,8 @@ def renew_input_port_for_data_product(
     id: UUID,
     output_port_id: UUID,
     background_tasks: BackgroundTasks,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: AuthenticatedUser,
+    db: DbSession,
 ) -> RenewInputPortForDataProductResponse:
     input_port = DataProductService(db).renew_input_port(
         id, output_port_id, actor=authenticated_user
@@ -542,8 +544,8 @@ def renew_input_port_for_data_product(
 def revoke_input_port_for_data_product(
     id: UUID,
     output_port_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: AuthenticatedUser,
+    db: DbSession,
 ) -> RevokeInputPortForDataProductResponse:
     input_port = DataProductService(db).revoke_input_port(
         id, output_port_id, actor=authenticated_user
@@ -568,7 +570,7 @@ def revoke_input_port_for_data_product(
 
 @router.get("")
 def get_data_products(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
     assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
@@ -591,9 +593,7 @@ def get_data_products(
         )
     ],
 )
-def get_data_product_event_history(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> GetEventHistoryResponse:
+def get_data_product_event_history(id: UUID, db: DbSession) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(
         events=[
             GetEventHistoryResponseItem.model_validate(event)
@@ -612,9 +612,7 @@ def get_data_product_event_history(
         )
     ],
 )
-def get_data_product(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> GetDataProductResponse:
+def get_data_product(id: UUID, db: DbSession) -> GetDataProductResponse:
     return DataProductService(db).get_data_product(id)
 
 
@@ -630,7 +628,7 @@ def get_data_product(
 )
 def get_data_product_input_ports(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
@@ -651,7 +649,7 @@ def get_data_product_input_ports(
     ],
 )
 def get_data_product_rolled_up_tags(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
+    id: UUID, db: DbSession
 ) -> GetDataProductRolledUpTagsResponse:
     return GetDataProductRolledUpTagsResponse(
         rolled_up_tags=DataProductService(db).get_rolled_up_tags(id)
@@ -673,8 +671,8 @@ def get_data_product_rolled_up_tags(
 def cancel_input_port_for_data_product(
     id: UUID,
     output_port_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: AuthenticatedUser,
+    db: DbSession,
 ) -> CancelInputPortForDataProductResponse:
     input_port = DataProductService(db).cancel_input_port_request(
         id, output_port_id, actor=authenticated_user
@@ -709,8 +707,8 @@ def cancel_input_port_for_data_product(
 def remove_input_port_for_data_product(
     id: UUID,
     output_port_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     input_port = DataProductService(db).remove_input_port(id, output_port_id)
 
@@ -741,7 +739,7 @@ def remove_input_port_for_data_product(
     ],
 )
 def get_data_product_settings(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
+    id: UUID, db: DbSession
 ) -> GetDataProductSettingsResponse:
     return GetDataProductSettingsResponse(
         data_product_settings=DataProductService(db).get_data_product_settings(id)
