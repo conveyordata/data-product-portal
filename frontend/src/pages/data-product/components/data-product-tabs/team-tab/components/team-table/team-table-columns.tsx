@@ -64,6 +64,7 @@ export const getDataProductTeamTableColumns = ({
         {
             title: t('Type'),
             key: 'identityType',
+            width: '20%',
             render: (_, { identity }) => getIdentityTypeLabel(identity, t),
             ...new FilterSettings(assignments, (assignment) => getIdentityTypeLabel(assignment.identity, t)),
             sorter: sorter.stringSorter((assignment) => getIdentityTypeLabel(assignment.identity, t)),
@@ -134,7 +135,7 @@ export const getDataProductTeamTableColumns = ({
                                     okButtonProps={{ loading: isSaving }}
                                     autoAdjustOverflow={true}
                                 >
-                                    <Button disabled={isSaving || !canApprove || !role} type="link" size="small">
+                                    <Button disabled={isSaving || !canApprove || !role} type="link">
                                         {t('Accept')}
                                     </Button>
                                 </Popconfirm>
@@ -150,7 +151,7 @@ export const getDataProductTeamTableColumns = ({
                                     okButtonProps={{ loading: isSaving }}
                                     autoAdjustOverflow={true}
                                 >
-                                    <Button disabled={isSaving || !canApprove} type="link" size="small">
+                                    <Button disabled={isSaving || !canApprove} type="link">
                                         {t('Reject')}
                                     </Button>
                                 </Popconfirm>
@@ -169,7 +170,7 @@ export const getDataProductTeamTableColumns = ({
                                 autoAdjustOverflow={true}
                             >
                                 <Tooltip title={locked ? ownerRequirement : undefined}>
-                                    <Button disabled={locked || isSaving || !canRemove} type="link" size="small">
+                                    <Button disabled={locked || isSaving || !canRemove} type="link">
                                         {t('Remove')}
                                     </Button>
                                 </Tooltip>
