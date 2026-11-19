@@ -16,6 +16,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -94,6 +95,7 @@ class TechnicalAssetOutputPortService:
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=timezone.utc)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return current_link
 
     def deny_technical_asset_link(
