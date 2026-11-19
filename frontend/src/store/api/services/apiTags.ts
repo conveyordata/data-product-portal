@@ -105,6 +105,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
+                ...requestListTags,
             ],
         },
         modifyDataProductRoleAssignment: {

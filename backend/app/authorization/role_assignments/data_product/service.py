@@ -215,6 +215,8 @@ class RoleAssignmentService:
     ) -> Sequence[DataProductRoleAssignmentRequest]:
         query = (
             select(DataProductRoleAssignmentModel)
+            .join(DataProductRoleAssignmentModel.data_product)
+            .options(contains_eager(DataProductRoleAssignmentModel.data_product))
             .filter(
                 or_(
                     DataProductRoleAssignmentModel.identity_id == user.id,

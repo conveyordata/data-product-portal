@@ -34,6 +34,17 @@ describe('request list tags', () => {
                 ),
         ],
         [
+            'creating a pending Data Product role assignment',
+            (store) =>
+                store.dispatch(
+                    api.endpoints.createDataProductRoleAssignment.initiate({
+                        identity_id: 'group1',
+                        role_id: 'r1',
+                        data_product_id: 'dp1',
+                    }),
+                ),
+        ],
+        [
             'linking a Technical Asset to an Output Port',
             (store) =>
                 store.dispatch(
@@ -55,6 +66,9 @@ describe('request list tags', () => {
                 calls.pendingActions++;
                 return HttpResponse.json({ pending_actions: [] });
             }),
+            http.post('*/api/v2/authz/role_assignments/data_product', () =>
+                HttpResponse.json({ id: 'ra1', decision: 'pending', data_product: { id: 'dp1' } }),
+            ),
             http.post('*', () => HttpResponse.json(null)),
         );
         const store = createTestStore();
