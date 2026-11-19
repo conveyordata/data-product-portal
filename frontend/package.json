@@ -58,7 +58,7 @@
         "elkjs": "^0.12.1",
         "esbuild-runner": "^2.2.2",
         "framer-motion": "^14.14.0",
-        "i18next": "^27.1.1",
+        "i18next": "^27.1.2",
         "i18next-http-backend": "^4.0.10",
         "nuqs": "^2.10.2",
         "oidc-client-ts": "^3.5.0",
