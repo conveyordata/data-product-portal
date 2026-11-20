@@ -74,8 +74,9 @@ def member_of(db: Session, data_product_id) -> ColumnElement[bool]:
     return _member(data_product_id, user_id)
 
 
-def consumes(db: Session, output_port_id: UUID, user_id: UUID) -> bool:
-    """Whether the user is a Member of a Data Product with an approved Input Port on the Output Port."""
+def is_member_of_consuming_data_product(
+    db: Session, output_port_id: UUID, user_id: UUID
+) -> bool:
     return bool(
         db.scalar(
             select(_consumes(output_port_id, user_id)),

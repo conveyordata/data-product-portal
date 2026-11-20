@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import AuthenticatedUser
 from app.database import database
 from app.database.deps import DbSession
-from app.database.visibility import consumes
+from app.database.visibility import is_member_of_consuming_data_product
 from app.settings import settings
 from app.utils.singleton import Singleton
 
@@ -61,7 +61,7 @@ class Authorization:
             output_port_id, user_id = UUID(obj), UUID(sub)
         except ValueError:
             return False
-        return consumes(self.db, output_port_id, user_id)
+        return is_member_of_consuming_data_product(self.db, output_port_id, user_id)
 
 
 class CasbinPolicies(metaclass=Singleton):

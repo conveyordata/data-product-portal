@@ -153,13 +153,15 @@ Known gaps, where Casbin can still disagree with the database:
 * Each worker keeps its own copy of the Casbin rules, so a change made on one worker reaches the others only when they next reload.
 * When two workers change rules at the same time, one worker's reload can overwrite the other's change.
 
-### Casbin does not copy consumer access
+### Consumer access is checked in the database
 
-Members of a Consuming Data Product may read an Invite only Output Port. Casbin used to hold a copy of every approved Input Port for this, and keeping that copy in step went wrong: expired access stayed in Casbin until a restart.
+Members of a Consuming Data Product may read the Invite only Output Ports it consumes. Casbin used to store one rule per approved Input Port to allow this. Those rules went stale: when an Input Port expired, its rule stayed in Casbin until the next restart.
 
-Casbin no longer copies it. `app/core/authz/authorization.py` splits asking from copying:
+Casbin no longer stores these rules. `Authorization(db).has_access(...)` in `app/core/authz/authorization.py` now:
 
-* `Authorization(db).has_access(...)` answers whether a user may do something. It asks Casbin first and, only for reading an Output Port, falls back to `consumes` in `app/database/visibility.py`. Route checks, the access check endpoint and services all ask through it.
-* `CasbinPolicies()` is the process's copy of the rules in Casbin, with the writes that keep it in step with the database.
+1. asks Casbin;
+2. if Casbin says no and the user wants to read an Output Port, asks the database through `is_member_of_consuming_data_product` in `app/database/visibility.py`.
 
-The fallback is not cached, so revoked access ends on the next request, on every worker. Expired access ends once the daily expiry job marks the Input Port as expired. The known gaps above still apply to the rules Casbin does copy.
+Every access check goes through `has_access`: route checks, the access check endpoint and services. `CasbinPolicies()` only keeps the rules Casbin still stores in step with the database.
+
+The database is asked on every request, so revoked access ends right away, on every worker. Expired access ends when the daily expiry job marks the Input Port as expired. The known gaps above still apply to the rules Casbin does store.
