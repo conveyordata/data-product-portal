@@ -613,7 +613,8 @@ type RevokeOutputPortAsInputPortParams struct {
 
 // SanitizeResourceNameParams is parameters of sanitize_resource_name operation.
 type SanitizeResourceNameParams struct {
-	Name string
+	Name               string
+	TechnicalAssetType OptNilString `json:",omitempty,omitzero"`
 }
 
 // SearchOutputPortsParams is parameters of search_output_ports operation.
@@ -773,9 +774,10 @@ type ValidateNewTechnicalAssetEnvironmentConfigurationParams struct {
 
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
 type ValidateResourceNameParams struct {
-	ResourceName  string
-	Model         ResourceNameModel
-	DataProductID OptUUID `json:",omitempty,omitzero"`
+	ResourceName       string
+	Model              ResourceNameModel
+	DataProductID      OptUUID      `json:",omitempty,omitzero"`
+	TechnicalAssetType OptNilString `json:",omitempty,omitzero"`
 }
 
 // ValidateTechnicalAssetEnvironmentConfigurationParams is parameters of validate_technical_asset_environment_configuration operation.

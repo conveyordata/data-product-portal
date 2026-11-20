@@ -8,15 +8,21 @@ sidebar_position: 200
 
 ### breaking changes
 
+- **[API/SDK]**: Technical Asset requests to `GET /api/v2/resource_names/validate` now require both `data_product_id` and `technical_asset_type`. Calls without either return 422. Generated clients include the new parameter.
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
 
 ### features
 
+- **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
+- **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
+- **[Plugins]**: Core provides `get_azure_plugin_url`, shared with Azure Blob, so custom Azure plugins can use the same parent-platform link.
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 
 ### bugfixes
 
+- **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
+- **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
