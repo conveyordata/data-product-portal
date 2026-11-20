@@ -56,8 +56,8 @@ export const getPeopleTableColumns = ({
     const sorter = new Sorter<Identity>();
     const emailOrExternalId = (identity: Identity) =>
         identity.type === 'user' ? identity.email : identity.external_id;
-    const roleFor = (identity: Identity) =>
-        assignments.find((assignment) => assignment.identity.id === identity.id) ?? null;
+    const assignmentsByIdentity = new Map(assignments.map((assignment) => [assignment.identity.id, assignment]));
+    const roleFor = (identity: Identity) => assignmentsByIdentity.get(identity.id) ?? null;
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
     const options = allRoles.map((role) => ({
         label: role.name,
