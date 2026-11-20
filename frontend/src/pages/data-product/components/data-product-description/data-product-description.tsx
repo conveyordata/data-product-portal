@@ -18,7 +18,7 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
     const { t } = useTranslation();
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Space size="large" wrap>
                 <Flex gap="small">
                     <Typography.Text strong>{t('Status')}</Typography.Text>

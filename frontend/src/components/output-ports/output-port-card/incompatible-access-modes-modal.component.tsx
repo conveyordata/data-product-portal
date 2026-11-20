@@ -52,7 +52,7 @@ export function IncompatibleAccessModesModal({ onClose, dataProductId, outputPor
                     description={t('The incompatible access mode details could not be loaded.')}
                 />
             ) : (
-                <Flex gap="middle" vertical>
+                <Flex gap="medium" vertical>
                     <Alert
                         showIcon
                         type="error"

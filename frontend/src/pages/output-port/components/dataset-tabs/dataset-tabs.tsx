@@ -150,7 +150,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                     className: styles.tabPane,
                 };
             })}
-            size="middle"
+            size="medium"
             rootClassName={styles.tabContainer}
         />
     );
