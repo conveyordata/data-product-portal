@@ -33,7 +33,7 @@ safe-outputs:
 
 Find the biggest inconsistency in how the backend (including the plugins) does the same thing in different ways, and align it to one pattern.
 
-Examples of what to compare: how routers, services and schemas are layered and split, how authorization is checked, how errors are raised and mapped to HTTP responses, how database sessions and transactions are handled, how queries are written, how events and notifications are emitted, naming of endpoints, functions, schemas and tests, and use of the domain terms from `CONTEXT.md`.
+Examples of what to compare: how routers, services and schemas are layered and split, how authorization is checked, how errors are raised and mapped to HTTP responses, how database sessions and transactions are handled, how queries are written, how events and notifications are emitted, naming of endpoints, functions, schemas and tests, and use of the domain terms from `GLOSSARY.md`.
 
 The target pattern is the one `backend/AGENTS.md` prescribes; if it says nothing, the one most of the codebase already uses. Never introduce a new pattern. Do not change public API paths, request or response shapes, or database schemas. Rank by how many places diverge and how much the divergence costs readers and maintainers. Keep the change reviewable: if the inconsistency is spread too wide for one PR, fix one coherent slice and list the remaining places in the issue.
 

@@ -5,7 +5,7 @@
 Output Ports have a hardcoded access level (`UNRESTRICTED`, `RESTRICTED`, `PRIVATE`) that is both the label users see and the
 behaviour Portal enforces. Customers often want their own names for how Output Ports are shared (e.g. Open / Internal on request / Need to know)
 and want to use those names directly. We introduce admin-defined **Access Types** that each map to one of the three fixed
-**Access Functions** (see `CONTEXT.md`). The behaviour of the three functions does not change.
+**Access Functions** (see `GLOSSARY.md`). The behaviour of the three functions does not change.
 
 This raises the question of where the Access Function of an Output Port is resolved. The access level is checked on hot paths: the
 ORM filter that hides private Output Ports on every SELECT (`output_ports/model.py`), the Casbin `output-port-reader` wildcard grouping,

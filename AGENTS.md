@@ -43,14 +43,14 @@ Follow [Our Development Process](CONTRIBUTING.md#our-development-process). At th
 | Issue leaves open questions about what or how | Suggest a grilling session on the issue, or `/wayfinder` for big unclear work |
 | Bug with unknown cause | `diagnosing-bugs` |
 | Approach clear, no PR | Implement (`/implement`), for a bug with a regression test, and open a draft PR with `Closes #<n>` |
-| Draft PR | `code-review` against `main` and the issue, then the Copilot loop, up to 3 rounds |
-| Copilot has nothing useful left | Mark the PR ready, write the body with `pr-description` |
+| Draft PR, self-reviewed, Copilot has nothing useful left or ran 3 rounds | Mark the PR ready, write the body with `pr-description` |
+| Draft PR | `code-review` against `main` and the issue, then the Copilot loop |
 
-These are suggestions, not requirements: propose one step at a time, wait for the user's yes, and go along when they skip a step. A grilling session uses the `grilling` skill, which is what `/grill-me` runs. Skills written as `/name` only start when the user types them; suggest the command. At every step, flag when an ADR is needed and write it with the `adr` skill.
+These are suggestions, not requirements: propose one step at a time, wait for the user's yes, and go along when they skip a step. A grilling session uses the `grilling` skill, which is what `/grill-me` runs. Skills written as `/name` only start when the user types them; suggest the command. When something hard to reverse gets decided, propose an ADR; write it with the `adr` skill only if the user wants one.
 
 ## General Rules for Agents
 
-*   **Domain Language**: Use the terms defined in `CONTEXT.md` (e.g. Output Port, not Dataset; Access Type, not Classification) in code, docs and conversation.
+*   **Domain Language**: Use the terms defined in `GLOSSARY.md` (e.g. Output Port, not Dataset; Access Type, not Classification) in code, docs and conversation.
 *   **Analyze First**: Use search tools to find and replicate existing patterns before inventing new ones.
 *   **Surgical Changes**: Modify only what is necessary. Avoid unsolicited refactoring. Edit files directly rather than through one-off scripts; split large edits into multiple steps if needed.
 *   **Validation**: Always verify your changes.

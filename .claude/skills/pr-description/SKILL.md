@@ -17,7 +17,7 @@ Describe the change for a reviewer who has not seen the code. Stay at the big pi
 
 ```markdown
 ## What changes
-<What a user, operator or integrator notices after merge. 2-5 bullets, in the domain language from CONTEXT.md.>
+<What a user, operator or integrator notices after merge. 2-5 bullets, in the domain language from GLOSSARY.md.>
 
 ## Why
 <One or two sentences. Link the issue or ADR if there is one.>

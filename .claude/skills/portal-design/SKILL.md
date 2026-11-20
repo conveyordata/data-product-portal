@@ -10,7 +10,7 @@ Apply these rules when you design, build or review anything a portal user sees. 
 ## Before you start
 
 - Read `frontend/AGENTS.md` for the implementation rules (Ant Design components, theme tokens, semantic size tokens, i18next, no custom CSS).
-- Read `CONTEXT.md` for the domain terms. They are the glossary for user-facing copy too.
+- Read `GLOSSARY.md` for the domain terms. They are the glossary for user-facing copy too.
 - Look at how two or three existing screens solve the same problem before adding anything. Reuse what `frontend/src/components/` already offers; a new pattern needs a reason.
 
 ## 1. Information architecture and navigation
@@ -80,7 +80,7 @@ Principle: every icon has one meaning and is never the only way to trigger an im
 
 Principle: every core term has one meaning, one spelling and one casing, everywhere.
 
-- Use the terms and definitions in `CONTEXT.md` (Data Product, Output Port, Input Port, Technical Asset, ...) in UI copy and docs. A term used in two meanings is a defect.
+- Use the terms and definitions in `GLOSSARY.md` (Data Product, Output Port, Input Port, Technical Asset, ...) in UI copy and docs. A term used in two meanings is a defect.
 - All copy goes through i18next (`frontend/public/locales/`); keep casing and pluralisation consistent across keys.
 - Add a tooltip or short help next to terms a new user would not understand, and link to the docs from the relevant screen.
 - Prefer plain language over engineering terms for audiences such as data consumers.

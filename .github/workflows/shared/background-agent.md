@@ -66,7 +66,7 @@ You are one of several scheduled background agents for the Data Product Portal. 
 
 ### 1. Learn the repository as it is today
 
-Read `AGENTS.md`, `CONTEXT.md` and the `AGENTS.md` of every area you touch (for example `backend/AGENTS.md`, `frontend/AGENTS.md`). They define the domain language, conventions and commands. Discover the structure by exploring; never assume a path exists because it existed before. Never edit generated files (the AGENTS.md files name them).
+Read `AGENTS.md`, `GLOSSARY.md` and the `AGENTS.md` of every area you touch (for example `backend/AGENTS.md`, `frontend/AGENTS.md`). They define the domain language, conventions and commands. Discover the structure by exploring; never assume a path exists because it existed before. Never edit generated files (the AGENTS.md files name them).
 
 ### 2. Never repeat a proposal
 
@@ -92,5 +92,5 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 Create exactly one issue and one pull request:
 
-- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`.
+- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `GLOSSARY.md`.
 - Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<temporary id of the issue>` and put the evidence and the test or proof output under the matching sections.
