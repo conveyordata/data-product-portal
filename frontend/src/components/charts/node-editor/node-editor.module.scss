@@ -2,4 +2,8 @@
 
 .node-editor {
     flex: 1;
+
+    :global(.react-flow__attribution a) {
+        color: var(--ant-color-text-quaternary);
+    }
 }

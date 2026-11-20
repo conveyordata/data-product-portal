@@ -259,7 +259,7 @@ function InternalFullExplorerContent() {
                     fitView({
                         ...defaultFitViewOptions,
                         nodes: connectedNodes,
-                        padding: 0.3,
+                        padding: '10%',
                     });
                 }, 150);
             }
