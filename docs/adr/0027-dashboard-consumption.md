@@ -43,9 +43,15 @@ The question is where a dashboard or application lives in Portal, and how its re
 
 ## Considered Options
 
-* **Option 1: Consumption as a separate concept.** A Consumption sits next to Data Product and Exploration. It holds Input Ports, its Technical Assets are the dashboards and apps, and audiences decide who opens which Technical Asset. Its owner may differ from the owners of the data.
-* **Option 2: Dashboard as an Output Port, readers through Explorations.** A dashboard or app is an Output Port of the Data Product that builds it. Its access modes map to the tool's audiences and row-level security. A reader, or a Group, requests it through an Exploration with a business justification.
-* **Option 3: Audiences on a Data Product.** A Data Product has audiences next to its Output Ports. An audience holds members and the Technical Assets they open. The audience is always owned by the Data Product's owner.
+* **Option 1: Consumption as a separate concept.** A Consumption sits next to Data Product and Exploration. It holds Input Ports, its Technical Assets are the dashboards and apps, and audiences decide who opens which Technical Asset. Its owner may differ from the owners of the data. Every new reader who joins an audience gives a business justification, and the Consumption owner approves.
+* **Option 2: Dashboard as an Output Port, readers through Explorations.** A dashboard or app is an Output Port of the Data Product that builds it. Its access modes map to the tool's audiences and row-level security. A reader, or a Group, requests it through an Exploration. The business justification is given once, for the Exploration; members of its Group come and go without one.
+* **Option 3: Audiences on a Data Product.** A Data Product has audiences next to its Output Ports. An audience holds members and the Technical Assets they open. The audience is always owned by the Data Product's owner. Every new reader who joins an audience gives a business justification, and the Data Product owner approves.
+
+The options differ on three points:
+
+* **Who owns the readers.** In Option 2 the reader asks through the existing request flow. In Options 1 and 3 the owner of the dashboard manages an audience.
+* **How often a reader justifies access.** In Option 2 once per Exploration, which can cover a whole Group. In Options 1 and 3 once per reader, so the owner sees a justification for every new reader.
+* **Different owners without a Data Product.** Only Option 1 lets a team own a dashboard on other teams' data without creating a Data Product for it.
 
 ## Comparison per scenario
 
@@ -58,18 +64,12 @@ The question is where a dashboard or application lives in Portal, and how its re
 | Different views | One Technical Asset per view, or viewer identity | One access mode per view, mapped to the tool's audiences and row-level security | One audience per view, each with its own Technical Assets |
 | Viewer identity | Readers get the grants of the Input Ports their Technical Asset reads | The Provisioner grants readers the data the dashboard reads | Readers get grants on data inside the Data Product |
 | Application, agent or integration | A Consumption whose Technical Asset reads with a machine user | An app or API is an Output Port; an integration is an Exploration owned by a machine user | A machine user in an audience |
+| Business justification | Per reader who joins an audience | Once per Exploration, covering every member of its Group | Per reader who joins an audience |
 | New concepts | Consumption and audience | None | Audience |
-
-The options differ on two points:
-
-* **Who owns the readers.** In Option 2 the reader asks, with a justification, through the existing request flow. In Options 1 and 3 the owner of the dashboard manages an audience.
-* **Different owners without a Data Product.** Only Option 1 lets a team own a dashboard on other teams' data without creating a Data Product for it.
 
 ## Decision Outcome
 
 Open for the team vote.
-The leaning is Option 2, if the team agrees that an Exploration is a lightweight request for access with a reason, not only a step towards a Data Product.
-Option 1 stays the alternative when dashboards owned apart from any Data Product are common.
 
 ## Pros and Cons of the Options
 
@@ -87,6 +87,7 @@ Option 1 stays the alternative when dashboards owned apart from any Data Product
 * **Good, because** access modes give one dashboard different views, the same way for dashboards and APIs.
 * **Bad, because** an Output Port is no longer only data that others build on, so Portal has to stop Data Products from requesting a dashboard.
 * **Bad, because** Explorations need a Group as requester and a request light enough to start from an "add reader" button. Access duration per requester is already an admin setting, so readers can get permanent access.
+* **Bad, because** the name "Exploration" reads as a step towards a Data Product rather than a request for access with a reason, so the concept has to be renamed in the code, the UI, the API and the docs.
 * **Bad, because** an Exploration cannot consume an Invite only Output Port, so sensitive dashboards need that rule revisited.
 * **Bad, because** with viewer identity the Provisioner grants readers the data behind the dashboard, which is not the Output Port they requested.
 
