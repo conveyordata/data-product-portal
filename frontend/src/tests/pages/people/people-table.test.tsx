@@ -216,8 +216,10 @@ describe('PeoplePage', () => {
         expect(header('Name').closest('th')).toHaveAttribute('aria-sort', 'ascending');
     });
 
-    it('retries approval of the same role without creating a duplicate assignment', async () => {
-        let assignments: GlobalRoleAssignmentResponse[] = [];
+    it.each([false, true])('retries approval without duplicating an assignment (existing: %s)', async (existing) => {
+        let assignments: GlobalRoleAssignmentResponse[] = existing
+            ? [globalAssignment(mockGroup, member, DecisionStatus.Pending)]
+            : [];
         const create = vi.fn();
         let attempts = 0;
         server.use(
@@ -242,14 +244,16 @@ describe('PeoplePage', () => {
         await waitFor(() => expect(select).toBeEnabled());
         await user.click(select);
         await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
-        expect(await screen.findByText('Could not assign global role')).toBeInTheDocument();
+        expect(
+            await screen.findByText('Could not confirm the role assignment. Select the role again to retry.'),
+        ).toBeInTheDocument();
         await waitFor(() => expect(select).toBeEnabled());
         await user.click(select);
         await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
         await waitFor(() => expect(attempts).toBe(2));
         await waitFor(() => expect(assignments[0].decision).toBe(DecisionStatus.Approved));
         expect(within(row).getByText('Member')).toBeInTheDocument();
-        expect(create).toHaveBeenCalledTimes(1);
+        expect(create).toHaveBeenCalledTimes(existing ? 0 : 1);
     });
 
     it('keeps existing roles read-only without permission and hides admin eligibility', async () => {

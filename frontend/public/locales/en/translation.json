@@ -245,6 +245,7 @@
     "Could not assign global role": "Could not assign global role",
     "Could not change admin eligibility": "Could not change admin eligibility",
     "Could not change global role assignment": "Could not change global role assignment",
+    "Could not confirm the role assignment. Select the role again to retry.": "Could not confirm the role assignment. Select the role again to retry.",
     "Could not delete announcement": "Could not delete announcement",
     "Could not migrate or delete Domain": "Could not migrate or delete Domain",
     "Could not migrate or delete Type": "Could not migrate or delete Type",

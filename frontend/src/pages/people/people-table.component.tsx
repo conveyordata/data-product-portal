@@ -74,6 +74,9 @@ export function PeoplePage() {
                     }).unwrap();
                 }
                 if (original.decision !== DecisionStatus.Approved) {
+                    if (original.decision === DecisionStatus.Pending) {
+                        failure = t('Could not confirm the role assignment. Select the role again to retry.');
+                    }
                     await decideAssignment({
                         id: original.id,
                         decideGlobalRoleAssignment: { decision: DecisionStatus.Approved },
@@ -81,6 +84,7 @@ export function PeoplePage() {
                 }
             } else if (value) {
                 const created = await createAssignment({ identity_id, role_id: value }).unwrap();
+                failure = t('Could not confirm the role assignment. Select the role again to retry.');
                 await decideAssignment({
                     id: created.id,
                     decideGlobalRoleAssignment: { decision: DecisionStatus.Approved },
