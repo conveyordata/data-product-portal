@@ -14,7 +14,7 @@ from tests.factories import DataProductFactory, PlatformServiceFactory
 def test_create_technical_asset__concurrent_duplicate_namespace(session: Session):
     data_product = DataProductFactory()
     service = PlatformServiceFactory()
-    session.commit()  # noqa: allow-commit
+    session.commit()  # allow-commit
     request = CreateTechnicalAssetRequest.model_validate(
         {
             "name": "Orders",
@@ -44,15 +44,18 @@ def test_create_technical_asset__concurrent_duplicate_namespace(session: Session
             second.rollback()
             second.close()
 
-    TechnicalAssetService(first).create_technical_asset(data_product.id, request)
     thread = threading.Thread(target=create_second)
-    thread.start()
-    thread.join(timeout=1)
-    assert thread.is_alive(), "second create should wait for the first to finish"
-
-    first.commit()  # noqa: allow-commit
-    first.close()
-    thread.join(timeout=10)
+    try:
+        TechnicalAssetService(first).create_technical_asset(data_product.id, request)
+        thread.start()
+        thread.join(timeout=1)
+        assert thread.is_alive(), "second create should wait for the first to finish"
+        first.commit()  # allow-commit
+    finally:
+        first.close()
+        if thread.ident is None:
+            second.close()
+        thread.join(timeout=10)
 
     assert not thread.is_alive()
     assert len(errors) == 1

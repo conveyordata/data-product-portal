@@ -2,6 +2,7 @@ import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup
 import { delay, HttpResponse, http } from 'msw';
 import { Route, Routes } from 'react-router';
 import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-asset-create.page.tsx';
+import { ResourceNameModel, ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
@@ -181,6 +182,41 @@ describe('TechnicalAssetCreate', async () => {
         expect(await screen.findByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
         expect(screen.getByText('Please provide a description for the Technical Asset')).toBeInTheDocument();
         expect(screen.queryByText('Technical asset detail')).not.toBeInTheDocument();
+    }, 15000);
+
+    it('should check the namespace against the Technical Assets of the selected type and recheck it when the type changes', async () => {
+        defaultMocks();
+        const validations: URLSearchParams[] = [];
+        server.use(
+            http.get('*/api/v2/resource_names/validate', ({ request }) => {
+                const params = new URL(request.url).searchParams;
+                validations.push(params);
+                return HttpResponse.json({
+                    validity:
+                        params.get('technical_asset_type') === 'S3TechnicalAssetConfiguration'
+                            ? ResourceNameValidityType.Duplicate
+                            : ResourceNameValidityType.Valid,
+                });
+            }),
+        );
+        const lastValidation = () => validations[validations.length - 1];
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+
+        expect(await screen.findByText('This namespace is already in use')).toBeInTheDocument();
+        expect(lastValidation()?.get('model')).toBe(ResourceNameModel.TechnicalAsset);
+        expect(lastValidation()?.get('data_product_id')).toBe(mockDataProducts[0].id);
+        expect(lastValidation()?.get('technical_asset_type')).toBe('S3TechnicalAssetConfiguration');
+
+        await waitFor(() => expect(screen.getByLabelText(/github/i)).not.toBeDisabled());
+        await user.click(screen.getByLabelText(/github/i));
+
+        await waitFor(() => expect(lastValidation()?.get('technical_asset_type')).toBe('GitHubPlugin'));
+        await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
     }, 15000);
 
     it('should render the page title and the Technical Asset Type', async () => {
