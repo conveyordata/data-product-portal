@@ -1,12 +1,12 @@
 import pytest
 
 from app.authorization.roles.schema import Scope
-from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.output_port_access_types.model import (
     OutputPortAccessType,
 )
 from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
+from app.core.authz.rules import OUTPUT_PORT_READER_ROLE
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort

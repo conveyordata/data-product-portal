@@ -1,43 +1,16 @@
 from typing import Optional
 from uuid import UUID
 
-from casbin_sqlalchemy_adapter import CasbinRule
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.data_product.auth import (
-    DataProductAuthAssignment,
-)
-from app.authorization.role_assignments.data_product.service import (
-    RoleAssignmentService as DataProductRoleAssignmentService,
-)
-from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.admin import admin_expiry_in_future
-from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
-from app.authorization.role_assignments.global_.service import (
-    RoleAssignmentService as GlobalRoleAssignmentService,
-)
-from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
-from app.authorization.role_assignments.output_port.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
-from app.authorization.roles.auth import AuthRole
-from app.authorization.roles.service import RoleService
-from app.core.authz import Authorization, CasbinPolicies
+from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.resolvers import output_port_parent
-from app.core.logging import logger
-from app.groups.model import GroupMembership
-from app.users.model import User as UserModel
-
-DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
-OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
 
 
 class AuthorizationService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.policies = CasbinPolicies()
 
     def check_access(
         self,
@@ -57,133 +30,3 @@ class AuthorizationService:
             parent=parent,
             act=action,
         )
-
-    def reload_enforcer(self) -> None:
-        self.policies.pause_enforcer_for_reload()
-
-        changed_roles, total_roles = self._sync_roles()
-        logger.info(f"Synced {changed_roles}/{total_roles} roles to the casbin table")
-
-        changed_product_a, total_product_a = self._sync_product_assignments()
-        logger.info(
-            f"Synced {changed_product_a}/{total_product_a}"
-            " product assignments to the casbin table"
-        )
-
-        changed_dataset_a, total_dataset_a = self._sync_dataset_assignments()
-        logger.info(
-            f"Synced {changed_dataset_a}/{total_dataset_a}"
-            " dataset assignments to the casbin table"
-        )
-
-        changed_global_a, total_global_a = self._sync_global_assignments()
-        logger.info(
-            f"Synced {changed_global_a}/{total_global_a}"
-            " global assignments to the casbin table"
-        )
-
-        self._sync_temporary_admins()
-        logger.info("Synced temporary admins to the casbin table")
-
-        self._sync_data_products_reader_role()
-        logger.info("Synced data products reader role permissions")
-
-        self._sync_output_ports_reader_role()
-        logger.info("Synced output ports reader role permissions")
-
-        self._sync_group_memberships()
-        logger.info("Synced group membership edges to the casbin table")
-
-        self.policies.start_enforcer_after_reload()
-
-        logger.info(
-            "Authorization reload done - the casbin table"
-            f" now contains {self._casbin_row_count(self.db)} rows"
-        )
-
-    @staticmethod
-    def _casbin_row_count(session: Session) -> int:
-        return session.scalar(select(func.count()).select_from(CasbinRule))
-
-    def _sync_roles(self) -> tuple[int, int]:
-        service = RoleService(self.db)
-        roles = service.get_roles()
-
-        changes = 0
-        for role in roles:
-            if AuthRole(role).sync():
-                changes += 1
-        return changes, len(roles)
-
-    def _sync_product_assignments(self) -> tuple[int, int]:
-        service = DataProductRoleAssignmentService(self.db)
-        product_assignments = service.list_assignments(
-            data_product_id=None, identity_id=None, decision=DecisionStatus.APPROVED
-        )
-
-        changes = 0
-        for assignment in product_assignments:
-            if DataProductAuthAssignment(assignment).add():
-                changes += 1
-        return changes, len(product_assignments)
-
-    def _sync_dataset_assignments(self) -> tuple[int, int]:
-        service = DatasetRoleAssignmentService(self.db)
-        dataset_assignments = service.list_assignments(
-            dataset_id=None, user_id=None, decision=DecisionStatus.APPROVED
-        )
-
-        changes = 0
-        for assignment in dataset_assignments:
-            if DatasetAuthAssignment(assignment).add():
-                changes += 1
-        return changes, len(dataset_assignments)
-
-    def _sync_global_assignments(self) -> tuple[int, int]:
-        service = GlobalRoleAssignmentService(self.db)
-        global_assignments = service.list_assignments(
-            identity_id=None, decision=DecisionStatus.APPROVED
-        )
-
-        changes = 0
-        for assignment in global_assignments:
-            if GlobalAuthAssignment(assignment).add():
-                changes += 1
-        return changes, len(global_assignments)
-
-    def _sync_temporary_admins(self) -> None:
-        for user_id in self.db.scalars(
-            select(UserModel.id).where(admin_expiry_in_future)
-        ):
-            self.policies.assign_admin_role(user_id=str(user_id))
-
-    def _sync_data_products_reader_role(self):
-        from app.data_products.service import DataProductService
-
-        self.policies.sync_role_permissions(
-            role_id=DATA_PRODUCT_READER_ROLE,
-            actions=[AuthorizationAction.HIDDEN__DATA_PRODUCT__READ],
-        )
-        DataProductService(self.db).sync_discoverable_data_products()
-
-    def _sync_output_ports_reader_role(self):
-        from app.data_products.output_ports.service import OutputPortService
-
-        self.policies.sync_role_permissions(
-            role_id=OUTPUT_PORT_READER_ROLE,
-            actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
-        )
-        OutputPortService(self.db).sync_read_rights_output_ports()
-
-    def _sync_group_memberships(self) -> None:
-        """Synchronize all group membership authorization policies."""
-        memberships = [
-            (member_identity_id, group_id)
-            for group_id, member_identity_id in self.db.execute(
-                select(
-                    GroupMembership.group_id,
-                    GroupMembership.member_identity_id,
-                )
-            )
-        ]
-        self.policies.assign_group_memberships(memberships=memberships)

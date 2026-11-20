@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
+    Iterable,
     Sequence,
-    TypeAlias,
-    Union,
 )
 from uuid import UUID
 
@@ -24,10 +23,11 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
-
-ID: TypeAlias = Union[str, UUID]
+from .rules import ID, Rule
 
 tracer = trace.get_tracer(__name__)
+
+_Row = tuple[str, ...]
 
 
 class Authorization:
@@ -66,7 +66,6 @@ class Authorization:
 
 class CasbinPolicies(metaclass=Singleton):
     def __init__(self) -> None:
-        self._reloading = False
         engine = create_engine(database.get_url())
         database.apply_auth(engine)
         self._adapter = sqlalchemy_adapter.Adapter(engine)
@@ -204,26 +203,65 @@ class CasbinPolicies(metaclass=Singleton):
         self._after_update()
         return updated
 
-    def pause_enforcer_for_reload(self) -> None:
-        """This stops autoloading and auto policy saving of the enforcer.
-        IT ALSO CLEARS ALL POLICIES FROM CASBIN.
-        To be used when you want to recreate the casbin table.
-        By pausing these it goes faster and avoids race conditions."""
-        self._reloading = True
-        self._enforcer.stop_auto_load_policy()
-        self._enforcer.enable_auto_save(False)
-        self._enforcer.clear_policy()
+    def replace_all(self, rules: Iterable[Rule]) -> tuple[int, int]:
+        enforcer: SyncedEnforcer = self._enforcer
+        model = enforcer.get_model()
+        rows: dict[str, set[_Row]] = {
+            ptype: set() for sec in ("p", "g") for ptype in model[sec]
+        }
+        for rule in rules:
+            rows[rule.ptype].add(tuple(str(value) for value in rule))
+        enforcer.stop_auto_load_policy()
+        enforcer.enable_auto_save(False)
+        # Per-rule link updates are slow, and build_role_links() below redoes them
+        enforcer.enable_auto_build_role_links(False)
+        try:
+            added = removed = 0
+            for ptype, desired in rows.items():
+                ptype_added, ptype_removed = self._replace(ptype, desired)
+                added += ptype_added
+                removed += ptype_removed
+            enforcer.build_role_links()  # Reconstructs the user → group → role graph to avoid stale user → group relationships
+            enforcer.save_policy()
+        except BaseException:
+            enforcer.enable_auto_build_role_links(True)
+            enforcer.load_policy()  # The table is unchanged on failure, so memory goes back to it
+            raise
+        finally:
+            enforcer.enable_auto_build_role_links(True)
+            self._cache.clear()
+            if settings.AUTHORIZER_AUTOLOAD_ENABLED:
+                enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+            enforcer.enable_auto_save(True)
+        return added, removed
 
-    def start_enforcer_after_reload(self) -> None:
-        """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
-        To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
-        self._cache.clear()
-        self._enforcer.build_role_links()  # Reconstructs the user → group → role graph to avoid stale user → group relationships
-        self._enforcer.save_policy()
-        if settings.AUTHORIZER_AUTOLOAD_ENABLED:
-            self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
-        self._enforcer.enable_auto_save(True)
-        self._reloading = False
+    def _replace(self, ptype: str, desired: set[_Row]) -> tuple[int, int]:
+        enforcer: SyncedEnforcer = self._enforcer
+        if ptype in enforcer.get_model()["g"]:
+            rules = enforcer.get_named_grouping_policy(ptype)
+            remove = enforcer.remove_named_grouping_policies
+            add = enforcer.add_named_grouping_policies
+        else:
+            rules = enforcer.get_named_policy(ptype)
+            remove = enforcer.remove_named_policies
+            add = enforcer.add_named_policies
+        # Casbin matches rules by ==, and other writers store tuples, so remove the stored objects
+        current: dict[_Row, Sequence[str]] = {}
+        duplicates = []
+        for rule in rules:
+            if tuple(rule) in current:
+                duplicates.append(rule)
+            else:
+                current[tuple(rule)] = rule
+        for rule in duplicates:
+            remove(ptype, [rule])  # Returns False while another copy remains
+        stale = [current[row] for row in current.keys() - desired]
+        missing = [list(row) for row in desired - current.keys()]
+        if stale and not remove(ptype, stale):
+            raise RuntimeError(f"Casbin refused to remove stale {ptype} rules")
+        if missing and not add(ptype, missing):
+            raise RuntimeError(f"Casbin refused to add missing {ptype} rules")
+        return len(missing), len(stale) + len(duplicates)
 
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Deletes the entry in the casbin table,
@@ -371,8 +409,7 @@ class CasbinPolicies(metaclass=Singleton):
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
-        if not self._reloading:
-            enforcer.load_policy()
+        enforcer.load_policy()
 
         resource_candidates = {
             (str(member_id), str(group_id), "*") for member_id, group_id in memberships

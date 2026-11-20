@@ -2,9 +2,9 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
-from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
@@ -85,7 +85,7 @@ class TestDataOutputDatasetService:
         )
 
         # Factories write directly to the database, so synchronize Casbin explicitly.
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
         pending_actions = TechnicalAssetOutputPortService(
             session
         ).get_user_pending_actions(user)
@@ -115,7 +115,7 @@ class TestDataOutputDatasetService:
             ).id,
             decision=decision,
         )
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
 
         pending_actions = TechnicalAssetOutputPortService(
             session

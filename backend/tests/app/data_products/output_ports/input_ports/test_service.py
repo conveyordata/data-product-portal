@@ -12,9 +12,9 @@ from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
-from app.authorization.service import AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessFunction
@@ -333,7 +333,7 @@ class TestInputPortDecisions:
         )
 
         # Factories bypass incremental authorization synchronization.
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
         pending_actions = InputPortService(session).get_user_pending_actions(approver)
         assert {action.id for action in pending_actions} == {pending_request.id}
 

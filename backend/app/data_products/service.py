@@ -16,7 +16,6 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
-from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -28,6 +27,7 @@ from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
 from app.core import context
 from app.core.authz import CasbinPolicies
+from app.core.authz.rules import DATA_PRODUCT_READER_ROLE, EVERYONE
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
@@ -57,7 +57,6 @@ from app.data_products.technical_assets.environment_configuration_service import
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import UNFILTERED
 from app.database.visibility import member_of
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -75,13 +74,13 @@ class DataProductService(AbstractDataProductService):
         match visibility:
             case DataProductVisibility.DISCOVERABLE:
                 CasbinPolicies().assign_resource_role(
-                    user_id="*",
+                    user_id=EVERYONE,
                     role_id=DATA_PRODUCT_READER_ROLE,
                     resource_id=str(data_product_id),
                 )
             case DataProductVisibility.HIDDEN:
                 CasbinPolicies().revoke_resource_role(
-                    user_id="*",
+                    user_id=EVERYONE,
                     role_id=DATA_PRODUCT_READER_ROLE,
                     resource_id=str(data_product_id),
                 )
@@ -531,13 +530,3 @@ class DataProductService(AbstractDataProductService):
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def sync_discoverable_data_products(self):
-        visible_data_product_ids = self.db.scalars(
-            select(DataProductModel.id).where(
-                DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
-            ),
-            execution_options=UNFILTERED,
-        ).all()
-        for id in visible_data_product_ids:
-            self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

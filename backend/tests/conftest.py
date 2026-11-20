@@ -11,9 +11,9 @@ from sqlalchemy import select, text  # noqa: TID251
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
 from app.core.authz.authorization import CasbinPolicies
@@ -170,7 +170,7 @@ def clear_db(session: Session) -> None:
     roles_table = Base.metadata.tables.get("roles")
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
-    AuthorizationService(session).reload_enforcer()
+    CasbinSync(session).rebuild()
     session.commit()  # allow-commit
     reset_unique_fakers()
 

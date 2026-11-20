@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from jinja2 import Template
 
-from app.authorization.service import AuthorizationService
+from app.authorization.casbin_sync import CasbinSync
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_system_db_session
 
@@ -27,5 +27,5 @@ def seed_db(path: str, **template_vars):
     raw_cursor.execute(rendered_content)
 
     raw_connection.commit()
-    AuthorizationService(db).reload_enforcer()
+    CasbinSync(db).rebuild()
     OutputPortService(db).recalculate_search_for_all_output_ports()
