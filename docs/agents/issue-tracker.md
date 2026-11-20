@@ -2,7 +2,7 @@
 
 Issues for this repo live in GitHub Issues (`conveyordata/data-product-portal`). Use the `gh` CLI.
 
-- Create: `gh issue create --title "..." --body "..." --label bug|enhancement`
+- Create: `gh issue create --title "..." --body "..." --label bug` (use `enhancement` for features).
 - Read: `gh issue view <number> --json number,title,body,labels,comments`
 - List: `gh issue list --state open --label <label>`
 - Comment: `gh issue comment <number> --body "..."`
