@@ -56,8 +56,8 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
     }, [inputPorts, searchTerm]);
 
     return (
-        <Flex vertical gap="middle">
-            <Flex gap="middle">
+        <Flex vertical gap="medium">
+            <Flex gap="medium">
                 <Input.Search
                     placeholder={t('Search consumers by name')}
                     allowClear

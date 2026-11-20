@@ -68,7 +68,7 @@ export function HistoryTab({ id, type, history = [], query }: Props) {
     ) as TableColumnsType<GetEventHistoryResponseItem>;
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Input.Search
                 placeholder={t('Search event history')}
                 allowClear

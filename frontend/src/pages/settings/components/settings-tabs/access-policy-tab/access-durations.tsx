@@ -215,7 +215,7 @@ export default function AccessDurations() {
     ];
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <SettingsSectionHeader
                 title={t('Access Durations')}
                 description={t('Configure default access durations for Input Ports.')}

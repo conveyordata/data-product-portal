@@ -27,7 +27,7 @@ export function EnvironmentChangesModal({ open, environments, changes, loading, 
             onOk={onConfirm}
             onCancel={onCancel}
         >
-            <Flex vertical gap="middle">
+            <Flex vertical gap="medium">
                 <Typography.Text>{t('Only Environments you changed are updated.')}</Typography.Text>
                 {environments.map((environment) => {
                     const items = changes[environment.id] ?? [];
@@ -55,7 +55,7 @@ export function EnvironmentChangesModal({ open, environments, changes, loading, 
                             {items.length > 0 ? (
                                 <Flex vertical gap="small">
                                     {items.map((item) => (
-                                        <Flex key={item.field} justify="space-between" gap="middle">
+                                        <Flex key={item.field} justify="space-between" gap="medium">
                                             <Typography.Text>{item.label}</Typography.Text>
                                             <Flex gap="small" align="center">
                                                 <Typography.Text type="secondary" delete>

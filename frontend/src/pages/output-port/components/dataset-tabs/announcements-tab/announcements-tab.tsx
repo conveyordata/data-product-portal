@@ -133,7 +133,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
     );
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             {announcements.length === 0 ? (
                 <EmptyState
                     icon={<NotificationOutlined />}
@@ -158,7 +158,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                 />
             ) : (
                 <>
-                    <Flex gap="middle">
+                    <Flex gap="medium">
                         <Input.Search
                             placeholder={t('Search announcements by title or message')}
                             allowClear

@@ -23,9 +23,9 @@ export function DetailPageLayout({ icon, title, titleExtra, edit, sidebar, child
     return (
         <Row wrap={false} gutter={token.paddingLG}>
             <Col flex="auto">
-                <Flex vertical gap="middle">
-                    <Flex justify="space-between" align="flex-start" gap="middle">
-                        <Flex gap="middle" align="center">
+                <Flex vertical gap="medium">
+                    <Flex justify="space-between" align="flex-start" gap="medium">
+                        <Flex gap="medium" align="center">
                             {icon}
                             <Typography.Title level={3} ellipsis={{ tooltip: title, rows: 2 }} style={{ margin: 0 }}>
                                 {title}

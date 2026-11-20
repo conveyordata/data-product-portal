@@ -20,7 +20,7 @@ type Props<T> = {
 
 export const CardSelection = <T,>({ options, onChange, value, style }: Props<T>) => {
     return (
-        <Flex gap="middle" style={style}>
+        <Flex gap="medium" style={style}>
             {options.map((option) => (
                 <Card
                     key={option.value as string}
