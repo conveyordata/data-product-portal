@@ -7,7 +7,12 @@ import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
-import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
+import {
+    mock_plugins,
+    mockGetPlatformTiles,
+    mockGetPlugins,
+    mockRenderTechnicalAssetAccessPath,
+} from '@/tests/mocks/plugins.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -186,6 +191,19 @@ describe('TechnicalAssetCreate', async () => {
 
     it('should check the namespace against the Technical Assets of the selected type and recheck it when the type changes', async () => {
         defaultMocks();
+        mockGetPlugins({
+            plugins: [
+                ...mock_plugins,
+                {
+                    ...mock_plugins[0],
+                    ui_metadata: [],
+                    plugin: 'GlueTechnicalAssetConfiguration',
+                    platform: 'glue',
+                    display_name: 'Glue',
+                    detailed_name: 'Database',
+                },
+            ],
+        });
         const validations: URLSearchParams[] = [];
         server.use(
             http.get('*/api/v2/resource_names/validate', ({ request }) => {
@@ -212,10 +230,12 @@ describe('TechnicalAssetCreate', async () => {
         expect(lastValidation()?.get('data_product_id')).toBe(mockDataProducts[0].id);
         expect(lastValidation()?.get('technical_asset_type')).toBe('S3TechnicalAssetConfiguration');
 
-        await waitFor(() => expect(screen.getByLabelText(/github/i)).not.toBeDisabled());
-        await user.click(screen.getByLabelText(/github/i));
+        await waitFor(() => expect(screen.getByLabelText(/glue/i)).not.toBeDisabled());
+        await user.click(screen.getByLabelText(/glue/i));
 
-        await waitFor(() => expect(lastValidation()?.get('technical_asset_type')).toBe('GitHubPlugin'));
+        await waitFor(() =>
+            expect(lastValidation()?.get('technical_asset_type')).toBe('GlueTechnicalAssetConfiguration'),
+        );
         await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
     }, 15000);
 
