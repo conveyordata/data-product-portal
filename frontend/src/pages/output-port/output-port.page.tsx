@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
+import { IdentityAccessOverview } from '@/components/data-access/identity-access-overview/identity-access-overview.component';
 import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
@@ -110,7 +110,10 @@ export function OutputPort() {
                 <>
                     <DatasetActions datasetId={datasetId} />
                     <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
-                    <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
+                    <IdentityAccessOverview
+                        identities={datasetOwners?.map((owner) => ({ ...owner, type: 'user' }))}
+                        title={t('Output Port Owners')}
+                    />
                 </>
             }
         >

@@ -28,7 +28,8 @@ import {
     selectCartOutputPorts,
 } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
-import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductOwners } from '@/utils/data-product-role.helper.ts';
+import { getIdentityDisplayName, getIdentitySecondaryLabel } from '@/utils/identity.ts';
 import { OutputPortAccessDuration } from './output-port-access-duration';
 
 type CartOverviewItemProps = {
@@ -66,14 +67,21 @@ function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
         return (
             <Space size="small" wrap>
                 {visibleOwners.map((owner) => (
-                    <Tag key={owner.id}>{owner.email}</Tag>
+                    <Tooltip
+                        key={owner.id}
+                        title={`${getIdentityDisplayName(owner)} (${getIdentitySecondaryLabel(owner)})`}
+                    >
+                        <Tag>{owner.type === 'user' ? owner.email : getIdentityDisplayName(owner)}</Tag>
+                    </Tooltip>
                 ))}
                 {remainingCount > 0 && (
                     <Tooltip
                         title={
                             <Space orientation="vertical" size="small">
                                 {dataProductOwners.slice(maxVisible).map((owner) => (
-                                    <span key={owner.id}>{owner.email}</span>
+                                    <span key={owner.id}>
+                                        {getIdentityDisplayName(owner)} ({getIdentitySecondaryLabel(owner)})
+                                    </span>
                                 ))}
                             </Space>
                         }

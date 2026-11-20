@@ -7210,13 +7210,13 @@
         "operationId": "list_global_role_assignments",
         "parameters": [
           {
-            "name": "user_id",
+            "name": "identity_id",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "User Id"
+              "title": "Identity Id"
             }
           },
           {
@@ -7516,13 +7516,13 @@
             }
           },
           {
-            "name": "user_id",
+            "name": "identity_id",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "User Id"
+              "title": "Identity Id"
             }
           },
           {
@@ -11699,10 +11699,10 @@
       },
       "CreateDataProductRoleAssignment": {
         "properties": {
-          "user_id": {
+          "identity_id": {
             "type": "string",
             "format": "uuid",
-            "title": "User Id"
+            "title": "Identity Id"
           },
           "role_id": {
             "type": "string",
@@ -11717,7 +11717,7 @@
         },
         "type": "object",
         "required": [
-          "user_id",
+          "identity_id",
           "role_id",
           "data_product_id"
         ],
@@ -11851,10 +11851,10 @@
       },
       "CreateGlobalRoleAssignment": {
         "properties": {
-          "user_id": {
+          "identity_id": {
             "type": "string",
             "format": "uuid",
-            "title": "User Id"
+            "title": "Identity Id"
           },
           "role_id": {
             "anyOf": [
@@ -11872,7 +11872,7 @@
         },
         "type": "object",
         "required": [
-          "user_id",
+          "identity_id",
           "role_id"
         ],
         "title": "CreateGlobalRoleAssignment"
@@ -12562,17 +12562,17 @@
             "format": "uuid",
             "title": "Data Product Id"
           },
-          "user_id": {
+          "identity_id": {
             "type": "string",
             "format": "uuid",
-            "title": "User Id"
+            "title": "Identity Id"
           }
         },
         "type": "object",
         "required": [
           "id",
           "data_product_id",
-          "user_id"
+          "identity_id"
         ],
         "title": "DataProductRoleAssignmentEvent",
         "description": "Fired on insert, update, and delete of a data-product role assignment."
@@ -12587,8 +12587,8 @@
           "data_product": {
             "$ref": "#/components/schemas/DataProduct"
           },
-          "user": {
-            "$ref": "#/components/schemas/User"
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
           },
           "role": {
             "anyOf": [
@@ -12658,7 +12658,7 @@
         "required": [
           "id",
           "data_product",
-          "user",
+          "identity",
           "role",
           "decision",
           "requested_on",
@@ -12678,8 +12678,8 @@
           "data_product": {
             "$ref": "#/components/schemas/DataProduct"
           },
-          "user": {
-            "$ref": "#/components/schemas/User"
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
           },
           "role": {
             "anyOf": [
@@ -12743,7 +12743,7 @@
         "required": [
           "id",
           "data_product",
-          "user",
+          "identity",
           "role",
           "decision",
           "requested_on",
@@ -14039,6 +14039,7 @@
           "output_port",
           "technical_asset",
           "user",
+          "identity",
           "exploration",
           "announcement"
         ],
@@ -14783,6 +14784,16 @@
               }
             ]
           },
+          "identity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Identity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "announcement": {
             "anyOf": [
               {
@@ -15462,8 +15473,8 @@
             "format": "uuid",
             "title": "Id"
           },
-          "user": {
-            "$ref": "#/components/schemas/User"
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -15519,7 +15530,7 @@
         "type": "object",
         "required": [
           "id",
-          "user",
+          "identity",
           "role",
           "decision",
           "requested_on",
@@ -15639,6 +15650,36 @@
           "display_name"
         ],
         "title": "GroupGet"
+      },
+      "GroupIdentity": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "type": {
+            "type": "string",
+            "const": "group",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "external_id",
+          "display_name",
+          "type"
+        ],
+        "title": "GroupIdentity"
       },
       "GroupMemberIdentityGet": {
         "properties": {
@@ -15815,6 +15856,28 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "Identity": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/GroupIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/MachineUserIdentity"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "group": "#/components/schemas/GroupIdentity",
+            "machine_user": "#/components/schemas/MachineUserIdentity",
+            "user": "#/components/schemas/UserIdentity"
+          }
+        },
+        "title": "Identity"
       },
       "IdentityBatchCreateError": {
         "properties": {
@@ -15993,7 +16056,8 @@
           "group",
           "machine_user"
         ],
-        "title": "IdentityType"
+        "title": "IdentityType",
+        "x-ogen-name": "IdentityKind"
       },
       "InputPortEvent": {
         "properties": {
@@ -16474,6 +16538,36 @@
           "display_name"
         ],
         "title": "MachineUserGet"
+      },
+      "MachineUserIdentity": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "type": {
+            "type": "string",
+            "const": "machine_user",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "external_id",
+          "display_name",
+          "type"
+        ],
+        "title": "MachineUserIdentity"
       },
       "MachineUserUpdate": {
         "properties": {
@@ -18207,10 +18301,10 @@
       },
       "RequestDataProductRoleAssignment": {
         "properties": {
-          "user_id": {
+          "identity_id": {
             "type": "string",
             "format": "uuid",
-            "title": "User Id"
+            "title": "Identity Id"
           },
           "role_id": {
             "type": "string",
@@ -18225,7 +18319,7 @@
         },
         "type": "object",
         "required": [
-          "user_id",
+          "identity_id",
           "role_id",
           "data_product_id"
         ],
@@ -20246,6 +20340,69 @@
           "id"
         ],
         "title": "UserCreateResponse"
+      },
+      "UserIdentity": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
+          },
+          "can_become_admin": {
+            "type": "boolean",
+            "title": "Can Become Admin"
+          },
+          "admin_expiry": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Expiry"
+          },
+          "type": {
+            "type": "string",
+            "const": "user",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "external_id",
+          "first_name",
+          "last_name",
+          "has_seen_tour",
+          "can_become_admin",
+          "type"
+        ],
+        "title": "UserIdentity"
       },
       "UserInputPort": {
         "properties": {

@@ -28,7 +28,7 @@ export function RoleFilter({ selectedRoles, onRoleChange, mode }: RoleFilterProp
         { skip: !currentUser || mode !== 'datasets' },
     );
     const { data: userDataProductRoles = undefined } = useListDataProductRoleAssignmentsQuery(
-        { userId: currentUser?.id || '' },
+        { identityId: currentUser?.id || '' },
         { skip: !currentUser || mode !== 'data_products' },
     );
 

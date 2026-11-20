@@ -38,7 +38,6 @@ class RoleAssignmentService:
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
-        users_only: bool = False,
     ) -> Sequence[GlobalRoleAssignment]:
         query = select(GlobalRoleAssignmentModel)
 
@@ -48,10 +47,6 @@ class RoleAssignmentService:
             query = query.where(GlobalRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(GlobalRoleAssignmentModel.decision == decision)
-        if users_only:
-            query = query.join(
-                UserModel, UserModel.id == GlobalRoleAssignmentModel.identity_id
-            )
 
         return self.db.scalars(query).all()
 

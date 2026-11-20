@@ -19,7 +19,7 @@ export function roleAssignmentRequest(id: string, dataProductName: string): Data
             status: 'active',
             type: { id: 'type', name: 'Analytics', description: '', icon_key: 'reporting' },
         },
-        user: notifiedUser,
+        identity: { ...notifiedUser, type: 'user' },
         role: null,
         decision: DecisionStatus.Pending,
         requested_on: '2026-10-26T10:00:00',

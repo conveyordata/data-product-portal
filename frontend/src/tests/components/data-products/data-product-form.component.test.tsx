@@ -12,6 +12,7 @@ import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductT
 import { mock_domains, mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
 import { mockEnvironments, mockGetEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
+import { mockGroup, mockIdentitiesHttp, mockMachineUser } from '@/tests/mocks/identities.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -19,7 +20,7 @@ import {
 } from '@/tests/mocks/resource_names.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockGetTags } from '@/tests/mocks/tags.ts';
-import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
+import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
 import { Prototype } from '@/types/roles';
 
@@ -68,7 +69,7 @@ describe('DataProductForm', () => {
         mockGetDomains(mock_domains);
         mockGetDataProductTypes();
         mockDataProductLifecycles();
-        mockUsersHttp(mockUsers);
+        mockIdentitiesHttp();
         mockGetTags();
         mockGetResourceNamesConstraints();
         mockResourceNamesSanitize();
@@ -77,7 +78,15 @@ describe('DataProductForm', () => {
         server.use(
             http.get('*/api/v2/authz/role_assignments/data_product', () =>
                 HttpResponse.json({
-                    role_assignments: [{ role: { prototype: Prototype.OWNER }, user: mockUsers[0] }],
+                    role_assignments: [
+                        {
+                            role: { prototype: Prototype.OWNER },
+                            identity: {
+                                ...mockUsers[0],
+                                type: 'user',
+                            },
+                        },
+                    ],
                 }),
             ),
         );
@@ -306,5 +315,66 @@ describe('DataProductForm', () => {
         await user.type(screen.getByRole('combobox', { name: /^Environments/ }), 'nonexistent');
         expect(await screen.findByText('No matching environments')).toBeInTheDocument();
         expect(screen.queryByText('No environments are configured')).not.toBeInTheDocument();
+    });
+
+    it.each([mockGroup, mockMachineUser])('preserves the $type owner when editing a Data Product', async (identity) => {
+        const save = vi.fn();
+
+        server.use(
+            http.get('*/api/v2/authz/role_assignments/data_product', () =>
+                HttpResponse.json({
+                    role_assignments: [
+                        {
+                            role: { prototype: Prototype.OWNER },
+                            identity,
+                        },
+                    ],
+                }),
+            ),
+            http.put('*/api/v2/data_products/dp-1', async ({ request }) => {
+                save(await request.json());
+                return HttpResponse.json({ id: 'dp-1' });
+            }),
+        );
+
+        renderForm('edit');
+        await getEnvironmentPicker();
+        expect(
+            screen.getByText(
+                `${identity.display_name} (${identity.type === 'group' ? 'Group' : 'Machine User'}: ${identity.external_id})`,
+            ),
+        ).toBeInTheDocument();
+        expect(screen.getByLabelText('Owners')).toBeDisabled();
+        await userEvent.click(screen.getByText('Save'));
+
+        await waitFor(() => expect(save).toHaveBeenCalled());
+        expect(save.mock.calls[0][0]).not.toHaveProperty('owners');
+    });
+
+    it('offers only users as owners when creating a Data Product', async () => {
+        const user = userEvent.setup();
+        const save = vi.fn();
+        server.use(
+            http.post('*/api/v2/data_products', async ({ request }) => {
+                save(await request.json());
+                return HttpResponse.json({ id: 'created-product' });
+            }),
+        );
+        renderForm('create');
+        await getEnvironmentPicker();
+        await fillRequiredFields(user);
+        const owner = screen.getByText('Alice Smith (User: alice@example.com)').closest('.ant-select-selection-item');
+        if (!(owner instanceof HTMLElement)) throw new Error('Default owner is missing');
+        await user.click(within(owner).getByLabelText('close'));
+        await user.click(screen.getByLabelText('Owners'));
+        const bob = await screen.findByText('Bob Jones (User: bob@example.com)', {
+            selector: '.ant-select-item-option-content',
+        });
+        expect(screen.queryByText(/Finance Team/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/ETL Runner/)).not.toBeInTheDocument();
+        await user.click(bob);
+        await user.click(screen.getByText('Create', { selector: 'button span' }));
+
+        await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({ owners: [mockUsers[1].id] })));
     });
 });

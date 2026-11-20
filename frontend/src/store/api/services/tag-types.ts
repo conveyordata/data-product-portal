@@ -12,6 +12,8 @@ export enum TagTypes {
     DataProductSetting = 'DataProductSetting',
     CurrentUser = 'CurrentUser',
     User = 'User',
+    Group = 'Group',
+    MachineUser = 'MachineUser',
     Auth = 'Auth',
     Role = 'Role',
     Environment = 'Environment',

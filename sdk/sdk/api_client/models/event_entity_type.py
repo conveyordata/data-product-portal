@@ -5,6 +5,7 @@ class EventEntityType(StrEnum):
     ANNOUNCEMENT = "announcement"
     DATA_PRODUCT = "data_product"
     EXPLORATION = "exploration"
+    IDENTITY = "identity"
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"

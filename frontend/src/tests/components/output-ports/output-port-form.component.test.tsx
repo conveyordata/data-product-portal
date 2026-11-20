@@ -1,5 +1,5 @@
 import { HttpResponse, http } from 'msw';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     AccessTypeSection,
     OutputPortForm,
@@ -14,6 +14,7 @@ import { mockAccessDurationsGet, mockTimeBoundAccessEnabled } from '@/tests/mock
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockOutputPortAccessTypes } from '@/tests/mocks/configurationOutputPortAccessTypes.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
+import { mockGroup, mockMachineUser } from '@/tests/mocks/identities.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -22,11 +23,11 @@ import {
 import { server } from '@/tests/mocks/server.ts';
 import { mockGetTags } from '@/tests/mocks/tags.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen, userEvent } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { DecisionStatus, Prototype } from '@/types/roles';
 
 describe('OutputPortForm', () => {
-    it('only allows Invite only access types for hidden data products', async () => {
-        const user = userEvent.setup();
+    beforeEach(() => {
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
@@ -37,6 +38,10 @@ describe('OutputPortForm', () => {
         mockGetResourceNamesConstraints();
         mockResourceNamesSanitize();
         mockResourceNamesValidate();
+    });
+
+    it('only allows Invite only access types for hidden data products', async () => {
+        const user = userEvent.setup();
         server.use(
             http.get('*/api/v2/authz/role_assignments/data_product/:dataProductId', () =>
                 HttpResponse.json({ role_assignments: [] }),
@@ -82,6 +87,32 @@ describe('OutputPortForm', () => {
         expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
         expect(screen.getByText('Hidden Data Products can only have hidden Output Ports')).toBeInTheDocument();
+    });
+
+    it('only defaults user identities into user-only Output Port ownership', async () => {
+        mockDataProductHttp();
+        server.use(
+            http.get('*/api/v2/authz/role_assignments/data_product', () =>
+                HttpResponse.json({
+                    role_assignments: [{ ...mockUsers[0], type: 'user' }, mockGroup, mockMachineUser].map(
+                        (identity) => ({
+                            identity,
+                            role: { prototype: Prototype.OWNER },
+                            decision: DecisionStatus.Approved,
+                        }),
+                    ),
+                }),
+            ),
+        );
+        renderWithProviders(<OutputPortForm mode="create" dataProductId="dp-1" />, { routerProps: {} });
+        const owners = (await screen.findByLabelText('Owners')).closest('.ant-select');
+        if (!owners) throw new Error('Owner field is missing');
+
+        await waitFor(() =>
+            expect(
+                [...owners.querySelectorAll('.ant-select-selection-item')].map((item) => item.getAttribute('title')),
+            ).toEqual(['Alice Smith (alice@example.com)']),
+        );
     });
 
     it('does not change an existing access type while access types load', async () => {
