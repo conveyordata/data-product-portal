@@ -76,7 +76,7 @@ def delete_data_product_role_assignment(
             subject_id=assignment.data_product_id,
             subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventEntityType.USER,
+            target_type=EventEntityType.IDENTITY,
             actor_id=user.id,
         ),
     )
@@ -96,17 +96,16 @@ def delete_data_product_role_assignment(
 def list_data_product_role_assignments(
     db: DbSession,
     data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
-    user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    identity_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
 ) -> ListDataProductRoleAssignmentsResponse:
     return ListDataProductRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
             data_product_id=data_product_id,
-            identity_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
             decision=decision,
-            users_only=True,
         )
     )
 
@@ -131,7 +130,7 @@ def request_data_product_role_assignment(
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
         role_id=request.role_id,
-        identity_id=request.user_id,
+        identity_id=request.identity_id,
         actor=user,
     )
     EventService(db).create_event(
@@ -140,7 +139,7 @@ def request_data_product_role_assignment(
             subject_id=role_assignment.data_product_id,
             subject_type=EventEntityType.DATA_PRODUCT,
             target_id=role_assignment.identity_id,
-            target_type=EventEntityType.USER,
+            target_type=EventEntityType.IDENTITY,
             actor_id=user.id,
         )
     )
@@ -181,7 +180,7 @@ def create_data_product_role_assignment(
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=body.data_product_id,
-        identity_id=body.user_id,
+        identity_id=body.identity_id,
         role_id=body.role_id,
         actor=user,
     )
@@ -192,7 +191,7 @@ def create_data_product_role_assignment(
             subject_id=role_assignment.data_product_id,
             subject_type=EventEntityType.DATA_PRODUCT,
             target_id=role_assignment.identity_id,
-            target_type=EventEntityType.USER,
+            target_type=EventEntityType.IDENTITY,
             actor_id=user.id,
         )
     )
@@ -260,7 +259,7 @@ def decide_data_product_role_assignment(
             subject_id=assignment.data_product_id,
             subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventEntityType.USER,
+            target_type=EventEntityType.IDENTITY,
             actor_id=user.id,
         ),
     )
@@ -307,7 +306,7 @@ def modify_data_product_role_assignment(
             subject_id=assignment.data_product_id,
             subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventEntityType.USER,
+            target_type=EventEntityType.IDENTITY,
             actor_id=user.id,
         ),
     )

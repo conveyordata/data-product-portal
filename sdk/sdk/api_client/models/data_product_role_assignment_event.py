@@ -17,12 +17,12 @@ class DataProductRoleAssignmentEvent:
     Attributes:
         id (UUID):
         data_product_id (UUID):
-        user_id (UUID):
+        identity_id (UUID):
     """
 
     id: UUID
     data_product_id: UUID
-    user_id: UUID
+    identity_id: UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -30,7 +30,7 @@ class DataProductRoleAssignmentEvent:
 
         data_product_id = str(self.data_product_id)
 
-        user_id = str(self.user_id)
+        identity_id = str(self.identity_id)
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -38,7 +38,7 @@ class DataProductRoleAssignmentEvent:
             {
                 "id": id,
                 "data_product_id": data_product_id,
-                "user_id": user_id,
+                "identity_id": identity_id,
             }
         )
 
@@ -51,12 +51,12 @@ class DataProductRoleAssignmentEvent:
 
         data_product_id = UUID(d.pop("data_product_id"))
 
-        user_id = UUID(d.pop("user_id"))
+        identity_id = UUID(d.pop("identity_id"))
 
         data_product_role_assignment_event = cls(
             id=id,
             data_product_id=data_product_id,
-            user_id=user_id,
+            identity_id=identity_id,
         )
 
         data_product_role_assignment_event.additional_properties = d

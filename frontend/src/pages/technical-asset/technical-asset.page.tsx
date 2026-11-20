@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { IdentityAccessOverview } from '@/components/data-access/identity-access-overview/identity-access-overview.component.tsx';
 import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
@@ -15,7 +15,7 @@ import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataPr
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation.ts';
-import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper';
+import { useGetDataProductOwners } from '@/utils/data-product-role.helper';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 import { TechnicalAssetActions } from './components/technical-asset-actions/technical-asset-actions.component.tsx';
@@ -86,7 +86,7 @@ export function TechnicalAsset() {
             sidebar={
                 <>
                     <TechnicalAssetActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
-                    <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
+                    <IdentityAccessOverview identities={dataOutputOwners} title={t('Technical Asset Owners')} />
                 </>
             }
         >

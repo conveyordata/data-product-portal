@@ -8,10 +8,13 @@ sidebar_position: 200
 
 ### breaking changes
 
+- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Data Product Owner assignments require a user. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
 
 ### features
 
+- **[UI]**: The People page now assigns global roles to groups and machine users alongside users. Different columns can be sorted together. Admin eligibility remains user-only.
+- **[UI]**: Data Product teams can now include groups and machine users alongside users. The Add team member modal provides a searchable identity table with type filtering and a role selector. The Owner option is available only for users.
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 

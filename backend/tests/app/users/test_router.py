@@ -31,6 +31,7 @@ from tests.factories import (
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
+    MachineUserFactory,
     NotificationFactory,
     OutputPortFactory,
     RoleFactory,
@@ -578,6 +579,60 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current/my_requests")
         assert response.status_code == 200, response.text
         assert len(response.json()["my_requests"]) == 1
+
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    def test_get_current_user_my_requests__excludes_inaccessible_role_requests(
+        self, client, identity_factory
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        identity = identity_factory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_USER],
+        )
+        hidden_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        membership = DataProductRoleAssignmentFactory(
+            data_product_id=hidden_product.id,
+            identity_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        hidden_request = DataProductRoleAssignmentFactory(
+            data_product_id=hidden_product.id,
+            identity_id=identity.id,
+            requested_by=user,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        visible_request = DataProductRoleAssignmentFactory(
+            data_product_id=DataProductFactory().id,
+            identity_id=identity.id,
+            requested_by=user,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        hidden_request_id = str(hidden_request.id)
+        visible_request_id = str(visible_request.id)
+        membership_id = str(membership.id)
+
+        response = client.get(f"{ENDPOINT}/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert hidden_request_id in {
+            request["id"] for request in response.json()["my_requests"]
+        }
+
+        response = client.delete(
+            f"/api/v2/authz/role_assignments/data_product/{membership_id}"
+        )
+        assert response.status_code == 200, response.text
+
+        response = client.get(f"{ENDPOINT}/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert [request["id"] for request in response.json()["my_requests"]] == [
+            visible_request_id
+        ]
 
     def test_get_current_user_my_requests_redacted(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

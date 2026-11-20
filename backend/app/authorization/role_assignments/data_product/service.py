@@ -23,6 +23,8 @@ from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
 from app.groups.model import GroupMembership
 from app.groups.service import GroupService
+from app.identities.model import ensure_identity_exists
+from app.identities.type import IdentityType
 from app.shared.model import naive_utc_now
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -45,7 +47,6 @@ class RoleAssignmentService:
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
-        users_only: bool = False,
     ) -> Sequence[DataProductRoleAssignment]:
         """
         Lists assignments for a given data product, identity, or role.
@@ -71,10 +72,6 @@ class RoleAssignmentService:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
-        if users_only:
-            query = query.join(
-                UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id
-            )
 
         return self.db.scalars(query).all()
 
@@ -82,6 +79,7 @@ class RoleAssignmentService:
         self, data_product_id: UUID, role_id: UUID, identity_id: UUID, *, actor: User
     ) -> DataProductRoleAssignment:
         self.ensure_is_data_product_scope(role_id)
+        self._ensure_owner_is_user(role_id, identity_id)
         dp = ensure_data_product_exists(data_product_id, self.db)
         if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
@@ -102,7 +100,7 @@ class RoleAssignmentService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Role assignment already exists for this user and data product."
+                        "Role assignment already exists for this identity and data product."
                     ),
                 )
 
@@ -131,6 +129,12 @@ class RoleAssignmentService:
     ) -> DataProductRoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
+
+        target_role_id = request.role_id or assignment.role_id
+        if target_role_id is not None and (
+            request.role_id is not None or request.decision == DecisionStatus.APPROVED
+        ):
+            self._ensure_owner_is_user(target_role_id, assignment.identity_id)
 
         if (role_id := request.role_id) is not None:
             self.ensure_is_data_product_scope(role_id)
@@ -165,6 +169,18 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
+    def _ensure_owner_is_user(self, role_id: UUID, identity_id: UUID) -> None:
+        role = self.db.get(Role, role_id)
+        if (
+            role is not None
+            and role.prototype == Prototype.OWNER
+            and ensure_identity_exists(identity_id, self.db).type != IdentityType.USER
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only users can be Data Product owners",
+            )
+
     def _guard_against_illegal_owner_removal(
         self, assignment: DataProductRoleAssignment
     ) -> None:
@@ -176,7 +192,7 @@ class RoleAssignmentService:
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                "A data product must always be owned by at least one user",
+                "A data product must always be owned by at least one identity",
             )
 
     def _count_owners(self, data_product_id: UUID) -> int:
@@ -199,8 +215,13 @@ class RoleAssignmentService:
     ) -> Sequence[DataProductRoleAssignmentRequest]:
         query = (
             select(DataProductRoleAssignmentModel)
+            .join(DataProductRoleAssignmentModel.data_product)
+            .options(contains_eager(DataProductRoleAssignmentModel.data_product))
             .filter(
-                DataProductRoleAssignmentModel.identity_id == user.id,
+                or_(
+                    DataProductRoleAssignmentModel.identity_id == user.id,
+                    DataProductRoleAssignmentModel.requested_by_id == user.id,
+                ),
             )
             .order_by(asc(DataProductRoleAssignmentModel.requested_on))
         )

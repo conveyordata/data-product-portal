@@ -58,7 +58,7 @@ export function NotificationDescription({ record }: NotificationDescriptionProps
                   : null,
             target_type,
         );
-        if (target_type !== EventReferenceEntity.User) {
+        if (target_type !== EventReferenceEntity.User && target_type !== EventEntityType.Identity) {
             targetelement = (
                 <Button
                     type="link"

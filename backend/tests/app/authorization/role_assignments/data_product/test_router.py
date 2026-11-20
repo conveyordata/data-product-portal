@@ -8,10 +8,13 @@ from fastapi.testclient import TestClient
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
+from app.identities.type import IdentityType
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    GroupFactory,
+    MachineUserFactory,
     RoleFactory,
     UserFactory,
 )
@@ -26,23 +29,138 @@ if TYPE_CHECKING:
     from app.users.schema import User
 
 ENDPOINT = "/api/v2/authz/role_assignments/data_product"
+IDENTITY_CASES = [
+    pytest.param(UserFactory, IdentityType.USER, "email", id="user"),
+    pytest.param(GroupFactory, IdentityType.GROUP, "display_name", id="group"),
+    pytest.param(
+        MachineUserFactory, IdentityType.MACHINE_USER, "display_name", id="machine_user"
+    ),
+]
 
 
 class TestDataProductRoleAssignmentsRouter:
-    def test_list_assignments(self, client: TestClient):
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    @pytest.mark.parametrize("operation", ["create", "request", "modify", "approve"])
+    def test_owner_assignment__requires_user(
+        self, client: TestClient, identity_factory, operation
+    ):
+        data_product = DataProductFactory()
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authorization_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=actor.id,
+            role_id=authorization_role.id,
+            data_product_id=data_product.id,
+        )
+        request_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(identity_id=actor.id, role_id=request_role.id)
+        identity = identity_factory()
+        owner_role = RoleFactory.data_product_owner()
+        if operation in ("create", "request"):
+            response = client.post(
+                ENDPOINT if operation == "create" else f"{ENDPOINT}/request",
+                json={
+                    "data_product_id": str(data_product.id),
+                    "identity_id": str(identity.id),
+                    "role_id": str(owner_role.id),
+                },
+            )
+        else:
+            assignment = DataProductRoleAssignmentFactory(
+                data_product_id=data_product.id,
+                identity_id=identity.id,
+                role_id=(
+                    owner_role.id if operation == "approve" else authorization_role.id
+                ),
+                decision=DecisionStatus.PENDING,
+            )
+            response = (
+                client.put(
+                    f"{ENDPOINT}/{assignment.id}",
+                    json={"role_id": str(owner_role.id)},
+                )
+                if operation == "modify"
+                else client.post(
+                    f"{ENDPOINT}/{assignment.id}/decide",
+                    json={"decision": DecisionStatus.APPROVED},
+                )
+            )
+
+        if identity.type == IdentityType.USER:
+            assert response.status_code == status.HTTP_200_OK, response.text
+            assert response.json()["role"]["id"] == str(owner_role.id)
+        else:
+            assert response.status_code == status.HTTP_400_BAD_REQUEST, response.text
+            assert response.json()["detail"] == "Only users can be Data Product owners"
+            assignments = client.get(
+                ENDPOINT,
+                params={"identity_id": str(identity.id)},
+            ).json()["role_assignments"]
+            if operation in ("create", "request"):
+                assert assignments == []
+            else:
+                assert assignments[0]["decision"] == DecisionStatus.PENDING
+                assert assignments[0]["role"]["id"] == str(assignment.role_id)
+
+    @pytest.mark.parametrize(
+        ("identity_factory", "identity_type", "detail_field"),
+        IDENTITY_CASES,
+    )
+    def test_list_assignments__identity(
+        self,
+        client: TestClient,
+        identity_factory,
+        identity_type: IdentityType,
+        detail_field: str,
+    ):
         data_product: DataProduct = DataProductFactory()
-        user: User = UserFactory()
+        identity = identity_factory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
-            data_product_id=data_product.id, identity_id=user.id, role_id=role.id
+            data_product_id=data_product.id,
+            identity_id=identity.id,
+            role_id=role.id,
         )
-        response = client.get(f"{ENDPOINT}")
 
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data["role_assignments"]) == 1
-        assert data["role_assignments"][0]["id"] == str(assignment.id)
+        response = client.get(
+            ENDPOINT,
+            params={
+                "data_product_id": str(data_product.id),
+                "identity_id": str(identity.id),
+            },
+        )
 
+        assert response.status_code == status.HTTP_200_OK
+        assignments = response.json()["role_assignments"]
+        assert len(assignments) == 1
+
+        response_assignment = assignments[0]
+        response_identity = response_assignment["identity"]
+
+        assert response_assignment["id"] == str(assignment.id)
+        assert response_assignment["data_product"]["id"] == str(data_product.id)
+        assert response_identity["id"] == str(identity.id)
+        assert response_identity["type"] == identity_type.value
+        assert response_identity["external_id"] == identity.external_id
+        assert response_identity[detail_field] == str(getattr(identity, detail_field))
+        assert response_assignment["role"]["id"] == str(role.id)
+
+    @pytest.mark.parametrize(
+        ("identity_factory", "identity_type", "detail_field"),
+        IDENTITY_CASES,
+    )
     @pytest.mark.parametrize(
         "permissions",
         [
@@ -56,40 +174,49 @@ class TestDataProductRoleAssignmentsRouter:
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
-    def test_create_assignment(
+    def test_create_assignment__identity(
         self,
         mock_data_product_auth_assignment,
         permissions: list[Action],
+        identity_factory,
+        identity_type: IdentityType,
+        detail_field: str,
         client: TestClient,
     ):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        authz_role = RoleFactory(
+        authorization_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=permissions,
         )
         DataProductRoleAssignmentFactory(
-            identity_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+            identity_id=me.id,
+            role_id=authorization_role.id,
+            data_product_id=data_product.id,
         )
-        user: User = UserFactory()
+        identity = identity_factory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}",
+            ENDPOINT,
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user.id),
+                "identity_id": str(identity.id),
                 "role_id": str(role.id),
             },
         )
-        assert response.status_code == 200
 
-        data = response.json()
-        assert data["data_product"]["id"] == str(data_product.id)
-        assert data["user"]["id"] == str(user.id)
-        assert data["role"]["id"] == str(role.id)
+        assert response.status_code == status.HTTP_200_OK
+        assignment = response.json()
+        response_identity = assignment["identity"]
 
-        # Verify Casbin update behavior
+        assert assignment["data_product"]["id"] == str(data_product.id)
+        assert response_identity["id"] == str(identity.id)
+        assert response_identity["type"] == identity_type.value
+        assert response_identity["external_id"] == identity.external_id
+        assert response_identity[detail_field] == str(getattr(identity, detail_field))
+        assert assignment["role"]["id"] == str(role.id)
+
         if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
             mock_data_product_auth_assignment.assert_called_once()
             mock_data_product_auth_assignment.return_value.add.assert_called_once()
@@ -162,7 +289,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user.id),
+                "identity_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -183,7 +310,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "user_id": str(user.id),
+                "identity_id": str(user.id),
                 "role_id": str(role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -192,7 +319,7 @@ class TestDataProductRoleAssignmentsRouter:
 
         data = response.json()
         assert data["data_product"]["id"] == str(data_product.id)
-        assert data["user"]["id"] == str(user.id)
+        assert data["identity"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_request_assignment_generates_webhook_v2_event(
@@ -229,7 +356,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "user_id": str(requested_user.id),
+                "identity_id": str(requested_user.id),
                 "role_id": str(requested_role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -268,7 +395,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "user_id": str(requested_user.id),
+                "identity_id": str(requested_user.id),
                 "role_id": str(requested_role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -293,7 +420,7 @@ class TestDataProductRoleAssignmentsRouter:
             response = client.post(
                 f"{ENDPOINT}/request",
                 json={
-                    "user_id": str(user.id),
+                    "identity_id": str(user.id),
                     "role_id": str(role.id),
                     "data_product_id": str(data_product.id),
                 },
@@ -333,7 +460,10 @@ class TestDataProductRoleAssignmentsRouter:
         self.test_delete_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
-    def test_delete_last_owner_assignment(self, client: TestClient):
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    def test_delete_last_owner_assignment(self, client: TestClient, identity_factory):
         data_product: DataProduct = DataProductFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -344,7 +474,7 @@ class TestDataProductRoleAssignmentsRouter:
             identity_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
         role = RoleFactory.data_product_owner()
-        user_1, user_2 = UserFactory.create_batch(2)
+        user_1, user_2 = UserFactory(), identity_factory()
         assignment_1 = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             identity_id=user_1.id,
@@ -361,21 +491,32 @@ class TestDataProductRoleAssignmentsRouter:
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"]
+            == "A data product must always be owned by at least one identity"
+        )
 
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    @pytest.mark.parametrize("operation", ["delete", "modify"])
     def test_delete_last_approved_owner_assignment__other_owner_pending(
-        self, client: TestClient
+        self, client: TestClient, identity_factory, operation
     ):
         data_product: DataProduct = DataProductFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATA_PRODUCT__DELETE_USER],
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__DELETE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
+            ],
         )
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
         role = RoleFactory.data_product_owner()
-        user_1, user_2 = UserFactory.create_batch(2)
+        user_1, user_2 = identity_factory(), UserFactory()
         approved = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             identity_id=user_1.id,
@@ -388,8 +529,18 @@ class TestDataProductRoleAssignmentsRouter:
             decision=DecisionStatus.PENDING,
         )
 
-        response = client.delete(f"{ENDPOINT}/{approved.id}")
+        response = (
+            client.delete(f"{ENDPOINT}/{approved.id}")
+            if operation == "delete"
+            else client.put(
+                f"{ENDPOINT}/{approved.id}", json={"role_id": str(authz_role.id)}
+            )
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert (
+            response.json()["detail"]
+            == "A data product must always be owned by at least one identity"
+        )
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -580,7 +731,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user.id),
+                "identity_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -701,7 +852,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user_requester.id),
+                "identity_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
         )
@@ -738,7 +889,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user_requester.id),
+                "identity_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
         )

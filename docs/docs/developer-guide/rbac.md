@@ -68,12 +68,12 @@ Roles can be created and customized for each scope. When creating a custom role:
 
 ### Role Assignments
 
-Role assignments link users to roles within a specific scope:
+Role assignments link identities to roles within a specific scope. Global and Data Product roles support users, groups and machine users:
 - **Global roles** are assigned through the People page and apply platform-wide
 - **Data Product roles** are assigned when adding team members to a data product
 - **Output Port roles** are assigned when granting access to output ports
-- Users can have different roles in different scopes simultaneously
-- Each user can have only **one global role** at a time (excluding temporary admin privileges)
+- Identities can have different roles in different scopes simultaneously
+- Each identity can have only **one global role** at a time (excluding temporary admin privileges)
 
 #### Group Role Assignments
 
@@ -144,21 +144,21 @@ You can see what the RBAC settings page looks like below:
 4. Save your changes
 
 :::caution
-Modifying a role affects all users currently assigned that role. Changes take effect immediately.
+Modifying a role affects all identities currently assigned that role. Changes take effect immediately.
 :::
 
-## Assigning Roles to Users
+## Assigning Roles to Identities
 
 ### Global Role Assignment
 
-Global roles must be assigned by administrators through the People page:
+Global roles for users, groups and machine users are assigned by administrators through the People page:
 
 1. Navigate to **People** (requires admin privileges)
-2. Find the user you want to assign a role to
-3. Select the desired role from the dropdown in the **Role** column
+2. Find the identity you want to assign a role to
+3. Select the desired role from the dropdown in the **Global Role** column
 4. The assignment takes effect immediately
 
-Users can also be granted the ability to elevate to temporary admin by checking the **"Can become admin"** checkbox.
+Only users can be granted the ability to elevate to temporary admin by checking the **"Can become admin"** checkbox.
 
 ### Data Product Role Assignment
 
@@ -167,9 +167,11 @@ Data product team members are assigned roles when added to the product:
 1. Navigate to the data product's detail page
 2. Go to the **Team** tab
 3. Click **"Add Team Member"**
-4. Select the user and assign them a role (e.g., Owner, Viewer, Custom Role)
+4. Assign an identity (user, group or machine user) a role (e.g., Owner, Viewer, Custom Role)
 5. Users can also **request to join** a data product, specifying their desired role
 6. Existing team members with appropriate permissions can approve these requests
+
+**Only users can be assigned the Data Product Owner role**
 
 ### Output Port Role Assignment
 

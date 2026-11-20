@@ -25,7 +25,7 @@ describe('Data Product role assignment tags', () => {
 
         await store.dispatch(
             api.endpoints.requestDataProductRoleAssignment.initiate({
-                user_id: 'u1',
+                identity_id: 'u1',
                 role_id: 'r1',
                 data_product_id: 'dp1',
             }),

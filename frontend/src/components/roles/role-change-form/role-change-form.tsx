@@ -1,30 +1,59 @@
-import { Flex, Select } from 'antd';
+import { Flex, Select, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import { type Role, type Scope, useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
+import { Prototype } from '@/types/roles';
 
 import styles from './role-change-form.module.scss';
 
 type Props = {
-    initialRole: Role;
+    role?: Role | null;
     onRoleChange: (role: Role) => void;
     disabled?: boolean;
+    ariaLabel?: string;
+    allowOwner?: boolean;
+    placeholder?: string;
     scope: Scope;
 };
-export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, scope }: Props) {
+export function RoleChangeForm({
+    role = null,
+    onRoleChange,
+    disabled = true,
+    scope,
+    ariaLabel,
+    allowOwner = true,
+    placeholder,
+}: Props) {
+    const { t } = useTranslation();
     const { data: { roles = [] } = {}, isLoading } = useGetRolesQuery(scope);
 
-    const options = roles.map((role) => ({ label: role.name, value: role.id }));
+    const options = roles.map((role) => ({
+        label: role.name,
+        value: role.id,
+        disabled: !allowOwner && role.prototype === Prototype.OWNER,
+    }));
     return (
         <Flex className={styles.selectRoleWrapper}>
             <Select
                 className={styles.selectRoleInput}
+                aria-label={ariaLabel}
                 disabled={disabled}
                 loading={isLoading}
                 options={options}
-                defaultValue={initialRole.id}
+                optionRender={({ label, data }) =>
+                    data.disabled ? (
+                        <Tooltip title={t('Only users can be Data Product owners')}>
+                            <span style={{ display: 'block' }}>{label}</span>
+                        </Tooltip>
+                    ) : (
+                        label
+                    )
+                }
+                value={role?.id ?? null}
+                placeholder={placeholder ?? t('No role assigned')}
                 onChange={(id: string) => {
                     const selectedRole = roles.find((role) => role.id === id);
-                    if (selectedRole) {
+                    if (selectedRole && (allowOwner || selectedRole.prototype !== Prototype.OWNER)) {
                         onRoleChange(selectedRole);
                     }
                 }}

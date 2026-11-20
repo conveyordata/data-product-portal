@@ -7,6 +7,8 @@ const services = [
     { name: 'Authorization - Roles', file: 'authorizationRoles' },
     { name: 'Users', file: 'users' },
     { name: 'Users - Notifications', file: 'usersNotifications' },
+    { name: 'Groups', file: 'groups' },
+    { name: 'Machine Users', file: 'machineUsers' },
     { name: 'Configuration - Data Product lifecycles', file: 'configurationDataProductLifecycles' },
     { name: 'Configuration - Data Product settings', file: 'configurationDataProductSettings' },
     { name: 'Configuration - Data Product types', file: 'configurationDataProductTypes' },

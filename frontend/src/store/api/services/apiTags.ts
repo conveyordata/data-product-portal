@@ -9,6 +9,7 @@ import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataPr
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
 import { graphTags } from '@/store/api/services/tags/graphTags.ts';
+import { identitiesTags } from '@/store/api/services/tags/identitiesTags.ts';
 import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
 import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
@@ -61,7 +62,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         modifyGlobalRoleAssignment: {
@@ -69,7 +70,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         decideGlobalRoleAssignment: {
@@ -77,7 +78,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.GlobalRoleAssignments, id: result?.id },
-                { type: TagTypes.User, id: result?.user?.id },
+                { type: TagTypes.User, id: result?.identity?.type === 'user' ? result.identity.id : undefined },
             ],
         },
         deleteGlobalRoleAssignment: {
@@ -104,6 +105,7 @@ api.enhanceEndpoints({
                 { type: TagTypes.DataProductRoleAssignments, id: result?.id },
                 { type: TagTypes.DataProduct, id: result?.data_product?.id },
                 { type: TagTypes.History, id: result?.data_product?.id },
+                ...requestListTags,
             ],
         },
         modifyDataProductRoleAssignment: {
@@ -343,6 +345,7 @@ api.enhanceEndpoints({
         ...dataProductTags,
         ...usersNotificationsTags,
         ...usersTags,
+        ...identitiesTags,
         ...dataProductsOutputPortsInputPortsTags,
         ...explorationTags,
         ...configurationAccessDurationsTags,

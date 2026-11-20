@@ -7,11 +7,12 @@ describe('Role assignment', () => {
 
         cy.visit(`/studio/${dataProductId}?tab=team`);
 
-        cy.contains('button', 'Add User').click();
+        cy.contains('button', 'Add team member').click();
 
-        cy.get('[data-cy="user-popup-search"]').type(userName);
+        // The search field has no visible label and shares its placeholder with the Team search.
+        cy.get('[data-cy="identity-selector-search"]').type(userName);
 
-        cy.contains('[data-cy="user-popup-item"]', userName, { timeout: 20000 })
+        cy.contains('tr', userName, { timeout: 20000 })
             .should('be.visible')
             .within(() => {
                 cy.contains('Select a role').click({ force: true });
@@ -19,8 +20,13 @@ describe('Role assignment', () => {
 
         cy.intercept('POST', '**/authz/role_assignments/data_product').as('createRoleAssignment');
         cy.contains('Member').click();
-        cy.wait('@createRoleAssignment', { timeout: 30000 });
+        cy.wait('@createRoleAssignment', { timeout: 30000 }).its('response.statusCode').should('eq', 200);
 
-        cy.contains('User has been granted access to the Data Product').should('be.visible');
+        cy.contains('Role has been assigned').should('be.visible');
+        cy.contains('button', /^Cancel$/).click();
+        cy.contains('tr', userName).within(() => {
+            cy.contains('Member').should('be.visible');
+            cy.contains('Approved').should('be.visible');
+        });
     });
 });

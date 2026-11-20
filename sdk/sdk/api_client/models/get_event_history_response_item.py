@@ -15,9 +15,12 @@ if TYPE_CHECKING:
     from ..models.announcement import Announcement
     from ..models.data_product import DataProduct
     from ..models.exploration import Exploration
+    from ..models.group_identity import GroupIdentity
+    from ..models.machine_user_identity import MachineUserIdentity
     from ..models.output_port import OutputPort
     from ..models.technical_asset import TechnicalAsset
     from ..models.user import User
+    from ..models.user_identity import UserIdentity
 
 
 T = TypeVar("T", bound="GetEventHistoryResponseItem")
@@ -44,6 +47,7 @@ class GetEventHistoryResponseItem:
         output_port (None | OutputPort | Unset):
         technical_asset (None | TechnicalAsset | Unset):
         exploration (Exploration | None | Unset):
+        identity (GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity):
         announcement (Announcement | None | Unset):
     """
 
@@ -64,6 +68,7 @@ class GetEventHistoryResponseItem:
     output_port: None | OutputPort | Unset = UNSET
     technical_asset: None | TechnicalAsset | Unset = UNSET
     exploration: Exploration | None | Unset = UNSET
+    identity: GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity = UNSET
     announcement: Announcement | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -71,9 +76,12 @@ class GetEventHistoryResponseItem:
         from ..models.announcement import Announcement  # noqa: PLC0415
         from ..models.data_product import DataProduct  # noqa: PLC0415
         from ..models.exploration import Exploration  # noqa: PLC0415
+        from ..models.group_identity import GroupIdentity  # noqa: PLC0415
+        from ..models.machine_user_identity import MachineUserIdentity  # noqa: PLC0415
         from ..models.output_port import OutputPort  # noqa: PLC0415
         from ..models.technical_asset import TechnicalAsset  # noqa: PLC0415
         from ..models.user import User  # noqa: PLC0415
+        from ..models.user_identity import UserIdentity  # noqa: PLC0415
 
         id = str(self.id)
 
@@ -169,6 +177,18 @@ class GetEventHistoryResponseItem:
         else:
             exploration = self.exploration
 
+        identity: dict[str, Any] | None | Unset
+        if isinstance(self.identity, Unset):
+            identity = UNSET
+        elif isinstance(self.identity, UserIdentity):
+            identity = self.identity.to_dict()
+        elif isinstance(self.identity, GroupIdentity):
+            identity = self.identity.to_dict()
+        elif isinstance(self.identity, MachineUserIdentity):
+            identity = self.identity.to_dict()
+        else:
+            identity = self.identity
+
         announcement: dict[str, Any] | None | Unset
         if isinstance(self.announcement, Unset):
             announcement = UNSET
@@ -211,6 +231,8 @@ class GetEventHistoryResponseItem:
             field_dict["technical_asset"] = technical_asset
         if exploration is not UNSET:
             field_dict["exploration"] = exploration
+        if identity is not UNSET:
+            field_dict["identity"] = identity
         if announcement is not UNSET:
             field_dict["announcement"] = announcement
 
@@ -221,9 +243,12 @@ class GetEventHistoryResponseItem:
         from ..models.announcement import Announcement  # noqa: PLC0415
         from ..models.data_product import DataProduct  # noqa: PLC0415
         from ..models.exploration import Exploration  # noqa: PLC0415
+        from ..models.group_identity import GroupIdentity  # noqa: PLC0415
+        from ..models.machine_user_identity import MachineUserIdentity  # noqa: PLC0415
         from ..models.output_port import OutputPort  # noqa: PLC0415
         from ..models.technical_asset import TechnicalAsset  # noqa: PLC0415
         from ..models.user import User  # noqa: PLC0415
+        from ..models.user_identity import UserIdentity  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -407,6 +432,43 @@ class GetEventHistoryResponseItem:
 
         exploration = _parse_exploration(d.pop("exploration", UNSET))
 
+        def _parse_identity(
+            data: object,
+        ) -> GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_identity_type_0 = UserIdentity.from_dict(data)
+
+                return componentsschemas_identity_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_identity_type_1 = GroupIdentity.from_dict(data)
+
+                return componentsschemas_identity_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_identity_type_2 = MachineUserIdentity.from_dict(data)
+
+                return componentsschemas_identity_type_2
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(
+                GroupIdentity | MachineUserIdentity | None | Unset | UserIdentity, data
+            )
+
+        identity = _parse_identity(d.pop("identity", UNSET))
+
         def _parse_announcement(data: object) -> Announcement | None | Unset:
             if data is None:
                 return data
@@ -442,6 +504,7 @@ class GetEventHistoryResponseItem:
             output_port=output_port,
             technical_asset=technical_asset,
             exploration=exploration,
+            identity=identity,
             announcement=announcement,
         )
 
