@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from functools import partial
 from pathlib import Path
 from typing import (
     Sequence,
@@ -14,10 +13,12 @@ from casbin import SyncedEnforcer, util
 from fastapi import HTTPException, Request, status
 from opentelemetry import trace
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from app.core.auth.auth import AuthenticatedUser
 from app.database import database
 from app.database.deps import DbSession
+from app.database.visibility import is_member_of_consuming_data_product
 from app.settings import settings
 from app.utils.singleton import Singleton
 
@@ -29,36 +30,41 @@ ID: TypeAlias = Union[str, UUID]
 tracer = trace.get_tracer(__name__)
 
 
-@dataclass(frozen=True)
-class InputPortLink:
-    consumer_id: str
-    producer_data_product_id: str
-    producer_output_port_id: str
+class Authorization:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    @classmethod
+    def enforce(
+        cls,
+        action: AuthorizationAction,
+        resolver: type[SubjectResolver],
+        *,
+        object_id: str = "id",
+    ) -> "Enforcement":
+        return Enforcement(action, resolver, object_id)
+
+    def has_access(
+        self,
+        *,
+        sub: str,
+        dom: str,
+        obj: str,
+        act: AuthorizationAction,
+        parent: str = "*",
+    ) -> bool:
+        if CasbinPolicies().allows(sub=sub, dom=dom, obj=obj, act=act, parent=parent):
+            return True
+        if act != AuthorizationAction.HIDDEN__OUTPUT_PORT__READ:
+            return False
+        try:
+            output_port_id, user_id = UUID(obj), UUID(sub)
+        except ValueError:
+            return False
+        return is_member_of_consuming_data_product(self.db, output_port_id, user_id)
 
 
-def _has_access_through_consumer_role(
-    enforcer: SyncedEnforcer,
-    sub: str,
-    role: str,
-    resource: str,
-    parent: str,
-    action: str,
-) -> bool:
-    if action != str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ):
-        return False
-    linked_resources = enforcer.get_filtered_named_grouping_policy(
-        "g4", 1, parent, resource
-    )
-
-    # g4 identifies consumers of the exact output port;
-    # g checks whether the subject has the evaluated role on one of them.
-    return any(
-        enforcer.get_role_manager().has_link(sub, role, consumer_id)
-        for consumer_id, _, _ in linked_resources
-    )
-
-
-class Authorization(metaclass=Singleton):
+class CasbinPolicies(metaclass=Singleton):
     def __init__(self) -> None:
         self._reloading = False
         engine = create_engine(database.get_url())
@@ -85,10 +91,6 @@ class Authorization(metaclass=Singleton):
         enforcer = SyncedEnforcer(model, adapter)
         # Used to allow g(user, group, *) rules so users inherit group permissions
         enforcer.add_named_domain_matching_func("g", util.key_match)
-        enforcer.add_function(
-            "hasAccessThroughConsumerRole",
-            partial(_has_access_through_consumer_role, enforcer),
-        )
         if settings.AUTHORIZER_AUTOLOAD_ENABLED:
             enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         return enforcer
@@ -98,18 +100,8 @@ class Authorization(metaclass=Singleton):
         """Releases the enforcer from the singleton. Useful during testing."""
         Singleton.deregister(cls)
 
-    @classmethod
-    def enforce(
-        cls,
-        action: AuthorizationAction,
-        resolver: type[SubjectResolver],
-        *,
-        object_id: str = "id",
-    ) -> "Enforcement":
-        return Enforcement(action, resolver, object_id)
-
     @cachedmethod(lambda self: self._cache)
-    def has_access(
+    def allows(
         self,
         *,
         sub: str,
@@ -118,7 +110,8 @@ class Authorization(metaclass=Singleton):
         act: AuthorizationAction,
         parent: str = "*",
     ) -> bool:
-        with tracer.start_as_current_span("has_access"):
+        """Casbin alone: misses consumer access, so ask through Authorization(db).has_access."""
+        with tracer.start_as_current_span("casbin_allows"):
             enforcer: SyncedEnforcer = self._enforcer
             return enforcer.enforce(sub, dom, obj, parent, str(act))
 
@@ -200,63 +193,6 @@ class Authorization(metaclass=Singleton):
         return enforcer.has_named_grouping_policy(
             "g", str(user_id), str(role_id), str(resource_id)
         )
-
-    def add_input_port_link(
-        self,
-        *,
-        consumer_id: ID,
-        producer_data_product_id: ID,
-        producer_output_port_id: ID,
-    ):
-        """
-        Establishes an input port relationship between a consumer and a producer output
-        port identified by the provided IDs. This ensures that a consumer can access
-        a hidden data product, or private output port that it consumes.
-
-        :param consumer_id: Identifier for the consumer entity.
-        :param producer_data_product_id: Identifier for the producer's data product.
-        :param producer_output_port_id: Identifier for the specific output port of the
-            producer.
-        """
-        enforcer: SyncedEnforcer = self._enforcer
-        enforcer.add_named_grouping_policy(
-            "g4",
-            str(consumer_id),
-            str(producer_data_product_id),
-            str(producer_output_port_id),
-        )
-        self._after_update()
-
-    def remove_input_port_link(
-        self,
-        *,
-        consumer_id: ID,
-        producer_data_product_id: ID,
-        producer_output_port_id: ID,
-    ):
-        enforcer: SyncedEnforcer = self._enforcer
-        enforcer.remove_named_grouping_policy(
-            "g4",
-            str(consumer_id),
-            str(producer_data_product_id),
-            str(producer_output_port_id),
-        )
-        self._after_update()
-
-    def get_input_port_link(
-        self, *, producer_data_product_id: ID
-    ) -> set[InputPortLink]:
-        """Retrieves consumer links created with ``add_consumer_link``."""
-        return {
-            InputPortLink(
-                consumer_id=consumer_id,
-                producer_data_product_id=producer_data_product_id,
-                producer_output_port_id=producer_output_port_id,
-            )
-            for consumer_id, producer_data_product_id, producer_output_port_id in self._enforcer.get_filtered_named_grouping_policy(
-                "g4", 1, str(producer_data_product_id)
-            )
-        }
 
     def assign_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Creates an entry in the casbin table,
@@ -410,22 +346,8 @@ class Authorization(metaclass=Singleton):
         role_updates = enforcer.remove_filtered_named_grouping_policy(
             "g", 2, str(resource_id)
         )
-        source_link_updates = enforcer.remove_filtered_named_grouping_policy(
-            "g4", 0, str(resource_id)
-        )
-        target_link_updates = enforcer.remove_filtered_named_grouping_policy(
-            "g4", 1, str(resource_id)
-        )
-        output_port_link_updates = enforcer.remove_filtered_named_grouping_policy(
-            "g4", 2, str(resource_id)
-        )
         self._after_update()
-        return bool(
-            role_updates
-            or source_link_updates
-            or target_link_updates
-            or output_port_link_updates
-        )
+        return bool(role_updates)
 
     def clear_assignments_for_domain(self, *, domain_id: ID) -> bool:
         """Removes all assignments to a domain inside the casbin table.
@@ -550,7 +472,7 @@ class Enforcement:
     ) -> None:
         context = await self.resolver.resolve_context(request, self.object_id, db)
 
-        if not Authorization().has_access(
+        if not Authorization(db).has_access(
             sub=str(user.id),
             dom=context.domain_id,
             obj=context.object_id,

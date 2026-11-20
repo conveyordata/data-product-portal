@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from app.settings import settings
 from tests.factories import (
     GlobalRoleAssignmentFactory,
@@ -98,7 +98,7 @@ class TestGlobalRoleAssignmentsRouter:
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert Authorization().has_admin_role(user_id=str(user.id)) is False
+        assert CasbinPolicies().has_admin_role(user_id=str(user.id)) is False
 
     def test_revoke_admin(self, client: TestClient):
         UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
@@ -321,7 +321,7 @@ class TestGlobalRoleAssignmentsRouter:
         response = client.delete(f"{ENDPOINT}/{assignment.id}")
 
         assert response.status_code == status.HTTP_200_OK
-        assert Authorization().has_admin_role(user_id=str(user.id)) is True
+        assert CasbinPolicies().has_admin_role(user_id=str(user.id)) is True
 
     def test_delete_last_admin_assignment(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -1,13 +1,18 @@
+import asyncio
 from copy import deepcopy
+from datetime import date, timedelta
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
 
+from app.abstract_data_product.input_ports.background_tasks import expire_input_ports
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.roles.schema import Scope
 from app.authorization.service import OUTPUT_PORT_READER_ROLE, AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
@@ -346,7 +351,7 @@ class TestOutputPortRouter:
         output_port = session.get(OutputPort, ds.id)
         assert output_port.access_type_id == access_type.id
         assert output_port.access_function == OutputPortAccessFunction.PRIVATE
-        assert not Authorization().has_resource_role(
+        assert not CasbinPolicies().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=ds.id
         )
 
@@ -495,6 +500,70 @@ class TestOutputPortRouter:
         )
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200
+
+    @staticmethod
+    def _invite_only_output_port_consumed_by_default_user(**input_port) -> OutputPort:
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        InputPortFactory(
+            consuming_abstract_data_product=consumer,
+            output_port=output_port,
+            **input_port,
+        )
+        return output_port
+
+    def test_get_output_port__consumer_member_reads_invite_only(self, client):
+        output_port = self._invite_only_output_port_consumed_by_default_user()
+
+        response = self.get_output_port(
+            client, output_port.id, output_port.data_product_id
+        )
+
+        assert response.status_code == 200, response.text
+
+    def test_get_output_port__pending_consumer_cannot_read_invite_only(self, client):
+        output_port = self._invite_only_output_port_consumed_by_default_user(
+            status=InputPortStatus.PENDING
+        )
+
+        response = self.get_output_port(
+            client, output_port.id, output_port.data_product_id
+        )
+
+        assert response.status_code == 403
+
+    def test_get_output_port__expired_consumer_loses_read_without_restart(
+        self, client, session
+    ):
+        output_port = self._invite_only_output_port_consumed_by_default_user(
+            request__valid_until=date.today() - timedelta(days=1),
+            request__decided_by=None,
+        )
+        assert (
+            self.get_output_port(
+                client, output_port.id, output_port.data_product_id
+            ).status_code
+            == 200
+        )
+
+        with patch(
+            "app.abstract_data_product.input_ports.background_tasks.emit_all_events",
+            AsyncMock(),
+        ):
+            asyncio.run(expire_input_ports(session))
+
+        response = self.get_output_port(
+            client, output_port.id, output_port.data_product_id
+        )
+        assert response.status_code == 403
 
     def test_get_output_port__deduplicates_access_modes(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

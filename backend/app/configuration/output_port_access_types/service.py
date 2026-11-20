@@ -37,7 +37,7 @@ class OutputPortAccessTypeService:
     ) -> Sequence[OutputPortAccessTypesGetItem]:
         counts = None
         if include_output_port_count:
-            can_configure = Authorization().has_access(
+            can_configure = Authorization(self.db).has_access(
                 sub=str(user.id),
                 dom="*",
                 obj="*",
