@@ -6,7 +6,7 @@ Every Technical Asset has a namespace. It is generated from the asset name (or t
 
 Until now the namespace had to be unique within the owning Data Product. A Data Product with an S3 Technical Asset and an SSM Parameter Store Technical Asset for the same dataset could therefore not call both `orders`, even though they are different kinds of resources.
 
-The technical asset namespace does not drive any physical naming. Plugins build and validate physical identifiers (databases, catalogs, buckets, suffixes) from the Data Product namespace, and no plugin, route or provisioner looks up a Technical Asset by its namespace. The uniqueness rule therefore only protects the namespace as a readable handle.
+The technical asset namespace does not drive any physical naming. Plugins build and validate physical identifiers (databases, catalogs, buckets, suffixes) from the Data Product namespace, and no plugin, route or backend provisioner looks up a Technical Asset by its namespace. The one consumer that did is the legacy Terraform exporter (`integrations/terraform/envs/portal/read_portal_config.py`): it keyed exported assets, and the Output Port references to them, by `data product namespace / asset namespace`, so two assets sharing that pair would silently collapse into one.
 
 Which scope should technical asset namespace uniqueness have?
 
@@ -35,6 +35,7 @@ Which scope should technical asset namespace uniqueness have?
 * `GET /api/v2/resource_names/validate` with `model=technical_asset` requires `data_product_id` and `technical_asset_type`. It returns 400 when either is missing and 422 for an unknown Technical Asset Type. This is a breaking change for API clients that called it without a type.
 * The Technical Asset form checks the namespace once a Technical Asset Type is selected, and checks it again when the type changes.
 * Uniqueness is enforced in the application only; there is no database constraint.
+* The Terraform exporter keys assets by `data product namespace / asset namespace / asset id`, in both `data_outputs.yaml` and the Output Port references in `datasets.yaml`. The keys are only map lookups, not Terraform resource addresses, so no state moves. Both files must be regenerated together; a mix of old and new files breaks the references. The exporter still calls the removed pre-v2 routes; its migration to the v2 API is a separate change and must keep this key.
 
 ## Pros and Cons of the Options
 
