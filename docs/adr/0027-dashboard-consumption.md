@@ -11,6 +11,9 @@ Many consumers produce nothing: a Power BI dashboard for a team, an organisation
 The people who read a dashboard (end users) have no place in Portal.
 They cannot discover a dashboard, ask to see it, or be granted the data it shows.
 
+An Exploration does not fill that gap.
+Its Input Port carries one business justification, and the people added to the Exploration read under it without a justification of their own.
+
 How a dashboard reads its data decides who needs access:
 
 | | Technical identity | Viewer identity |
@@ -43,29 +46,60 @@ The question is where a dashboard or application lives in Portal, and how its re
 
 ## Considered Options
 
-* **Option 1: Consumption as a separate concept.** A Consumption sits next to Data Product and Exploration. It holds Input Ports, its Technical Assets are the dashboards and apps, and audiences decide who opens which Technical Asset. Its owner may differ from the owners of the data. Every new reader who joins an audience gives a business justification, and the Consumption owner approves.
-* **Option 2: Dashboard as an Output Port, readers through Explorations.** A dashboard or app is an Output Port of the Data Product that builds it. Its access modes map to the tool's audiences and row-level security. A reader, or a Group, requests it through an Exploration. The business justification is given once, for the Exploration; members of its Group come and go without one.
-* **Option 3: Audiences on a Data Product.** A Data Product has audiences next to its Output Ports. An audience holds members and the Technical Assets they open. The audience is always owned by the Data Product's owner. Every new reader who joins an audience gives a business justification, and the Data Product owner approves.
+### Option 1: Output Ports open to identities
 
-The options differ on three points:
+When the owner creates an Output Port, they choose who may consume it: Data Products, identities, or both.
+Identities are users and Groups; whether machine users consume as identities or always through a Data Product is an open question.
+A dashboard or app is an Output Port of the Data Product that builds it, opened to identities.
 
-* **Who owns the readers.** In Option 2 the reader asks through the existing request flow. In Options 1 and 3 the owner of the dashboard manages an audience.
-* **How often a reader justifies access.** In Option 2 once per Exploration, which can cover a whole Group. In Options 1 and 3 once per reader, so the owner sees a justification for every new reader.
-* **Different owners without a Data Product.** Only Option 1 lets a team own a dashboard on other teams' data without creating a Data Product for it.
+* Each identity requests the Output Port itself, with its own business justification, the way a Data Product requests one today.
+* The Output Port's Access Type decides the approval, so an Output Port that needs approval or is Invite only works for identities as it does for Data Products ([ADR-0025](./0025-output-port-access-types.md)).
+* Access modes give one Output Port different views, mapped to the tool's audiences and row-level security.
+* The owner of the readers is the owner of the Data Product.
+* With viewer identity the identity holds the grant on the Output Port; with technical identity it gets the reader role on the dashboard.
+
+A stricter variant splits the two kinds of consumer: Data Products only consume Output Ports, and identities only consume a new concept next to them, an audience.
+Everything else stays the same.
+The split makes every concept explicit, at the cost of a new concept and of publishing twice when Data Products and people need the same data.
+
+### Option 2: Consumption as a separate concept
+
+A Consumption sits next to Data Product and Exploration.
+It holds Input Ports on Output Ports of any Data Products, and its Technical Assets are the dashboards and apps.
+
+* Audiences decide who opens which Technical Asset.
+* Every new reader who joins an audience gives a business justification, and the Consumption owner approves.
+* The Consumption's owner may differ from the owners of the data.
+* With viewer identity the readers of a Technical Asset get the grants of the Input Ports it reads.
+
+### Option 3: Dashboard as an Output Port, readers through Explorations
+
+A dashboard or app is an Output Port of the Data Product that builds it.
+A reader, or a Group, requests it through an Exploration.
+
+* The business justification is given once, for the Exploration's Input Port; members of the Exploration read under it.
+* Access modes map to the tool's audiences and row-level security.
+* With viewer identity the Provisioner grants the Exploration's members the data the dashboard reads.
+
+### How the options differ
+
+* **Who requests access.** In Option 1 the identity itself. In Option 2 the reader joins an audience that the Consumption owner manages. In Option 3 the owner of the Exploration, for its members.
+* **Who justifies access.** In Options 1 and 2 every reader, or every Group, gives its own justification. In Option 3 only the Exploration does, and its members have none.
+* **Different owners without a Data Product.** Only Option 2 lets a team own a dashboard on other teams' data without creating a Data Product for it.
 
 ## Comparison per scenario
 
-| Scenario | Option 1: Consumption | Option 2: Output Port and Explorations | Option 3: Audiences on a Data Product |
+| Scenario | Option 1: Output Ports open to identities | Option 2: Consumption | Option 3: Readers through Explorations |
 |---|---|---|---|
-| Team dashboard on own data | A Consumption next to the Data Product; its Input Ports are approved automatically | An Output Port on the own Data Product | An audience on the own Data Product |
-| Organisation-wide dashboard | Readers join an audience; the Consumption owner approves | One Exploration per reader or Group; the Output Port owner approves | Readers join an audience; the Data Product owner approves |
-| Dashboard by another team | A Consumption owned by that team | That team creates a Data Product for the dashboard | Same as Option 2 |
-| Combining Data Products | Input Ports on several Output Ports | Through the dashboard's own Data Product | Same as Option 2 |
-| Different views | One Technical Asset per view, or viewer identity | One access mode per view, mapped to the tool's audiences and row-level security | One audience per view, each with its own Technical Assets |
-| Viewer identity | Readers get the grants of the Input Ports their Technical Asset reads | The Provisioner grants readers the data the dashboard reads | Readers get grants on data inside the Data Product |
-| Application, agent or integration | A Consumption whose Technical Asset reads with a machine user | An app or API is an Output Port; an integration is an Exploration owned by a machine user | A machine user in an audience |
-| Business justification | Per reader who joins an audience | Once per Exploration, covering every member of its Group | Per reader who joins an audience |
-| New concepts | Consumption and audience | None | Audience |
+| Team dashboard on own data | An Output Port on the own Data Product, open to identities | A Consumption next to the Data Product; its Input Ports are approved automatically | An Output Port on the own Data Product |
+| Organisation-wide dashboard | Readers or Groups request the Output Port; its Access Type decides the approval | Readers join an audience; the Consumption owner approves | One Exploration per reader or Group; the Output Port owner approves |
+| Dashboard by another team | That team creates a Data Product for the dashboard | A Consumption owned by that team | Same as Option 1 |
+| Combining Data Products | Through the dashboard's own Data Product | Input Ports on several Output Ports | Same as Option 1 |
+| Different views | One access mode per view, mapped to the tool's audiences and row-level security | One Technical Asset per view, or viewer identity | Same as Option 1 |
+| Viewer identity | Readers hold the grant on the Output Port themselves | Readers get the grants of the Input Ports their Technical Asset reads | The Provisioner grants members the data the dashboard reads |
+| Application, agent or integration | An app or API is an Output Port; an integration consumes through a Data Product, or as a machine user if allowed | A Consumption whose Technical Asset reads with a machine user | An app or API is an Output Port; an integration is an Exploration owned by a machine user |
+| Business justification | Per request, by a reader or a Group | Per reader who joins an audience | Once per Exploration |
+| New concepts | None; an audience in the split variant | Consumption and audience | None |
 
 ## Decision Outcome
 
@@ -73,7 +107,18 @@ Open for the team vote.
 
 ## Pros and Cons of the Options
 
-### Option 1: Consumption as a separate concept
+### Option 1: Output Ports open to identities
+
+* **Good, because** it adds no concept: datasets, dashboards and APIs are all Output Ports, found and requested in the marketplace.
+* **Good, because** every reader justifies their own access, and the Output Port owner sees each reader and why.
+* **Good, because** Access Types and access modes work the same for Data Products and identities.
+* **Good, because** with viewer identity the reader holds the grant directly, with no grants passed on through another concept.
+* **Bad, because** a person now holds an Input Port: an Input Port is held by a Data Product or an identity, which changes the data model and the rules that build on it.
+* **Bad, because** an Output Port is no longer only data that others build on, and its owner has to choose who may consume it.
+* **Bad, because** a team that only builds a dashboard on other teams' data needs a Data Product.
+* **Bad, because** a large audience means many requests, unless Groups request or the Access Type approves automatically.
+
+### Option 2: Consumption as a separate concept
 
 * **Good, because** a team can own a dashboard or app on other teams' data, from several Data Products, without a Data Product of its own.
 * **Good, because** the Output Port keeps meaning data that others build on.
@@ -81,30 +126,23 @@ Open for the team vote.
 * **Bad, because** a producer that builds a dashboard on its own data manages a Data Product and a Consumption.
 * **Bad, because** it sits close to the Exploration and makes the difference between the two harder to explain.
 
-### Option 2: Dashboard as an Output Port, readers through Explorations
+### Option 3: Dashboard as an Output Port, readers through Explorations
 
-* **Good, because** it adds no concept: dashboards and APIs are Output Ports, and readers use the request flow and marketplace that exist.
-* **Good, because** access modes give one dashboard different views, the same way for dashboards and APIs.
-* **Bad, because** an Output Port is no longer only data that others build on, so Portal has to stop Data Products from requesting a dashboard.
-* **Bad, because** Explorations need a Group as requester and a request light enough to start from an "add reader" button. Access duration per requester is already an admin setting, so readers can get permanent access.
+* **Good, because** it adds no concept and uses the request flow that exists.
+* **Bad, because** members of an Exploration read without a justification of their own.
 * **Bad, because** the name "Exploration" reads as a step towards a Data Product rather than a request for access with a reason, so the concept has to be renamed in the code, the UI, the API and the docs.
 * **Bad, because** an Exploration cannot consume an Invite only Output Port, so sensitive dashboards need that rule revisited.
-* **Bad, because** with viewer identity the Provisioner grants readers the data behind the dashboard, which is not the Output Port they requested.
-
-### Option 3: Audiences on a Data Product
-
-* **Good, because** the producer shares a dashboard from its own Data Product without another concept to request through.
-* **Bad, because** the producer manages and approves every reader.
-* **Bad, because** with viewer identity readers get grants on data inside the Data Product, close to what it never publishes.
-* **Bad, because** a team that only builds a dashboard needs a Data Product, as in Option 2.
+* **Bad, because** with viewer identity the Provisioner grants members the data behind the dashboard, which is not the Output Port they requested.
 
 ## Open Questions
 
-1. **What an Exploration is.** Its purpose, its name, a Group as requester, and creating one behind an "add reader" button. This may need its own ADR.
-2. **Grants under viewer identity.** How the Provisioner grants readers the data a dashboard reads, and how the Output Port owner sees that.
-3. **Kinds of Output Port.** Which requesters may request which kind of Output Port, if dashboards and apps become Output Ports.
-4. **Moving a Technical Asset.** In Option 1, a dashboard a team built inside its Data Product is rebuilt in a Consumption once others need it. Should Portal move the Technical Asset instead, keeping the underlying resource?
-5. **Name.** "Consumption" is a working name for Option 1. See Appendix A for how other tools and open standards name it.
+1. **Explorations.** With Option 1, people request Output Ports directly. Is an Exploration still needed, only as a personal, time-bound workspace, or not at all?
+2. **Machine users.** Does a machine user always consume through a Data Product, because it automates work, or may it consume an Output Port as an identity?
+3. **Groups as requester.** Who may request on behalf of a Group, and does its justification cover every member?
+4. **The split variant.** Should one Output Port be able to serve both Data Products and identities, or should identities consume a separate audience?
+5. **Rules that change.** Which requesters may consume an Invite only Output Port, who receives Announcements, and how the definition of an Output Port covers dashboards.
+6. **Moving a Technical Asset.** In Option 2, a dashboard a team built inside its Data Product is rebuilt in a Consumption once others need it. Should Portal move the Technical Asset instead, keeping the underlying resource?
+7. **Name.** "Consumption" is a working name for Option 2. See Appendix A for how other tools and open standards name it.
 
 ## Appendix A: How others name it
 
