@@ -180,7 +180,6 @@ class TechnicalAssetService:
     def create_technical_asset(
         self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
-        # Serializes creates per Data Product so the namespace check below can't race.
         self.db.execute(
             select(DataProductModel.id)
             .where(DataProductModel.id == data_product_id)

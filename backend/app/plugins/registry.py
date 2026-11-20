@@ -58,11 +58,11 @@ class PluginRegistry:
 plugin_registry = PluginRegistry()
 
 
-def _ensure_technical_asset_type(name: str) -> str:
+def ensure_technical_asset_type(name: str) -> str:
     plugin = next((p for p in plugin_registry.discovered() if p.name == name), None)
     if plugin is None or not hasattr(plugin, "Meta"):
         raise ValueError(f"'{name}' is not an installed Technical Asset Type")
     return name
 
 
-TechnicalAssetType = Annotated[str, AfterValidator(_ensure_technical_asset_type)]
+TechnicalAssetType = Annotated[str, AfterValidator(ensure_technical_asset_type)]

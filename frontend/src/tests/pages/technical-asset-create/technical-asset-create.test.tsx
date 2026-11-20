@@ -8,6 +8,7 @@ import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import {
+    mock_platform_tiles,
     mock_plugins,
     mockGetPlatformTiles,
     mockGetPlugins,
@@ -237,6 +238,57 @@ describe('TechnicalAssetCreate', async () => {
             expect(lastValidation()?.get('technical_asset_type')).toBe('GlueTechnicalAssetConfiguration'),
         );
         await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
+    }, 15000);
+
+    it('should clear the namespace check when the Technical Asset Type is cleared', async () => {
+        defaultMocks();
+        mockGetPlatformTiles({
+            platform_tiles: [
+                ...mock_platform_tiles,
+                {
+                    ...mock_platform_tiles[0],
+                    label: 'Azure',
+                    value: 'azure',
+                    children: mock_platform_tiles[0].children?.slice(0, 1),
+                },
+            ],
+        });
+        server.use(
+            http.get('*/api/v2/resource_names/validate', () =>
+                HttpResponse.json({ validity: ResourceNameValidityType.Duplicate }),
+            ),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+        expect(await screen.findByText('This namespace is already in use')).toBeInTheDocument();
+
+        await user.click(screen.getByLabelText(/azure/i));
+
+        await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
+    }, 15000);
+
+    it('should not check the namespace before a Technical Asset Type is selected', async () => {
+        defaultMocks();
+        const validations: URLSearchParams[] = [];
+        server.use(
+            http.get('*/api/v2/resource_names/validate', ({ request }) => {
+                validations.push(new URL(request.url).searchParams);
+                return HttpResponse.json({ validity: ResourceNameValidityType.Valid });
+            }),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+
+        await waitFor(() => expect(document.querySelector('[data-cy="namespace"]')).not.toHaveValue(''));
+        expect(validations).toHaveLength(0);
+        expect(document.querySelector('.ant-form-item-feedback-icon-success')).not.toBeInTheDocument();
     }, 15000);
 
     it('should render the page title and the Technical Asset Type', async () => {

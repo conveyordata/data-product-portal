@@ -259,19 +259,29 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         }
     }, [mode, form, canEditNamespace, dataOutputNameValue, fetchNamespaceDebounced]);
 
-    useEffect(() => {
-        if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
-            form.validateFields(['namespace']);
-        }
-    }, [form, mode, canEditNamespace, sanitizedResourceName]);
-
     const options = [
         { label: t('Default'), value: 'default' },
         { label: t('Custom'), value: 'custom' },
     ];
 
     const technicalAssetType = pluginMetadata?.plugin;
+    const revalidateNamespace = useCallback(() => {
+        if (technicalAssetType) {
+            form.validateFields(['namespace']);
+        } else {
+            const namespace = form.getFieldValue('namespace');
+            form.resetFields(['namespace']);
+            form.setFields([{ name: 'namespace', value: namespace }]);
+        }
+    }, [form, technicalAssetType]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
+            revalidateNamespace();
+        }
+    }, [form, mode, canEditNamespace, sanitizedResourceName, revalidateNamespace]);
+
     const validateNamespaceCallback = useCallback(
         async (namespace: string) =>
             technicalAssetType
@@ -286,10 +296,10 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     );
 
     useEffect(() => {
-        if (technicalAssetType && form.getFieldValue('namespace')) {
-            form.validateFields(['namespace']);
+        if (form.getFieldValue('namespace')) {
+            revalidateNamespace();
         }
-    }, [form, technicalAssetType]);
+    }, [form, revalidateNamespace]);
 
     const latestPreview = useRef(0);
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {

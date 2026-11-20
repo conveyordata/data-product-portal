@@ -98,6 +98,20 @@ class TestResourceNamesRouter:
 
         assert response.status_code == 400
 
+    def test_validate_resource_name__ignores_technical_asset_type_for_other_models(
+        self, client: TestClient
+    ):
+        response = client.get(
+            "api/v2/resource_names/validate",
+            params={
+                "resource_name": "valid-namespace",
+                "model": "data_product",
+                "technical_asset_type": "UnknownType",
+            },
+        )
+
+        assert response.status_code == 200
+
     def test_validated_exploration(self, client):
         namespace = "test"
         response = self.validate_namespace(client, namespace, "exploration")
