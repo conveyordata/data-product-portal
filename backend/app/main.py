@@ -17,10 +17,10 @@ from app.abstract_data_product.background_tasks import check_stuck_deletions
 from app.abstract_data_product.input_ports.background_tasks import (
     expire_input_ports_task,
 )
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.role_assignments.global_.background_tasks import (
     check_expired_admins,
 )
-from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
@@ -94,8 +94,7 @@ async def _cancel_tasks(tasks: list[asyncio.Task[None]]) -> None:
 async def lifespan(app: FastAPI):
     if settings.AUTHORIZER_STARTUP_SYNC:
         with database.SessionLocal() as db:
-            AuthorizationService(db).reload_enforcer()
-            db.commit()
+            CasbinSync(db).rebuild()
 
     warm_text_embedding_model()
 

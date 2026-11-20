@@ -19,7 +19,6 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
-from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -31,6 +30,7 @@ from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
 from app.core import context
 from app.core.authz import CasbinPolicies
+from app.core.authz.rules import DATA_PRODUCT_READER_ROLE, EVERYONE
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.context import discard_events
 from app.core.embed.model import get_text_embedding_model
@@ -85,13 +85,13 @@ class DataProductService(AbstractDataProductService):
         match visibility:
             case DataProductVisibility.DISCOVERABLE:
                 CasbinPolicies().assign_resource_role(
-                    user_id="*",
+                    user_id=EVERYONE,
                     role_id=DATA_PRODUCT_READER_ROLE,
                     resource_id=str(data_product_id),
                 )
             case DataProductVisibility.HIDDEN:
                 CasbinPolicies().revoke_resource_role(
-                    user_id="*",
+                    user_id=EVERYONE,
                     role_id=DATA_PRODUCT_READER_ROLE,
                     resource_id=str(data_product_id),
                 )
@@ -592,16 +592,6 @@ class DataProductService(AbstractDataProductService):
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def sync_discoverable_data_products(self):
-        visible_data_product_ids = self.db.scalars(
-            select(DataProductModel.id).where(
-                DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
-            ),
-            execution_options=UNFILTERED,
-        ).all()
-        for id in visible_data_product_ids:
-            self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)
 
     def recalculate_search(self, id: UUID) -> None:
         self.db.flush()

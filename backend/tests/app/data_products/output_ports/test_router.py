@@ -9,11 +9,12 @@ import pytest
 from app.abstract_data_product.input_ports.background_tasks import expire_input_ports
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.type import AbstractDataProductType
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.roles.schema import Scope
-from app.authorization.service import OUTPUT_PORT_READER_ROLE, AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
+from app.core.authz.rules import OUTPUT_PORT_READER_ROLE
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
@@ -739,7 +740,7 @@ class TestOutputPortRouter:
             data_product=dp, access_function=OutputPortAccessFunction.PRIVATE
         )
         link = TechnicalAssetOutputPortAssociationFactory(output_port=output_port)
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
 
         response = client.get(
             f"{ENDPOINT.format(dp.id)}/{output_port.id}/graph", params={"level": 3}

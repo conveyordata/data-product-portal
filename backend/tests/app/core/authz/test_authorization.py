@@ -1,11 +1,19 @@
 from typing import cast
 from uuid import uuid4
 
+import pytest
 from sqlalchemy import text  # noqa: TID251
 from sqlalchemy.orm import Session
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, CasbinPolicies
+from app.core.authz.rules import (
+    GlobalRole,
+    Permission,
+    ResourceRole,
+    Rule,
+    membership_rules,
+)
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from tests.factories import (
     DataProductFactory,
@@ -862,3 +870,56 @@ class TestCrossWorkerStaleness:
 
         # Access is now correctly granted
         assert policies.allows(sub=user, dom="*", obj=resource, act=action) is True
+
+
+class TestReplaceAll:
+    def test_replace_all__changes_nothing_when_in_sync(self, policies: CasbinPolicies):
+        rules: set[Rule] = {
+            Permission("role", AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+            ResourceRole("user", "role", "resource"),
+            *membership_rules("user", "group"),
+        }
+
+        policies.replace_all(rules)
+        policies._enforcer.load_policy()
+
+        assert policies.replace_all(rules) == (0, 0)
+
+    def test_replace_all__keeps_the_table_state_when_saving_fails(
+        self, policies: CasbinPolicies, monkeypatch
+    ):
+        action = AuthorizationAction.GLOBAL__CREATE_USER
+        permission = Permission("group", action)
+        policies.replace_all({permission, GlobalRole("member", "group")})
+
+        def fail() -> None:
+            raise RuntimeError("database unavailable")
+
+        monkeypatch.setattr(policies._enforcer, "save_policy", fail)
+        with pytest.raises(RuntimeError):
+            policies.replace_all({permission})
+
+        assert policies.allows(sub="member", dom="*", obj="*", act=action)
+
+    def test_replace_all__removes_duplicate_and_unloaded_rows(
+        self, policies: CasbinPolicies, session: Session
+    ):
+        kept = ("member", "group")
+        stale = ("member", "other-group")
+        self._insert_global_roles(session, kept, kept, stale, stale)
+        policies._enforcer.load_policy()
+        self._insert_global_roles(session, ("member", "unloaded-group"))
+        policies.replace_all({GlobalRole("member", "group")})
+
+        rows = session.execute(
+            text("SELECT v1 FROM casbin_rule WHERE ptype='g3' AND v0='member'")
+        ).all()
+        assert [row.v1 for row in rows] == ["group"]
+
+    @staticmethod
+    def _insert_global_roles(session: Session, *rows: tuple[str, str]) -> None:
+        for member, group in rows:
+            session.execute(
+                text("INSERT INTO casbin_rule (ptype, v0, v1) VALUES ('g3', :m, :g)"),
+                {"m": member, "g": group},
+            )

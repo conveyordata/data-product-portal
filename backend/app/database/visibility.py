@@ -46,6 +46,20 @@ def acting_as(session: Session, user_id: Optional[UUID]) -> Iterator[Session]:
         session.info[_CURRENT_USER] = previous
 
 
+def data_product_visible_to_everyone(data_product) -> ColumnElement[bool]:
+    return data_product.visibility == DataProductVisibility.DISCOVERABLE
+
+
+def output_port_visible_to_everyone(output_port) -> ColumnElement[bool]:
+    return output_port.access_function.in_(_OPEN_ACCESS_FUNCTIONS)
+
+
+def access_function_visible_to_everyone(
+    access_function: OutputPortAccessFunction,
+) -> bool:
+    return access_function in _OPEN_ACCESS_FUNCTIONS
+
+
 def output_port_visible_ignoring_consumption(
     db: Session, output_port: type[OutputPort]
 ) -> ColumnElement[bool]:
@@ -152,7 +166,7 @@ def _current_user(db: Session) -> Optional[UUID]:
 
 def _data_product_visible(data_product, user_id: UUID) -> ColumnElement[bool]:
     return or_(
-        data_product.visibility == DataProductVisibility.DISCOVERABLE,
+        data_product_visible_to_everyone(data_product),
         _member(data_product.id, user_id),
         is_user_admin(user_id),
     )
@@ -183,7 +197,7 @@ def _output_port_visible_ignoring_consumption(
     output_port, user_id: UUID
 ) -> ColumnElement[bool]:
     return or_(
-        output_port.access_function.in_(_OPEN_ACCESS_FUNCTIONS),
+        output_port_visible_to_everyone(output_port),
         _has_output_port_role(output_port.id, user_id),
         _member(output_port.data_product_id, user_id),
         is_user_admin(user_id),
