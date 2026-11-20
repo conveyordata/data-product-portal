@@ -237,15 +237,17 @@ class InputPortService:
             consuming_data_product_id,
             execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
-        target = current_link.active_grant
-        if target is None:
+        targets = current_link.active_grants
+        if not targets:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no active access to revoke",
             )
 
-        target.revoked_by = actor
-        target.revoked_at = datetime.now(timezone.utc)
+        revoked_at = datetime.now(timezone.utc)
+        for target in targets:
+            target.revoked_by = actor
+            target.revoked_at = revoked_at
         current_link.recompute_status()
         return RedactedInputPort.of(
             current_link, current_link.latest_request.requested_by_id

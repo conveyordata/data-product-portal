@@ -27,6 +27,7 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     ExplorationFactory,
     InputPortFactory,
+    InputPortRequestFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
@@ -632,3 +633,36 @@ class TestRequestInputPortsDuration:
                 dp.id, port.id, actor=actor
             )
         assert exc.value.status_code == 404
+
+
+class TestRevokeOverlappingGrants:
+    def test_revoke_input_port__revokes_overlapping_renewed_grants(self, session):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__requested_duration_days=30,
+            request__valid_from=date.today() - timedelta(days=5),
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        InputPortRequestFactory(
+            input_port=link,
+            decision=InputPortRequestDecision.APPROVED,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            requested_duration_days=30,
+            valid_from=date.today(),
+            valid_until=date.today() + timedelta(days=30),
+        )
+        session.refresh(link, ["requests"])
+
+        AbstractDataProductService(session).revoke_input_port(
+            dp.id, port.id, actor=actor
+        )
+
+        session.refresh(link)
+        assert link.active_grant is None
+        assert link.status == InputPortStatus.REVOKED
