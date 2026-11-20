@@ -8237,6 +8237,22 @@
               "type": "string",
               "title": "Name"
             }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technical Asset Type"
+            }
           }
         ],
         "responses": {
@@ -8296,6 +8312,22 @@
               "type": "string",
               "format": "uuid",
               "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technical Asset Type"
             }
           }
         ],
@@ -19787,6 +19819,11 @@
             "type": "boolean",
             "title": "Shareable",
             "default": true
+          },
+          "namespace_max_length": {
+            "type": "integer",
+            "title": "Namespace Max Length",
+            "default": 64
           },
           "detailed_name": {
             "type": "string",

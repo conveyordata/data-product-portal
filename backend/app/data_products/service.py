@@ -32,7 +32,6 @@ from app.core.authz import Authorization
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
-    TechnicalAssetNamespaceValidator,
 )
 from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
@@ -76,7 +75,6 @@ class DataProductService(AbstractDataProductService):
     def __init__(self, db: Session):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(DataProductModel)
-        self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
 
     @staticmethod
     def _sync_public_reader_grouping(

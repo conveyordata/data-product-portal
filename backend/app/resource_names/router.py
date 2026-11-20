@@ -24,8 +24,15 @@ router = APIRouter(tags=["Resource names"], prefix="/v2/resource_names")
 
 
 @router.get("/sanitize")
-def sanitize_resource_name(name: str) -> ResourceNameSuggestion:
-    return ResourceNameService.resource_name_suggestion(name)
+def sanitize_resource_name(
+    name: str, technical_asset_type: str | None = None
+) -> ResourceNameSuggestion:
+    max_length = (
+        DataOutputResourceNameValidator(technical_asset_type).max_length
+        if technical_asset_type is not None
+        else None
+    )
+    return ResourceNameService.resource_name_suggestion(name, max_length)
 
 
 @router.get("/validate")
@@ -34,6 +41,7 @@ def validate_resource_name(
     model: ResourceNameModel,
     db: DbSession,
     data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    technical_asset_type: str | None = None,
 ) -> ResourceNameValidation:
     match model:
         case ResourceNameModel.DATA_PRODUCT:
@@ -41,9 +49,14 @@ def validate_resource_name(
                 resource_name, db
             )
         case ResourceNameModel.TECHNICAL_ASSET:
-            return DataOutputResourceNameValidator().validate_resource_name(
-                resource_name, db, scope=data_product_id
-            )
+            if technical_asset_type is None or data_product_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="technical_asset_type and data_product_id are required for Technical Assets",
+                )
+            return DataOutputResourceNameValidator(
+                technical_asset_type
+            ).validate_resource_name(resource_name, db, scope=data_product_id)
         case ResourceNameModel.OUTPUT_PORT:
             return ResourceNameService(model=OutputPort).validate_resource_name(
                 resource_name, db

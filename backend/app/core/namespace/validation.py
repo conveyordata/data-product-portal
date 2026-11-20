@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
@@ -78,34 +77,6 @@ class NamespaceValidator:
     ) -> NamespaceLengthLimits:
         return NamespaceLengthLimits(
             max_length=cls.max_length,
-        )
-
-
-class TechnicalAssetNamespaceValidator(NamespaceValidator):
-    def __init__(self):
-        super().__init__(model=TechnicalAsset)
-
-    def _is_unique(
-        self,
-        namespace: str,
-        db: Session,
-        data_product_id: Optional[UUID] = None,
-    ) -> bool:
-        if data_product_id is None:
-            raise ValueError(
-                "TechnicalAssetNamespaceValidator requires a Data Product ID "
-                "to check uniqueness with the Data Product as scope"
-            )
-
-        return not db.scalar(
-            select(
-                exists().where(
-                    and_(
-                        TechnicalAsset.namespace == namespace,
-                        TechnicalAsset.owner_id == data_product_id,
-                    )
-                )
-            )
         )
 
 

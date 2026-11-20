@@ -37,6 +37,7 @@ class UIElementMetadataResponse:
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
         shareable (bool | Unset):  Default: True.
+        namespace_max_length (int | Unset):  Default: 64.
     """
 
     ui_metadata: list[UIElementMetadata]
@@ -55,6 +56,7 @@ class UIElementMetadataResponse:
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
     shareable: bool | Unset = True
+    namespace_max_length: int | Unset = 64
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -116,6 +118,8 @@ class UIElementMetadataResponse:
 
         shareable = self.shareable
 
+        namespace_max_length = self.namespace_max_length
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -147,6 +151,8 @@ class UIElementMetadataResponse:
             field_dict["show_in_form"] = show_in_form
         if shareable is not UNSET:
             field_dict["shareable"] = shareable
+        if namespace_max_length is not UNSET:
+            field_dict["namespace_max_length"] = namespace_max_length
 
         return field_dict
 
@@ -234,6 +240,8 @@ class UIElementMetadataResponse:
 
         shareable = d.pop("shareable", UNSET)
 
+        namespace_max_length = d.pop("namespace_max_length", UNSET)
+
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
@@ -251,6 +259,7 @@ class UIElementMetadataResponse:
             platform_tile=platform_tile,
             show_in_form=show_in_form,
             shareable=shareable,
+            namespace_max_length=namespace_max_length,
         )
 
         ui_element_metadata_response.additional_properties = d

@@ -139,6 +139,7 @@ export type UiElementMetadataResponse = {
   platform_tile?: PlatformTile | null;
   show_in_form?: boolean;
   shareable?: boolean;
+  namespace_max_length?: number;
   detailed_name: string;
 };
 export type PluginResponse = {

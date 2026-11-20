@@ -190,7 +190,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
         }
     };
 
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace({ name }), DEBOUNCE);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {

@@ -15637,6 +15637,7 @@ type UIElementMetadataResponse struct {
 	PlatformTile          OptNilPlatformTile      `json:"platform_tile"`
 	ShowInForm            OptBool                 `json:"show_in_form"`
 	Shareable             OptBool                 `json:"shareable"`
+	NamespaceMaxLength    OptInt                  `json:"namespace_max_length"`
 	DetailedName          string                  `json:"detailed_name"`
 }
 
@@ -15713,6 +15714,11 @@ func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 // GetShareable returns the value of Shareable.
 func (s *UIElementMetadataResponse) GetShareable() OptBool {
 	return s.Shareable
+}
+
+// GetNamespaceMaxLength returns the value of NamespaceMaxLength.
+func (s *UIElementMetadataResponse) GetNamespaceMaxLength() OptInt {
+	return s.NamespaceMaxLength
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -15793,6 +15799,11 @@ func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 // SetShareable sets the value of Shareable.
 func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
 	s.Shareable = val
+}
+
+// SetNamespaceMaxLength sets the value of NamespaceMaxLength.
+func (s *UIElementMetadataResponse) SetNamespaceMaxLength(val OptInt) {
+	s.NamespaceMaxLength = val
 }
 
 // SetDetailedName sets the value of DetailedName.
