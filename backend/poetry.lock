@@ -342,18 +342,6 @@ msal-extensions = ">=1.2.0"
 typing-extensions = ">=4.0.0"
 
 [[package]]
-name = "backoff"
-version = "2.2.1"
-description = "Function decoration for backoff and retry"
-optional = false
-python-versions = ">=3.7,<4.0"
-groups = ["main"]
-files = [
-    {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
-    {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
-]
-
-[[package]]
 name = "beartype"
 version = "0.23.1"
 description = "Unbearably fast near-real-time pure-Python runtime-static type-checker."
@@ -3955,18 +3943,17 @@ files = [
 
 [[package]]
 name = "posthog"
-version = "7.91.2"
+version = "8.0.1"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.91.2-py3-none-any.whl", hash = "sha256:f686f657d7c9f860547c0ccd4aafc338bdc675a1b3fd3fd1f0c75118c7259ecf"},
-    {file = "posthog-7.91.2.tar.gz", hash = "sha256:5c47055e35be44beac949d86feaf7f8d9a2574d942fb5e0e6f34f14d193543c6"},
+    {file = "posthog-8.0.1-py3-none-any.whl", hash = "sha256:7672cf055bafc87cf73d457a2fab15cef4b36ff0a1030812fe7ae0c9c536f429"},
+    {file = "posthog-8.0.1.tar.gz", hash = "sha256:66d8b58992900109958495c31500125b98c46c1809bc451e3baeec89e02e3dcb"},
 ]
 
 [package.dependencies]
-backoff = ">=1.10.0"
 distro = ">=1.5.0"
 requests = ">=2.7,<3.0"
 typing-extensions = ">=4.2.0"
@@ -6112,4 +6099,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "413d8d23696ec15e98c0ca9d6e1a40115539a8bb8d3426236a64753689cc420b"
+content-hash = "6adf3f215ec9e855fbc15138ebd3ea9d1c410a28540d61f865d71e3b3a0a77bc"
