@@ -116,7 +116,7 @@ describe('PeoplePage', () => {
         await screen.findByText('Finance Team');
         expect(Array.from(container.querySelectorAll('thead th')).map((header) => header.textContent)).toEqual([
             'Name',
-            'Email / External ID',
+            'Identifier',
             'Type',
             'Global Role',
             'Can become admin',
@@ -127,7 +127,7 @@ describe('PeoplePage', () => {
                 identity.type === 'user' ? identity.email : identity.external_id,
             );
         }
-        for (const name of ['Name', 'Email / External ID']) {
+        for (const name of ['Name', 'Identifier']) {
             expect(screen.getByText(name).closest('th')?.querySelector('.ant-table-filter-trigger')).toBeNull();
         }
         expect(screen.getByText('Type').closest('th')?.querySelector('.ant-table-filter-trigger')).not.toBeNull();
@@ -205,8 +205,8 @@ describe('PeoplePage', () => {
         expect(header('Type').closest('th')).toHaveAttribute('aria-sort', 'ascending');
         expect(header('Global Role').closest('th')).toHaveAttribute('aria-sort', 'ascending');
         expect(names()).toEqual(['Finance Team', 'ETL Runner', 'Alice Smith', 'Bob Jones']);
-        await user.click(header('Email / External ID'));
-        for (const name of ['Type', 'Email / External ID', 'Global Role']) {
+        await user.click(header('Identifier'));
+        for (const name of ['Type', 'Identifier', 'Global Role']) {
             await user.click(header(name));
             await user.click(header(name));
             expect(header(name).closest('th')).not.toHaveAttribute('aria-sort');

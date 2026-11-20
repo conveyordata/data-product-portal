@@ -82,7 +82,7 @@ export const getPeopleTableColumns = ({
             sortDirections: ['ascend', 'descend', 'ascend'],
         },
         {
-            title: t('Email / External ID'),
+            title: t('Identifier'),
             key: 'email_or_external_id',
             ellipsis: { showTitle: false },
             render: (_, identity) => {
