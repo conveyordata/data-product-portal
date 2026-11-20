@@ -82,7 +82,13 @@ Using an AI agent is optional. If you do, these skills fit the steps above:
 | Human review | `pr-description`, `teach` |
 | Improve the process | `retro`, across many sessions and PRs |
 
-Most come from [mattpocock/skills](https://github.com/mattpocock/skills); `adr` and `pr-description` live in `.claude/skills/`. Claude Code (`.claude/settings.json`) and Copilot CLI (`.github/copilot/settings.json`) enable the plugin for this repo and keep it updated. In VS Code or other agents, follow the [installation steps](https://github.com/mattpocock/skills#installation-30-second-setup). The repo-specific configuration these skills read is in `docs/agents/`.
+Most come from [mattpocock/skills](https://github.com/mattpocock/skills); `adr` and `pr-description` live in `.claude/skills/`.
+
+For Claude Code, each contributor runs `claude plugin install mattpocock-skills@claude-plugins-official --scope project` once per clone. The committed `.claude/settings.json` enables the plugin, but does not download it. Once installed, it updates itself by default.
+
+For Copilot CLI, follow the [installation steps](https://github.com/mattpocock/skills#installation-30-second-setup), then set `autoUpdate` to `true` on the `mattpocock` entry under `extraKnownMarketplaces` in `~/.copilot/settings.json`. The repository's `.github/copilot/settings.json` enables the plugin, but its repository-level `autoUpdate` setting is ignored.
+
+In VS Code or other agents, follow the [installation steps](https://github.com/mattpocock/skills#installation-30-second-setup). The repo-specific configuration these skills read is in `docs/agents/`.
 
 ***
 
