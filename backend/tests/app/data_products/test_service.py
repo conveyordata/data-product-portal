@@ -7,12 +7,15 @@ from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.service import DataProductService
+from app.data_products.technical_assets.model import TechnicalAsset
+from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     InputPortFactory,
     OutputPortFactory,
     RoleFactory,
+    TechnicalAssetFactory,
     UserFactory,
 )
 from tests.session_util import as_user
@@ -143,3 +146,20 @@ class TestDataProductService:
             )
         }
         assert (str(other_consumer.id), str(other_output_port.id)) in links
+
+    def test_remove_data_product__deletes_technical_assets_and_configurations(
+        self, session
+    ):
+        data_product = DataProductFactory()
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        data_product_id = data_product.id
+        technical_asset_id = technical_asset.id
+        configuration_id = technical_asset.configuration_id
+        configuration_type = type(technical_asset.configuration)
+
+        DataProductService(session).remove_data_product(data_product_id)
+
+        assert session.get(DataProduct, data_product_id) is None
+        assert session.get(TechnicalAsset, technical_asset_id) is None
+        assert session.get(configuration_type, configuration_id) is None
+        assert session.get(TechnicalAssetConfiguration, configuration_id) is None
