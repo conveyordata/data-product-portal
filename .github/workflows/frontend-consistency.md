@@ -33,9 +33,31 @@ safe-outputs:
 
 Find the biggest inconsistency in how the frontend code does the same thing in different ways, and align it to one pattern.
 
-Examples of what to compare: raw pixel values versus semantic size tokens, hardcoded colours versus theme tokens, custom components that duplicate an existing shared component or an Ant Design one, different ways of fetching data, handling loading and error states, routing, forms and validation, hardcoded strings versus i18next, comparing against plain strings where an enum exists, and file and naming conventions.
+The target pattern is the one `frontend/AGENTS.md` or `.claude/skills/portal-design/SKILL.md` prescribes, or the canonical sibling named below; if none says anything, the one most of the codebase already uses. Never introduce a new pattern. Keep the change reviewable: if the inconsistency is spread too wide for one PR, fix one coherent slice (for example one feature folder) and list the remaining places in the issue.
 
-The target pattern is the one `frontend/AGENTS.md` prescribes; if it says nothing, the one most of the codebase already uses. Never introduce a new pattern. Rank by how many places diverge and how much the divergence costs readers and maintainers. Keep the change reviewable: if the inconsistency is spread too wide for one PR, fix one coherent slice (for example one feature folder) and list the remaining places in the issue.
+## Required survey
+
+Read `frontend/AGENTS.md` and `.claude/skills/portal-design/SKILL.md`, then do every check below before deciding. For each check, record the variants you found with a count per variant and two file references. Count each variant separately: `middle` and `medium` are two variants, not one.
+
+Sibling families to compare side by side. Read the files, don't only grep:
+- Create and edit forms: `frontend/src/components/data-products/data-product-form/`, `components/output-ports/output-port-form/`, `components/explorations/exploration-form/`, `components/data-products/technical-asset-form/`, `pages/technical-asset-edit/technical-asset-form/`.
+- Create and edit pages: `pages/*-create/*.page.tsx`, `pages/*-edit/*.page.tsx`, and any create form rendered inside a modal.
+- Detail pages: `pages/{data-product,output-port,technical-asset,exploration}/*.page.tsx`.
+- Tabs with the same name under different entities (`pages/*/components/*-tabs/*`) and the settings tables (`pages/settings/components/settings-tabs/components/*-table/`).
+
+Checks:
+1. Form footer. Canonical: `data-product-form.component.tsx`. Delete on the left (edit only), then Cancel and the primary submit on the right; the submit says "Save" when editing and "Create" when creating. Flag any other order, label or layout, and any delete confirmation whose wording differs from the majority.
+2. Create and edit page shell: where the title and breadcrumbs are set, extra wrappers or SCSS, and a modal versus a page for creating a core entity.
+3. Detail pages use `DetailPageLayout`; flag any page that builds its own header, edit button or sidebar.
+4. Icons: build an icon-to-meaning table from `@ant-design/icons` usages and their tooltips or labels. Flag one icon with two meanings and one meaning with two icons.
+5. Lists: `<Table` and `<Empty` outside `components/list-table/` and `components/empty-state/`. Tables inside forms and selectors are exempt.
+6. Duplicated UI: files in the sibling families that repeat the same structure instead of sharing one component from `frontend/src/components/`.
+7. Tokens: hex colours and `px` values in `*.scss` and inline `style`, numeric gaps, and deprecated Ant Design values.
+8. Copy: `t('…')` strings that use a term `CONTEXT.md` replaces, for example "Dataset" instead of Output Port.
+9. Dead styling: `styles.X` references to a class the imported module does not define, and empty `.module.scss` files.
+10. Data fetching, loading and error states, routing, i18next, and enums versus plain strings, as `frontend/AGENTS.md` prescribes.
+
+For this agent, any divergence from a written rule in `frontend/AGENTS.md` or the portal-design guide, or from the canonical sibling named above, is significant by definition. Never reject it as cosmetic or a matter of taste. Rank the candidates in a table with the check, the variants, their counts and the files, by how many places diverge and how much the divergence costs users and maintainers. Fix the top one, or one coherent slice of it, and list the others in the issue. If you call `noop`, put that table in the noop message.
 
 ## Evidence
 
