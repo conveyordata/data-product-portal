@@ -16,6 +16,7 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useSetCanBecomeAdminMutation } from '@/store/api/services/generated/usersApi.ts';
+import { getApiErrorDetail } from '@/store/common/errors.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus, type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -64,7 +65,7 @@ export function PeoplePage() {
                 success = t('Global role assignment successfully reset');
                 failure = t('Could not reset global role assignment');
                 await deleteAssignment(original.id).unwrap();
-            } else if (original && value) {
+            } else if (original && value && original.decision !== DecisionStatus.Denied) {
                 success = t('Global role assignment successfully changed');
                 failure = t('Could not change global role assignment');
                 if (original.role.id !== value) {
@@ -73,16 +74,26 @@ export function PeoplePage() {
                         modifyGlobalRoleAssignment: { role_id: value },
                     }).unwrap();
                 }
-                if (original.decision !== DecisionStatus.Approved) {
-                    if (original.decision === DecisionStatus.Pending) {
-                        failure = t('Could not confirm the role assignment. Select the role again to retry.');
-                    }
+                if (original.decision === DecisionStatus.Pending) {
+                    failure = t('Could not confirm the role assignment. Select the role again to retry.');
                     await decideAssignment({
                         id: original.id,
                         decideGlobalRoleAssignment: { decision: DecisionStatus.Approved },
                     }).unwrap();
                 }
             } else if (value) {
+                if (original) {
+                    try {
+                        await deleteAssignment(original.id).unwrap();
+                    } catch (error) {
+                        if (getApiErrorDetail(error) === "You don't have permission to perform this action") {
+                            failure = t(
+                                "This identity has a previously denied role assignment. You don't have permission to replace it. Ask an administrator to assign the role.",
+                            );
+                        }
+                        throw error;
+                    }
+                }
                 const created = await createAssignment({ identity_id, role_id: value }).unwrap();
                 failure = t('Could not confirm the role assignment. Select the role again to retry.');
                 await decideAssignment({

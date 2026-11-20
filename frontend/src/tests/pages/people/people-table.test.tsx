@@ -216,23 +216,79 @@ describe('PeoplePage', () => {
         expect(header('Name').closest('th')).toHaveAttribute('aria-sort', 'ascending');
     });
 
-    it.each([false, true])('retries approval without duplicating an assignment (existing: %s)', async (existing) => {
-        let assignments: GlobalRoleAssignmentResponse[] = existing
-            ? [globalAssignment(mockGroup, member, DecisionStatus.Pending)]
-            : [];
-        const create = vi.fn();
-        let attempts = 0;
+    it.each([null, DecisionStatus.Pending, DecisionStatus.Denied])(
+        'retries approval without duplicating an assignment (existing: %s)',
+        async (existing) => {
+            let assignments: GlobalRoleAssignmentResponse[] = existing
+                ? [globalAssignment(mockGroup, member, existing)]
+                : [];
+            const create = vi.fn();
+            let attempts = 0;
+            server.use(
+                http.get(endpoint, () => HttpResponse.json({ role_assignments: assignments })),
+                http.delete(`${endpoint}/:id`, ({ params }) => {
+                    assignments = [];
+                    return HttpResponse.json({ id: params.id });
+                }),
+                http.post(endpoint, () => {
+                    create();
+                    assignments = [globalAssignment(mockGroup, member, DecisionStatus.Pending)];
+                    return HttpResponse.json(assignments[0]);
+                }),
+                http.post(`${endpoint}/:id/decide`, () => {
+                    attempts++;
+                    if (attempts === 1) return HttpResponse.json({ detail: 'Unavailable' }, { status: 500 });
+                    assignments = [globalAssignment(mockGroup)];
+                    return HttpResponse.json(assignments[0]);
+                }),
+            );
+            const user = userEvent.setup();
+            renderWithProviders(<PeoplePage />);
+            const row = (await screen.findByText('Finance Team')).closest('tr');
+            const select = row?.querySelector('input');
+            if (!row || !select) throw new Error('Missing group role selector');
+            await waitFor(() => expect(select).toBeEnabled());
+            await user.click(select);
+            await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
+            expect(
+                await screen.findByText('Could not confirm the role assignment. Select the role again to retry.'),
+            ).toBeInTheDocument();
+            await waitFor(() => expect(select).toBeEnabled());
+            await user.click(select);
+            await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
+            await waitFor(() => expect(attempts).toBe(2));
+            await waitFor(() => expect(assignments[0].decision).toBe(DecisionStatus.Approved));
+            expect(within(row).getByText('Member')).toBeInTheDocument();
+            expect(create).toHaveBeenCalledTimes(existing === DecisionStatus.Pending ? 0 : 1);
+        },
+    );
+
+    it.each([member, editor])('recreates a denied assignment before approving $name', async (role) => {
+        const denied = globalAssignment(mockGroup, member, DecisionStatus.Denied);
+        let assignments = [denied];
+        const requests: string[] = [];
         server.use(
             http.get(endpoint, () => HttpResponse.json({ role_assignments: assignments })),
-            http.post(endpoint, () => {
-                create();
-                assignments = [globalAssignment(mockGroup, member, DecisionStatus.Pending)];
+            http.delete(`${endpoint}/:id`, ({ params }) => {
+                requests.push(`delete:${params.id}`);
+                assignments = [];
+                return HttpResponse.json({ id: params.id });
+            }),
+            http.post(endpoint, async ({ request }) => {
+                requests.push('create');
+                expect(await request.json()).toEqual({ identity_id: mockGroup.id, role_id: role.id });
+                assignments = [
+                    {
+                        ...globalAssignment(mockGroup, role, DecisionStatus.Pending),
+                        id: 'replacement',
+                    },
+                ];
                 return HttpResponse.json(assignments[0]);
             }),
-            http.post(`${endpoint}/:id/decide`, () => {
-                attempts++;
-                if (attempts === 1) return HttpResponse.json({ detail: 'Unavailable' }, { status: 500 });
-                assignments = [globalAssignment(mockGroup)];
+            http.post(`${endpoint}/:id/decide`, async ({ params, request }) => {
+                requests.push(`approve:${params.id}`);
+                expect(await request.json()).toEqual({ decision: DecisionStatus.Approved });
+                assignments[0].decision = DecisionStatus.Approved;
                 return HttpResponse.json(assignments[0]);
             }),
         );
@@ -243,18 +299,48 @@ describe('PeoplePage', () => {
         if (!row || !select) throw new Error('Missing group role selector');
         await waitFor(() => expect(select).toBeEnabled());
         await user.click(select);
-        await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
-        expect(
-            await screen.findByText('Could not confirm the role assignment. Select the role again to retry.'),
-        ).toBeInTheDocument();
-        await waitFor(() => expect(select).toBeEnabled());
-        await user.click(select);
-        await user.click(await screen.findByText('Member', { selector: '.ant-select-item-option-content' }));
-        await waitFor(() => expect(attempts).toBe(2));
-        await waitFor(() => expect(assignments[0].decision).toBe(DecisionStatus.Approved));
-        expect(within(row).getByText('Member')).toBeInTheDocument();
-        expect(create).toHaveBeenCalledTimes(existing ? 0 : 1);
+        await user.click(await screen.findByText(role.name, { selector: '.ant-select-item-option-content' }));
+        expect(await screen.findByText('Global role successfully assigned')).toBeInTheDocument();
+        expect(requests).toEqual([`delete:${denied.id}`, 'create', 'approve:replacement']);
+        await waitFor(() => expect(within(row).getByText(role.name)).toBeInTheDocument());
+        expect(assignments[0].decision).toBe(DecisionStatus.Approved);
     });
+
+    it.each([
+        {
+            status: 403,
+            detail: "You don't have permission to perform this action",
+            message:
+                "This identity has a previously denied role assignment. You don't have permission to replace it. Ask an administrator to assign the role.",
+        },
+        { status: 500, detail: 'Unavailable', message: 'Could not assign global role' },
+    ])(
+        'explains deletion failure ($status) without recreating a denied assignment',
+        async ({ status, detail, message }) => {
+            const denied = globalAssignment(mockGroup, member, DecisionStatus.Denied);
+            const create = vi.fn();
+            server.use(
+                http.get(endpoint, () => HttpResponse.json({ role_assignments: [denied] })),
+                http.delete(`${endpoint}/:id`, () => HttpResponse.json({ detail }, { status })),
+                http.post(endpoint, () => {
+                    create();
+                    return HttpResponse.json(globalAssignment(mockGroup, editor, DecisionStatus.Pending));
+                }),
+            );
+            const user = userEvent.setup();
+            renderWithProviders(<PeoplePage />);
+            const row = (await screen.findByText('Finance Team')).closest('tr');
+            const select = row?.querySelector('input');
+            if (!row || !select) throw new Error('Missing group role selector');
+            await waitFor(() => expect(select).toBeEnabled());
+            await user.click(select);
+            await user.click(await screen.findByText('Editor', { selector: '.ant-select-item-option-content' }));
+            expect(await screen.findByText(message)).toBeInTheDocument();
+            await waitFor(() => expect(select).toBeEnabled());
+            expect(within(row).getByText('Member')).toBeInTheDocument();
+            expect(create).not.toHaveBeenCalled();
+        },
+    );
 
     it('keeps existing roles read-only without permission and hides admin eligibility', async () => {
         server.use(
