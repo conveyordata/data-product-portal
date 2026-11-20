@@ -22,6 +22,7 @@ const injectedRtkApi = api.injectEndpoints({
           resource_name: queryArg.resourceName,
           model: queryArg.model,
           data_product_id: queryArg.dataProductId,
+          technical_asset_type: queryArg.technicalAssetType,
         },
       }),
     }),
@@ -44,6 +45,7 @@ export type ValidateResourceNameApiArg = {
   resourceName: string;
   model: ResourceNameModel;
   dataProductId?: string;
+  technicalAssetType?: string;
 };
 export type ResourceNameConstraintsApiResponse =
   /** status 200 Successful Response */ ResourceNameLengthLimits;

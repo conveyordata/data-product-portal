@@ -17,6 +17,7 @@ def _get_kwargs(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: UUID | Unset = UNSET,
+    technical_asset_type: str | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -30,6 +31,8 @@ def _get_kwargs(
     if not isinstance(data_product_id, Unset):
         json_data_product_id = str(data_product_id)
     params["data_product_id"] = json_data_product_id
+
+    params["technical_asset_type"] = technical_asset_type
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -78,6 +81,7 @@ def sync_detailed(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: UUID | Unset = UNSET,
+    technical_asset_type: str | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameValidation]:
     """Validate Resource Name
 
@@ -85,6 +89,7 @@ def sync_detailed(
         resource_name (str):
         model (ResourceNameModel):
         data_product_id (UUID | Unset):
+        technical_asset_type (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -98,6 +103,7 @@ def sync_detailed(
         resource_name=resource_name,
         model=model,
         data_product_id=data_product_id,
+        technical_asset_type=technical_asset_type,
     )
 
     response = client.get_httpx_client().request(
@@ -113,6 +119,7 @@ def sync(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: UUID | Unset = UNSET,
+    technical_asset_type: str | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameValidation | None:
     """Validate Resource Name
 
@@ -120,6 +127,7 @@ def sync(
         resource_name (str):
         model (ResourceNameModel):
         data_product_id (UUID | Unset):
+        technical_asset_type (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,6 +142,7 @@ def sync(
         resource_name=resource_name,
         model=model,
         data_product_id=data_product_id,
+        technical_asset_type=technical_asset_type,
     ).parsed
 
 
@@ -143,6 +152,7 @@ async def asyncio_detailed(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: UUID | Unset = UNSET,
+    technical_asset_type: str | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameValidation]:
     """Validate Resource Name
 
@@ -150,6 +160,7 @@ async def asyncio_detailed(
         resource_name (str):
         model (ResourceNameModel):
         data_product_id (UUID | Unset):
+        technical_asset_type (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -163,6 +174,7 @@ async def asyncio_detailed(
         resource_name=resource_name,
         model=model,
         data_product_id=data_product_id,
+        technical_asset_type=technical_asset_type,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -176,6 +188,7 @@ async def asyncio(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: UUID | Unset = UNSET,
+    technical_asset_type: str | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameValidation | None:
     """Validate Resource Name
 
@@ -183,6 +196,7 @@ async def asyncio(
         resource_name (str):
         model (ResourceNameModel):
         data_product_id (UUID | Unset):
+        technical_asset_type (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -198,5 +212,6 @@ async def asyncio(
             resource_name=resource_name,
             model=model,
             data_product_id=data_product_id,
+            technical_asset_type=technical_asset_type,
         )
     ).parsed

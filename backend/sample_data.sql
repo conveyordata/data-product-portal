@@ -496,6 +496,17 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
     WHERE lower(ps.name) = 'parameterstore'
 ), '{{ customer_segmentation_id }}'::uuid, NULL, '7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', timezone('utc'::text, current_timestamp), NULL, NULL, 'default');
 
+INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('6b3cfee2-387b-4350-bbf7-a2b567f92d6c', 'ParameterStoreTechnicalAssetConfiguration');
+
+INSERT INTO public.parameter_store_technical_asset_configurations (id, prefix, parameter_name, created_on, updated_on, deleted_at) VALUES ('6b3cfee2-387b-4350-bbf7-a2b567f92d6c', 'customer_segmentation', 'customer-segments-weekly-table', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('44bc6126-aab7-494b-b26e-bfd4ae2cc45c'::uuid, 'customer-segments-weekly-table', 'Customer segments weekly table location', 'Parameter holding the location of the weekly customer segments table', 'ACTIVE', (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE lower(ps.name) = 'parameterstore'
+), '{{ customer_segmentation_id }}'::uuid, NULL, '6b3cfee2-387b-4350-bbf7-a2b567f92d6c', timezone('utc'::text, current_timestamp), NULL, NULL, 'default');
+
 INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), '{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ customer_segmentation_weekly_output_port_id }}'::uuid, 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.784134', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.936773', NULL, NULL, '2025-10-28 16:36:36.677803', '2025-10-28 16:36:36.838041', NULL);
 
 INSERT INTO public.tags_datasets (dataset_id, tag_id) VALUES ('{{ customer_segmentation_weekly_output_port_id }}'::uuid, '{{ tag_sensitive_id }}'::uuid);

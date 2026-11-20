@@ -27,6 +27,10 @@ Consumers cannot access these assets directly.
 Instead, Data Products offer Output Ports, which bundle a collection of related assets together to provide managed read access.
 Output Ports should follow the advice that data that belongs together should also be shared together.
 
+## Namespace
+
+Each Technical Asset has a namespace, generated from its name unless you type your own. It must be unique among Technical Assets of the same Technical Asset Type within a Data Product, so an S3 asset and a Parameter Store asset in the same Data Product can share a namespace. The namespace can not be changed after creation.
+
 ## Technical Mapping
 
 When creating a Technical Asset, you can choose between two provisioning strategies:
