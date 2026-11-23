@@ -11653,23 +11653,6 @@ func (c *Client) sendSearchDataProducts(ctx context.Context, params SearchDataPr
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
-	{
-		// Encode "assignment_filter" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "assignment_filter",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AssignmentFilter.Get(); ok {
-				return e.EncodeValue(conv.StringToString(string(val)))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
 	u.RawQuery = q.Values().Encode()
 
 	r, err := ht.NewRequest(ctx, "GET", u)

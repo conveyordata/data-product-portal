@@ -19,6 +19,7 @@ from sqlalchemy.orm import (
     column_property,
     deferred,
     mapped_column,
+    query_expression,
     relationship,
 )
 
@@ -77,6 +78,7 @@ class DataProduct(
         default=DataProductVisibility.DISCOVERABLE,
     )
     embeddings = deferred(Column(Vector(384)))
+    consumer_count: Mapped[int] = query_expression()
 
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(

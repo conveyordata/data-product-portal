@@ -1,27 +1,34 @@
+const dataProductName = 'Customer Churn Prediction';
 const outputPortName = 'Weekly Churn Probabilities';
 const consumingDataProductName = 'DEI Insights Dashboard';
 
-// A different, unlinked output port so this test doesn't interfere with the one above.
+// A different Output Port of the same Data Product so this test doesn't interfere with the one above.
 const explorationOutputPortName = 'Monthly Churn Targets';
 const explorationDomainName = 'Customer Insights';
 
+function addOutputPortToCart(name: string) {
+    cy.intercept('GET', '**/v2/search/data_products*').as('searchDataProducts');
+    cy.visit('/marketplace');
+    // The Marketplace page fires an unfiltered search on mount. Wait for that
+    // request to complete first, so the next cy.wait() below waits for our
+    // actual search request instead of resolving on this earlier one.
+    cy.wait('@searchDataProducts', { timeout: 30000 });
+
+    cy.get('[data-cy="marketplace-search"]').type(`${dataProductName}{enter}`);
+    cy.wait('@searchDataProducts', { timeout: 30000 });
+
+    // The card container has no label of its own; its Data Product name scopes it.
+    cy.contains('[data-cy="data-product-card"]', dataProductName, { timeout: 20000 }).within(() => {
+        cy.contains('button', 'Add to cart').click();
+    });
+
+    cy.contains(name).click();
+    cy.contains('button', 'Add 1 to cart').click();
+}
+
 describe('Marketplace checkout', () => {
     it('lets a user search for a data product, add it to cart, and request access', () => {
-        cy.intercept('GET', '**/v2/search/output_ports*').as('searchOutputPorts');
-        cy.visit('/marketplace');
-        // The Marketplace page fires an unfiltered search on mount. Wait for that
-        // request to complete first, so the next cy.wait() below waits for our
-        // actual search request instead of resolving on this earlier one.
-        cy.wait('@searchOutputPorts', { timeout: 30000 });
-
-        cy.get('[data-cy="marketplace-search"]').type(`${outputPortName}{enter}`);
-        cy.wait('@searchOutputPorts', { timeout: 30000 });
-
-        cy.contains(outputPortName, { timeout: 20000 }).should('be.visible');
-
-        cy.contains('[data-cy="output-port-card"]', outputPortName).within(() => {
-            cy.get('[data-cy="add-to-cart"]').click();
-        });
+        addOutputPortToCart(outputPortName);
 
         cy.visit('/marketplace/cart');
 
@@ -45,21 +52,7 @@ describe('Marketplace checkout', () => {
     it('lets a user search for a data product, add it to cart, and create a new exploration', () => {
         const explorationName = `Cypress E2E Exploration ${Date.now()}`;
 
-        cy.intercept('GET', '**/v2/search/output_ports*').as('searchOutputPorts');
-        cy.visit('/marketplace');
-        // The Marketplace page fires an unfiltered search on mount. Wait for that
-        // request to complete first, so the next cy.wait() below waits for our
-        // actual search request instead of resolving on this earlier one.
-        cy.wait('@searchOutputPorts', { timeout: 30000 });
-
-        cy.get('[data-cy="marketplace-search"]').type(`${explorationOutputPortName}{enter}`);
-        cy.wait('@searchOutputPorts', { timeout: 30000 });
-
-        cy.contains(explorationOutputPortName, { timeout: 20000 }).should('be.visible');
-
-        cy.contains('[data-cy="output-port-card"]', explorationOutputPortName).within(() => {
-            cy.get('[data-cy="add-to-cart"]').click();
-        });
+        addOutputPortToCart(explorationOutputPortName);
 
         cy.visit('/marketplace/cart');
 

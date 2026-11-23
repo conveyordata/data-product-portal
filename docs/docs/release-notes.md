@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+This migration can take some time, depending on the amount of Data Products present, as embeddings are calculated for every Data Product.
+
 ### breaking changes
 
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
@@ -13,6 +15,7 @@ sidebar_position: 200
 
 ### features
 
+- **[Marketplace]**: The marketplace lists Data Products instead of Output Ports. Search matches on a Data Product's name, description, about, Output Ports and the Technical Assets those Output Ports expose. When a Data Product has a single Output Port with at most one access mode, **Add to cart** adds it directly; otherwise a dialog lets you pick the Output Ports and an access mode for each.
 - **[Plugins/UI]**: Plugins can set `UIElementString.placeholder` to show placeholder text in string inputs.
 - **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
 - **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
