@@ -31,20 +31,30 @@ def _backup_user_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == EventEntityType.USER,
+                EventModel.subject_type.in_(
+                    [EventEntityType.USER, EventEntityType.IDENTITY]
+                ),
             )
         )
-        .values(deleted_subject_identifier=target.email)
+        .values(
+            subject_type=EventEntityType.USER,
+            deleted_subject_identifier=target.email,
+        )
     )
     connection.execute(
         update(EventModel.__table__)
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == EventEntityType.USER,
+                EventModel.target_type.in_(
+                    [EventEntityType.USER, EventEntityType.IDENTITY]
+                ),
             )
         )
-        .values(deleted_target_identifier=target.email)
+        .values(
+            target_type=EventEntityType.USER,
+            deleted_target_identifier=target.email,
+        )
     )
 
 

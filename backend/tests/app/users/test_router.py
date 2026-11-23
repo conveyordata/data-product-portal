@@ -75,20 +75,25 @@ class TestUsersRouter:
         assert len(response.json()["users"]) == 1
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_user__preserves_event_references(self, client, session):
+    @pytest.mark.parametrize(
+        "entity_type", [EventEntityType.USER, EventEntityType.IDENTITY]
+    )
+    def test_remove_user__preserves_event_references(
+        self, client, session, entity_type
+    ):
         user = UserFactory()
         other_user = UserFactory()
         actor_event = EventFactory(actor=user)
         subject_event = EventFactory(
             actor=other_user,
             subject_id=user.id,
-            subject_type=EventEntityType.USER,
+            subject_type=entity_type,
             deleted_subject_identifier=None,
         )
         target_event = EventFactory(
             actor=other_user,
             target_id=user.id,
-            target_type=EventEntityType.USER,
+            target_type=entity_type,
         )
         user_id, email = user.id, user.email
         actor_event_id = actor_event.id
@@ -109,9 +114,13 @@ class TestUsersRouter:
         assert history.actor is None
         assert history.deleted_actor_identifier == email
         subject_event = session.get(Event, subject_event_id)
+        assert subject_event.subject_id == user_id
+        assert subject_event.subject_type == EventEntityType.USER
         assert subject_event.deleted_subject_identifier == email
         assert subject_event.user is None
         target_event = session.get(Event, target_event_id)
+        assert target_event.target_id == user_id
+        assert target_event.target_type == EventEntityType.USER
         assert target_event.deleted_target_identifier == email
         assert target_event.user is None
 
