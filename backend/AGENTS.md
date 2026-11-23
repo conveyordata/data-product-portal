@@ -21,7 +21,9 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 In principle should always be present on non GET endpoints and sensitive GET endpoints.
 * Check if new actions need to be added.
 * Content tied to a resource (notifications, counts, graph nodes) follows that resource's visibility.
-* A visibility filter can turn a related object into `None`; guard every consumer of that relationship. Internal maintenance writes run with `SKIP_DATA_PRODUCT_VISIBILITY_FILTER`.
+* A visibility filter can turn a related object into `None`; guard every consumer of that relationship. Visibility filters are for reads: writes, approvals, deletes and in-use checks run with `SKIP_DATA_PRODUCT_VISIBILITY_FILTER`, tested with the counterpart row hidden.
+* When you widen an authorization or visibility rule, list every read path it opens and add a negative test for each.
+* When acting on "the active" grant, request or assignment, check whether several can be active at once and handle all of them.
 * When a write changes role assignments or group membership, update the Casbin enforcer in that write, not only on reload. Mirror new `AuthorizationAction`s in `frontend/src/types/authorization/rbac-actions.ts`.
 * Who sees a Data Product, Exploration, Technical Asset or Output Port is decided in `app/database/visibility.py`, and who is an admin in `app/authorization/role_assignments/global_/admin.py`; don't read `session.info` or write visibility or admin predicates elsewhere.
 
