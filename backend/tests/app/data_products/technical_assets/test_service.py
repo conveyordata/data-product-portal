@@ -1,5 +1,6 @@
 import threading
 
+import pytest
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,7 @@ from tests import session_factory
 from tests.factories import DataProductFactory, PlatformServiceFactory
 
 
+@pytest.mark.commits
 def test_create_technical_asset__concurrent_duplicate_namespace(session: Session):
     data_product = DataProductFactory()
     service = PlatformServiceFactory()

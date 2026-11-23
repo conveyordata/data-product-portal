@@ -126,16 +126,20 @@ tasks:
   test:backend:
     desc: "Run the tests for the backend"
     dir: backend
+    env:
+      TEST_EMBEDDING_LATENCY_BOUND: "5.000"
     cmds:
       - poetry install --with test
       - docker compose up -d postgresql
-      - poetry run pytest -v
+      - poetry run pytest -v -n auto
 
   coverage:backend:
     desc: "Run the backend tests with a coverage report"
     dir: backend
+    env:
+      TEST_EMBEDDING_LATENCY_BOUND: "5.000"
     cmds:
-      - poetry run pytest --cov-report term-missing --cov-report html --cov=app tests/
+      - poetry run pytest -n auto --cov-report term-missing --cov-report html --cov=app tests/
 
   lint:backend:
     desc: "Lint and format the backend with ruff"

@@ -1,14 +1,13 @@
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError
 
 from app.configuration.domains.model import Domain as DomainModel
 from app.configuration.domains.schema_request import DomainUpdate
 from app.configuration.domains.service import DomainService
 from app.configuration.domains.status import DomainStatus
-from tests import engine
 from tests.factories import DataProductFactory, DomainFactory, ExplorationFactory
+from tests.session_util import row_lock_modes
 
 
 def _remove_unknown_finalizer(service, id):
@@ -44,30 +43,18 @@ def _update_unchanged(service, id):
 def test__get_locked__holds_the_domain_lock_until_commit(session, finalizers, call):
     domain = DomainFactory(finalizers=finalizers)
     call(DomainService(session), domain.id)
-    try:
-        with engine.connect() as other, pytest.raises(OperationalError):
-            other.execute(
-                select(DomainModel.id)
-                .where(DomainModel.id == domain.id)
-                .with_for_update(nowait=True)
-            )
-    finally:
-        session.rollback()
+
+    assert row_lock_modes(session, DomainModel.__table__, domain.id) & {
+        "For Share",
+        "For Update",
+    }
 
 
 def test_ensure_assignable__lets_other_assignments_through(session):
     domain = DomainFactory()
     DomainService(session).ensure_assignable(domain.id)
-    try:
-        with engine.connect() as other:
-            locked = other.scalar(
-                select(DomainModel.id)
-                .where(DomainModel.id == domain.id)
-                .with_for_update(read=True, nowait=True)
-            )
-        assert locked == domain.id
-    finally:
-        session.rollback()
+
+    assert row_lock_modes(session, DomainModel.__table__, domain.id) == {"For Share"}
 
 
 def test_reject_assignment_to_deleting_domain__new_data_product(session):
