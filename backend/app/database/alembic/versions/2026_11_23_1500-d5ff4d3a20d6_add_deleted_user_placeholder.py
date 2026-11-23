@@ -27,6 +27,12 @@ USER_REFERENCES = [
     ("explorations", "owner_id"),
 ]
 
+ROLE_HOLDERS = [
+    ("role_assignments_global", "identity_id"),
+    ("role_assignments_data_product", "identity_id"),
+    ("role_assignments_dataset", "user_id"),
+]
+
 identities = sa.table(
     "identities",
     sa.column("id", sa.UUID),
@@ -71,6 +77,11 @@ def downgrade() -> None:
     system_account_id = connection.scalar(
         sa.select(users.c.id).where(users.c.email == "systemaccount@noreply.com")
     )
+    if system_account_id is None:
+        raise RuntimeError(
+            "Cannot downgrade the deleted user placeholder without system account "
+            "systemaccount@noreply.com"
+        )
     for table, column in USER_REFERENCES:
         references = sa.table(table, sa.column(column, sa.UUID))
         connection.execute(
@@ -78,4 +89,7 @@ def downgrade() -> None:
             .where(references.c[column] == DELETED_USER_ID)
             .values({column: system_account_id})
         )
+    for table, column in ROLE_HOLDERS:
+        holders = sa.table(table, sa.column(column, sa.UUID))
+        connection.execute(holders.delete().where(holders.c[column] == DELETED_USER_ID))
     connection.execute(identities.delete().where(identities.c.id == DELETED_USER_ID))

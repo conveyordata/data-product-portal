@@ -116,6 +116,8 @@ class UserService:
         self.db.flush()
 
     def _reassign_to_deleted_user(self, user_ids: list[UUID]) -> None:
+        if not user_ids:
+            return
         for model, column in USER_REFERENCES:
             self.db.execute(
                 update(model)
