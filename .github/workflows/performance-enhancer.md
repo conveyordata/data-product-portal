@@ -36,7 +36,7 @@ Find the single most inefficient piece of code whose fix gives a significant, me
 
 ## Kinds of defect to look for
 
-Look across backend, frontend, SDK and CLI, and go through these kinds of defect:
+Look across backend, frontend, SDK and CLI, and go through these kinds of defect. They are examples, not a complete list:
 
 1. N+1 queries and missing eager loading.
 2. Queries that load far more rows or columns than are used.

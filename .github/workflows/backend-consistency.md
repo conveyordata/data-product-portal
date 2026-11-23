@@ -40,6 +40,19 @@ The target pattern is the one the documents below prescribe, else the one most o
 
 The rules in `AGENTS.md` and `backend/AGENTS.md`, and the terms in `CONTEXT.md`, over `backend/app/` and `plugins/`. Go through them section by section, and compare modules that do the same job. Rename internal names only; never API paths, schema field names or database columns. Fix one test module per PR.
 
+## Kinds of defect to look for
+
+Examples, not a complete list:
+
+1. Business logic, queries, authorization decisions or HTTP errors in the wrong layer.
+2. Modules split into files differently from the rest.
+3. Relationship loading the written rules don't allow.
+4. The same kind of value stored or compared in two forms.
+5. Visibility, admin and authorization decisions made outside the place that owns them, and routes without an authorization check.
+6. Internal names that use a term `CONTEXT.md` lists under _Avoid_.
+7. Tests named or built differently from the written rules.
+8. The same check, query or mapping written out in several places instead of shared.
+
 ## Evidence
 
 In the issue and PR, show the count of usages of each variant before and after, with a few representative file references, and cite the AGENTS.md rule or the dominant usage that justifies the target. The full backend test suite and pre-commit must pass, which shows behaviour is unchanged.

@@ -88,7 +88,7 @@ Search all issues and pull requests, open and closed, with the label `background
 
 ### 3. Find the first thing that isn't right yet, and fix it
 
-Your role below says what to hold the code to: the documents whose rules you enforce, or the kinds of defect to look for. The documents describe how the repository should be. Find code that doesn't follow them yet, usually older code written before the rule. Read the files; a grep alone is not a check. Count each variant separately, never as one bucket. Stop at the first candidate that qualifies and fix it.
+Your role below names the documents whose rules you enforce, if any, and the kinds of defect to look for. The documents describe how the repository should be. The kinds of defect are examples, not a complete list: anything else that breaks a written rule or that your role's evidence proves counts too. Find code that doesn't follow them yet, usually older code written before the rule. Read the files; a grep alone is not a check. Count each variant separately, never as one bucket. Stop at the first candidate that qualifies and fix it.
 
 A candidate qualifies when both are true:
 

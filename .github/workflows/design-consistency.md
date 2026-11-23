@@ -56,6 +56,18 @@ Screen families:
 
 Go through the design guide section by section on these screens, comparing the screens of each family side by side.
 
+Kinds of defect to look for, examples, not a complete list:
+
+1. Pages of the same kind with a different header, actions, sidebar or parent context.
+2. Create and edit flows that differ: page or dialog, title, breadcrumb, button order or labels.
+3. One icon with two meanings, one meaning with two icons, or an icon-only action without a tooltip.
+4. Lists that differ in density, totals, pagination, action column or empty state.
+5. The same status shown with a different colour, icon or label.
+6. Sibling cards and tiles with a different width, title size, text hierarchy or icon size.
+7. Colours outside the theme, and black next to coloured primary buttons.
+8. The same action labelled differently, and terms `CONTEXT.md` lists under _Avoid_.
+9. Different gaps between equivalent sections or cards.
+
 The target is what the design guide prescribes and most equivalent screens already do, implemented the way `frontend/AGENTS.md` prescribes. Never introduce a new visual style. Rules in the guide that need new flows or features (guided tours, new pages) are out of scope: fix inconsistencies only.
 
 ## Run the app

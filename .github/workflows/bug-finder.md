@@ -36,7 +36,7 @@ Find the single most impactful real bug: code that does the wrong thing for a re
 
 ## Kinds of defect to look for
 
-For each pattern, look for a concrete case and try to write a test that fails on the current code. The first case whose test fails is the bug you fix.
+Examples, not a complete list. For each kind, look for a concrete case and try to write a test that fails on the current code. The first case whose test fails is the bug you fix.
 
 1. Two representations. The same value stored or compared in two forms: an enum by name against by value, local time against UTC, an id against a name.
 2. Read filters on writes. Writes that go through a read filter (visibility, soft delete, scope) and so skip or break on rows the caller can't see.
