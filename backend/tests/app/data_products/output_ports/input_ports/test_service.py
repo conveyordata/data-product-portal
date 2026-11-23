@@ -243,6 +243,44 @@ class TestInputPortDecisions:
         assert requests[grant.id].revoked_by_id == actor.id
         assert requests[grant.id].decision == InputPortRequestDecision.APPROVED
 
+    def test_revoke__revokes_overlapping_renewed_grants(self, session):
+        actor = UserFactory()
+        consumer = DataProductFactory()
+        port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.RESTRICTED,
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        link = InputPortFactory(
+            consuming_abstract_data_product=consumer,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__requested_duration_days=30,
+            request__valid_from=date.today() - timedelta(days=5),
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        InputPortRequestFactory(
+            input_port=link,
+            decision=InputPortRequestDecision.APPROVED,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            requested_duration_days=30,
+            valid_from=date.today(),
+            valid_until=date.today() + timedelta(days=30),
+        )
+        session.refresh(link, ["requests"])
+
+        input_port = InputPortService(session).revoke_output_port_as_input_port(
+            data_product_id=port.data_product.id,
+            output_port_id=port.id,
+            consuming_data_product_id=consumer.id,
+            actor=actor,
+        )
+        session.flush()
+
+        assert input_port.status == InputPortStatus.REVOKED
+        assert len(link.requests) == 2
+        assert all(request.revoked_at is not None for request in link.requests)
+
     def test_revoke__raises_when_no_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
