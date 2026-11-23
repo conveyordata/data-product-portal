@@ -654,7 +654,7 @@ class TestRevokeOverlappingGrants:
             decision=InputPortRequestDecision.APPROVED,
             access_duration_type=AccessDurationType.TIME_BOUND,
             requested_duration_days=30,
-            valid_from=date.today(),
+            valid_from=date.today() - timedelta(days=1),
             valid_until=date.today() + timedelta(days=30),
         )
         session.refresh(link, ["requests"])
@@ -664,5 +664,7 @@ class TestRevokeOverlappingGrants:
         )
 
         session.refresh(link)
-        assert link.active_grant is None
         assert link.status == InputPortStatus.REVOKED
+        assert len(link.requests) == 2
+        assert all(request.revoked_at is not None for request in link.requests)
+        assert all(request.revoked_by_id == actor.id for request in link.requests)

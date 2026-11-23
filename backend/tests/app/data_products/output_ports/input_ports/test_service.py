@@ -264,7 +264,7 @@ class TestInputPortDecisions:
             decision=InputPortRequestDecision.APPROVED,
             access_duration_type=AccessDurationType.TIME_BOUND,
             requested_duration_days=30,
-            valid_from=date.today(),
+            valid_from=date.today() - timedelta(days=1),
             valid_until=date.today() + timedelta(days=30),
         )
         session.refresh(link, ["requests"])
@@ -280,6 +280,7 @@ class TestInputPortDecisions:
         assert input_port.status == InputPortStatus.REVOKED
         assert len(link.requests) == 2
         assert all(request.revoked_at is not None for request in link.requests)
+        assert all(request.revoked_by_id == actor.id for request in link.requests)
 
     def test_revoke__raises_when_no_active_grant(self, session):
         actor = UserFactory()
