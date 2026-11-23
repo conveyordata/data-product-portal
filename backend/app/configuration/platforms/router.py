@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 
 from app.configuration.platform_service_configurations.schema import (
     GetAllPlatformServiceConfigurationsResponse,
@@ -45,17 +45,9 @@ def get_platform_service_config(
         Depends(PlatformServiceConfigurationService),
     ],
 ) -> PlatformServiceConfiguration:
-    if not (
-        service_config
-        := platform_service_configuration_service.get_platform_service_configuration(
-            id, service_id
-        )
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Platform service configuration not found",
-        )
-    return service_config
+    return platform_service_configuration_service.get_platform_service_configuration(
+        id, service_id
+    )
 
 
 @router.get("/configs/{config_id}")
