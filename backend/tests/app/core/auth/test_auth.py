@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.core.auth import jwt as jwt_module
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.settings import settings
-from app.users.model import User
+from app.users.model import DELETED_USER_EMAIL, DELETED_USER_ID, User
 from tests.factories import UserFactory
 
 
@@ -382,6 +382,25 @@ class TestUserinfoIdentitySource:
 
         session.refresh(existing)
         assert existing.external_id == "keycloak-sub-1"
+
+    @pytest.mark.parametrize("external_id", ["placeholder-sub", "keycloak-sub-1"])
+    def test_get_authenticated_user__never_links_deleted_user_placeholder(
+        self, idp, session, external_id
+    ):
+        idp(audience="portal")
+        placeholder = UserFactory(
+            id=DELETED_USER_ID, external_id=external_id, email=DELETED_USER_EMAIL
+        )
+        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
+        body = {**KEYCLOAK_ACCESS_TOKEN, "email": DELETED_USER_EMAIL}
+
+        with userinfo_returns(200, body), pytest.raises(HTTPException) as error:
+            log_in(bearer, session)
+
+        assert error.value.status_code == status.HTTP_401_UNAUTHORIZED
+        session.refresh(placeholder)
+        assert placeholder.external_id == external_id
+        assert placeholder.first_name != KEYCLOAK_ACCESS_TOKEN.get("given_name")
 
     def test_authorize_user__email_change_to_taken_address_keeps_old_email(
         self, idp, session

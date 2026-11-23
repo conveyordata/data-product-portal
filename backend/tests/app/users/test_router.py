@@ -371,9 +371,10 @@ class TestUsersRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_remove_user__deleted_user_placeholder(self, client):
-        owner = UserFactory()
-        ExplorationFactory(owner=owner)
-        assert client.delete(f"{ENDPOINT}/{owner.id}").status_code == 200
+        for _ in range(2):
+            owner = UserFactory()
+            ExplorationFactory(owner=owner)
+            assert client.delete(f"{ENDPOINT}/{owner.id}").status_code == 200
 
         response = client.delete(f"{ENDPOINT}/{DELETED_USER_ID}")
 
