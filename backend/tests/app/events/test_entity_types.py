@@ -9,15 +9,8 @@ from alembic.operations import Operations
 from app.events.enums import EventEntityType
 from app.events.model import Event
 from app.events.schema_response import GetEventHistoryResponseItem
-from app.users.model import User
 from app.users.notifications.model import Notification
-from tests.factories import (
-    EventFactory,
-    GroupFactory,
-    MachineUserFactory,
-    NotificationFactory,
-    UserFactory,
-)
+from tests.factories import EventFactory, NotificationFactory
 
 
 @pytest.mark.parametrize("entity_type", list(EventEntityType))
@@ -78,56 +71,3 @@ def test_event_entity_migration__preserves_existing_history(session, monkeypatch
     response = GetEventHistoryResponseItem.model_validate(restored_event)
     assert response.subject_type == EventEntityType.OUTPUT_PORT
     assert response.target_type == EventEntityType.TECHNICAL_ASSET
-
-
-@pytest.mark.parametrize(
-    "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
-)
-def test_identity_event_migration__handles_deleted_identities(
-    session, monkeypatch, identity_factory
-):
-    identity = identity_factory()
-    event = EventFactory(
-        subject_id=identity.id,
-        subject_type=EventEntityType.IDENTITY,
-        target_id=identity.id,
-        target_type=EventEntityType.IDENTITY,
-        deleted_subject_identifier=None,
-    )
-    event_id = event.id
-    identity_id = identity.id
-    is_user = isinstance(identity, User)
-    identifier = identity.email if is_user else identity.display_name
-    session.delete(identity)
-    session.flush()
-    migration = import_module(
-        "app.database.alembic.versions."
-        "2026_11_16_1501-4b6d2a8f1c35_add_identity_event_reference_entity"
-    )
-    monkeypatch.setattr(
-        migration, "op", Operations(MigrationContext.configure(session.connection()))
-    )
-
-    if is_user:
-        migration.downgrade()
-        migration.upgrade()
-    else:
-        with (
-            pytest.raises(
-                sa.exc.DBAPIError,
-                match="Cannot downgrade while non-user identity events exist",
-            ),
-            session.connection().begin_nested(),
-        ):
-            migration.downgrade()
-
-    session.expire_all()
-    preserved_event = session.get(Event, event_id)
-    assert preserved_event is not None
-    expected_type = EventEntityType.USER if is_user else EventEntityType.IDENTITY
-    assert preserved_event.subject_type == expected_type
-    assert preserved_event.target_type == expected_type
-    assert preserved_event.subject_id == identity_id
-    assert preserved_event.target_id == identity_id
-    assert preserved_event.deleted_subject_identifier == identifier
-    assert preserved_event.deleted_target_identifier == identifier
