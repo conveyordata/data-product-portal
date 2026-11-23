@@ -7,9 +7,13 @@
 @forward "mixins";
 @forward "shared";
 
-* {
-    @include mixins.border-box-sizing();
-    margin: 0;
+@layer base, xyflow;
+
+@layer base {
+    * {
+        @include mixins.border-box-sizing();
+        margin: 0;
+    }
 }
 
 #root {

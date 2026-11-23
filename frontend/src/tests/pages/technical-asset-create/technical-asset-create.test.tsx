@@ -2,11 +2,18 @@ import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup
 import { delay, HttpResponse, http } from 'msw';
 import { Route, Routes } from 'react-router';
 import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-asset-create.page.tsx';
+import { ResourceNameModel, ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
-import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
+import {
+    mock_platform_tiles,
+    mock_plugins,
+    mockGetPlatformTiles,
+    mockGetPlugins,
+    mockRenderTechnicalAssetAccessPath,
+} from '@/tests/mocks/plugins.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -181,6 +188,107 @@ describe('TechnicalAssetCreate', async () => {
         expect(await screen.findByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
         expect(screen.getByText('Please provide a description for the Technical Asset')).toBeInTheDocument();
         expect(screen.queryByText('Technical asset detail')).not.toBeInTheDocument();
+    }, 15000);
+
+    it('should check the namespace against the Technical Assets of the selected type and recheck it when the type changes', async () => {
+        defaultMocks();
+        mockGetPlugins({
+            plugins: [
+                ...mock_plugins,
+                {
+                    ...mock_plugins[0],
+                    ui_metadata: [],
+                    plugin: 'GlueTechnicalAssetConfiguration',
+                    platform: 'glue',
+                    display_name: 'Glue',
+                    detailed_name: 'Database',
+                },
+            ],
+        });
+        const validations: URLSearchParams[] = [];
+        server.use(
+            http.get('*/api/v2/resource_names/validate', ({ request }) => {
+                const params = new URL(request.url).searchParams;
+                validations.push(params);
+                return HttpResponse.json({
+                    validity:
+                        params.get('technical_asset_type') === 'S3TechnicalAssetConfiguration'
+                            ? ResourceNameValidityType.Duplicate
+                            : ResourceNameValidityType.Valid,
+                });
+            }),
+        );
+        const lastValidation = () => validations[validations.length - 1];
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+
+        expect(await screen.findByText('This namespace is already in use')).toBeInTheDocument();
+        expect(lastValidation()?.get('model')).toBe(ResourceNameModel.TechnicalAsset);
+        expect(lastValidation()?.get('data_product_id')).toBe(mockDataProducts[0].id);
+        expect(lastValidation()?.get('technical_asset_type')).toBe('S3TechnicalAssetConfiguration');
+
+        await waitFor(() => expect(screen.getByLabelText(/glue/i)).not.toBeDisabled());
+        await user.click(screen.getByLabelText(/glue/i));
+
+        await waitFor(() =>
+            expect(lastValidation()?.get('technical_asset_type')).toBe('GlueTechnicalAssetConfiguration'),
+        );
+        await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
+    }, 15000);
+
+    it('should clear the namespace check when the Technical Asset Type is cleared', async () => {
+        defaultMocks();
+        mockGetPlatformTiles({
+            platform_tiles: [
+                ...mock_platform_tiles,
+                {
+                    ...mock_platform_tiles[0],
+                    label: 'Azure',
+                    value: 'azure',
+                    children: mock_platform_tiles[0].children?.slice(0, 1),
+                },
+            ],
+        });
+        server.use(
+            http.get('*/api/v2/resource_names/validate', () =>
+                HttpResponse.json({ validity: ResourceNameValidityType.Duplicate }),
+            ),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+        expect(await screen.findByText('This namespace is already in use')).toBeInTheDocument();
+
+        await user.click(screen.getByLabelText(/azure/i));
+
+        await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
+    }, 15000);
+
+    it('should not check the namespace before a Technical Asset Type is selected', async () => {
+        defaultMocks();
+        const validations: URLSearchParams[] = [];
+        server.use(
+            http.get('*/api/v2/resource_names/validate', ({ request }) => {
+                validations.push(new URL(request.url).searchParams);
+                return HttpResponse.json({ validity: ResourceNameValidityType.Valid });
+            }),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+
+        await waitFor(() => expect(document.querySelector('[data-cy="namespace"]')).not.toHaveValue(''));
+        expect(validations).toHaveLength(0);
+        expect(document.querySelector('.ant-form-item-feedback-icon-success')).not.toBeInTheDocument();
     }, 15000);
 
     it('should render the page title and the Technical Asset Type', async () => {

@@ -46,7 +46,7 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.graph.graph import Graph
-from app.plugins.registry import plugin_registry
+from app.plugins.registry import TechnicalAssetType, plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
@@ -81,7 +81,6 @@ def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> No
 class TechnicalAssetService:
     def __init__(self, db: Session):
         self.db = db
-        self.namespace_validator = TechnicalAssetNamespaceValidator()
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
@@ -181,21 +180,23 @@ class TechnicalAssetService:
     def create_technical_asset(
         self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
+        self.db.execute(
+            select(DataProductModel.id)
+            .where(DataProductModel.id == data_product_id)
+            .with_for_update()
+        )
         if (
-            validity := self.namespace_validator.validate_namespace(
-                technical_asset.namespace, self.db, data_product_id
-            ).validity
+            validity := self.validate_namespace(
+                data_product_id,
+                technical_asset.namespace,
+                technical_asset.configuration.name,
+            )
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        self.db.execute(
-            select(DataProductModel.id)
-            .where(DataProductModel.id == data_product_id)
-            .with_for_update()
-        )
         context = self._new_asset_context(
             data_product_id,
             technical_asset.namespace,
@@ -234,6 +235,18 @@ class TechnicalAssetService:
             environment_values,
         )
         return model
+
+    def validate_namespace(
+        self,
+        data_product_id: UUID,
+        namespace: str,
+        technical_asset_type: TechnicalAssetType,
+    ) -> ResourceNameValidityType:
+        return (
+            TechnicalAssetNamespaceValidator(technical_asset_type)
+            .validate_namespace(namespace, self.db, data_product_id)
+            .validity
+        )
 
     def get_technical_asset_with_environment_values(
         self, data_product_id: UUID, id: UUID

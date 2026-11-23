@@ -152,3 +152,16 @@ Known gaps, where Casbin can still disagree with the database:
 * Casbin is updated before the request's transaction commits. If the request fails and rolls back, Casbin keeps the change until its next reload.
 * Each worker keeps its own copy of the Casbin rules, so a change made on one worker reaches the others only when they next reload.
 * When two workers change rules at the same time, one worker's reload can overwrite the other's change.
+
+### Consumer access is checked in the database
+
+Members of a Consuming Data Product may read the Invite only Output Ports it consumes. Casbin used to store one rule per approved Input Port to allow this. Those rules went stale: when an Input Port expired, its rule stayed in Casbin until the next restart.
+
+Casbin no longer stores these rules. `Authorization(db).has_access(...)` in `app/core/authz/authorization.py` now:
+
+1. asks Casbin;
+2. if Casbin says no and the user wants to read an Output Port, asks the database through `is_member_of_consuming_data_product` in `app/database/visibility.py`.
+
+Every access check goes through `has_access`: route checks, the access check endpoint and services. `CasbinPolicies()` only keeps the rules Casbin still stores in step with the database.
+
+The database is asked on every request, so revoked access ends right away, on every worker. Expired access ends when the daily expiry job marks the Input Port as expired. The known gaps above still apply to the rules Casbin does store.

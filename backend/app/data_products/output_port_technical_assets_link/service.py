@@ -174,7 +174,7 @@ class TechnicalAssetOutputPortService:
                 .all()
             )
 
-            authorizer = Authorization()
+            authorizer = Authorization(self.db)
             return [
                 TechnicalAssetOutputPortRequest.model_validate(a)
                 for a in requested_associations

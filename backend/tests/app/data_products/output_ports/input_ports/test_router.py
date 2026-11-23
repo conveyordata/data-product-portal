@@ -166,7 +166,7 @@ class TestInputPortsRouter:
             actor=UserFactory(),
         )
 
-        assert Authorization().has_access(
+        assert Authorization(session).has_access(
             act=Action.HIDDEN__OUTPUT_PORT__READ,
             dom=str(output_port.data_product.domain_id),
             obj=str(output_port.id),

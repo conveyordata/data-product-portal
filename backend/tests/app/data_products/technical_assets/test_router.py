@@ -26,6 +26,7 @@ from tests.factories import (
     OutputPortFactory,
     PlatformServiceFactory,
     RoleFactory,
+    SizingTechnicalAssetConfigurationFactory,
     TagFactory,
     TechnicalAssetFactory,
     UserFactory,
@@ -568,17 +569,6 @@ class TestTechnicalAssetsRouter:
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
 
-    def test_get_namespace_validation(self, client: TestClient):
-        namespace = "valid-namespace"
-        data_product = DataProductFactory()
-        response = self.get_namespace_validation(
-            client, namespace, str(data_product.id)
-        )
-        body = response.json()
-
-        assert response.status_code == 200
-        assert body["validity"] == "VALID"
-
     def test_create_technical_asset_duplicate_namespace(
         self,
         technical_asset_payload,
@@ -596,6 +586,26 @@ class TestTechnicalAssetsRouter:
         )
         response = self.create_technical_asset(client, technical_asset_payload)
         assert response.status_code == 400
+
+    def test_create_technical_asset__namespace_taken_by_other_type(
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client: TestClient,
+        session,
+    ):
+        data_product = session.get(
+            DataProduct,
+            str(technical_asset_payload["owner_id"]),
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
+        )
+        TechnicalAssetFactory(
+            namespace=technical_asset_payload["namespace"],
+            owner=data_product,
+            configuration=SizingTechnicalAssetConfigurationFactory(),
+        )
+        response = self.create_technical_asset(client, technical_asset_payload)
+        assert response.status_code == 200
 
     def test_create_technical_asset_invalid_characters_namespace(
         self, technical_asset_payload, data_product_role_assignment, client: TestClient
@@ -867,19 +877,6 @@ class TestTechnicalAssetsRouter:
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name) -> Response:
         return client.get(f"/api/v2/resource_names/sanitize?name={name}")
-
-    @staticmethod
-    def get_namespace_validation(
-        client: TestClient, namespace, data_product_id
-    ) -> Response:
-        return client.get(
-            "/api/v2/resource_names/validate",
-            params={
-                "resource_name": namespace,
-                "model": "technical_asset",
-                "data_product_id": data_product_id,
-            },
-        )
 
     @staticmethod
     def get_namespace_length_limits(client: TestClient) -> Response:

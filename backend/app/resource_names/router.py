@@ -8,11 +8,12 @@ from app.configuration.data_product_settings.enums import DataProductSettingScop
 from app.configuration.domains.model import Domain
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import OutputPort
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.database.deps import DbSession
 from app.explorations.model import Exploration
+from app.plugins.registry import ensure_technical_asset_type
 from app.resource_names.enums import ResourceNameModel
 from app.resource_names.service import (
-    DataOutputResourceNameValidator,
     DataProductSettingResourceNameValidator,
     ResourceNameLengthLimits,
     ResourceNameService,
@@ -34,6 +35,7 @@ def validate_resource_name(
     model: ResourceNameModel,
     db: DbSession,
     data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
+    technical_asset_type: Annotated[str | SkipJsonSchema[None], Query()] = None,
 ) -> ResourceNameValidation:
     match model:
         case ResourceNameModel.DATA_PRODUCT:
@@ -41,8 +43,21 @@ def validate_resource_name(
                 resource_name, db
             )
         case ResourceNameModel.TECHNICAL_ASSET:
-            return DataOutputResourceNameValidator().validate_resource_name(
-                resource_name, db, scope=data_product_id
+            if data_product_id is None or technical_asset_type is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="data_product_id and technical_asset_type are required",
+                )
+            try:
+                ensure_technical_asset_type(technical_asset_type)
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+                ) from e
+            return ResourceNameValidation(
+                validity=TechnicalAssetService(db).validate_namespace(
+                    data_product_id, resource_name, technical_asset_type
+                )
             )
         case ResourceNameModel.OUTPUT_PORT:
             return ResourceNameService(model=OutputPort).validate_resource_name(

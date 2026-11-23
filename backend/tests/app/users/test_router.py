@@ -75,20 +75,25 @@ class TestUsersRouter:
         assert len(response.json()["users"]) == 1
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_user__preserves_event_references(self, client, session):
+    @pytest.mark.parametrize(
+        "entity_type", [EventEntityType.USER, EventEntityType.IDENTITY]
+    )
+    def test_remove_user__preserves_event_references(
+        self, client, session, entity_type
+    ):
         user = UserFactory()
         other_user = UserFactory()
         actor_event = EventFactory(actor=user)
         subject_event = EventFactory(
             actor=other_user,
             subject_id=user.id,
-            subject_type=EventEntityType.USER,
+            subject_type=entity_type,
             deleted_subject_identifier=None,
         )
         target_event = EventFactory(
             actor=other_user,
             target_id=user.id,
-            target_type=EventEntityType.USER,
+            target_type=entity_type,
         )
         user_id, email = user.id, user.email
         actor_event_id = actor_event.id
@@ -109,9 +114,13 @@ class TestUsersRouter:
         assert history.actor is None
         assert history.deleted_actor_identifier == email
         subject_event = session.get(Event, subject_event_id)
+        assert subject_event.subject_id == user_id
+        assert subject_event.subject_type == EventEntityType.USER
         assert subject_event.deleted_subject_identifier == email
         assert subject_event.user is None
         target_event = session.get(Event, target_event_id)
+        assert target_event.target_id == user_id
+        assert target_event.target_type == EventEntityType.USER
         assert target_event.deleted_target_identifier == email
         assert target_event.user is None
 
@@ -180,40 +189,40 @@ class TestUsersRouter:
             assert returned_event["deleted_actor_identifier"] == actor_email
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_user__clears_authorization(self, client, authorizer, session):
+    def test_remove_user__clears_authorization(self, client, policies, session):
         user = UserFactory()
         other_user = UserFactory()
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
         user_id = user.id
         group_id = group.id
-        authorizer.assign_resource_role(
+        policies.assign_resource_role(
             user_id=user_id, role_id="resource-role", resource_id="resource"
         )
-        authorizer.assign_domain_role(
+        policies.assign_domain_role(
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
-        authorizer.assign_global_role(user_id=user_id, role_id="global-role")
-        authorizer.assign_group_memberships(
+        policies.assign_global_role(user_id=user_id, role_id="global-role")
+        policies.assign_group_memberships(
             memberships=[(user_id, group_id)],
         )
-        authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
+        policies.assign_global_role(user_id=other_user.id, role_id="global-role")
 
         response = client.delete(f"{ENDPOINT}/{user_id}")
 
         assert response.status_code == 200, response.text
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=user_id, role_id="resource-role", resource_id="resource"
         )
-        assert not authorizer.has_domain_role(
+        assert not policies.has_domain_role(
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
-        assert not authorizer.has_global_role(user_id=user_id, role_id="global-role")
-        assert not authorizer.has_resource_role(
+        assert not policies.has_global_role(user_id=user_id, role_id="global-role")
+        assert not policies.has_resource_role(
             user_id=user_id, role_id=group_id, resource_id="*"
         )
-        assert not authorizer.has_global_role(user_id=user_id, role_id=group_id)
-        assert authorizer.has_global_role(user_id=other_user.id, role_id="global-role")
+        assert not policies.has_global_role(user_id=user_id, role_id=group_id)
+        assert policies.has_global_role(user_id=other_user.id, role_id="global-role")
 
     @pytest.mark.usefixtures("admin")
     def test_remove_user__with_data_product_role(self, client, session):

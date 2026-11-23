@@ -773,9 +773,10 @@ type ValidateNewTechnicalAssetEnvironmentConfigurationParams struct {
 
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
 type ValidateResourceNameParams struct {
-	ResourceName  string
-	Model         ResourceNameModel
-	DataProductID OptUUID `json:",omitempty,omitzero"`
+	ResourceName       string
+	Model              ResourceNameModel
+	DataProductID      OptUUID   `json:",omitempty,omitzero"`
+	TechnicalAssetType OptString `json:",omitempty,omitzero"`
 }
 
 // ValidateTechnicalAssetEnvironmentConfigurationParams is parameters of validate_technical_asset_environment_configuration operation.
