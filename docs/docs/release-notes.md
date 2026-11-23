@@ -22,7 +22,7 @@ sidebar_position: 200
 
 ### bugfixes
 
-- **[User Deletion]**: Deleting a user no longer fails when they requested or decided a role assignment, input port request or Technical Asset link, or own an Exploration. These now point to a shared "Deleted user" placeholder instead of the deleted user. Who it was stays in the event history, which keeps their email.
+- **[User Deletion]**: Deleting a user no longer fails when they requested or decided a role assignment, input port request or Technical Asset link, or own an Exploration. These now point to a shared "Deleted user" placeholder instead of the deleted user. Where the event history recorded who acted, it keeps their email.
 - **[API]**: Admins can manage Explorations they don't own, also when the owner was deleted.
 - **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
 - **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.

@@ -3,7 +3,7 @@ from typing import Any, Final, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, or_, select, update
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.model import InputPortRequest
@@ -119,11 +119,12 @@ class UserService:
         if not user_ids:
             return
         for model, column in USER_REFERENCES:
-            self.db.execute(
-                update(model)
-                .where(getattr(model, column).in_(user_ids))
-                .values({column: DELETED_USER_ID})
+            rows = self.db.scalars(
+                select(model).where(getattr(model, column).in_(user_ids))
             )
+            for row in rows:
+                setattr(row, column, DELETED_USER_ID)
+        self.db.flush()
 
     def _remove_user(self, user: UserModel) -> None:
         user.data_products = []

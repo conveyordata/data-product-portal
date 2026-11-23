@@ -3,9 +3,11 @@
 import uuid
 
 import faker
+import pytest
 
+from app.core.webhooks.events import ExplorationEvent
 from tests.conftest import webhook_v2_config
-from tests.factories import DomainFactory
+from tests.factories import DomainFactory, ExplorationFactory, UserFactory
 
 ROUTE = "/api/v2/explorations"
 
@@ -44,3 +46,13 @@ class TestExplorationEventEmission:
 
         assert response.status_code >= 400
         assert len(capture_events.captured_events) == 0
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_owner_emits_event(self, capture_events, client):
+        owner = UserFactory()
+        exploration = ExplorationFactory(owner=owner)
+
+        response = client.delete(f"/api/v2/users/{owner.id}")
+
+        assert response.status_code == 200, response.text
+        assert ExplorationEvent(id=exploration.id) in capture_events.captured_events
