@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapper, Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
+from app.plugins.registry import plugin_registry
 from app.settings import settings
 from app.shared.schema import ORMModel
 
@@ -42,12 +43,10 @@ class ResourceNameService:
         self.model = model
 
     @classmethod
-    def _resource_name_from_name(
-        cls, name: str, max_length: Optional[int] = None
-    ) -> str:
+    def _resource_name_from_name(cls, name: str, max_length: int) -> str:
         resource_name = re.sub(
             r"[^a-z0-9+=,.@_-]", "", name.lower().replace(" ", "-")
-        ).strip("-")[: cls.max_length if max_length is None else max_length]
+        ).strip("-")[:max_length]
         return "" if set(resource_name) <= {"."} else resource_name
 
     def _is_unique(
@@ -62,8 +61,15 @@ class ResourceNameService:
 
     @classmethod
     def resource_name_suggestion(
-        cls, name: str, max_length: Optional[int] = None
+        cls, name: str, technical_asset_type: str | None = None
     ) -> ResourceNameSuggestion:
+        max_length = (
+            plugin_registry.get(technical_asset_type)
+            .get_platform_metadata()
+            .namespace_max_length
+            if technical_asset_type is not None
+            else cls.max_length
+        )
         resource_name = cls._resource_name_from_name(name, max_length)
 
         return ResourceNameSuggestion(

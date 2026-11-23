@@ -11,7 +11,7 @@ from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.database.deps import DbSession
 from app.explorations.model import Exploration
-from app.plugins.registry import ensure_technical_asset_type, plugin_registry
+from app.plugins.registry import ensure_technical_asset_type
 from app.resource_names.enums import ResourceNameModel
 from app.resource_names.service import (
     DataProductSettingResourceNameValidator,
@@ -28,14 +28,7 @@ router = APIRouter(tags=["Resource names"], prefix="/v2/resource_names")
 def sanitize_resource_name(
     name: str, technical_asset_type: str | None = None
 ) -> ResourceNameSuggestion:
-    max_length = (
-        plugin_registry.get(technical_asset_type)
-        .get_platform_metadata()
-        .namespace_max_length
-        if technical_asset_type is not None
-        else None
-    )
-    return ResourceNameService.resource_name_suggestion(name, max_length)
+    return ResourceNameService.resource_name_suggestion(name, technical_asset_type)
 
 
 @router.get("/validate")

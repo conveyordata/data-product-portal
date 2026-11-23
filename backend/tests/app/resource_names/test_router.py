@@ -161,6 +161,17 @@ class TestResourceNamesRouter:
         response = client.get("api/v2/resource_names/sanitize", params={"name": name})
         assert response.json()["resource_name"] == ""
 
+    def test_sanitize_resource_name__uses_default_length_without_type(
+        self, client: TestClient
+    ):
+        response = client.get(
+            "api/v2/resource_names/sanitize",
+            params={"name": "a" * (settings.NAMESPACE_MAX_LENGTH + 1)},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"resource_name": "a" * settings.NAMESPACE_MAX_LENGTH}
+
     def test_validate_resource_name(self):
         """
         This test exists to ensure the case is tested where we have added a new model to the enum
