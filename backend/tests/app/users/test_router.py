@@ -13,7 +13,7 @@ from app.authorization.role_assignments.output_port.model import (
 from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
-from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent
+from app.core.webhooks.events import InputPortEvent, OutputPortTechnicalAssetLinkEvent
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
@@ -26,6 +26,9 @@ from app.settings import settings
 from app.users.model import DELETED_USER_ID, User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
+)
+from tests.conftest import (
+    webhook_v2_input_port_events_from_technical_asset_output_port_link,
 )
 from tests.factories import (
     DataProductFactory,
@@ -679,18 +682,32 @@ class TestUsersRouter:
             ),
             requested_by=requester,
         )
-        link_id = link.id
-        expected_event = OutputPortTechnicalAssetLinkEvent(
-            id=link.id,
-            data_product_id=link.technical_asset.owner_id,
-            output_port_id=link.output_port_id,
-            technical_asset_id=link.technical_asset_id,
+        consumer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        input_port = InputPortFactory(
+            output_port=link.output_port, consuming_abstract_data_product=consumer
         )
+        link_id = link.id
+        expected_events = [
+            OutputPortTechnicalAssetLinkEvent(
+                id=link.id,
+                data_product_id=link.technical_asset.owner_id,
+                output_port_id=link.output_port_id,
+                technical_asset_id=link.technical_asset_id,
+            ),
+            InputPortEvent(
+                id=input_port.id,
+                consuming_abstract_data_product_id=consumer.id,
+                consuming_abstract_data_product_type=consumer.abstract_data_product_type,
+                producing_data_product_id=link.output_port.data_product_id,
+            ),
+        ]
 
-        response = client.delete(f"{ENDPOINT}/{requester.id}")
+        with webhook_v2_input_port_events_from_technical_asset_output_port_link():
+            response = client.delete(f"{ENDPOINT}/{requester.id}")
 
         assert response.status_code == 200, response.text
-        assert expected_event in capture_events.captured_events
+        for event in expected_events:
+            assert event in capture_events.captured_events
         session.expire_all()
         assert (
             session.scalar(

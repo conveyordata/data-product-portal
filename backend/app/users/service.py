@@ -25,7 +25,7 @@ from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
-from app.database.database import UNFILTERED
+from app.database.visibility import acting_as
 from app.explorations.model import Exploration
 from app.groups.model import Group, GroupMembership
 from app.groups.schema_response import GroupGet
@@ -119,15 +119,14 @@ class UserService:
     def _reassign_to_deleted_user(self, user_ids: list[UUID]) -> None:
         if not user_ids:
             return
-        for model, column in USER_REFERENCES:
-            rows = self.db.scalars(
-                select(model)
-                .where(getattr(model, column).in_(user_ids))
-                .execution_options(**UNFILTERED)
-            )
-            for row in rows:
-                setattr(row, column, DELETED_USER_ID)
-        self.db.flush()
+        with acting_as(self.db, None):
+            for model, column in USER_REFERENCES:
+                rows = self.db.scalars(
+                    select(model).where(getattr(model, column).in_(user_ids))
+                )
+                for row in rows:
+                    setattr(row, column, DELETED_USER_ID)
+            self.db.flush()
 
     def _remove_user(self, user: UserModel) -> None:
         user.data_products = []
