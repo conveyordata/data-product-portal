@@ -57,7 +57,7 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
 
     return (
         <Flex vertical gap={filteredDataOutputs.length === 0 ? 'large' : 'small'}>
-            <Flex vertical gap="middle">
+            <Flex vertical gap="medium">
                 <Flex justify="space-between" align="center">
                     <Typography.Title level={4} style={{ margin: 0 }}>
                         {t('Technical Assets')}

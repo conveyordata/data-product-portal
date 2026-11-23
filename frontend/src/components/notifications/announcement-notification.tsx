@@ -73,7 +73,7 @@ export function AnnouncementNotification({
             </Flex>
             <Button
                 type={detailed ? 'link' : 'text'}
-                size={detailed ? 'small' : 'middle'}
+                size={detailed ? 'small' : 'medium'}
                 aria-label={t('Acknowledge')}
                 icon={detailed ? undefined : <CheckOutlined />}
                 loading={isAcknowledging}

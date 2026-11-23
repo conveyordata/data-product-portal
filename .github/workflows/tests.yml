@@ -69,7 +69,7 @@ jobs:
       - name: Run the automated tests
         working-directory: ./backend
         id: run-test
-        run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+        run: poetry run pytest -v -n logical --dist worksteal --cov=app --cov-report=term --cov-report=xml tests/
         env:
           TEST_EMBEDDING_LATENCY_BOUND: "5.000"
           TEST_LATENCY_BOUND: "0.800"

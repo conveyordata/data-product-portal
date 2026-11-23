@@ -48,7 +48,7 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
 
     return (
         <Flex vertical gap={filteredOutputPorts.length === 0 ? 'large' : 'small'}>
-            <Flex vertical gap="middle">
+            <Flex vertical gap="medium">
                 <Flex justify="space-between" align="center">
                     <Typography.Title level={4} style={{ margin: 0 }}>
                         {t('Output Ports')}

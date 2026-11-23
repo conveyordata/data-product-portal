@@ -2,10 +2,11 @@ import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup
 import { delay, HttpResponse, http } from 'msw';
 import { Route, Routes } from 'react-router';
 import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-asset-create.page.tsx';
+import type { RenderTechnicalAssetAccessPathRequest } from '@/store/api/services/generated/pluginsApi.ts';
 import { ResourceNameModel, ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
-import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
+import { mock_platform_service_configuration, mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import {
     mock_platform_tiles,
@@ -48,6 +49,34 @@ const renderPage = () =>
         { routerProps: { initialEntries: [`/studio/${mockDataProducts[0].id}/technical-assets/new`] } },
     );
 
+const mockNamespaceLengths = () => {
+    mockGetPlugins({
+        plugins: mock_plugins.map((plugin) =>
+            plugin.platform === 's3' ? { ...plugin, namespace_max_length: 24 } : plugin,
+        ),
+    });
+    const validations = vi.fn();
+    server.use(
+        http.get('*/api/v2/resource_names/sanitize', async ({ request }) => {
+            const params = new URL(request.url).searchParams;
+            const limit = params.get('technical_asset_type') === 'S3TechnicalAssetConfiguration' ? 24 : 64;
+            await delay(50);
+            return HttpResponse.json({
+                resource_name: params.get('name')?.toLowerCase().replace(/ /g, '-').slice(0, limit),
+            });
+        }),
+        http.get('*/api/v2/resource_names/validate', ({ request }) => {
+            const params = Object.fromEntries(new URL(request.url).searchParams);
+            validations(params);
+            const limit = params.technical_asset_type === 'S3TechnicalAssetConfiguration' ? 24 : 64;
+            return HttpResponse.json({
+                validity: params.resource_name.length > limit ? 'INVALID_LENGTH' : 'VALID',
+            });
+        }),
+    );
+    return validations;
+};
+
 describe('TechnicalAssetCreate', async () => {
     const fillInS3 = async (user: UserEvent) => {
         await user.click(screen.getByLabelText(/aws/i));
@@ -87,6 +116,38 @@ describe('TechnicalAssetCreate', async () => {
 
         expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
     }, 15000);
+
+    it.each(['owner/repository', undefined])('renders an optional plugin placeholder: %s', async (placeholder) => {
+        defaultMocks();
+        mockGetPlugins({
+            plugins: mock_plugins.map((plugin) =>
+                plugin.platform === 'github'
+                    ? {
+                          ...plugin,
+                          ui_metadata: plugin.ui_metadata.map((field) => ({
+                              ...field,
+                              string: { ...field.string, placeholder },
+                          })),
+                      }
+                    : plugin,
+            ),
+        });
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+        const github = await screen.findByLabelText(/^github$/i);
+        await waitFor(() => expect(github).toBeEnabled());
+        await user.click(github);
+
+        const input = screen.getByLabelText(/^repository$/i);
+        if (placeholder) {
+            expect(input).toHaveAttribute('placeholder', placeholder);
+        } else {
+            expect(input).not.toHaveAttribute('placeholder');
+        }
+        expect(input).toHaveValue('');
+        await user.type(input, 'my-org/my-repo');
+        expect(input).toHaveValue('my-org/my-repo');
+    });
 
     it('should be able to select multiple access modes and choose specific modes', async () => {
         defaultMocks();
@@ -173,6 +234,142 @@ describe('TechnicalAssetCreate', async () => {
         await waitFor(() => expect(screen.getByLabelText(/github/i)).not.toBeDisabled(), { timeout: 2000 });
     }, 15000);
 
+    it('uses the selected type for namespace length, suggestions and uniqueness', async () => {
+        defaultMocks();
+        const validations = mockNamespaceLengths();
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+        const name = 'A technical asset name longer than twenty four characters';
+        const fullNamespace = name.toLowerCase().replace(/ /g, '-');
+        const input = await screen.findByLabelText(/^name$/i);
+        await waitFor(() => expect(input).toBeEnabled());
+        await user.type(input, name);
+
+        const namespace = await screen.findByDisplayValue(fullNamespace);
+        expect(namespace).toHaveAttribute('maxlength', '64');
+        expect(validations).not.toHaveBeenCalled();
+
+        await user.click(screen.getByLabelText(/^aws$/i));
+        await user.click(screen.getByLabelText(/^s3$/i));
+        expect(screen.getByText('Create', { selector: 'button span' }).closest('button')).toBeDisabled();
+        await waitFor(() => expect(namespace).toHaveValue(fullNamespace.slice(0, 24)));
+        expect(namespace).toHaveAttribute('maxlength', '24');
+        await waitFor(() =>
+            expect(validations).toHaveBeenLastCalledWith({
+                model: 'technical_asset',
+                technical_asset_type: 'S3TechnicalAssetConfiguration',
+                data_product_id: mockDataProducts[0].id,
+                resource_name: fullNamespace.slice(0, 24),
+            }),
+        );
+        await waitFor(() => expect(screen.getByText('Create').closest('button')).toBeEnabled());
+
+        await user.click(screen.getByLabelText(/^github$/i));
+        await waitFor(() => expect(namespace).toHaveValue(fullNamespace));
+        expect(namespace).toHaveAttribute('maxlength', '64');
+        await waitFor(() =>
+            expect(validations).toHaveBeenLastCalledWith(
+                expect.objectContaining({ technical_asset_type: 'GitHubPlugin', resource_name: fullNamespace }),
+            ),
+        );
+    }, 15000);
+
+    it('preserves a manually entered namespace and revalidates it when the type changes', async () => {
+        defaultMocks();
+        mockNamespaceLengths();
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+        await fillInNameAndDescription(user);
+        const namespace = await screen.findByDisplayValue('my-new-technical-asset');
+        await user.click(screen.getByLabelText('edit'));
+        await user.clear(namespace);
+        await user.type(namespace, 'manually-entered-namespace-longer-than-24');
+
+        await user.click(screen.getByLabelText(/^aws$/i));
+        await user.click(screen.getByLabelText(/^s3$/i));
+
+        expect(namespace).toHaveValue('manually-entered-namespace-longer-than-24');
+        expect(await screen.findByText('Namespace is too long')).toBeInTheDocument();
+
+        await user.click(screen.getByLabelText(/^github$/i));
+        await waitFor(() => expect(screen.queryByText('Namespace is too long')).not.toBeInTheDocument());
+        expect(namespace).toHaveValue('manually-entered-namespace-longer-than-24');
+    }, 15000);
+
+    it('renders previews only for the selected child after switching platforms', async () => {
+        defaultMocks();
+        const awsConfig = mock_platform_service_configuration[0];
+        mockGetPlatformConfigs({
+            platform_service_configurations: [
+                ...mock_platform_service_configuration,
+                {
+                    ...awsConfig,
+                    id: 'glue-config',
+                    service: { ...awsConfig.service, id: 'glue-service', name: 'Glue' },
+                    config: [],
+                },
+            ],
+        });
+        mockGetPlugins({
+            plugins: [
+                ...mock_plugins,
+                {
+                    ...mock_plugins[0],
+                    plugin: 'GlueTechnicalAssetConfiguration',
+                    platform: 'glue',
+                    display_name: 'Glue',
+                    detailed_name: 'Glue',
+                    ui_metadata: [],
+                },
+            ],
+        });
+        const previews = vi.fn();
+        server.use(
+            http.post<never, RenderTechnicalAssetAccessPathRequest>(
+                '*/api/v2/plugins/render_technical_asset_access_path',
+                async ({ request }) => {
+                    previews(await request.json());
+                    return HttpResponse.json({ technical_asset_access_path: 'preview' });
+                },
+            ),
+        );
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+        await fillInNameAndDescription(user);
+        await user.click(screen.getByLabelText(/^aws$/i));
+        expect(previews).not.toHaveBeenCalled();
+        await user.click(screen.getByLabelText(/^glue$/i));
+        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+
+        await waitFor(() => expect(screen.getByLabelText(/^github$/i)).toBeEnabled());
+        await user.click(screen.getByLabelText(/^github$/i));
+        const count = previews.mock.calls.length;
+        await user.click(screen.getByLabelText(/^aws$/i));
+        expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
+        await user.click(screen.getByLabelText(/^s3$/i));
+        expect(screen.getByLabelText('Resulting path')).toHaveValue('');
+        expect(previews).toHaveBeenCalledTimes(count);
+        await user.click(screen.getByLabelText(/^bucket$/i));
+        await user.click(screen.getAllByText('datalake')[1]);
+        await user.type(screen.getByLabelText(/^path$/i), 'test-path');
+
+        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+        expect(previews).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                platform_id: awsConfig.platform.id,
+                service_id: awsConfig.service.id,
+                configuration: expect.objectContaining({ name: 'S3TechnicalAssetConfiguration', path: 'test-path' }),
+            }),
+        );
+        for (const [request] of previews.mock.calls) {
+            expect(request.configuration.name).toBe(
+                request.service_id === 'glue-service'
+                    ? 'GlueTechnicalAssetConfiguration'
+                    : 'S3TechnicalAssetConfiguration',
+            );
+        }
+    }, 15000);
+
     it('should scroll to the first invalid field when submitting an incomplete form', async () => {
         defaultMocks();
 
@@ -183,6 +380,7 @@ describe('TechnicalAssetCreate', async () => {
         await waitFor(() => expect(nameInput).not.toBeDisabled());
 
         const createButton = screen.getByRole('button', { name: /Create/i });
+        await waitFor(() => expect(createButton).toBeEnabled());
         await user.click(createButton);
 
         expect(await screen.findByText('Please provide the name of the Technical Asset')).toBeInTheDocument();

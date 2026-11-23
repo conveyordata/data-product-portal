@@ -80,7 +80,7 @@ export default function AccessModes() {
     );
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <SettingsSectionHeader
                 title={t('Access Modes')}
                 description={t('Configure available access modes for Technical Assets and Output Ports')}
