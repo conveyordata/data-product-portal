@@ -592,14 +592,14 @@ files = [
 
 [[package]]
 name = "cachetools"
-version = "8.0.0"
+version = "8.0.2"
 description = "Extensible memoizing collections and decorators"
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "plugins"]
 files = [
-    {file = "cachetools-8.0.0-py3-none-any.whl", hash = "sha256:5af562e5078f0086771a1e3832a9c3dbf5d336b6e2794a2c12a64680a4c9087d"},
-    {file = "cachetools-8.0.0.tar.gz", hash = "sha256:5ed01bd676800d51f0025605e4fd8ad0891550513e7b0a4c3da478463764e5c3"},
+    {file = "cachetools-8.0.2-py3-none-any.whl", hash = "sha256:502bf3c17c6e35d78ccdaa70da8c7001b28634541f5cde0dee33c93bb252277d"},
+    {file = "cachetools-8.0.2.tar.gz", hash = "sha256:30ac523adfc118b51d2b2e7bad8a0ddb31370dfe2700c7f10ca224f36ccf81e0"},
 ]
 
 [[package]]
@@ -6135,4 +6135,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "41f8cb50f9901903e5585c4940531e13615d491afe0adac5f32d2bbfec0223ac"
+content-hash = "5ce77f0ef44dc9441d9c103ceb4cacc6af0335b722a6ecfd0e34b644810433f1"
