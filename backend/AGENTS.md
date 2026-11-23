@@ -17,8 +17,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 
 
 ## Authorization
-*   When creating new endpoints check with the user if authorization is needed with `Authorization.enforce()`.
-In principle should always be present on non GET endpoints and sensitive GET endpoints.
+*   Every non-GET endpoint and every sensitive GET endpoint enforces authorization with `Authorization.enforce()`. When creating a new endpoint, check with the user which action it needs.
 * Check if new actions need to be added.
 * Who sees a Data Product, Exploration, Technical Asset or Output Port is decided in `app/database/visibility.py`, and who is an admin in `app/authorization/role_assignments/global_/admin.py`; don't read `session.info` or write visibility or admin predicates elsewhere.
 

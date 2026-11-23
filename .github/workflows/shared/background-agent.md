@@ -41,7 +41,7 @@ safe-outputs:
           [ -n "$text" ] || exit 0
           { echo "## Checked"; echo; echo "$text"; } >> "$GITHUB_STEP_SUMMARY"
           rows=$(printf '%s\n' "$text" | grep -c '^|' || true)
-          if [ "$rows" -lt 5 ]; then
+          if [ "$rows" -lt 9 ]; then
             echo "::error::noop without a table of what was checked ($rows table lines)"
             exit 1
           fi

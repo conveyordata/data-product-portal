@@ -34,7 +34,7 @@ safe-outputs:
 
 Find the biggest inconsistency in how the backend (including the plugins) does the same thing in different ways, and align it to one pattern.
 
-The target pattern is the one those documents prescribe, else the one most of the codebase already uses. Never introduce a new pattern. Do not change public API paths, request or response shapes, or database schemas.
+The target pattern is the one the documents below prescribe, else the one most of the codebase already uses. Never introduce a new pattern. Do not change public API paths, request or response shapes, or database schemas.
 
 ## What to hold the code to
 

@@ -19,6 +19,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 -   **Testing**: Run `task test:frontend` (or `npm test run`). Tests live in `frontend/src/tests/`.
 -   **Quality**: When comparing values, if it is an ENUM always use that, avoid comparing against plain strings or number except if it is only used once and it is a default constant.
 -   **Styling**: Try to avoid using CSS colouring, use the theme token: const { token } = theme.useToken(); to fetch the colours you need.
+-   **No dead styles**: every `styles.x` a component uses exists in its `.module.scss`, and no `.module.scss` is empty or unused.
 - Prefer using semantic size tokens ("small", "medium") instead of raw pixel gaps (static numbers)
 -   **No chained type assertions**: Never use `as unknown as X`. Fix the type at its source or narrow it with a type guard.
 -   **No module mocking**: Avoid `vi.mock`. Pass dependencies in, or mock HTTP with `msw`.

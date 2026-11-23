@@ -34,7 +34,7 @@ safe-outputs:
 
 Find the biggest inconsistency in how the frontend code does the same thing in different ways, and align it to one pattern.
 
-The target pattern is the one those documents prescribe; if they say nothing, the one most of the codebase already uses. Never introduce a new pattern.
+The target pattern is the one the documents below prescribe; if they say nothing, the one most of the codebase already uses. Never introduce a new pattern.
 
 ## What to hold the code to
 
