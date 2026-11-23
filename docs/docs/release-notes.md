@@ -13,6 +13,7 @@ sidebar_position: 200
 
 ### features
 
+- **[Plugins/UI]**: Plugins can set `UIElementString.placeholder` to show placeholder text in string inputs.
 - **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
 - **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
 - **[Plugins]**: Core provides `get_azure_plugin_url`, shared with Azure Blob, so custom Azure plugins can use the same parent-platform link.
