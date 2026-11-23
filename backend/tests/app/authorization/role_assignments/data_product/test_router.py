@@ -493,7 +493,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert (
             response.json()["detail"]
-            == "A data product must always be owned by at least one user"
+            == "A data product must always be owned by at least one identity"
         )
 
     @pytest.mark.parametrize(
@@ -539,7 +539,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert (
             response.json()["detail"]
-            == "A data product must always be owned by at least one user"
+            == "A data product must always be owned by at least one identity"
         )
 
     def test_decide_assignment(self, client: TestClient):
