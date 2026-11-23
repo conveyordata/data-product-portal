@@ -118,8 +118,12 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     );
     const previousDefaults = useRef<{ metadata: unknown; values: EnvironmentValues }>(undefined);
     const dataOutputNameValue = Form.useWatch('name', form);
+    const configurationType = Form.useWatch(['configuration', 'name'], form);
 
-    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        { currentData: sanitizedResourceName, originalArgs: namespaceRequest, isFetching: isSanitizingNamespace },
+    ] = useLazySanitizeResourceNameQuery();
     const [validateNamespace] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
@@ -230,6 +234,7 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                 form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
             } else {
                 setSelectedConfiguration(undefined);
+                form.setFieldValue('service_id', undefined);
             }
         }
     };
@@ -244,7 +249,10 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     };
 
     // Namespace validation
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), debounce);
+    const fetchNamespaceDebounced = useDebouncedCallback(
+        (name: string, technicalAssetType?: string) => sanitizeResourceName({ name, technicalAssetType }),
+        debounce,
+    );
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
@@ -255,9 +263,15 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                     errors: [],
                 },
             ]);
-            fetchNamespaceDebounced(dataOutputNameValue ?? '');
+            fetchNamespaceDebounced(dataOutputNameValue ?? '', pluginMetadata?.plugin);
         }
-    }, [mode, form, canEditNamespace, dataOutputNameValue, fetchNamespaceDebounced]);
+    }, [mode, form, canEditNamespace, dataOutputNameValue, pluginMetadata?.plugin, fetchNamespaceDebounced]);
+
+    const namespaceIsCurrent =
+        !isSanitizingNamespace &&
+        sanitizedResourceName !== undefined &&
+        namespaceRequest?.name === (dataOutputNameValue ?? '') &&
+        namespaceRequest?.technicalAssetType === pluginMetadata?.plugin;
 
     const options = [
         { label: t('Default'), value: 'default' },
@@ -276,11 +290,11 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     }, [form, technicalAssetType]);
 
     useEffect(() => {
-        if (mode === 'create' && !canEditNamespace) {
-            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
+        if (mode === 'create' && !canEditNamespace && namespaceIsCurrent && sanitizedResourceName) {
+            form.setFields([{ name: 'namespace', value: sanitizedResourceName.resource_name, validating: false }]);
             revalidateNamespace();
         }
-    }, [form, mode, canEditNamespace, sanitizedResourceName, revalidateNamespace]);
+    }, [form, mode, canEditNamespace, namespaceIsCurrent, sanitizedResourceName, revalidateNamespace]);
 
     const validateNamespaceCallback = useCallback(
         async (namespace: string) =>
@@ -309,7 +323,7 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                 form.setFieldValue('result', result);
             }
         };
-        if (!values.platform_id || !values.service_id) {
+        if (!values.platform_id || !values.service_id || !values.configuration?.name) {
             form.setFieldValue('result', undefined);
             return;
         }
@@ -372,8 +386,14 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     }, [environmentValues, sharedConfiguration, namespace, technical_mapping, checkEnvironmentValues]);
 
     useEffect(() => {
-        setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
-    }, [form, namespace, technical_mapping, setResultString]);
+        const values = form.getFieldsValue(true);
+        setResultString({
+            ...values,
+            namespace,
+            technical_mapping,
+            configuration: configurationType ? values.configuration : undefined,
+        });
+    }, [form, namespace, technical_mapping, configurationType, setResultString]);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,
@@ -416,10 +436,10 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                 <ResourceNameFormItem
                     form={form}
                     tooltip={t('The namespace of the Technical Asset')}
-                    max_length={constraints?.max_length}
+                    max_length={pluginMetadata?.namespace_max_length ?? constraints?.max_length}
                     canEditResourceName={canEditNamespace}
                     toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
-                    validationRequired
+                    validationRequired={Boolean(pluginMetadata)}
                     validateResourceName={validateNamespaceCallback}
                 />
                 <Form.Item<TechnicalAssetsCreateForm>
@@ -600,7 +620,12 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                                 <Button onClick={onCancel} disabled={isLoading}>
                                     {t('Cancel')}
                                 </Button>
-                                <Button type="primary" htmlType="submit" loading={isCreating} disabled={isLoading}>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={isCreating}
+                                    disabled={isLoading || (!canEditNamespace && !namespaceIsCurrent)}
+                                >
                                     {t('Create')}
                                 </Button>
                             </Space>

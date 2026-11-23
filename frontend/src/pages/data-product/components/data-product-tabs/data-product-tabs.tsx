@@ -217,7 +217,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                         className: styles.tabPane,
                     };
                 })}
-                size="middle"
+                size="medium"
                 className={styles.container}
             />
             <Tour

@@ -455,7 +455,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                     )
                 }
             >
-                <Flex vertical gap="middle">
+                <Flex vertical gap="medium">
                     <Flex gap="small" align="stretch">
                         <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3, minWidth: 0 }}>
                             <Flex vertical gap="small">

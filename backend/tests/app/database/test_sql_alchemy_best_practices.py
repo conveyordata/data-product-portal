@@ -4,10 +4,11 @@ from sqlalchemy import Table, inspect
 from app.database.database import Base
 from tests import engine
 
-models = [mapper.class_ for mapper in Base.registry.mappers]
+mappers = sorted(Base.registry.mappers, key=lambda mapper: mapper.class_.__name__)
+models = [mapper.class_ for mapper in mappers]
 association_relationships = [
     relationship
-    for mapper in Base.registry.mappers
+    for mapper in mappers
     for relationship in mapper.relationships
     if isinstance(relationship.secondary, Table)
 ]

@@ -2,11 +2,11 @@ from typing import cast
 from uuid import uuid4
 
 from sqlalchemy import text  # noqa: TID251
+from sqlalchemy.orm import Session
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, CasbinPolicies
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.database.database import engine
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -537,7 +537,7 @@ class TestAuthorization:
             assert not policies.has_global_role(user_id=member_id, role_id=group_id)
 
     def test_assign_group_memberships__reconciles_policies_from_another_worker(
-        self, policies: CasbinPolicies
+        self, policies: CasbinPolicies, session: Session
     ):
         suffix = uuid4().hex
         persisted_elsewhere = (
@@ -549,7 +549,7 @@ class TestAuthorization:
             f"new-group-{suffix}",
         )
 
-        self._persist_group_membership(*persisted_elsewhere)
+        self._persist_group_membership(session, *persisted_elsewhere)
 
         assert not policies.has_resource_role(
             user_id=persisted_elsewhere[0],
@@ -563,7 +563,9 @@ class TestAuthorization:
 
         assert updated
         for member_id, group_id in (persisted_elsewhere, new_membership):
-            assert self._count_group_membership_policies(member_id, group_id) == 2
+            assert (
+                self._count_group_membership_policies(session, member_id, group_id) == 2
+            )
             assert policies.has_resource_role(
                 user_id=member_id,
                 role_id=group_id,
@@ -613,7 +615,7 @@ class TestAuthorization:
         )
 
     def test_revoke_group_memberships__reconciles_policies_from_another_worker(
-        self, policies: CasbinPolicies
+        self, policies: CasbinPolicies, session: Session
     ):
         suffix = uuid4().hex
         locally_known = (
@@ -626,7 +628,7 @@ class TestAuthorization:
         )
 
         policies.assign_group_memberships(memberships=[locally_known])
-        self._persist_group_membership(*persisted_elsewhere)
+        self._persist_group_membership(session, *persisted_elsewhere)
 
         assert not policies.has_resource_role(
             user_id=persisted_elsewhere[0],
@@ -640,7 +642,9 @@ class TestAuthorization:
 
         assert updated
         for member_id, group_id in (persisted_elsewhere, locally_known):
-            assert self._count_group_membership_policies(member_id, group_id) == 0
+            assert (
+                self._count_group_membership_policies(session, member_id, group_id) == 0
+            )
             assert not policies.has_resource_role(
                 user_id=member_id,
                 role_id=group_id,
@@ -715,27 +719,26 @@ class TestAuthorization:
         assert not policies.clear_assignments_for_identities(identity_ids=[])
 
     def test_clear_assignments_for_identities__removes_policy_from_another_worker(
-        self, policies: CasbinPolicies
+        self, policies: CasbinPolicies, session: Session
     ):
         suffix = uuid4().hex
         user = f"remote-user-{suffix}"
         role = f"remote-role-{suffix}"
         resource = f"remote-resource-{suffix}"
 
-        with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
-                    VALUES ('g', :user, :role, :resource)
-                    """
-                ),
-                {
-                    "user": user,
-                    "role": role,
-                    "resource": resource,
-                },
-            )
+        session.execute(
+            text(
+                """
+                INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                VALUES ('g', :user, :role, :resource)
+                """
+            ),
+            {
+                "user": user,
+                "role": role,
+                "resource": resource,
+            },
+        )
 
         # The policy was persisted by another worker and is absent locally.
         assert not policies.has_resource_role(
@@ -753,82 +756,85 @@ class TestAuthorization:
             resource_id=resource,
         )
 
-        with engine.connect() as connection:
-            remaining = connection.execute(
-                text(
-                    """
-                    SELECT COUNT(*)
-                    FROM casbin_rule
-                    WHERE ptype = 'g'
-                      AND v0 = :user
-                      AND v1 = :role
-                      AND v2 = :resource
-                    """
-                ),
-                {
-                    "user": user,
-                    "role": role,
-                    "resource": resource,
-                },
-            ).scalar_one()
+        remaining = session.execute(
+            text(
+                """
+                SELECT COUNT(*)
+                FROM casbin_rule
+                WHERE ptype = 'g'
+                  AND v0 = :user
+                  AND v1 = :role
+                  AND v2 = :resource
+                """
+            ),
+            {
+                "user": user,
+                "role": role,
+                "resource": resource,
+            },
+        ).scalar_one()
 
         assert remaining == 0
 
-    def _persist_group_membership(self, member_id: str, group_id: str) -> None:
+    def _persist_group_membership(
+        self, session: Session, member_id: str, group_id: str
+    ) -> None:
         """
         Simulate another Casbin worker persisting policies without updating this
         worker's in-memory state.
         """
-        with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
-                    VALUES ('g', :member_id, :group_id, '*')
-                    """
-                ),
-                {
-                    "member_id": member_id,
-                    "group_id": group_id,
-                },
-            )
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO casbin_rule (ptype, v0, v1)
-                    VALUES ('g3', :member_id, :group_id)
-                    """
-                ),
-                {
-                    "member_id": member_id,
-                    "group_id": group_id,
-                },
-            )
+        session.execute(
+            text(
+                """
+                INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                VALUES ('g', :member_id, :group_id, '*')
+                """
+            ),
+            {
+                "member_id": member_id,
+                "group_id": group_id,
+            },
+        )
+        session.execute(
+            text(
+                """
+                INSERT INTO casbin_rule (ptype, v0, v1)
+                VALUES ('g3', :member_id, :group_id)
+                """
+            ),
+            {
+                "member_id": member_id,
+                "group_id": group_id,
+            },
+        )
 
-    def _count_group_membership_policies(self, member_id: str, group_id: str) -> int:
-        with engine.connect() as connection:
-            return connection.execute(
-                text(
-                    """
-                    SELECT COUNT(*)
-                    FROM casbin_rule
-                    WHERE v0 = :member_id
-                      AND v1 = :group_id
-                      AND (
-                        (ptype = 'g' AND v2 = '*')
-                            OR ptype = 'g3'
-                        )
-                    """
-                ),
-                {
-                    "member_id": member_id,
-                    "group_id": group_id,
-                },
-            ).scalar_one()
+    def _count_group_membership_policies(
+        self, session: Session, member_id: str, group_id: str
+    ) -> int:
+        return session.execute(
+            text(
+                """
+                SELECT COUNT(*)
+                FROM casbin_rule
+                WHERE v0 = :member_id
+                  AND v1 = :group_id
+                  AND (
+                    (ptype = 'g' AND v2 = '*')
+                        OR ptype = 'g3'
+                    )
+                """
+            ),
+            {
+                "member_id": member_id,
+                "group_id": group_id,
+            },
+        ).scalar_one()
 
 
 class TestCrossWorkerStaleness:
-    def test_auto_reload_resolves_stale_policy(self, policies: CasbinPolicies):
+    def test_auto_reload_resolves_stale_policy(
+        self, policies: CasbinPolicies, session: Session
+    ):
         """Regression test: a role assigned by another worker (direct DB write) is
         invisible until the enforcer reloads and the TTL cache expires."""
         role = "staleness_role"
@@ -840,14 +846,12 @@ class TestCrossWorkerStaleness:
         assert policies.allows(sub=user, dom="*", obj=resource, act=action) is False
 
         # Another worker writes the assignment directly to DB, bypassing the enforcer
-        with engine.begin() as conn:
-            conn.execute(
-                text(
-                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) "
-                    "VALUES ('g', :u, :r, :obj)"
-                ),
-                {"u": user, "r": role, "obj": resource},
-            )
+        session.execute(
+            text(
+                "INSERT INTO casbin_rule (ptype, v0, v1, v2) VALUES ('g', :u, :r, :obj)"
+            ),
+            {"u": user, "r": role, "obj": resource},
+        )
 
         # In-memory is stale: still denied despite the DB change
         assert policies.allows(sub=user, dom="*", obj=resource, act=action) is False
@@ -858,14 +862,3 @@ class TestCrossWorkerStaleness:
 
         # Access is now correctly granted
         assert policies.allows(sub=user, dom="*", obj=resource, act=action) is True
-
-        # Cleanup
-        with engine.begin() as conn:
-            conn.execute(
-                text(
-                    "DELETE FROM casbin_rule "
-                    "WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
-                ),
-                {"u": user, "r": role, "obj": resource},
-            )
-        policies.remove_role_permissions(role_id=role)

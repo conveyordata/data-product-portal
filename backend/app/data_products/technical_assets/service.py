@@ -12,9 +12,7 @@ from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.context import queue_event
-from app.core.namespace.validation import (
-    TechnicalAssetNamespaceValidator,
-)
+from app.core.namespace.validation import TechnicalAssetNamespaceValidator
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
@@ -234,6 +232,7 @@ class TechnicalAssetService:
             type(technical_asset.configuration),
             environment_values,
         )
+        DataProductService(self.db).recalculate_search(data_product_id)
         return model
 
     def validate_namespace(
@@ -318,6 +317,7 @@ class TechnicalAssetService:
 
         self.update_search_for_associated_datasets(result)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return result
 
     def get_technical_asset_with_links(
@@ -425,6 +425,7 @@ class TechnicalAssetService:
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return technical_asset
 
     def update_technical_asset(
@@ -441,6 +442,7 @@ class TechnicalAssetService:
                 setattr(current_technical_asset, k, v) if v else None
 
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:

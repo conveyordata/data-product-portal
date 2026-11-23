@@ -185,7 +185,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                             key="add to cart"
                             data-cy="add-to-cart"
                             type="text"
-                            size="middle"
+                            size="medium"
                             onClick={(e) => {
                                 e.preventDefault();
                                 toggleCart(outputPort);

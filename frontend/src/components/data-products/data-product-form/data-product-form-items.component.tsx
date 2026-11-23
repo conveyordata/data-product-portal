@@ -125,7 +125,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     }));
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), 500);
+    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName({ name }), 500);
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName) {
@@ -141,7 +141,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
 
     const namespaceIsCurrent =
-        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (dataProductNameValue ?? '');
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName?.name === (dataProductNameValue ?? '');
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {

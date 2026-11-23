@@ -57,6 +57,27 @@ class TestPluginEndpoints:
             "SizingTechnicalAssetConfiguration": True,
         }
 
+    def test_list_plugins__exposes_namespace_length_override(self, client, monkeypatch):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "_platform_metadata",
+            FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+                update={"namespace_max_length": 24}
+            ),
+        )
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        limits = {
+            p["plugin"]: p["namespace_max_length"] for p in response.json()["plugins"]
+        }
+        assert limits == {
+            "FakeTechnicalAssetConfiguration": 24,
+            "FakeLinkPlugin": settings.NAMESPACE_MAX_LENGTH,
+            "SizingTechnicalAssetConfiguration": settings.NAMESPACE_MAX_LENGTH,
+        }
+
     def test_list_plugins_includes_expected_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
         response = client.get(ENDPOINT)

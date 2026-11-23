@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     UUID,
     Column,
@@ -16,6 +17,7 @@ from sqlalchemy.orm import (
     Mapped,
     Session,
     column_property,
+    deferred,
     mapped_column,
     relationship,
 )
@@ -74,6 +76,7 @@ class DataProduct(
         nullable=False,
         default=DataProductVisibility.DISCOVERABLE,
     )
+    embeddings = deferred(Column(Vector(384)))
 
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(

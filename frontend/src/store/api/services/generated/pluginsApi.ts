@@ -94,6 +94,7 @@ export type UiElementSelect = {
 };
 export type UiElementString = {
   initial_value?: string | null;
+  placeholder?: string | null;
 };
 export type UiElementRadio = {
   max_count?: number | null;
@@ -139,6 +140,7 @@ export type UiElementMetadataResponse = {
   platform_tile?: PlatformTile | null;
   show_in_form?: boolean;
   shareable?: boolean;
+  namespace_max_length?: number;
   detailed_name: string;
 };
 export type PluginResponse = {

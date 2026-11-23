@@ -15,11 +15,17 @@ sidebar_position: 200
 ### features
 
 - **[UI]**: Data Product teams can now include groups and machine users alongside users. The Add team member modal provides a searchable identity table with type filtering and a role selector. The Owner option is available only for users.
+- **[Plugins/UI]**: Plugins can set `UIElementString.placeholder` to show placeholder text in string inputs.
+- **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
+- **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
+- **[Plugins]**: Core provides `get_azure_plugin_url`, shared with Azure Blob, so custom Azure plugins can use the same parent-platform link.
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 
 ### bugfixes
 
+- **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
+- **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.
 - **[UI]**: The namespace check when creating a Technical Asset no longer reports a namespace as taken because an Output Port uses it. It now checks the Technical Assets of the Data Product, like saving does.
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.

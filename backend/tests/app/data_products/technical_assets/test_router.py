@@ -31,6 +31,7 @@ from tests.factories import (
     TechnicalAssetFactory,
     UserFactory,
 )
+from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"
@@ -615,6 +616,61 @@ class TestTechnicalAssetsRouter:
 
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
+
+    @pytest.mark.parametrize("same_product", [True, False])
+    def test_create_technical_asset__allows_namespace_in_another_type_or_product(
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client,
+        session,
+        same_product,
+    ):
+        owner = (
+            session.get(DataProduct, technical_asset_payload["owner_id"])
+            if same_product
+            else DataProductFactory()
+        )
+        kwargs = (
+            {"configuration": SizingTechnicalAssetConfigurationFactory()}
+            if same_product
+            else {}
+        )
+        TechnicalAssetFactory(
+            owner=owner, namespace=technical_asset_payload["namespace"], **kwargs
+        )
+
+        response = self.create_technical_asset(client, technical_asset_payload)
+
+        assert response.status_code == 200, response.text
+
+    @pytest.mark.parametrize("limit", [24, 96])
+    def test_create_technical_asset__enforces_plugin_namespace_length(
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client,
+        monkeypatch,
+        limit,
+    ):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "_platform_metadata",
+            FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+                update={"namespace_max_length": limit}
+            ),
+        )
+        technical_asset_payload["namespace"] = "a" * (limit + 1)
+
+        response = self.create_technical_asset(client, technical_asset_payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Invalid namespace: INVALID_LENGTH"
+
+        technical_asset_payload["namespace"] = "a" * limit
+        response = self.create_technical_asset(client, technical_asset_payload)
+
+        assert response.status_code == 200, response.text
 
     def test_create_technical_asset_invalid_length_namespace(
         self, technical_asset_payload, data_product_role_assignment, client: TestClient
