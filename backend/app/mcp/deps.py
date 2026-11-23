@@ -190,7 +190,7 @@ def authorize_data_product_read_integrations(
     obj = str(data_product.id)
     sub = str(authorized_user.id)
 
-    if not Authorization().has_access(
+    if not Authorization(db).has_access(
         sub=sub, dom=dom, obj=obj, act=Action.DATA_PRODUCT__READ_INTEGRATIONS
     ):
         raise PermissionError(

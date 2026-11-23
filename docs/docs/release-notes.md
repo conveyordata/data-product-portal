@@ -8,8 +8,8 @@ sidebar_position: 200
 
 ### breaking changes
 
-- **[API/SDK]**: Technical Asset requests to `GET /api/v2/resource_names/validate` now require both `data_product_id` and `technical_asset_type`. Calls without either return 422. Generated clients include the new parameter.
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
+- **[API/SDK]**: A Technical Asset's namespace only has to be unique among Technical Assets of the same Technical Asset Type in its Data Product, so for example an S3 and a Parameter Store Technical Asset can share one. `GET /api/v2/resource_names/validate` with `model=technical_asset` now requires `technical_asset_type` next to `data_product_id`: it returns a 400 when either is missing, where a missing `data_product_id` used to return a 500, and a 422 for an unknown Technical Asset Type. Existing namespaces are not changed. See [Technical assets - Namespace](./concepts/technical-assets.md#namespace).
 
 ### features
 
@@ -23,6 +23,7 @@ sidebar_position: 200
 
 - **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
 - **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.
+- **[UI]**: The namespace check when creating a Technical Asset no longer reports a namespace as taken because an Output Port uses it. It now checks the Technical Assets of the Data Product, like saving does.
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.

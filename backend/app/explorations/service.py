@@ -8,7 +8,6 @@ from sqlalchemy.orm import joinedload
 
 from app.abstract_data_product.service import AbstractDataProductService
 from app.configuration.domains.service import DomainService
-from app.core.namespace.validation import NamespaceValidator
 from app.database.deps import DbSession
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User
@@ -21,7 +20,6 @@ from .schema_request import CreateExplorationRequest
 class ExplorationService(AbstractDataProductService):
     def __init__(self, db: DbSession):
         super().__init__(db)
-        self.namespace_validator = NamespaceValidator(ExplorationModel)
 
     def create_exploration(
         self,

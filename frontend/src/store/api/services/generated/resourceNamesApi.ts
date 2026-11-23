@@ -49,7 +49,7 @@ export type ValidateResourceNameApiArg = {
   resourceName: string;
   model: ResourceNameModel;
   dataProductId?: string;
-  technicalAssetType?: string | null;
+  technicalAssetType?: string;
 };
 export type ResourceNameConstraintsApiResponse =
   /** status 200 Successful Response */ ResourceNameLengthLimits;

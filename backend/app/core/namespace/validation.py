@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Final, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy import UUID, and_, exists, select
@@ -8,9 +8,12 @@ from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base
+from app.plugins.registry import TechnicalAssetType, plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
+from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
 
 class NamespaceValidation(BaseModel):
@@ -26,7 +29,7 @@ class NamespaceLengthLimits(BaseModel):
 
 
 class NamespaceValidator:
-    max_length: Final[int] = settings.NAMESPACE_MAX_LENGTH
+    max_length: int = settings.NAMESPACE_MAX_LENGTH
 
     def __init__(self, model: Base):
         self.model = model
@@ -77,6 +80,44 @@ class NamespaceValidator:
     ) -> NamespaceLengthLimits:
         return NamespaceLengthLimits(
             max_length=cls.max_length,
+        )
+
+
+class TechnicalAssetNamespaceValidator(NamespaceValidator):
+    def __init__(self, technical_asset_type: TechnicalAssetType):
+        super().__init__(model=TechnicalAsset)
+        self.technical_asset_type = technical_asset_type
+        self.max_length = (
+            plugin_registry.get(technical_asset_type)
+            .get_platform_metadata()
+            .namespace_max_length
+        )
+
+    def _is_unique(
+        self,
+        namespace: str,
+        db: Session,
+        data_product_id: Optional[UUID] = None,
+    ) -> bool:
+        if data_product_id is None:
+            raise ValueError(
+                "TechnicalAssetNamespaceValidator requires a Data Product ID "
+                "to check uniqueness with the Data Product as scope"
+            )
+
+        return not db.scalar(
+            select(
+                exists().where(
+                    and_(
+                        TechnicalAsset.namespace == namespace,
+                        TechnicalAsset.owner_id == data_product_id,
+                        TechnicalAsset.configuration_id
+                        == TechnicalAssetConfiguration.id,
+                        TechnicalAssetConfiguration.configuration_type
+                        == self.technical_asset_type,
+                    )
+                )
+            )
         )
 
 

@@ -863,7 +863,7 @@ def test_visible_ids__agrees_with_casbin_route_check(session, visibility, make_u
 
     with as_user(session, user.id):
         sees = data_product.id in visible_ids(session, [data_product.id])
-    may_read = Authorization().has_access(
+    may_read = Authorization(session).has_access(
         sub=str(user.id),
         dom=str(data_product.domain_id),
         obj=str(data_product.id),
@@ -971,7 +971,7 @@ def test_acting_as__output_port_agrees_with_casbin_route_check(
             session.scalar(select(OutputPort.id).where(OutputPort.id == output_port.id))
             is not None
         )
-    may_read = Authorization().has_access(
+    may_read = Authorization(session).has_access(
         sub=str(user.id),
         dom=str(data_product.domain_id),
         obj=str(output_port.id),

@@ -161,19 +161,19 @@ class TestRolesRouter:
         assert data["description"] == "admins can have a custom description"
 
     @pytest.mark.usefixtures("admin")
-    def test_delete_role__clears_global_assignments(self, client, authorizer):
+    def test_delete_role__clears_global_assignments(self, client, policies):
         user = UserFactory()
         role = RoleFactory(scope=Scope.GLOBAL)
         other_role = RoleFactory(scope=Scope.GLOBAL)
         role_id = role.id
-        authorizer.assign_global_role(user_id=user.id, role_id=role_id)
-        authorizer.assign_global_role(user_id=user.id, role_id=other_role.id)
+        policies.assign_global_role(user_id=user.id, role_id=role_id)
+        policies.assign_global_role(user_id=user.id, role_id=other_role.id)
 
         response = client.delete(f"{ENDPOINT}/{role_id}")
 
         assert response.status_code == 200, response.text
-        assert not authorizer.has_global_role(user_id=user.id, role_id=role_id)
-        assert authorizer.has_global_role(user_id=user.id, role_id=other_role.id)
+        assert not policies.has_global_role(user_id=user.id, role_id=role_id)
+        assert policies.has_global_role(user_id=user.id, role_id=other_role.id)
 
     @pytest.mark.usefixtures("admin")
     def test_delete_role(self, client: TestClient):
