@@ -33,14 +33,22 @@ def downgrade() -> None:
                 FROM events
                 WHERE subject_type = 'IDENTITY'
                   AND subject_id NOT IN (SELECT id FROM users)
+                  AND (
+                      subject_id IN (SELECT id FROM identities)
+                      OR deleted_subject_identifier IS NULL
+                  )
             ) OR EXISTS (
                 SELECT 1
                 FROM events
                 WHERE target_type = 'IDENTITY'
                   AND target_id NOT IN (SELECT id FROM users)
+                  AND (
+                      target_id IN (SELECT id FROM identities)
+                      OR deleted_target_identifier IS NULL
+                  )
             ) THEN
                 RAISE EXCEPTION
-                    'Cannot downgrade while non-user identity events exist';
+                    'Cannot downgrade while non-user or unresolved identity events exist';
             END IF;
         END
         $$;
