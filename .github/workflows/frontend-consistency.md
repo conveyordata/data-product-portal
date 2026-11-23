@@ -1,4 +1,5 @@
 ---
+name: "Background agent: Frontend consistency"
 description: Finds the biggest code inconsistency in the frontend and aligns it to the dominant pattern
 on:
   schedule: weekly on tuesday
@@ -33,11 +34,11 @@ safe-outputs:
 
 Find the biggest inconsistency in how the frontend code does the same thing in different ways, and align it to one pattern.
 
-The target pattern is the one `frontend/AGENTS.md` or `.claude/skills/portal-design/SKILL.md` prescribes, or the canonical sibling named below; if none says anything, the one most of the codebase already uses. Never introduce a new pattern. Keep the change reviewable: if the inconsistency is spread too wide for one PR, fix one coherent slice (for example one feature folder) and list the remaining places in the issue.
+The target pattern is the one `frontend/AGENTS.md` or `.claude/skills/portal-design/SKILL.md` prescribes, or the canonical sibling named below; if none says anything, the one most of the codebase already uses. Never introduce a new pattern.
 
 ## Required survey
 
-Read `frontend/AGENTS.md` and `.claude/skills/portal-design/SKILL.md`, then do every check below before deciding. For each check, record the variants you found with a count per variant and two file references. Count each variant separately: `middle` and `medium` are two variants, not one.
+Read `frontend/AGENTS.md` and `.claude/skills/portal-design/SKILL.md`, then do every check below. Count each variant separately: `middle` and `medium` are two variants, not one.
 
 Sibling families to compare side by side. Read the files, don't only grep:
 - Create and edit forms: `frontend/src/components/data-products/data-product-form/`, `components/output-ports/output-port-form/`, `components/explorations/exploration-form/`, `components/data-products/technical-asset-form/`, `pages/technical-asset-edit/technical-asset-form/`.
@@ -56,8 +57,6 @@ Checks:
 8. Copy: `t('…')` strings that use a term `CONTEXT.md` replaces, for example "Dataset" instead of Output Port.
 9. Dead styling: `styles.X` references to a class the imported module does not define, and empty `.module.scss` files.
 10. Data fetching, loading and error states, routing, i18next, and enums versus plain strings, as `frontend/AGENTS.md` prescribes.
-
-For this agent, any divergence from a written rule in `frontend/AGENTS.md` or the portal-design guide, or from the canonical sibling named above, is significant by definition. Never reject it as cosmetic or a matter of taste. Rank the candidates in a table with the check, the variants, their counts and the files, by how many places diverge and how much the divergence costs users and maintainers. Fix the top one, or one coherent slice of it, and list the others in the issue. If you call `noop`, put that table in the noop message.
 
 ## Evidence
 

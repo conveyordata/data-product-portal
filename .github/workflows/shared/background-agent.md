@@ -30,6 +30,30 @@ services:
       --health-retries 25
     ports:
       - 5432:5432
+jobs:
+  noop-survey-check:
+    needs: agent
+    if: always() && needs.agent.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Download agent output
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: agent
+          path: /tmp/gh-aw/
+      - name: Require the survey table in a noop
+        run: |
+          f=/tmp/gh-aw/agent_output.json
+          [ -f "$f" ] || exit 0
+          msg=$(jq -r '.items[] | select(.type=="noop") | .message' "$f")
+          [ -n "$msg" ] || exit 0
+          { echo "## Noop survey"; echo; echo "$msg"; } >> "$GITHUB_STEP_SUMMARY"
+          rows=$(printf '%s\n' "$msg" | grep -c '^|' || true)
+          if [ "$rows" -lt 5 ]; then
+            echo "::error::noop without a survey table ($rows table lines)"
+            exit 1
+          fi
 safe-outputs:
   github-app:
     client-id: ${{ vars.APP_ID }}
@@ -62,7 +86,7 @@ steps:
 
 ## How every background agent works
 
-You are one of several scheduled background agents for the Data Product Portal. Your output is at most one finding per run, and only when you are highly confident it is real, significant and worth a maintainer's time. Producing nothing is a good outcome; a weak or wrong proposal is a bad one.
+You are one of several scheduled background agents for the Data Product Portal. Every run should leave the codebase better than you found it: clearer, more consistent, or less likely to break. A change does not have to be big to be worth making. It has to be better, and you have to show why with evidence. Taste and unsupported opinion never count.
 
 ### 1. Learn the repository as it is today
 
@@ -72,17 +96,20 @@ Read `AGENTS.md`, `CONTEXT.md` and the `AGENTS.md` of every area you touch (for 
 
 Search all issues and pull requests, open and closed, with the label `background-agent`. A closed one without a merge means a maintainer rejected it: never propose the same thing, or a variation of it, again. Skip anything already tracked by any other open issue or PR as well.
 
-### 3. Find, rank, keep one
+### 3. Survey, rank, fix the top one
 
-Survey broadly before deciding. Collect candidates, rank them by real-world impact, and keep only the top one. A candidate must:
+Do every check in your role's required survey below before you decide anything. Read the files; a grep alone is not a check. For each check, record what you found: every variant with its count and two file references, or every candidate with the evidence for it. Count each variant separately, never as one bucket.
 
-- be significant, not cosmetic or a matter of taste;
-- be fixable with a small, focused change that does not add complexity or change behaviour beyond the fix;
-- come with the evidence your role requires below.
+A candidate qualifies when both are true:
 
-### 4. Confidence gate
+- It makes the code better and you can show it. It breaks a written rule in an `AGENTS.md`, `CONTEXT.md` or `.claude/skills/portal-design/SKILL.md`, or it diverges from a canonical file your role names, or your role's evidence proves it (a failing test, a measurement, a screenshot). A divergence from a written rule is worth fixing by definition. Never reject it as cosmetic, minor or a matter of taste.
+- The fix is small and focused. It changes no behaviour beyond the fix, adds no complexity and introduces no new pattern. If the divergence is too wide for one reviewable PR, fix one coherent slice and list the rest.
 
-If the top candidate does not clearly pass every point above, or you cannot produce the evidence, stop and call `noop` with a one-line reason. Do not lower the bar to have something to show.
+Put the qualifying candidates in a Markdown table: check, variants with counts, files, and what the divergence costs users or maintainers. Rank by how many places diverge and how much it costs. Fix the top one.
+
+### 4. When to noop
+
+Call `noop` only when the full survey found no qualifying candidate, or when you cannot get the checks in step 5 green. The noop message must contain the Markdown table from step 3 with every candidate you rejected and why; a noop without it fails the run. "Too small" and "cosmetic" are not reasons. "Too wide" means fix a slice.
 
 ### 5. Fix and verify
 
@@ -92,5 +119,5 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 Create exactly one issue and one pull request:
 
-- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`.
+- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`. List the other candidates from your table so a maintainer can see what is left.
 - Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<the same temporary id>` (for example `Fixes #aw_fix1`) and put the evidence and the test or proof output under the matching sections. The id is only replaced by the real issue number if you passed it to `create_issue`; otherwise the merged PR leaves the issue open and that open issue stops every later run of this agent.

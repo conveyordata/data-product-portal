@@ -1,4 +1,5 @@
 ---
+name: "Background agent: Bug finder"
 description: Finds a real, reproducible bug and fixes it with a regression test
 on:
   schedule: weekly on friday
@@ -33,7 +34,20 @@ safe-outputs:
 
 Find the single most impactful real bug: code that does the wrong thing for a realistic input or state, and fix it.
 
-Look across backend, plugins, frontend, SDK and CLI, for example: logic errors and wrong conditions, unhandled edge cases (empty, missing, duplicate, concurrent), state that is not updated or cleaned up, mismatches between the frontend and the API contract, broken lifecycle or status transitions, off-by-one and pagination errors, and errors that are swallowed silently.
+## Required survey
+
+For every check below, find at least one concrete candidate, try to write a test that fails on the current code, and record the result (failing test, passing test, or why no test was possible). The bug you fix is the highest-impact candidate whose test fails.
+
+1. Enum name against value. Code, raw SQL rows and `backend/sample_data.sql` that compare or store an enum by `.name` where the column holds the `.value`, or the other way round. Compare sibling branches of the same function.
+2. Visibility on writes. Updates and deletes that load or cascade through queries filtered by `app/database/visibility.py`, so rows the caller can't see are skipped or break the write.
+3. Derived state that goes stale. Anything copied from a source of truth (authorization policies, events, graph nodes and edges, counts, cached flags) that is not updated when the source is revoked, expired, renamed or deleted.
+4. Time-bound access. Expiry and renewal in `abstract_data_product/input_ports/background_tasks.py` and `authorization/role_assignments/global_/background_tasks.py`: overlapping grants, revoke after renew, and expiry at the boundary.
+5. Status transitions and guards. Approve, deny and revoke on pending, denied and expired states, and "last owner" style guards that count the wrong states.
+6. Boundary validation. Names, ids, durations and config values accepted by the API that later break a lookup or a 500 path.
+7. Response contract. Routes that return something other than their declared response schema, and frontend code that reads a field the OpenAPI schema does not have.
+8. Frontend cache. RTK Query mutations in `frontend/src/store/api/services/tags/` whose `invalidatesTags` miss data the mutation changes, and component state derived from props or queries that is not reset when they change.
+9. Swallowed errors. `except Exception` blocks that log and continue where the caller needs the failure.
+10. Recent changes. Dependency bumps and merged PRs of the last month (`git log --since`) whose behaviour change was not followed through, as with the Tiptap 3 toolbar in #4717.
 
 Rank by user impact: data loss or corruption first, then wrong data shown or written, then broken flows. A suspicion is not a bug. Code you merely find unusual is not a bug.
 

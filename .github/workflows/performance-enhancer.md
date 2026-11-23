@@ -1,4 +1,5 @@
 ---
+name: "Background agent: Performance"
 description: Finds the most significant performance problem and fixes it without changing behaviour
 on:
   schedule: weekly on monday
@@ -33,7 +34,17 @@ safe-outputs:
 
 Find the single most inefficient piece of code whose fix gives a significant, measurable gain, and fix it without losing functionality or adding complexity.
 
-Look across backend, frontend, SDK and CLI, for example: N+1 queries or missing eager loading, queries that load far more rows or columns than used, missing database indexes on filtered or joined columns, repeated work inside loops, quadratic algorithms over growing collections, unnecessary React re-renders or over-fetching from the API, and large synchronous work on hot request paths.
+## Required survey
+
+Look across backend, frontend, SDK and CLI, and do every check:
+
+1. N+1 queries and missing eager loading.
+2. Queries that load far more rows or columns than are used.
+3. Missing database indexes on filtered or joined columns.
+4. Repeated work inside loops.
+5. Quadratic algorithms over growing collections.
+6. Unnecessary React re-renders and over-fetching from the API.
+7. Large synchronous work on hot request paths.
 
 Only consider code on a path that actually runs often or on growing data. Micro-optimisations do not qualify.
 
