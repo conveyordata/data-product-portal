@@ -15637,6 +15637,7 @@ type UIElementMetadataResponse struct {
 	PlatformTile          OptNilPlatformTile      `json:"platform_tile"`
 	ShowInForm            OptBool                 `json:"show_in_form"`
 	Shareable             OptBool                 `json:"shareable"`
+	NamespaceMaxLength    OptInt                  `json:"namespace_max_length"`
 	DetailedName          string                  `json:"detailed_name"`
 }
 
@@ -15713,6 +15714,11 @@ func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 // GetShareable returns the value of Shareable.
 func (s *UIElementMetadataResponse) GetShareable() OptBool {
 	return s.Shareable
+}
+
+// GetNamespaceMaxLength returns the value of NamespaceMaxLength.
+func (s *UIElementMetadataResponse) GetNamespaceMaxLength() OptInt {
+	return s.NamespaceMaxLength
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -15793,6 +15799,11 @@ func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 // SetShareable sets the value of Shareable.
 func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
 	s.Shareable = val
+}
+
+// SetNamespaceMaxLength sets the value of NamespaceMaxLength.
+func (s *UIElementMetadataResponse) SetNamespaceMaxLength(val OptInt) {
+	s.NamespaceMaxLength = val
 }
 
 // SetDetailedName sets the value of DetailedName.
@@ -15879,6 +15890,7 @@ func (s *UIElementSelect) SetOptions(val OptNilSelectOptionArray) {
 // Ref: #/components/schemas/UIElementString
 type UIElementString struct {
 	InitialValue OptNilString `json:"initial_value"`
+	Placeholder  OptNilString `json:"placeholder"`
 }
 
 // GetInitialValue returns the value of InitialValue.
@@ -15886,9 +15898,19 @@ func (s *UIElementString) GetInitialValue() OptNilString {
 	return s.InitialValue
 }
 
+// GetPlaceholder returns the value of Placeholder.
+func (s *UIElementString) GetPlaceholder() OptNilString {
+	return s.Placeholder
+}
+
 // SetInitialValue sets the value of InitialValue.
 func (s *UIElementString) SetInitialValue(val OptNilString) {
 	s.InitialValue = val
+}
+
+// SetPlaceholder sets the value of Placeholder.
+func (s *UIElementString) SetPlaceholder(val OptNilString) {
+	s.Placeholder = val
 }
 
 // Ref: #/components/schemas/UIElementType

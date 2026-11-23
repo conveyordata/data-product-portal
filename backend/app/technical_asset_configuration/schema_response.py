@@ -1,6 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
+from app.settings import settings
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.base_schema import UIElementMetadata
 
@@ -41,6 +42,7 @@ class UIElementMetadataResponse(ORMModel):
     platform_tile: Optional[PlatformTile] = None
     show_in_form: bool = True
     shareable: bool = True
+    namespace_max_length: int = settings.NAMESPACE_MAX_LENGTH
     detailed_name: str
 
 

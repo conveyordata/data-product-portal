@@ -8,7 +8,8 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/resource_names/sanitize`,
         params: {
-          name: queryArg,
+          name: queryArg.name,
+          technical_asset_type: queryArg.technicalAssetType,
         },
       }),
     }),
@@ -38,7 +39,10 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as api };
 export type SanitizeResourceNameApiResponse =
   /** status 200 Successful Response */ ResourceNameSuggestion;
-export type SanitizeResourceNameApiArg = string;
+export type SanitizeResourceNameApiArg = {
+  name: string;
+  technicalAssetType?: string | null;
+};
 export type ValidateResourceNameApiResponse =
   /** status 200 Successful Response */ ResourceNameValidation;
 export type ValidateResourceNameApiArg = {

@@ -25,8 +25,10 @@ router = APIRouter(tags=["Resource names"], prefix="/v2/resource_names")
 
 
 @router.get("/sanitize")
-def sanitize_resource_name(name: str) -> ResourceNameSuggestion:
-    return ResourceNameService.resource_name_suggestion(name)
+def sanitize_resource_name(
+    name: str, technical_asset_type: str | None = None
+) -> ResourceNameSuggestion:
+    return ResourceNameService.resource_name_suggestion(name, technical_asset_type)
 
 
 @router.get("/validate")

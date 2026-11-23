@@ -59,7 +59,10 @@ class Identity(Base, BaseORM):
         lazy="select",
     )
 
-    __mapper_args__ = {"polymorphic_on": type}
+    __mapper_args__ = {
+        "polymorphic_on": type,
+        "polymorphic_abstract": True,
+    }
 
 
 def ensure_identity_exists(

@@ -8237,6 +8237,22 @@
               "type": "string",
               "title": "Name"
             }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technical Asset Type"
+            }
           }
         ],
         "responses": {
@@ -19797,6 +19813,11 @@
             "title": "Shareable",
             "default": true
           },
+          "namespace_max_length": {
+            "type": "integer",
+            "title": "Namespace Max Length",
+            "default": 64
+          },
           "detailed_name": {
             "type": "string",
             "title": "Detailed Name"
@@ -19912,6 +19933,17 @@
               }
             ],
             "title": "Initial Value"
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Placeholder"
           }
         },
         "type": "object",

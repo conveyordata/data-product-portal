@@ -41331,12 +41331,18 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.NamespaceMaxLength.Set {
+			e.FieldStart("namespace_max_length")
+			s.NamespaceMaxLength.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("detailed_name")
 		e.Str(s.DetailedName)
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [16]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [17]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
 	2:  "environment_ui_metadata",
@@ -41352,7 +41358,8 @@ var jsonFieldsNameOfUIElementMetadataResponse = [16]string{
 	12: "platform_tile",
 	13: "show_in_form",
 	14: "shareable",
-	15: "detailed_name",
+	15: "namespace_max_length",
+	16: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -41360,7 +41367,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UIElementMetadataResponse to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -41540,8 +41547,18 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"shareable\"")
 			}
+		case "namespace_max_length":
+			if err := func() error {
+				s.NamespaceMaxLength.Reset()
+				if err := s.NamespaceMaxLength.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace_max_length\"")
+			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -41561,9 +41578,10 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b10011010,
-		0b10000011,
+		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -41820,10 +41838,17 @@ func (s *UIElementString) encodeFields(e *jx.Encoder) {
 			s.InitialValue.Encode(e)
 		}
 	}
+	{
+		if s.Placeholder.Set {
+			e.FieldStart("placeholder")
+			s.Placeholder.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfUIElementString = [1]string{
+var jsonFieldsNameOfUIElementString = [2]string{
 	0: "initial_value",
+	1: "placeholder",
 }
 
 // Decode decodes UIElementString from json.
@@ -41843,6 +41868,16 @@ func (s *UIElementString) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"initial_value\"")
+			}
+		case "placeholder":
+			if err := func() error {
+				s.Placeholder.Reset()
+				if err := s.Placeholder.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"placeholder\"")
 			}
 		default:
 			return d.Skip()

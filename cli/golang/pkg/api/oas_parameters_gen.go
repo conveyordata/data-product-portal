@@ -613,7 +613,8 @@ type RevokeOutputPortAsInputPortParams struct {
 
 // SanitizeResourceNameParams is parameters of sanitize_resource_name operation.
 type SanitizeResourceNameParams struct {
-	Name string
+	Name               string
+	TechnicalAssetType OptNilString `json:",omitempty,omitzero"`
 }
 
 // SearchOutputPortsParams is parameters of search_output_ports operation.

@@ -50,7 +50,7 @@ export const NewExplorationForm = () => {
         sanitizeResourceName,
         { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, isFetching: sanitizingResourceName },
     ] = useLazySanitizeResourceNameQuery();
-    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), 500);
+    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName({ name }), 500);
     const isResourceNamePending = fetchResourceNameDebounced.isPending();
     useEffect(() => {
         fetchResourceNameDebounced(dataProductNameValue ?? '');

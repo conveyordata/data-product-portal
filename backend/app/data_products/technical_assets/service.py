@@ -12,9 +12,7 @@ from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.context import queue_event
-from app.core.namespace.validation import (
-    TechnicalAssetNamespaceValidator,
-)
+from app.core.namespace.validation import TechnicalAssetNamespaceValidator
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
