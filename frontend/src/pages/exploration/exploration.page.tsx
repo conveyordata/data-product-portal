@@ -52,7 +52,7 @@ export function ExplorationPage() {
         return null;
     }
 
-    const canEdit = !!currentUser && exploration?.owner?.id === currentUser.id;
+    const canEdit = !!currentUser && exploration?.owner.id === currentUser.id;
 
     return (
         <DetailPageLayout
@@ -78,11 +78,7 @@ export function ExplorationPage() {
                 </Flex>
                 <Flex gap="small">
                     <Typography.Text strong>{t('Owner')}</Typography.Text>
-                    <Typography.Text>
-                        {exploration?.owner
-                            ? `${exploration.owner.first_name} ${exploration.owner.last_name} <${exploration.owner.email}>`
-                            : exploration?.deleted_owner_identifier}
-                    </Typography.Text>
+                    <Typography.Text>{`${exploration?.owner?.first_name} ${exploration?.owner?.last_name} <${exploration?.owner?.email}>`}</Typography.Text>
                 </Flex>
                 <Flex gap="small">
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>

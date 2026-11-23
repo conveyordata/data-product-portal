@@ -7,20 +7,17 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import {
     type AbstractDataProductInfo,
     AbstractDataProductType,
+    type User,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createAbstractDataProductIdPath } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 type Props = {
-    requesterEmail: string;
+    requestedBy: User;
     consumingAbstractDataProductId: string;
     consumingAbstractDataProduct: AbstractDataProductInfo;
 };
-export function ConsumerColumn({
-    consumingAbstractDataProduct,
-    consumingAbstractDataProductId,
-    requesterEmail,
-}: Props) {
+export function ConsumerColumn({ consumingAbstractDataProduct, consumingAbstractDataProductId, requestedBy }: Props) {
     const { t } = useTranslation();
     const popover = (() => {
         switch (consumingAbstractDataProduct.abstract_data_product_type) {
@@ -28,7 +25,7 @@ export function ConsumerColumn({
                 if (consumingAbstractDataProduct.is_redacted) {
                     return t(
                         'The consumer is a hidden Data Product, contact the requester ({{ requester }}) for more information',
-                        { requester: requesterEmail },
+                        { requester: requestedBy.email },
                     );
                 }
                 return t('The consumer is a Data Product named: {{name}}', { name: consumingAbstractDataProduct.name });

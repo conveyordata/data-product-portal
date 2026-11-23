@@ -22,11 +22,9 @@ export function filterBySearch(requests: Request[], searchTerm: string): Request
                 ('input_port' in action &&
                     action.input_port.consuming_abstract_data_product.name.toLowerCase().includes(lowerSearch)) ||
                 ('technical_asset' in action && action.technical_asset.name.toLowerCase().includes(lowerSearch)) ||
-                !!action.requested_by?.first_name.toLowerCase().includes(lowerSearch) ||
-                !!action.requested_by?.last_name.toLowerCase().includes(lowerSearch) ||
-                (action.requested_by?.email ?? action.deleted_requested_by_identifier ?? '')
-                    .toLowerCase()
-                    .includes(lowerSearch)
+                action.requested_by.first_name.toLowerCase().includes(lowerSearch) ||
+                action.requested_by.last_name.toLowerCase().includes(lowerSearch) ||
+                action.requested_by.email.toLowerCase().includes(lowerSearch)
             );
         }
 

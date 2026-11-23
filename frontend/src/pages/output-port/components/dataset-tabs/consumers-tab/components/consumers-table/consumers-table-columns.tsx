@@ -51,9 +51,7 @@ export const getConsumerColumns = ({
             render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, current_request }) => {
                 return (
                     <ConsumerColumn
-                        requesterEmail={
-                            current_request.requested_by?.email ?? current_request.deleted_requested_by_identifier ?? ''
-                        }
+                        requestedBy={current_request.requested_by}
                         consumingAbstractDataProductId={consuming_abstract_data_product_id}
                         consumingAbstractDataProduct={consuming_abstract_data_product}
                     />

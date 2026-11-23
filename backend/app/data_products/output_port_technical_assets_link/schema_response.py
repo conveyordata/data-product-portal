@@ -22,12 +22,9 @@ class TechnicalAssetOutputPortAssociationsGet(ORMModel):
     denied_on: Optional[datetime]
     approved_on: Optional[datetime]
 
-    requested_by: Optional[User]
-    deleted_requested_by_identifier: Optional[str] = None
+    requested_by: User
     denied_by: Optional[User]
-    deleted_denied_by_identifier: Optional[str] = None
     approved_by: Optional[User]
-    deleted_approved_by_identifier: Optional[str] = None
 
 
 class LinkTechnicalAssetsToOutputPortResponse(ORMModel):

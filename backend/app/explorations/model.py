@@ -28,11 +28,8 @@ class Exploration(
     __mapper_args__ = {
         "polymorphic_identity": AbstractDataProductType.EXPLORATION,
     }
-    owner_id: Mapped[UUID] = mapped_column("owner_id", UUID)
-    owner: Mapped["User | None"] = relationship(
-        "User", primaryjoin="foreign(Exploration.owner_id) == User.id", lazy="raise"
-    )
-    deleted_owner_identifier: Mapped[str | None] = mapped_column()
+    owner_id: Mapped[UUID] = mapped_column("owner_id", ForeignKey("users.id"))
+    owner: Mapped["User"] = relationship("User", foreign_keys=[owner_id], lazy="raise")
 
     def to_event(self) -> ExplorationEvent:
         return ExplorationEvent(

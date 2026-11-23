@@ -28,7 +28,6 @@ from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from app.settings import settings
 from app.users.notifications.model import Notification
-from app.users.service import UserService
 from tests.factories import (
     AccessDurationFactory,
     AccessModeFactory,
@@ -998,30 +997,6 @@ class TestInputPortsRouter:
         assert [event["name"] for event in history["events"]] == [
             "data_product_dataset_link_approved"
         ]
-
-    def test_renew_output_port_as_input_port__requester_deleted(self, client, session):
-        requester = UserFactory()
-        email = requester.email
-        link = self.create_link_with_status(
-            InputPortStatus.REVOKED, request__requested_by=requester
-        )
-        UserService(session).remove_user(requester.id)
-        session.expire_all()
-
-        response = self.renew_output_port_as_input_port(
-            client,
-            link.output_port.data_product.id,
-            link.output_port.id,
-            link.consuming_abstract_data_product.id,
-        )
-
-        assert response.status_code == 200, response.text
-        identifiers = session.scalars(
-            select(InputPortRequest.deleted_requested_by_identifier).where(
-                InputPortRequest.input_port_id == link.id
-            )
-        ).all()
-        assert identifiers == [email, email]
 
     def test_renew_output_port_as_input_port__time_bound_gets_new_period(self, client):
         AccessDurationFactory(

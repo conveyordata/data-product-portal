@@ -39,12 +39,9 @@ class TechnicalAssetOutputPortRequest:
         requested_on (datetime.datetime):
         denied_on (datetime.datetime | None):
         approved_on (datetime.datetime | None):
-        requested_by (None | User):
+        requested_by (User):
         denied_by (None | User):
         approved_by (None | User):
-        deleted_requested_by_identifier (None | str | Unset):
-        deleted_denied_by_identifier (None | str | Unset):
-        deleted_approved_by_identifier (None | str | Unset):
         request_type (Literal['TechnicalAssetOutputPort'] | Unset):  Default: 'TechnicalAssetOutputPort'.
     """
 
@@ -57,12 +54,9 @@ class TechnicalAssetOutputPortRequest:
     requested_on: datetime.datetime
     denied_on: datetime.datetime | None
     approved_on: datetime.datetime | None
-    requested_by: None | User
+    requested_by: User
     denied_by: None | User
     approved_by: None | User
-    deleted_requested_by_identifier: None | str | Unset = UNSET
-    deleted_denied_by_identifier: None | str | Unset = UNSET
-    deleted_approved_by_identifier: None | str | Unset = UNSET
     request_type: Literal["TechnicalAssetOutputPort"] | Unset = (
         "TechnicalAssetOutputPort"
     )
@@ -97,11 +91,7 @@ class TechnicalAssetOutputPortRequest:
         else:
             approved_on = self.approved_on
 
-        requested_by: dict[str, Any] | None
-        if isinstance(self.requested_by, User):
-            requested_by = self.requested_by.to_dict()
-        else:
-            requested_by = self.requested_by
+        requested_by = self.requested_by.to_dict()
 
         denied_by: dict[str, Any] | None
         if isinstance(self.denied_by, User):
@@ -114,24 +104,6 @@ class TechnicalAssetOutputPortRequest:
             approved_by = self.approved_by.to_dict()
         else:
             approved_by = self.approved_by
-
-        deleted_requested_by_identifier: None | str | Unset
-        if isinstance(self.deleted_requested_by_identifier, Unset):
-            deleted_requested_by_identifier = UNSET
-        else:
-            deleted_requested_by_identifier = self.deleted_requested_by_identifier
-
-        deleted_denied_by_identifier: None | str | Unset
-        if isinstance(self.deleted_denied_by_identifier, Unset):
-            deleted_denied_by_identifier = UNSET
-        else:
-            deleted_denied_by_identifier = self.deleted_denied_by_identifier
-
-        deleted_approved_by_identifier: None | str | Unset
-        if isinstance(self.deleted_approved_by_identifier, Unset):
-            deleted_approved_by_identifier = UNSET
-        else:
-            deleted_approved_by_identifier = self.deleted_approved_by_identifier
 
         request_type = self.request_type
 
@@ -153,16 +125,6 @@ class TechnicalAssetOutputPortRequest:
                 "approved_by": approved_by,
             }
         )
-        if deleted_requested_by_identifier is not UNSET:
-            field_dict["deleted_requested_by_identifier"] = (
-                deleted_requested_by_identifier
-            )
-        if deleted_denied_by_identifier is not UNSET:
-            field_dict["deleted_denied_by_identifier"] = deleted_denied_by_identifier
-        if deleted_approved_by_identifier is not UNSET:
-            field_dict["deleted_approved_by_identifier"] = (
-                deleted_approved_by_identifier
-            )
         if request_type is not UNSET:
             field_dict["request_type"] = request_type
 
@@ -219,20 +181,7 @@ class TechnicalAssetOutputPortRequest:
 
         approved_on = _parse_approved_on(d.pop("approved_on"))
 
-        def _parse_requested_by(data: object) -> None | User:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                requested_by_type_0 = User.from_dict(data)
-
-                return requested_by_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | User, data)
-
-        requested_by = _parse_requested_by(d.pop("requested_by"))
+        requested_by = User.from_dict(d.pop("requested_by"))
 
         def _parse_denied_by(data: object) -> None | User:
             if data is None:
@@ -264,39 +213,6 @@ class TechnicalAssetOutputPortRequest:
 
         approved_by = _parse_approved_by(d.pop("approved_by"))
 
-        def _parse_deleted_requested_by_identifier(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
-
-        deleted_requested_by_identifier = _parse_deleted_requested_by_identifier(
-            d.pop("deleted_requested_by_identifier", UNSET)
-        )
-
-        def _parse_deleted_denied_by_identifier(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
-
-        deleted_denied_by_identifier = _parse_deleted_denied_by_identifier(
-            d.pop("deleted_denied_by_identifier", UNSET)
-        )
-
-        def _parse_deleted_approved_by_identifier(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
-
-        deleted_approved_by_identifier = _parse_deleted_approved_by_identifier(
-            d.pop("deleted_approved_by_identifier", UNSET)
-        )
-
         request_type = cast(
             Literal["TechnicalAssetOutputPort"] | Unset, d.pop("request_type", UNSET)
         )
@@ -320,9 +236,6 @@ class TechnicalAssetOutputPortRequest:
             requested_by=requested_by,
             denied_by=denied_by,
             approved_by=approved_by,
-            deleted_requested_by_identifier=deleted_requested_by_identifier,
-            deleted_denied_by_identifier=deleted_denied_by_identifier,
-            deleted_approved_by_identifier=deleted_approved_by_identifier,
             request_type=request_type,
         )
 

@@ -21,14 +21,11 @@ class InputPortRequestBase(ORMModel):
     valid_until: Optional[date]
     access_duration_type: AccessDurationType
     requested_duration_days: Optional[int] = None
-    requested_by: Optional[User] = None
-    deleted_requested_by_identifier: Optional[str] = None
+    requested_by: User
     decided_by: Optional[User] = None
-    deleted_decided_by_identifier: Optional[str] = None
     decision: InputPortRequestDecision
     revoked_at: Optional[datetime] = None
     revoked_by: Optional[User] = None
-    deleted_revoked_by_identifier: Optional[str] = None
     created_on: datetime
     requested_on: datetime
     access_mode: Optional[AccessMode] = None

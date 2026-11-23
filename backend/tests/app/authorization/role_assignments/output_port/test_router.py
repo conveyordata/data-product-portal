@@ -1,16 +1,17 @@
 from typing import TYPE_CHECKING
 from unittest.mock import patch
-from uuid import uuid4
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from sqlalchemy import event
+from sqlalchemy import event, select
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
+from app.users.model import DELETED_USER_ID
+from app.users.notifications.model import Notification
 from tests import engine
 from tests.factories import (
     DatasetRoleAssignmentFactory,
@@ -45,22 +46,6 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data["role_assignments"]) == 1
         assert data["role_assignments"][0]["id"] == str(assignment.id)
-
-    def test_list_assignments__deleted_requester(self, client: TestClient):
-        DatasetRoleAssignmentFactory(
-            output_port_id=OutputPortFactory().id,
-            user_id=UserFactory().id,
-            role_id=RoleFactory(scope=Scope.DATASET).id,
-            requested_by_id=uuid4(),
-            deleted_requested_by_identifier="deleted@example.com",
-        )
-
-        response = client.get(ENDPOINT)
-
-        assert response.status_code == 200
-        assignment = response.json()["role_assignments"][0]
-        assert assignment["requested_by"] is None
-        assert assignment["deleted_requested_by_identifier"] == "deleted@example.com"
 
     def test_list_assignments__query_count_is_constant(self, client: TestClient):
         def count_queries() -> int:
@@ -297,14 +282,16 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["decision"] == DecisionStatus.APPROVED
 
     @pytest.mark.usefixtures("admin")
-    def test_decide_assignment__deleted_requester(self, client: TestClient):
+    def test_decide_assignment__requester_deleted(self, client: TestClient, session):
+        requester = UserFactory()
         assignment = DatasetRoleAssignmentFactory(
             output_port_id=OutputPortFactory().id,
             user_id=UserFactory().id,
             role_id=RoleFactory(scope=Scope.DATASET).id,
             decision=DecisionStatus.PENDING,
-            requested_by_id=uuid4(),
+            requested_by_id=requester.id,
         )
+        client.delete(f"/api/v2/users/{requester.id}").raise_for_status()
 
         response = client.post(
             f"{ENDPOINT}/{assignment.id}/decide",
@@ -312,6 +299,10 @@ class TestDatasetRoleAssignmentsRouter:
         )
 
         assert response.status_code == 200, response.text
+        assert response.json()["requested_by"]["id"] == str(DELETED_USER_ID)
+        assert not session.scalars(
+            select(Notification).where(Notification.user_id == DELETED_USER_ID)
+        ).all()
 
     def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)

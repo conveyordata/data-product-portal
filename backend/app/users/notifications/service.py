@@ -26,6 +26,7 @@ from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.explorations.model import Exploration
 from app.groups.model import GroupMembership
+from app.users.model import DELETED_USER_ID
 from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
 from app.users.schema import User
@@ -127,9 +128,12 @@ class NotificationService:
 
         `extra_receiver_ids` paraam is also filtered out to allow only users.
         """
-        receivers = self._data_product_member_ids([data_product_id]) | set(
-            extra_receiver_ids
+        extra_user_ids = set(
+            self.db.scalars(
+                select(UserModel.id).where(UserModel.id.in_(extra_receiver_ids))
+            )
         )
+        receivers = self._data_product_member_ids([data_product_id]) | extra_user_ids
 
         self._notify(receivers, event_id)
 
@@ -212,10 +216,8 @@ class NotificationService:
                 )
             )
         )
-        existing_users = set(
-            self.db.scalars(select(UserModel.id).where(UserModel.id.in_(receivers)))
-        )
-        for receiver in existing_users - already_notified - {event.actor_id}:
+        ignored = already_notified | {event.actor_id, DELETED_USER_ID}
+        for receiver in receivers - ignored:
             self.db.add(NotificationModel(user_id=receiver, event_id=event_id))
 
     def _data_product_member_ids(self, data_product_ids: Iterable[UUID]) -> set[UUID]:

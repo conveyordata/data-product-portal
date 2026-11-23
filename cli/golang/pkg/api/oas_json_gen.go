@@ -7719,12 +7719,6 @@ func (s *DataProductRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		s.RequestedBy.Encode(e)
 	}
 	{
-		if s.DeletedRequestedByIdentifier.Set {
-			e.FieldStart("deleted_requested_by_identifier")
-			s.DeletedRequestedByIdentifier.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("decided_on")
 		s.DecidedOn.Encode(e, json.EncodeDateTime)
 	}
@@ -7732,26 +7726,18 @@ func (s *DataProductRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		e.FieldStart("decided_by")
 		s.DecidedBy.Encode(e)
 	}
-	{
-		if s.DeletedDecidedByIdentifier.Set {
-			e.FieldStart("deleted_decided_by_identifier")
-			s.DeletedDecidedByIdentifier.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfDataProductRoleAssignmentResponse = [11]string{
-	0:  "id",
-	1:  "data_product",
-	2:  "user",
-	3:  "role",
-	4:  "decision",
-	5:  "requested_on",
-	6:  "requested_by",
-	7:  "deleted_requested_by_identifier",
-	8:  "decided_on",
-	9:  "decided_by",
-	10: "deleted_decided_by_identifier",
+var jsonFieldsNameOfDataProductRoleAssignmentResponse = [9]string{
+	0: "id",
+	1: "data_product",
+	2: "user",
+	3: "role",
+	4: "decision",
+	5: "requested_on",
+	6: "requested_by",
+	7: "decided_on",
+	8: "decided_by",
 }
 
 // Decode decodes DataProductRoleAssignmentResponse from json.
@@ -7835,18 +7821,8 @@ func (s *DataProductRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"requested_by\"")
 			}
-		case "deleted_requested_by_identifier":
-			if err := func() error {
-				s.DeletedRequestedByIdentifier.Reset()
-				if err := s.DeletedRequestedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_requested_by_identifier\"")
-			}
 		case "decided_on":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.DecidedOn.Decode(d, json.DecodeDateTime); err != nil {
 					return err
@@ -7856,7 +7832,7 @@ func (s *DataProductRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_on\"")
 			}
 		case "decided_by":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.DecidedBy.Decode(d); err != nil {
 					return err
@@ -7864,16 +7840,6 @@ func (s *DataProductRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"decided_by\"")
-			}
-		case "deleted_decided_by_identifier":
-			if err := func() error {
-				s.DeletedDecidedByIdentifier.Reset()
-				if err := s.DeletedDecidedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_decided_by_identifier\"")
 			}
 		default:
 			return d.Skip()
@@ -7885,8 +7851,8 @@ func (s *DataProductRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01111111,
-		0b00000011,
+		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16791,15 +16757,9 @@ func (s *GetExplorationResponse) encodeFields(e *jx.Encoder) {
 		e.FieldStart("owner")
 		s.Owner.Encode(e)
 	}
-	{
-		if s.DeletedOwnerIdentifier.Set {
-			e.FieldStart("deleted_owner_identifier")
-			s.DeletedOwnerIdentifier.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfGetExplorationResponse = [9]string{
+var jsonFieldsNameOfGetExplorationResponse = [8]string{
 	0: "id",
 	1: "name",
 	2: "namespace",
@@ -16808,7 +16768,6 @@ var jsonFieldsNameOfGetExplorationResponse = [9]string{
 	5: "status",
 	6: "finalizers",
 	7: "owner",
-	8: "deleted_owner_identifier",
 }
 
 // Decode decodes GetExplorationResponse from json.
@@ -16816,7 +16775,7 @@ func (s *GetExplorationResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetExplorationResponse to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -16918,16 +16877,6 @@ func (s *GetExplorationResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner\"")
 			}
-		case "deleted_owner_identifier":
-			if err := func() error {
-				s.DeletedOwnerIdentifier.Reset()
-				if err := s.DeletedOwnerIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_owner_identifier\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -16937,9 +16886,8 @@ func (s *GetExplorationResponse) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [1]uint8{
 		0b11111111,
-		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -20051,12 +19999,6 @@ func (s *GlobalRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		s.RequestedBy.Encode(e)
 	}
 	{
-		if s.DeletedRequestedByIdentifier.Set {
-			e.FieldStart("deleted_requested_by_identifier")
-			s.DeletedRequestedByIdentifier.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("decided_on")
 		s.DecidedOn.Encode(e, json.EncodeDateTime)
 	}
@@ -20064,25 +20006,17 @@ func (s *GlobalRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		e.FieldStart("decided_by")
 		s.DecidedBy.Encode(e)
 	}
-	{
-		if s.DeletedDecidedByIdentifier.Set {
-			e.FieldStart("deleted_decided_by_identifier")
-			s.DeletedDecidedByIdentifier.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfGlobalRoleAssignmentResponse = [10]string{
+var jsonFieldsNameOfGlobalRoleAssignmentResponse = [8]string{
 	0: "id",
 	1: "user",
 	2: "role",
 	3: "decision",
 	4: "requested_on",
 	5: "requested_by",
-	6: "deleted_requested_by_identifier",
-	7: "decided_on",
-	8: "decided_by",
-	9: "deleted_decided_by_identifier",
+	6: "decided_on",
+	7: "decided_by",
 }
 
 // Decode decodes GlobalRoleAssignmentResponse from json.
@@ -20090,7 +20024,7 @@ func (s *GlobalRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GlobalRoleAssignmentResponse to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -20156,18 +20090,8 @@ func (s *GlobalRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"requested_by\"")
 			}
-		case "deleted_requested_by_identifier":
-			if err := func() error {
-				s.DeletedRequestedByIdentifier.Reset()
-				if err := s.DeletedRequestedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_requested_by_identifier\"")
-			}
 		case "decided_on":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.DecidedOn.Decode(d, json.DecodeDateTime); err != nil {
 					return err
@@ -20177,7 +20101,7 @@ func (s *GlobalRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_on\"")
 			}
 		case "decided_by":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.DecidedBy.Decode(d); err != nil {
 					return err
@@ -20185,16 +20109,6 @@ func (s *GlobalRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"decided_by\"")
-			}
-		case "deleted_decided_by_identifier":
-			if err := func() error {
-				s.DeletedDecidedByIdentifier.Reset()
-				if err := s.DeletedDecidedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_decided_by_identifier\"")
 			}
 		default:
 			return d.Skip()
@@ -20205,9 +20119,8 @@ func (s *GlobalRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b10111111,
-		0b00000001,
+	for i, mask := range [1]uint8{
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -23039,27 +22952,13 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.RequestedBy.Set {
-			e.FieldStart("requested_by")
-			s.RequestedBy.Encode(e)
-		}
-	}
-	{
-		if s.DeletedRequestedByIdentifier.Set {
-			e.FieldStart("deleted_requested_by_identifier")
-			s.DeletedRequestedByIdentifier.Encode(e)
-		}
+		e.FieldStart("requested_by")
+		s.RequestedBy.Encode(e)
 	}
 	{
 		if s.DecidedBy.Set {
 			e.FieldStart("decided_by")
 			s.DecidedBy.Encode(e)
-		}
-	}
-	{
-		if s.DeletedDecidedByIdentifier.Set {
-			e.FieldStart("deleted_decided_by_identifier")
-			s.DeletedDecidedByIdentifier.Encode(e)
 		}
 	}
 	{
@@ -23079,12 +22978,6 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.DeletedRevokedByIdentifier.Set {
-			e.FieldStart("deleted_revoked_by_identifier")
-			s.DeletedRevokedByIdentifier.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("created_on")
 		json.EncodeDateTime(e, s.CreatedOn)
 	}
@@ -23100,7 +22993,7 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPortRequestBase = [18]string{
+var jsonFieldsNameOfInputPortRequestBase = [15]string{
 	0:  "id",
 	1:  "justification",
 	2:  "decision_note",
@@ -23109,16 +23002,13 @@ var jsonFieldsNameOfInputPortRequestBase = [18]string{
 	5:  "access_duration_type",
 	6:  "requested_duration_days",
 	7:  "requested_by",
-	8:  "deleted_requested_by_identifier",
-	9:  "decided_by",
-	10: "deleted_decided_by_identifier",
-	11: "decision",
-	12: "revoked_at",
-	13: "revoked_by",
-	14: "deleted_revoked_by_identifier",
-	15: "created_on",
-	16: "requested_on",
-	17: "access_mode",
+	8:  "decided_by",
+	9:  "decision",
+	10: "revoked_at",
+	11: "revoked_by",
+	12: "created_on",
+	13: "requested_on",
+	14: "access_mode",
 }
 
 // Decode decodes InputPortRequestBase from json.
@@ -23126,7 +23016,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode InputPortRequestBase to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -23205,24 +23095,14 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"requested_duration_days\"")
 			}
 		case "requested_by":
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
-				s.RequestedBy.Reset()
 				if err := s.RequestedBy.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"requested_by\"")
-			}
-		case "deleted_requested_by_identifier":
-			if err := func() error {
-				s.DeletedRequestedByIdentifier.Reset()
-				if err := s.DeletedRequestedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_requested_by_identifier\"")
 			}
 		case "decided_by":
 			if err := func() error {
@@ -23234,18 +23114,8 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"decided_by\"")
 			}
-		case "deleted_decided_by_identifier":
-			if err := func() error {
-				s.DeletedDecidedByIdentifier.Reset()
-				if err := s.DeletedDecidedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_decided_by_identifier\"")
-			}
 		case "decision":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.Decision.Decode(d); err != nil {
 					return err
@@ -23274,18 +23144,8 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"revoked_by\"")
 			}
-		case "deleted_revoked_by_identifier":
-			if err := func() error {
-				s.DeletedRevokedByIdentifier.Reset()
-				if err := s.DeletedRevokedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_revoked_by_identifier\"")
-			}
 		case "created_on":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedOn = v
@@ -23297,7 +23157,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_on\"")
 			}
 		case "requested_on":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.RequestedOn = v
@@ -23327,10 +23187,9 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
-		0b00110011,
-		0b10001000,
-		0b00000001,
+	for i, mask := range [2]uint8{
+		0b10110011,
+		0b00110010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -31084,12 +30943,6 @@ func (s *OutputPortRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		s.RequestedBy.Encode(e)
 	}
 	{
-		if s.DeletedRequestedByIdentifier.Set {
-			e.FieldStart("deleted_requested_by_identifier")
-			s.DeletedRequestedByIdentifier.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("decided_on")
 		s.DecidedOn.Encode(e, json.EncodeDateTime)
 	}
@@ -31097,26 +30950,18 @@ func (s *OutputPortRoleAssignmentResponse) encodeFields(e *jx.Encoder) {
 		e.FieldStart("decided_by")
 		s.DecidedBy.Encode(e)
 	}
-	{
-		if s.DeletedDecidedByIdentifier.Set {
-			e.FieldStart("deleted_decided_by_identifier")
-			s.DeletedDecidedByIdentifier.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfOutputPortRoleAssignmentResponse = [11]string{
-	0:  "id",
-	1:  "output_port",
-	2:  "user",
-	3:  "role",
-	4:  "decision",
-	5:  "requested_on",
-	6:  "requested_by",
-	7:  "deleted_requested_by_identifier",
-	8:  "decided_on",
-	9:  "decided_by",
-	10: "deleted_decided_by_identifier",
+var jsonFieldsNameOfOutputPortRoleAssignmentResponse = [9]string{
+	0: "id",
+	1: "output_port",
+	2: "user",
+	3: "role",
+	4: "decision",
+	5: "requested_on",
+	6: "requested_by",
+	7: "decided_on",
+	8: "decided_by",
 }
 
 // Decode decodes OutputPortRoleAssignmentResponse from json.
@@ -31200,18 +31045,8 @@ func (s *OutputPortRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"requested_by\"")
 			}
-		case "deleted_requested_by_identifier":
-			if err := func() error {
-				s.DeletedRequestedByIdentifier.Reset()
-				if err := s.DeletedRequestedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_requested_by_identifier\"")
-			}
 		case "decided_on":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.DecidedOn.Decode(d, json.DecodeDateTime); err != nil {
 					return err
@@ -31221,7 +31056,7 @@ func (s *OutputPortRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_on\"")
 			}
 		case "decided_by":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.DecidedBy.Decode(d); err != nil {
 					return err
@@ -31229,16 +31064,6 @@ func (s *OutputPortRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"decided_by\"")
-			}
-		case "deleted_decided_by_identifier":
-			if err := func() error {
-				s.DeletedDecidedByIdentifier.Reset()
-				if err := s.DeletedDecidedByIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deleted_decided_by_identifier\"")
 			}
 		default:
 			return d.Skip()
@@ -31250,8 +31075,8 @@ func (s *OutputPortRoleAssignmentResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01111111,
-		0b00000011,
+		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

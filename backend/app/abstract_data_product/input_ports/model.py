@@ -218,30 +218,31 @@ class InputPortRequest(
     input_port_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("input_ports.id", ondelete="CASCADE")
     )
-    requested_by_id: Mapped[uuid.UUID] = mapped_column()
-    deleted_requested_by_identifier: Mapped[Optional[str]] = mapped_column()
-    decided_by_id: Mapped[Optional[uuid.UUID]] = mapped_column()
-    deleted_decided_by_identifier: Mapped[Optional[str]] = mapped_column()
-    revoked_by_id: Mapped[Optional[uuid.UUID]] = mapped_column()
-    deleted_revoked_by_identifier: Mapped[Optional[str]] = mapped_column()
+    requested_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    decided_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    revoked_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
 
     input_port: Mapped["InputPort"] = relationship(
         "InputPort",
         back_populates="requests",
     )
-    requested_by: Mapped[Optional["User"]] = relationship(
+    requested_by: Mapped["User"] = relationship(
         "User",
-        primaryjoin="foreign(InputPortRequest.requested_by_id) == User.id",
+        foreign_keys=[requested_by_id],
         lazy="joined",
     )
     decided_by: Mapped[Optional["User"]] = relationship(
         "User",
-        primaryjoin="foreign(InputPortRequest.decided_by_id) == User.id",
+        foreign_keys=[decided_by_id],
         lazy="joined",
     )
     revoked_by: Mapped[Optional["User"]] = relationship(
         "User",
-        primaryjoin="foreign(InputPortRequest.revoked_by_id) == User.id",
+        foreign_keys=[revoked_by_id],
         lazy="joined",
     )
     access_mode: Mapped[Optional["AccessMode"]] = relationship(

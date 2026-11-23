@@ -18,7 +18,7 @@ from app.events.enums import EventEntityType
 from app.events.model import Event
 from app.events.schema_response import GetEventHistoryResponseItem
 from app.settings import settings
-from app.users.model import User
+from app.users.model import DELETED_USER_ID, User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
@@ -294,7 +294,7 @@ class TestUsersRouter:
 
     @pytest.mark.usefixtures("admin")
     @pytest.mark.parametrize(
-        ("create", "fields"),
+        ("create", "columns"),
         [
             (
                 lambda user: DataProductRoleAssignmentFactory(
@@ -304,7 +304,7 @@ class TestUsersRouter:
                     requested_by_id=user.id,
                     decided_by_id=user.id,
                 ),
-                ["requested_by", "decided_by"],
+                ["requested_by_id", "decided_by_id"],
             ),
             (
                 lambda user: DatasetRoleAssignmentFactory(
@@ -314,7 +314,7 @@ class TestUsersRouter:
                     requested_by_id=user.id,
                     decided_by_id=user.id,
                 ),
-                ["requested_by", "decided_by"],
+                ["requested_by_id", "decided_by_id"],
             ),
             (
                 lambda user: GlobalRoleAssignmentFactory(
@@ -323,21 +323,21 @@ class TestUsersRouter:
                     requested_by_id=user.id,
                     decided_by_id=user.id,
                 ),
-                ["requested_by", "decided_by"],
+                ["requested_by_id", "decided_by_id"],
             ),
             (
                 lambda user: InputPortRequestFactory(
                     requested_by=user, decided_by=user, revoked_by=user
                 ),
-                ["requested_by", "decided_by", "revoked_by"],
+                ["requested_by_id", "decided_by_id", "revoked_by_id"],
             ),
             (
                 lambda user: TechnicalAssetOutputPortAssociationFactory(
                     requested_by=user, approved_by=user, denied_by=user
                 ),
-                ["requested_by", "approved_by", "denied_by"],
+                ["requested_by_id", "approved_by_id", "denied_by_id"],
             ),
-            (lambda user: ExplorationFactory(owner=user), ["owner"]),
+            (lambda user: ExplorationFactory(owner=user), ["owner_id"]),
         ],
         ids=[
             "data_product_role",
@@ -348,10 +348,12 @@ class TestUsersRouter:
             "exploration",
         ],
     )
-    def test_remove_user__preserves_references(self, client, session, create, fields):
+    def test_remove_user__reassigns_references_to_deleted_user(
+        self, client, session, create, columns
+    ):
         user = UserFactory()
         row = create(user)
-        model, row_id, user_id, email = type(row), row.id, user.id, user.email
+        model, row_id, user_id = type(row), row.id, user.id
 
         response = client.delete(f"{ENDPOINT}/{user_id}")
 
@@ -359,12 +361,23 @@ class TestUsersRouter:
         session.expire_all()
         assert session.get(User, user_id) is None
         row = session.get(model, row_id)
-        assert row is not None
-        session.refresh(row, fields)
-        for field in fields:
-            assert getattr(row, f"{field}_id") == user_id
-            assert getattr(row, field) is None
-            assert getattr(row, f"deleted_{field}_identifier") == email
+        for column in columns:
+            assert getattr(row, column) == DELETED_USER_ID
+        users = client.get(ENDPOINT)
+        assert users.status_code == 200, users.text
+        assert str(DELETED_USER_ID) not in {
+            user["id"] for user in users.json()["users"]
+        }
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__deleted_user_placeholder(self, client):
+        owner = UserFactory()
+        ExplorationFactory(owner=owner)
+        assert client.delete(f"{ENDPOINT}/{owner.id}").status_code == 200
+
+        response = client.delete(f"{ENDPOINT}/{DELETED_USER_ID}")
+
+        assert response.status_code == 400, response.text
 
     def test_post_user_not_admin(self, client):
         response = client.post(f"{ENDPOINT}")

@@ -12634,17 +12634,6 @@
               }
             ]
           },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
-          },
           "decided_on": {
             "anyOf": [
               {
@@ -12666,17 +12655,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           },
           "request_type": {
             "type": "string",
@@ -12747,17 +12725,6 @@
               }
             ]
           },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
-          },
           "decided_on": {
             "anyOf": [
               {
@@ -12779,17 +12746,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           }
         },
         "type": "object",
@@ -14907,25 +14863,7 @@
             "title": "Finalizers"
           },
           "owner": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "deleted_owner_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Owner Identifier"
+            "$ref": "#/components/schemas/User"
           }
         },
         "type": "object",
@@ -15564,17 +15502,6 @@
               }
             ]
           },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
-          },
           "decided_on": {
             "anyOf": [
               {
@@ -15596,17 +15523,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           }
         },
         "type": "object",
@@ -16179,25 +16095,7 @@
             "title": "Requested Duration Days"
           },
           "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
+            "$ref": "#/components/schemas/User"
           },
           "decided_by": {
             "anyOf": [
@@ -16208,17 +16106,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           },
           "decision": {
             "$ref": "#/components/schemas/InputPortRequestDecision"
@@ -16244,17 +16131,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_revoked_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Revoked By Identifier"
           },
           "created_on": {
             "type": "string",
@@ -16292,6 +16168,7 @@
           "justification",
           "valid_until",
           "access_duration_type",
+          "requested_by",
           "decision",
           "created_on",
           "requested_on",
@@ -16360,25 +16237,7 @@
             "title": "Requested Duration Days"
           },
           "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
+            "$ref": "#/components/schemas/User"
           },
           "decided_by": {
             "anyOf": [
@@ -16389,17 +16248,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           },
           "decision": {
             "$ref": "#/components/schemas/InputPortRequestDecision"
@@ -16425,17 +16273,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_revoked_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Revoked By Identifier"
           },
           "created_on": {
             "type": "string",
@@ -16464,6 +16301,7 @@
           "justification",
           "valid_until",
           "access_duration_type",
+          "requested_by",
           "decision",
           "created_on",
           "requested_on"
@@ -17753,17 +17591,6 @@
               }
             ]
           },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
-          },
           "decided_on": {
             "anyOf": [
               {
@@ -17785,17 +17612,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_decided_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Decided By Identifier"
           }
         },
         "type": "object",
@@ -19586,25 +19402,7 @@
             "title": "Approved On"
           },
           "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "deleted_requested_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Requested By Identifier"
+            "$ref": "#/components/schemas/User"
           },
           "denied_by": {
             "anyOf": [
@@ -19616,17 +19414,6 @@
               }
             ]
           },
-          "deleted_denied_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Denied By Identifier"
-          },
           "approved_by": {
             "anyOf": [
               {
@@ -19636,17 +19423,6 @@
                 "type": "null"
               }
             ]
-          },
-          "deleted_approved_by_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Approved By Identifier"
           },
           "request_type": {
             "type": "string",

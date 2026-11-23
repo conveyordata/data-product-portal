@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Any, Final, Sequence
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
@@ -32,7 +33,12 @@ from app.identities.schema_response import (
     IdentityBatchCreateResponse,
 )
 from app.identities.service import validate_batch_create_items
-from app.users.model import User, ensure_user_exists
+from app.users.model import (
+    DELETED_USER_EMAIL,
+    DELETED_USER_ID,
+    User,
+    ensure_user_exists,
+)
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import (
@@ -46,19 +52,19 @@ from app.users.schema_response import (
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 
 USER_REFERENCES: Final = [
-    (DataProductRoleAssignment, "requested_by"),
-    (DataProductRoleAssignment, "decided_by"),
-    (DatasetRoleAssignment, "requested_by"),
-    (DatasetRoleAssignment, "decided_by"),
-    (GlobalRoleAssignment, "requested_by"),
-    (GlobalRoleAssignment, "decided_by"),
-    (InputPortRequest, "requested_by"),
-    (InputPortRequest, "decided_by"),
-    (InputPortRequest, "revoked_by"),
-    (TechnicalAssetOutputPortAssociation, "requested_by"),
-    (TechnicalAssetOutputPortAssociation, "approved_by"),
-    (TechnicalAssetOutputPortAssociation, "denied_by"),
-    (Exploration, "owner"),
+    (DataProductRoleAssignment, "requested_by_id"),
+    (DataProductRoleAssignment, "decided_by_id"),
+    (DatasetRoleAssignment, "requested_by_id"),
+    (DatasetRoleAssignment, "decided_by_id"),
+    (GlobalRoleAssignment, "requested_by_id"),
+    (GlobalRoleAssignment, "decided_by_id"),
+    (InputPortRequest, "requested_by_id"),
+    (InputPortRequest, "decided_by_id"),
+    (InputPortRequest, "revoked_by_id"),
+    (TechnicalAssetOutputPortAssociation, "requested_by_id"),
+    (TechnicalAssetOutputPortAssociation, "approved_by_id"),
+    (TechnicalAssetOutputPortAssociation, "denied_by_id"),
+    (Exploration, "owner_id"),
 ]
 
 
@@ -71,17 +77,22 @@ class UserService:
         users = self.db.scalars(
             select(UserModel)
             .outerjoin(UserModel.global_role)
-            .where(UserModel.email != SYSTEM_ACCOUNT)
+            .where(UserModel.email.not_in([SYSTEM_ACCOUNT, DELETED_USER_EMAIL]))
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
         return users
 
     def remove_user(self, id: UUID) -> None:
+        if id == DELETED_USER_ID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The placeholder for deleted users can't be deleted",
+            )
         user = ensure_user_exists(
             id, self.db, options=[selectinload(User.data_product_roles)]
         )
         self.policies.clear_assignments_for_user(user_id=user.id)
-        self._keep_identifiers([user.id])
+        self._reassign_to_deleted_user([user.id])
         self._remove_user(user)
         self.db.flush()
 
@@ -92,7 +103,7 @@ class UserService:
         """
         users = self.db.scalars(
             select(UserModel)
-            .where(UserModel.id.in_(ids))
+            .where(UserModel.id.in_(ids), UserModel.id != DELETED_USER_ID)
             .options(
                 selectinload(UserModel.data_product_roles),
                 selectinload(UserModel.dataset_roles),
@@ -102,22 +113,37 @@ class UserService:
         self.policies.clear_assignments_for_identities(
             identity_ids=[user.id for user in users],
         )
-        self._keep_identifiers([user.id for user in users])
+        self._reassign_to_deleted_user([user.id for user in users])
 
         for user in users:
             self._remove_user(user)
 
         self.db.flush()
 
-    def _keep_identifiers(self, user_ids: list[UUID]) -> None:
-        for model, field in USER_REFERENCES:
-            user_id = getattr(model, f"{field}_id")
-            email = select(UserModel.email).where(UserModel.id == user_id)
+    def _reassign_to_deleted_user(self, user_ids: list[UUID]) -> None:
+        if not user_ids:
+            return
+        deleted_user_id = self._deleted_user().id
+        for model, column in USER_REFERENCES:
             self.db.execute(
                 update(model)
-                .where(user_id.in_(user_ids))
-                .values({f"deleted_{field}_identifier": email.scalar_subquery()})
+                .where(getattr(model, column).in_(user_ids))
+                .values({column: deleted_user_id})
             )
+
+    def _deleted_user(self) -> UserModel:
+        user = self.db.get(UserModel, DELETED_USER_ID)
+        if user is None:
+            user = UserModel(
+                id=DELETED_USER_ID,
+                external_id=f"deleted-user-{DELETED_USER_ID}",
+                email=DELETED_USER_EMAIL,
+                first_name="Deleted",
+                last_name="user",
+            )
+            self.db.add(user)
+            self.db.flush()
+        return user
 
     def _remove_user(self, user: UserModel) -> None:
         user.data_products = []

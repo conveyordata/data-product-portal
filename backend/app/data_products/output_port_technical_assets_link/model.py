@@ -37,12 +37,9 @@ class TechnicalAssetOutputPortAssociation(Base, BaseORM, EventTrackedMixin):
     output_port_id: Mapped[uuid.UUID] = mapped_column(
         "dataset_id", ForeignKey("datasets.id")
     )
-    requested_by_id: Mapped[UUID] = mapped_column(UUID)
-    deleted_requested_by_identifier: Mapped[str | None] = mapped_column()
-    approved_by_id: Mapped[UUID] = mapped_column(UUID)
-    deleted_approved_by_identifier: Mapped[str | None] = mapped_column()
-    denied_by_id: Mapped[UUID] = mapped_column(UUID)
-    deleted_denied_by_identifier: Mapped[str | None] = mapped_column()
+    requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
     technical_asset: Mapped["TechnicalAsset"] = relationship(
         back_populates="output_port_links",
@@ -54,20 +51,18 @@ class TechnicalAssetOutputPortAssociation(Base, BaseORM, EventTrackedMixin):
         order_by="OutputPort.name",
         lazy="joined",
     )
-    requested_by: Mapped["User | None"] = relationship(
-        primaryjoin="foreign(TechnicalAssetOutputPortAssociation.requested_by_id)"
-        " == User.id",
+    requested_by: Mapped["User"] = relationship(
+        foreign_keys=[requested_by_id],
+        back_populates="requested_dataoutputs",
         lazy="joined",
     )
-    approved_by: Mapped["User | None"] = relationship(
-        primaryjoin="foreign(TechnicalAssetOutputPortAssociation.approved_by_id)"
-        " == User.id",
+    approved_by: Mapped["User"] = relationship(
+        foreign_keys=[approved_by_id],
+        back_populates="approved_dataoutputs",
         lazy="joined",
     )
-    denied_by: Mapped["User | None"] = relationship(
-        primaryjoin="foreign(TechnicalAssetOutputPortAssociation.denied_by_id)"
-        " == User.id",
-        lazy="joined",
+    denied_by: Mapped["User"] = relationship(
+        foreign_keys=[denied_by_id], back_populates="denied_dataoutputs", lazy="joined"
     )
 
     def generate_extra_events(self, connection) -> Sequence[V2Event]:
