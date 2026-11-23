@@ -80,6 +80,33 @@ def _tracked_revisions() -> set[str]:
         }
 
 
+# The two slowest tests of the suite come first, so a parallel run starts them
+# early instead of finishing with them after the other workers are done.
+def test_migrate_all__two_runs_at_once_on_an_empty_database(scratch_engine):
+    assert 0 in _migrate_twice_at_once(scratch_engine)
+
+    migrate_all(_portal_plugins(), scratch_engine)
+
+    _assert_migrated_once(scratch_engine)
+
+
+def test_migrate_all__two_runs_at_once_on_an_upgrade(scratch_engine):
+    migrate_all(_portal_plugins(), scratch_engine)
+    url = scratch_engine.url.render_as_string(hide_password=False)
+    config = _config(_version_locations(installed()), url)
+    head = _core_head(installed(), url)
+    command.downgrade(config, "parameter_store@base")
+    command.downgrade(
+        config, ScriptDirectory.from_config(config).get_revision(head).down_revision
+    )
+
+    assert 0 in _migrate_twice_at_once(scratch_engine)
+
+    migrate_all(_portal_plugins(), scratch_engine)
+
+    _assert_migrated_once(scratch_engine)
+
+
 def test_owns_a_table__true_when_a_versions_folder_sits_next_to_the_plugin_class():
     assert owns_a_table(ExamplePlugin)  # type: ignore[arg-type]
 
@@ -250,6 +277,13 @@ def scratch_engine():
     drop_database(url)
 
 
+def _portal_plugins() -> list:
+    """The plugins `python -m app.db_tool migrate` migrates: the test fakes are
+    only registered inside this process. Runs that do not race each other use
+    this in-process, which skips importing the app in a new process."""
+    return [p for p in installed() if not p.__module__.startswith("tests.")]
+
+
 def _migrate(target: Engine) -> subprocess.Popen:
     return subprocess.Popen(
         [sys.executable, "-m", "app.db_tool", "migrate"],
@@ -278,28 +312,3 @@ def _assert_migrated_once(target: Engine) -> None:
         ).scalar()
     assert {_core_head(installed(), url), "parameter_store_0001_baseline"} <= tracked
     assert services == 1
-
-
-def test_migrate_all__two_runs_at_once_on_an_empty_database(scratch_engine):
-    assert 0 in _migrate_twice_at_once(scratch_engine)
-
-    assert _migrate(scratch_engine).wait(timeout=300) == 0
-
-    _assert_migrated_once(scratch_engine)
-
-
-def test_migrate_all__two_runs_at_once_on_an_upgrade(scratch_engine):
-    assert _migrate(scratch_engine).wait(timeout=300) == 0
-    url = scratch_engine.url.render_as_string(hide_password=False)
-    config = _config(_version_locations(installed()), url)
-    head = _core_head(installed(), url)
-    command.downgrade(config, "parameter_store@base")
-    command.downgrade(
-        config, ScriptDirectory.from_config(config).get_revision(head).down_revision
-    )
-
-    assert 0 in _migrate_twice_at_once(scratch_engine)
-
-    assert _migrate(scratch_engine).wait(timeout=300) == 0
-
-    _assert_migrated_once(scratch_engine)
