@@ -14,6 +14,36 @@ export default defineConfig({
         environmentOptions: { jsdom: { url: 'http://localhost:8080' } },
         setupFiles: ['./src/tests/setup.ts'],
         testTimeout: 10000,
+        // Every test file runs in a fresh process; pre-bundling these large barrel packages into
+        // single files avoids re-reading thousands of small modules per test file.
+        deps: {
+            optimizer: {
+                client: {
+                    enabled: true,
+                    // Bundled together so antd, the app and Testing Library share one copy of react-dom,
+                    // icons and cssinjs (StyleProvider); a package left out would be loaded a second time.
+                    include: [
+                        'antd',
+                        '@ant-design/icons',
+                        '@ant-design/cssinjs',
+                        'react-dom',
+                        '@testing-library/react',
+                        '@testing-library/dom',
+                        '@testing-library/user-event',
+                        'dayjs',
+                        'date-fns',
+                    ],
+                },
+            },
+        },
+        alias: [
+            // Under Node, @ant-design/icons resolves to a CJS wrapper whose named exports get lost when
+            // pre-bundled, so point the tests at its ESM build instead.
+            {
+                find: /^@ant-design\/icons$/,
+                replacement: path.resolve(import.meta.dirname, './node_modules/@ant-design/icons/es/index.js'),
+            },
+        ],
     },
     resolve: {
         alias: {
