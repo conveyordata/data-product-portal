@@ -30,31 +30,21 @@ services:
       --health-retries 25
     ports:
       - 5432:5432
-jobs:
-  noop-survey-check:
-    needs: agent
-    if: always() && needs.agent.result == 'success'
-    runs-on: ubuntu-24.04
-    permissions: {}
-    steps:
-      - name: Download agent output
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: agent
-          path: /tmp/gh-aw/
-      - name: Require the survey table in a noop
+safe-outputs:
+  threat-detection:
+    post-steps:
+      - name: Require the survey table
         run: |
           f=/tmp/gh-aw/agent_output.json
           [ -f "$f" ] || exit 0
-          msg=$(jq -r '.items[] | select(.type=="noop") | .message' "$f")
-          [ -n "$msg" ] || exit 0
-          { echo "## Noop survey"; echo; echo "$msg"; } >> "$GITHUB_STEP_SUMMARY"
-          rows=$(printf '%s\n' "$msg" | grep -c '^|' || true)
-          if [ "$rows" -lt 5 ]; then
-            echo "::error::noop without a survey table ($rows table lines)"
+          text=$(jq -r '.items[] | select(.type=="noop" or .type=="create_issue") | (.message // .body)' "$f")
+          [ -n "$text" ] || exit 0
+          { echo "## Survey"; echo; echo "$text"; } >> "$GITHUB_STEP_SUMMARY"
+          rows=$(printf '%s\n' "$text" | grep -c '^|' || true)
+          if [ "$rows" -lt 9 ]; then
+            echo "::error::the issue or noop has no survey table with a row per check ($rows table lines)"
             exit 1
           fi
-safe-outputs:
   github-app:
     client-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -105,7 +95,7 @@ A candidate qualifies when both are true:
 - It makes the code better and you can show it. It breaks a written rule in an `AGENTS.md`, `CONTEXT.md` or `.claude/skills/portal-design/SKILL.md`, or it diverges from a canonical file your role names, or your role's evidence proves it (a failing test, a measurement, a screenshot). A divergence from a written rule is worth fixing by definition. Never reject it as cosmetic, minor or a matter of taste.
 - The fix is small and focused. It changes no behaviour beyond the fix, adds no complexity and introduces no new pattern. If the divergence is too wide for one reviewable PR, fix one coherent slice and list the rest.
 
-Put the qualifying candidates in a Markdown table: check, variants with counts, files, and what the divergence costs users or maintainers. Rank by how many places diverge and how much it costs. Fix the top one.
+Put the survey in a Markdown table with one row per check, including the checks where you found nothing: check, variants with counts, files, and what the divergence costs users or maintainers. Rank the qualifying candidates by how many places diverge and how much it costs. Fix the top-ranked one, not the easiest one: a slice of a large divergence beats all of a small one.
 
 ### 4. When to noop
 
@@ -119,5 +109,5 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 Create exactly one issue and one pull request:
 
-- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`. List the other candidates from your table so a maintainer can see what is left.
+- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`. Include the full survey table from step 3 so a maintainer can see what is left; publishing fails without it.
 - Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<the same temporary id>` (for example `Fixes #aw_fix1`) and put the evidence and the test or proof output under the matching sections. The id is only replaced by the real issue number if you passed it to `create_issue`; otherwise the merged PR leaves the issue open and that open issue stops every later run of this agent.
