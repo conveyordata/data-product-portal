@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import select
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
@@ -13,6 +14,9 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
+from app.data_products.output_port_technical_assets_link.model import (
+    TechnicalAssetOutputPortAssociation,
+)
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType
 from app.events.model import Event
@@ -655,6 +659,37 @@ class TestUsersRouter:
         assert response.status_code == 200, response.text
         assert [a["id"] for a in response.json()["pending_actions"]] == [str(link.id)]
         assert "owner" not in response.json()["pending_actions"][0]["technical_asset"]
+
+    def test_remove_user__references_on_hidden_data_product(self, client, session):
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__DELETE_USER]
+        )
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=role.id)
+        requester = UserFactory()
+        link = TechnicalAssetOutputPortAssociationFactory(
+            output_port=OutputPortFactory(
+                data_product=DataProductFactory(
+                    visibility=DataProductVisibility.HIDDEN
+                ),
+                access_function=OutputPortAccessFunction.PRIVATE,
+            ),
+            requested_by=requester,
+        )
+        link_id = link.id
+
+        response = client.delete(f"{ENDPOINT}/{requester.id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert (
+            session.scalar(
+                select(TechnicalAssetOutputPortAssociation.requested_by_id).where(
+                    TechnicalAssetOutputPortAssociation.id == link_id
+                )
+            )
+            == DELETED_USER_ID
+        )
 
     def test_get_current_user(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
