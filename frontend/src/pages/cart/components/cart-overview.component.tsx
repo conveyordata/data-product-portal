@@ -103,31 +103,38 @@ function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
                     label: <Typography.Text strong>{t('Owner')}</Typography.Text>,
                     children: renderOwners(),
                 },
-                {
-                    key: 'accessMode',
-                    label: <Typography.Text strong>{t('Access mode')}</Typography.Text>,
-                    children: (
-                        <Select
-                            size="small"
-                            style={{ width: '100%' }}
-                            value={selectedAccessMode?.id}
-                            placeholder={t('Select access mode')}
-                            options={(accessModes ?? []).map((accessMode) => ({
-                                value: accessMode.id,
-                                label: (
-                                    <Tooltip title={accessMode.description || undefined}>
-                                        <span>{accessMode.name}</span>
-                                    </Tooltip>
-                                ),
-                            }))}
-                            onChange={(accessModeId) => {
-                                dispatch(
-                                    selectAccessModeForOutputPortInCart({ outputPortId: outputPort.id, accessModeId }),
-                                );
-                            }}
-                        />
-                    ),
-                },
+                ...(outputPort.access_modes.length > 0
+                    ? [
+                          {
+                              key: 'accessMode',
+                              label: <Typography.Text strong>{t('Access mode')}</Typography.Text>,
+                              children: (
+                                  <Select
+                                      size="small"
+                                      style={{ width: '100%' }}
+                                      value={selectedAccessMode?.id}
+                                      placeholder={t('Select access mode')}
+                                      options={(accessModes ?? []).map((accessMode) => ({
+                                          value: accessMode.id,
+                                          label: (
+                                              <Tooltip title={accessMode.description || undefined}>
+                                                  <span>{accessMode.name}</span>
+                                              </Tooltip>
+                                          ),
+                                      }))}
+                                      onChange={(accessModeId) => {
+                                          dispatch(
+                                              selectAccessModeForOutputPortInCart({
+                                                  outputPortId: outputPort.id,
+                                                  accessModeId,
+                                              }),
+                                          );
+                                      }}
+                                  />
+                              ),
+                          },
+                      ]
+                    : []),
             ]}
         />
     );
