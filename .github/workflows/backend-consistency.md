@@ -38,7 +38,7 @@ The target pattern is the one `backend/AGENTS.md` prescribes, else the canonical
 
 ## Required survey
 
-Read `backend/AGENTS.md`. Use `backend/app/data_products/output_ports/` (`router.py`, `service.py`, `model.py`, `schema_request.py`, `schema_response.py`) as the canonical module layout. Run every check over `backend/app/` and `plugins/`.
+Read `backend/AGENTS.md`. Use `backend/app/data_products/output_ports/` (`router.py`, `service.py`, `model.py`, `schema_request.py`, `schema_response.py`) as the canonical module layout. Run the checks over `backend/app/` and `plugins/`.
 
 1. Layering. Business logic, queries, authorization decisions and `raise HTTPException` in a `router.py` instead of its `service.py` (`backend/AGENTS.md:10`). Count per router. For example `configuration/platforms/router.py`, `resource_names/router.py`, `configuration/access_durations/router.py` and `data_products/output_ports/contract/router.py` raise in the router, while services raise in more than 100 places.
 2. File split. Modules without separate `schema_request.py` and `schema_response.py`, request and response schemas mixed in one file, and logic in `model.py` (`backend/AGENTS.md:10,16`).

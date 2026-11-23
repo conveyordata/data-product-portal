@@ -36,7 +36,7 @@ Find the single most impactful real bug: code that does the wrong thing for a re
 
 ## Required survey
 
-For every check below, find at least one concrete candidate, try to write a test that fails on the current code, and record the result (failing test, passing test, or why no test was possible). The bug you fix is the highest-impact candidate whose test fails.
+For each check, look for a concrete candidate and try to write a test that fails on the current code. The first candidate whose test fails is the bug you fix.
 
 1. Enum name against value. Code, raw SQL rows and `backend/sample_data.sql` that compare or store an enum by `.name` where the column holds the `.value`, or the other way round. Compare sibling branches of the same function.
 2. Visibility on writes. Updates and deletes that load or cascade through queries filtered by `app/database/visibility.py`, so rows the caller can't see are skipped or break the write.
@@ -49,7 +49,7 @@ For every check below, find at least one concrete candidate, try to write a test
 9. Swallowed errors. `except Exception` blocks that log and continue where the caller needs the failure.
 10. Recent changes. Dependency bumps and merged PRs of the last month (`git log --since`) whose behaviour change was not followed through, as with the Tiptap 3 toolbar in #4717.
 
-Rank by user impact: data loss or corruption first, then wrong data shown or written, then broken flows. A suspicion is not a bug. Code you merely find unusual is not a bug.
+A suspicion is not a bug. Code you merely find unusual is not a bug.
 
 ## Evidence
 

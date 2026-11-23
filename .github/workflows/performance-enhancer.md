@@ -36,7 +36,7 @@ Find the single most inefficient piece of code whose fix gives a significant, me
 
 ## Required survey
 
-Look across backend, frontend, SDK and CLI, and do every check:
+Look across backend, frontend, SDK and CLI, and go through the checks:
 
 1. N+1 queries and missing eager loading.
 2. Queries that load far more rows or columns than are used.

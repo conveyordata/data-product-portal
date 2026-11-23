@@ -38,7 +38,7 @@ The target pattern is the one `frontend/AGENTS.md` or `.claude/skills/portal-des
 
 ## Required survey
 
-Read `frontend/AGENTS.md` and `.claude/skills/portal-design/SKILL.md`, then do every check below. Count each variant separately: `middle` and `medium` are two variants, not one.
+Read `frontend/AGENTS.md` and `.claude/skills/portal-design/SKILL.md`, then go through the checks below. Count each variant separately: `middle` and `medium` are two variants, not one.
 
 Sibling families to compare side by side. Read the files, don't only grep:
 - Create and edit forms: `frontend/src/components/data-products/data-product-form/`, `components/output-ports/output-port-form/`, `components/explorations/exploration-form/`, `components/data-products/technical-asset-form/`, `pages/technical-asset-edit/technical-asset-form/`.

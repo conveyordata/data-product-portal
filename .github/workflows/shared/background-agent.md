@@ -37,12 +37,12 @@ safe-outputs:
         run: |
           f=/tmp/gh-aw/agent_output.json
           [ -f "$f" ] || exit 0
-          text=$(jq -r '.items[] | select(.type=="noop" or .type=="create_issue") | (.message // .body)' "$f")
+          text=$(jq -r '.items[] | select(.type=="noop") | .message' "$f")
           [ -n "$text" ] || exit 0
           { echo "## Survey"; echo; echo "$text"; } >> "$GITHUB_STEP_SUMMARY"
           rows=$(printf '%s\n' "$text" | grep -c '^|' || true)
           if [ "$rows" -lt 9 ]; then
-            echo "::error::the issue or noop has no survey table with a row per check ($rows table lines)"
+            echo "::error::noop without a survey table with a row per check ($rows table lines)"
             exit 1
           fi
   github-app:
@@ -86,20 +86,18 @@ Read `AGENTS.md`, `CONTEXT.md` and the `AGENTS.md` of every area you touch (for 
 
 Search all issues and pull requests, open and closed, with the label `background-agent`. A closed one without a merge means a maintainer rejected it: never propose the same thing, or a variation of it, again. Skip anything already tracked by any other open issue or PR as well.
 
-### 3. Survey, rank, fix the top one
+### 3. Go through the checks, fix the first finding
 
-Do every check in your role's required survey below before you decide anything. Read the files; a grep alone is not a check. For each check, record what you found: every variant with its count and two file references, or every candidate with the evidence for it. Count each variant separately, never as one bucket.
+Go through your role's required survey below in order. Read the files; a grep alone is not a check. Count each variant separately, never as one bucket. Stop at the first candidate that qualifies and fix it.
 
 A candidate qualifies when both are true:
 
 - It makes the code better and you can show it. It breaks a written rule in an `AGENTS.md`, `CONTEXT.md` or `.claude/skills/portal-design/SKILL.md`, or it diverges from a canonical file your role names, or your role's evidence proves it (a failing test, a measurement, a screenshot). A divergence from a written rule is worth fixing by definition. Never reject it as cosmetic, minor or a matter of taste.
 - The fix is small and focused. It changes no behaviour beyond the fix, adds no complexity and introduces no new pattern. If the divergence is too wide for one reviewable PR, fix one coherent slice and list the rest.
 
-Put the survey in a Markdown table with one row per check, including the checks where you found nothing: check, variants with counts, files, and what the divergence costs users or maintainers. Rank the qualifying candidates by how many places diverge and how much it costs. Fix the top-ranked one, not the easiest one: a slice of a large divergence beats all of a small one.
-
 ### 4. When to noop
 
-Call `noop` only when the full survey found no qualifying candidate, or when you cannot get the checks in step 5 green. The noop message must contain the Markdown table from step 3 with every candidate you rejected and why; a noop without it fails the run. "Too small" and "cosmetic" are not reasons. "Too wide" means fix a slice.
+Call `noop` only when every check in your survey found no qualifying candidate, or when you cannot get the checks in step 5 green. The noop message must contain a Markdown table with one row per check: what you looked at, what you found and why it did not qualify. A noop without it fails the run. "Too small" and "cosmetic" are not reasons. "Too wide" means fix a slice.
 
 ### 5. Fix and verify
 
@@ -109,5 +107,5 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 Create exactly one issue and one pull request:
 
-- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`. Include the full survey table from step 3 so a maintainer can see what is left; publishing fails without it.
+- Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`. Pick a temporary id of the form `aw_` plus 3 to 8 letters or digits (for example `aw_fix1`) and pass it as the `temporary_id` argument of `create_issue`. Name the survey check the finding belongs to.
 - Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<the same temporary id>` (for example `Fixes #aw_fix1`) and put the evidence and the test or proof output under the matching sections. The id is only replaced by the real issue number if you passed it to `create_issue`; otherwise the merged PR leaves the issue open and that open issue stops every later run of this agent.
