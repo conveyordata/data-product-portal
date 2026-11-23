@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.core.authz import CasbinPolicies
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
@@ -42,8 +43,12 @@ class UserService:
     def get_users(self) -> Sequence[UsersGet]:
         users = self.db.scalars(
             select(UserModel)
-            .outerjoin(UserModel.global_role)
             .where(UserModel.email != SYSTEM_ACCOUNT)
+            .options(
+                selectinload(UserModel.global_role).selectinload(
+                    GlobalRoleAssignment.role
+                )
+            )
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
         return users

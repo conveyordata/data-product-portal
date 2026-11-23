@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import event
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
@@ -19,6 +20,7 @@ from app.events.model import Event
 from app.events.schema_response import GetEventHistoryResponseItem
 from app.settings import settings
 from app.users.model import User
+from tests import engine
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
@@ -50,6 +52,36 @@ class TestUsersRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
+
+    def test_get_users__query_count_is_constant(self, client):
+        def count_queries() -> int:
+            count = 0
+
+            def record(*_):
+                nonlocal count
+                count += 1
+
+            event.listen(engine, "before_cursor_execute", record)
+            try:
+                response = client.get(ENDPOINT)
+            finally:
+                event.remove(engine, "before_cursor_execute", record)
+            assert response.status_code == 200
+            return count
+
+        def create_users(n: int) -> None:
+            for _ in range(n):
+                GlobalRoleAssignmentFactory(
+                    identity_id=UserFactory().id,
+                    role_id=RoleFactory(scope=Scope.GLOBAL).id,
+                )
+
+        create_users(2)
+        count_queries()
+        baseline = count_queries()
+        create_users(5)
+
+        assert count_queries() == baseline
 
     def test_remove_user_not_admin(self, client):
         user = UserFactory()
