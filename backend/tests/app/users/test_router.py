@@ -13,6 +13,7 @@ from app.authorization.role_assignments.output_port.model import (
 from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
+from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
@@ -660,7 +661,9 @@ class TestUsersRouter:
         assert [a["id"] for a in response.json()["pending_actions"]] == [str(link.id)]
         assert "owner" not in response.json()["pending_actions"][0]["technical_asset"]
 
-    def test_remove_user__references_on_hidden_data_product(self, client, session):
+    def test_remove_user__references_on_hidden_data_product(
+        self, client, session, capture_events
+    ):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__DELETE_USER]
@@ -677,10 +680,17 @@ class TestUsersRouter:
             requested_by=requester,
         )
         link_id = link.id
+        expected_event = OutputPortTechnicalAssetLinkEvent(
+            id=link.id,
+            data_product_id=link.technical_asset.owner_id,
+            output_port_id=link.output_port_id,
+            technical_asset_id=link.technical_asset_id,
+        )
 
         response = client.delete(f"{ENDPOINT}/{requester.id}")
 
         assert response.status_code == 200, response.text
+        assert expected_event in capture_events.captured_events
         session.expire_all()
         assert (
             session.scalar(
