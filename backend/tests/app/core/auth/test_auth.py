@@ -383,24 +383,35 @@ class TestUserinfoIdentitySource:
         session.refresh(existing)
         assert existing.external_id == "keycloak-sub-1"
 
-    @pytest.mark.parametrize("external_id", ["placeholder-sub", "keycloak-sub-1"])
-    def test_get_authenticated_user__never_links_deleted_user_placeholder(
-        self, idp, session, external_id
+    @pytest.mark.parametrize(
+        ("placeholder_external_id", "email"),
+        [
+            ("placeholder-sub", DELETED_USER_EMAIL),
+            (None, DELETED_USER_EMAIL),
+            ("keycloak-sub-1", "new@example.org"),
+        ],
+        ids=["email_of_placeholder", "email_before_placeholder", "subject"],
+    )
+    def test_get_authenticated_user__never_logs_in_as_deleted_user_placeholder(
+        self, idp, session, placeholder_external_id, email
     ):
         idp(audience="portal")
-        placeholder = UserFactory(
-            id=DELETED_USER_ID, external_id=external_id, email=DELETED_USER_EMAIL
-        )
+        if placeholder_external_id:
+            UserFactory(
+                id=DELETED_USER_ID,
+                external_id=placeholder_external_id,
+                email=DELETED_USER_EMAIL,
+            )
         bearer = sign(KEYCLOAK_ACCESS_TOKEN)
-        body = {**KEYCLOAK_ACCESS_TOKEN, "email": DELETED_USER_EMAIL}
+        body = {**KEYCLOAK_ACCESS_TOKEN, "email": email}
 
         with userinfo_returns(200, body), pytest.raises(HTTPException) as error:
             log_in(bearer, session)
 
         assert error.value.status_code == status.HTTP_401_UNAUTHORIZED
-        session.refresh(placeholder)
-        assert placeholder.external_id == external_id
-        assert placeholder.first_name != KEYCLOAK_ACCESS_TOKEN.get("given_name")
+        assert session.scalars(
+            select(User.external_id).where(User.email.in_([DELETED_USER_EMAIL, email]))
+        ).all() == ([placeholder_external_id] if placeholder_external_id else [])
 
     def test_authorize_user__email_change_to_taken_address_keeps_old_email(
         self, idp, session

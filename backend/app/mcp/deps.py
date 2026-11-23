@@ -23,7 +23,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import db_session
 from app.database.visibility import acting_as
 from app.settings import settings
-from app.users.model import User
+from app.users.model import DELETED_USER_ID, User
 from app.users.model import User as UserModel
 
 MCP_USER_ID_STATE_KEY = "mcp_user_id"
@@ -153,7 +153,11 @@ def _resolve_mcp_user(db: Session) -> UserModel:
         )
     logger.debug(f"[MCP] Resolving user from upstream_claims: sub={sub!r}")
 
-    user_model = db.scalar(sa_select(UserModel).where(UserModel.external_id == sub))
+    user_model = db.scalar(
+        sa_select(UserModel).where(
+            UserModel.external_id == sub, UserModel.id != DELETED_USER_ID
+        )
+    )
     if not user_model:
         logger.error(f"[MCP] Authenticated user not found in DB: sub={sub!r}")
         raise ValueError(f"Authenticated user not found: sub={sub!r}")

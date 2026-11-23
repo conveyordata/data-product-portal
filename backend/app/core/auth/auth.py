@@ -11,7 +11,7 @@ from app.core.auth.oidc import OIDCIdentity, is_address
 from app.core.logging import logger
 from app.database.database import SystemDbSession
 from app.settings import settings
-from app.users.model import DELETED_USER_ID
+from app.users.model import DELETED_USER_EMAIL, DELETED_USER_ID
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_request import UserCreate
@@ -22,11 +22,15 @@ SYSTEM_ACCOUNT_BOT_EXTERNAL_ID = "systemaccount_bot"
 def update_db_user(
     oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
 ) -> User:
-    db_user = db.scalar(
-        select(UserModel).where(
-            UserModel.external_id == token.sub, UserModel.id != DELETED_USER_ID
+    db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
+    if oidc_user.email.lower() == DELETED_USER_EMAIL or (
+        db_user and db_user.id == DELETED_USER_ID
+    ):
+        logger.warning("Identity matches the deleted user placeholder")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account can't log in",
         )
-    )
     email_owner = None
     if not db_user or db_user.email != oidc_user.email:
         email_owner = db.scalar(
@@ -42,7 +46,7 @@ def update_db_user(
         db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
     elif email_owner:
-        if not link_by_email or email_owner.id == DELETED_USER_ID:
+        if not link_by_email:
             logger.warning("Identity email belongs to a user with another subject")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

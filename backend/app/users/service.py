@@ -142,7 +142,7 @@ class UserService:
                 type=IdentityType.USER.value,
                 external_id=f"deleted-user-{DELETED_USER_ID}",
             )
-            .on_conflict_do_nothing(index_elements=["id"])
+            .on_conflict_do_nothing()
         )
         self.db.execute(
             insert(cast("Table", UserModel.__table__))
@@ -152,7 +152,7 @@ class UserService:
                 first_name="Deleted",
                 last_name="user",
             )
-            .on_conflict_do_nothing(index_elements=["id"])
+            .on_conflict_do_nothing()
         )
 
     def _remove_user(self, user: UserModel) -> None:
