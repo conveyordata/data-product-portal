@@ -34,20 +34,20 @@ safe-outputs:
 
 Find the single most impactful real bug: code that does the wrong thing for a realistic input or state, and fix it.
 
-## Required survey
+## Kinds of defect to look for
 
-For each check, look for a concrete candidate and try to write a test that fails on the current code. The first candidate whose test fails is the bug you fix.
+For each pattern, look for a concrete case and try to write a test that fails on the current code. The first case whose test fails is the bug you fix.
 
-1. Enum name against value. Code, raw SQL rows and `backend/sample_data.sql` that compare or store an enum by `.name` where the column holds the `.value`, or the other way round. Compare sibling branches of the same function.
-2. Visibility on writes. Updates and deletes that load or cascade through queries filtered by `app/database/visibility.py`, so rows the caller can't see are skipped or break the write.
-3. Derived state that goes stale. Anything copied from a source of truth (authorization policies, events, graph nodes and edges, counts, cached flags) that is not updated when the source is revoked, expired, renamed or deleted.
-4. Time-bound access. Expiry and renewal in `abstract_data_product/input_ports/background_tasks.py` and `authorization/role_assignments/global_/background_tasks.py`: overlapping grants, revoke after renew, and expiry at the boundary.
-5. Status transitions and guards. Approve, deny and revoke on pending, denied and expired states, and "last owner" style guards that count the wrong states.
-6. Boundary validation. Names, ids, durations and config values accepted by the API that later break a lookup or a 500 path.
-7. Response contract. Routes that return something other than their declared response schema, and frontend code that reads a field the OpenAPI schema does not have.
-8. Frontend cache. RTK Query mutations in `frontend/src/store/api/services/tags/` whose `invalidatesTags` miss data the mutation changes, and component state derived from props or queries that is not reset when they change.
-9. Swallowed errors. `except Exception` blocks that log and continue where the caller needs the failure.
-10. Recent changes. Dependency bumps and merged PRs of the last month (`git log --since`) whose behaviour change was not followed through, as with the Tiptap 3 toolbar in #4717.
+1. Two representations. The same value stored or compared in two forms: an enum by name against by value, local time against UTC, an id against a name.
+2. Read filters on writes. Writes that go through a read filter (visibility, soft delete, scope) and so skip or break on rows the caller can't see.
+3. Stale derived state. Data copied from a source of truth that isn't updated when the source changes, expires or is deleted.
+4. Overlaps and edges. Ranges, durations and versions that overlap or meet at an edge: the first or last day, or two active records where the code expects one.
+5. State transitions. Actions allowed or blocked in the wrong state, and guards that count the wrong states.
+6. Unvalidated input. Input the API accepts that later breaks a lookup or ends in a 500.
+7. Contract drift. Responses that don't match their declared schema, and clients that read fields the schema doesn't have.
+8. Stale client cache. Mutations that don't refresh the data they change, and state derived from props or queries that isn't reset when they change.
+9. Swallowed errors. Errors caught and logged where the caller needs the failure.
+10. Half-finished changes. A recent dependency bump or change whose effect wasn't followed through everywhere it reaches.
 
 A suspicion is not a bug. Code you merely find unusual is not a bug.
 

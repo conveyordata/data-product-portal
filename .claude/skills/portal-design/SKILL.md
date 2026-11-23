@@ -58,6 +58,8 @@ Principle: the same interaction looks and behaves the same everywhere.
 
 - Buttons: one placement for edit, add, save and delete, and one rule for text, icon or icon plus text. Follow the existing buttons in `frontend/src/components/buttons/` and on comparable screens.
 - Row actions in compact lists (Home cards, the notification bell, the pending requests table) are text link buttons, `type="link" size="small"`, without an icon.
+- Detail pages of core concepts (Data Product, Output Port, Technical Asset, Exploration) share one layout: `DetailPageLayout` from `frontend/src/components/detail-page-layout/`, with the same header, edit button and sidebar.
+- Create and edit forms share one footer: Delete on the left (edit only), then Cancel and the primary submit on the right. The submit says "Save" when editing and "Create" when creating.
 - Modal for a quick single-step confirmation; a page for multi-step or data-heavy tasks; inline only for small edits.
 - One empty-state pattern: icon or illustration, explanation, primary action. Use `EmptyState` from `frontend/src/components/empty-state/`; for a table use `ListTable` from `frontend/src/components/list-table/`, which also handles loading, failed loads and column filters. Pass `filter` when the list can be searched or filtered, so an empty result is not presented as "nothing exists yet".
 - One table pattern: `size="small"`, the total and pagination at the top right (`placement: ['topEnd']`, through `useTablePagination`), and the action column last, as in the Consumers and History tables.

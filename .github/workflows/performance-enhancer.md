@@ -34,7 +34,7 @@ safe-outputs:
 
 Find the single most inefficient piece of code whose fix gives a significant, measurable gain, and fix it without losing functionality or adding complexity.
 
-## Required survey
+## Kinds of defect to look for
 
 Look across backend, frontend, SDK and CLI, and go through the checks:
 
