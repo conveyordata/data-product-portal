@@ -266,6 +266,7 @@ describe('TechnicalAssetCreate', async () => {
         await fillInS3(user);
         expect(await screen.findByText('This namespace is already in use')).toBeInTheDocument();
 
+        await waitFor(() => expect(screen.getByLabelText(/azure/i)).not.toBeDisabled());
         await user.click(screen.getByLabelText(/azure/i));
 
         await waitFor(() => expect(screen.queryByText('This namespace is already in use')).not.toBeInTheDocument());
