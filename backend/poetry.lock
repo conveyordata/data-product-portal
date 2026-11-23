@@ -1501,39 +1501,39 @@ tqdm = ">=4.66,<5"
 
 [[package]]
 name = "fastmcp"
-version = "4.2.0"
+version = "4.2.3"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "plugins"]
 files = [
-    {file = "fastmcp-4.2.0-py3-none-any.whl", hash = "sha256:441351551edac39eed248f0ea0f1d87fd95f44812ffee8b72fa05a5053db903d"},
-    {file = "fastmcp-4.2.0.tar.gz", hash = "sha256:833508360b9a5db6ae3524cf12471b31716c210feee0c726a867e38c43a9287f"},
+    {file = "fastmcp-4.2.3-py3-none-any.whl", hash = "sha256:82fde5c1db2a6d865015726b15502a2657205e4549295dc1357fcb7b1c521a4d"},
+    {file = "fastmcp-4.2.3.tar.gz", hash = "sha256:0c9d1739d59e89506489bea589dec6193d204ab86e9739333d6bb46c13476477"},
 ]
 
 [package.dependencies]
-fastmcp-slim = {version = "4.2.0", extras = ["client", "server"]}
+fastmcp-slim = {version = "4.2.3", extras = ["client", "server"]}
 
 [package.extras]
-anthropic = ["fastmcp-slim[anthropic] (==4.2.0)"]
-apps = ["fastmcp-slim[apps] (==4.2.0)"]
-azure = ["fastmcp-slim[azure] (==4.2.0)"]
-code-mode = ["fastmcp-slim[code-mode] (==4.2.0)"]
-gemini = ["fastmcp-slim[gemini] (==4.2.0)"]
-jev = ["fastmcp-slim[jev] (==4.2.0)"]
-openai = ["fastmcp-slim[openai] (==4.2.0)"]
-tasks = ["fastmcp-tasks (==4.2.0)"]
+anthropic = ["fastmcp-slim[anthropic] (==4.2.3)"]
+apps = ["fastmcp-slim[apps] (==4.2.3)"]
+azure = ["fastmcp-slim[azure] (==4.2.3)"]
+code-mode = ["fastmcp-slim[code-mode] (==4.2.3)"]
+gemini = ["fastmcp-slim[gemini] (==4.2.3)"]
+jev = ["fastmcp-slim[jev] (==4.2.3)"]
+openai = ["fastmcp-slim[openai] (==4.2.3)"]
+tasks = ["fastmcp-tasks (==4.2.3)"]
 
 [[package]]
 name = "fastmcp-slim"
-version = "4.2.0"
+version = "4.2.3"
 description = "The dependency-slim FastMCP package."
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "plugins"]
 files = [
-    {file = "fastmcp_slim-4.2.0-py3-none-any.whl", hash = "sha256:174239bed3ac47275afa7fe82941a65f86ad0314205195766c92b138c6dcfebe"},
-    {file = "fastmcp_slim-4.2.0.tar.gz", hash = "sha256:01578f6d1a1423ca073e9d2ea4a193eed3ed9a5330e121fbcd9415511cfd1c0f"},
+    {file = "fastmcp_slim-4.2.3-py3-none-any.whl", hash = "sha256:6d68766ad18d5966230d7216c1e070325ffc547a3c8bc49172174f6c42ea617d"},
+    {file = "fastmcp_slim-4.2.3.tar.gz", hash = "sha256:9037cd8c0a2804152102f559f8f6a9c615377b6aeb9d2b6a466c0afe9df5839b"},
 ]
 
 [package.dependencies]
@@ -1551,10 +1551,10 @@ jsonschema-path = {version = ">=0.3.4", optional = true, markers = "extra == \"s
 mcp = {version = ">=2.3.0,<3.0.0", optional = true, markers = "extra == \"client\" or extra == \"server\""}
 mcp-types = ">=2.0.0,<3.0.0"
 openapi-pydantic = {version = ">=0.6.0", optional = true, markers = "extra == \"server\""}
-opentelemetry-api = {version = ">=1.28.0", optional = true, markers = "extra == \"client\" or extra == \"server\""}
+opentelemetry-api = {version = ">=1.45.2", optional = true, markers = "extra == \"client\" or extra == \"server\""}
 packaging = {version = ">=24.0", optional = true, markers = "extra == \"server\""}
 platformdirs = ">=4.0.0"
-py-key-value-aio = {version = ">=0.4.6,<0.5.0", extras = ["filetree", "memory"], optional = true, markers = "extra == \"client\" or extra == \"server\""}
+py-key-value-aio = {version = ">=0.4.6,<0.6.0", extras = ["filetree", "memory"], optional = true, markers = "extra == \"client\" or extra == \"server\""}
 pydantic = {version = ">=2.12.0", extras = ["email"]}
 pydantic-settings = ">=2.0.0"
 pyperclip = {version = ">=1.9.0", optional = true, markers = "extra == \"server\""}
@@ -1573,13 +1573,13 @@ websockets = {version = ">=15.0.1", optional = true, markers = "extra == \"serve
 anthropic = ["anthropic (>=0.48.0,<2)", "certifi (>=2026.10.19)"]
 apps = ["prefab-ui (>=0.18.0)"]
 azure = ["azure-identity (>=1.16.0)", "certifi (>=2026.10.19)", "pyjwt (>=2.12.0)"]
-client = ["authlib (>=1.9.5)", "beartype (>=0.23.0rc2) ; python_version >= \"3.15\"", "exceptiongroup (>=1.2.2)", "httpx2 (>=2.5.0)", "mcp (>=2.3.0,<3.0.0)", "opentelemetry-api (>=1.28.0)", "py-key-value-aio[filetree,memory] (>=0.4.6,<0.5.0)", "starlette (>=1.0.1)"]
+client = ["authlib (>=1.9.5)", "beartype (>=0.23.0rc2) ; python_version >= \"3.15\"", "exceptiongroup (>=1.2.2)", "httpx2 (>=2.5.0)", "mcp (>=2.3.0,<3.0.0)", "opentelemetry-api (>=1.45.2)", "py-key-value-aio[filetree,memory] (>=0.4.6,<0.6.0)", "starlette (>=1.0.1)"]
 code-mode = ["pydantic-monty (>=1.1,<2)"]
 gemini = ["certifi (>=2026.10.19)", "google-genai (>=1.18.0)", "jsonref (>=1.1.0)"]
 jev = ["typesafe-sdk (>=0.5.7)"]
-mcp = ["exceptiongroup (>=1.2.2)", "httpx2 (>=2.5.0)", "mcp (>=2.3.0,<3.0.0)", "opentelemetry-api (>=1.28.0)", "starlette (>=1.0.1)"]
+mcp = ["exceptiongroup (>=1.2.2)", "httpx2 (>=2.5.0)", "mcp (>=2.3.0,<3.0.0)", "opentelemetry-api (>=1.45.2)", "starlette (>=1.0.1)"]
 openai = ["certifi (>=2026.10.19)", "openai (>=1.102.0)"]
-server = ["authlib (>=1.9.5)", "beartype (>=0.23.0rc2) ; python_version >= \"3.15\"", "certifi (>=2026.10.19)", "cyclopts (>=4.0.0)", "exceptiongroup (>=1.2.2)", "griffelib (>=2.0.0)", "httpx2 (>=2.5.0)", "joserfc (>=1.7.6)", "jsonref (>=1.1.0)", "jsonschema (>=4.20.0)", "jsonschema-path (>=0.3.4)", "mcp (>=2.3.0,<3.0.0)", "openapi-pydantic (>=0.6.0)", "opentelemetry-api (>=1.28.0)", "packaging (>=24.0)", "py-key-value-aio[filetree,memory] (>=0.4.6,<0.5.0)", "pyperclip (>=1.9.0)", "python-multipart (>=0.0.26)", "pyyaml (>=6.0,<7.0)", "starlette (>=1.0.1)", "uncalled-for (>=0.6.1)", "uvicorn (>=0.35)", "watchfiles (>=1.0.0)", "websockets (>=15.0.1)"]
+server = ["authlib (>=1.9.5)", "beartype (>=0.23.0rc2) ; python_version >= \"3.15\"", "certifi (>=2026.10.19)", "cyclopts (>=4.0.0)", "exceptiongroup (>=1.2.2)", "griffelib (>=2.0.0)", "httpx2 (>=2.5.0)", "joserfc (>=1.7.6)", "jsonref (>=1.1.0)", "jsonschema (>=4.20.0)", "jsonschema-path (>=0.3.4)", "mcp (>=2.3.0,<3.0.0)", "openapi-pydantic (>=0.6.0)", "opentelemetry-api (>=1.45.2)", "packaging (>=24.0)", "py-key-value-aio[filetree,memory] (>=0.4.6,<0.6.0)", "pyperclip (>=1.9.0)", "python-multipart (>=0.0.26)", "pyyaml (>=6.0,<7.0)", "starlette (>=1.0.1)", "uncalled-for (>=0.6.1)", "uvicorn (>=0.35)", "watchfiles (>=1.0.0)", "websockets (>=15.0.1)"]
 
 [[package]]
 name = "filelock"
@@ -6099,4 +6099,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "856f0dda22589f3fd0c2822b30e69f28ff17da941d494fb2d0323026c901c479"
+content-hash = "311645fd7f278a48ae42af6587fd7c99ea29d5cf4da52f288c2e3721457626d8"
