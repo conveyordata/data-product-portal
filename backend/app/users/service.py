@@ -81,6 +81,7 @@ class UserService:
             id, self.db, options=[selectinload(User.data_product_roles)]
         )
         self.policies.clear_assignments_for_user(user_id=user.id)
+        self._keep_identifiers([user.id])
         self._remove_user(user)
         self.db.flush()
 
@@ -101,19 +102,24 @@ class UserService:
         self.policies.clear_assignments_for_identities(
             identity_ids=[user.id for user in users],
         )
+        self._keep_identifiers([user.id for user in users])
 
         for user in users:
             self._remove_user(user)
 
         self.db.flush()
 
-    def _remove_user(self, user: UserModel) -> None:
+    def _keep_identifiers(self, user_ids: list[UUID]) -> None:
         for model, field in USER_REFERENCES:
+            user_id = getattr(model, f"{field}_id")
+            email = select(UserModel.email).where(UserModel.id == user_id)
             self.db.execute(
                 update(model)
-                .where(getattr(model, f"{field}_id") == user.id)
-                .values({f"deleted_{field}_identifier": user.email})
+                .where(user_id.in_(user_ids))
+                .values({f"deleted_{field}_identifier": email.scalar_subquery()})
             )
+
+    def _remove_user(self, user: UserModel) -> None:
         user.data_products = []
         user.datasets = []
         self.db.delete(user)

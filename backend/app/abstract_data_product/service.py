@@ -417,6 +417,7 @@ class AbstractDataProductService:
         request = InputPortRequestModel(
             justification=previous_request.justification,
             requested_by_id=previous_request.requested_by_id,
+            deleted_requested_by_identifier=previous_request.deleted_requested_by_identifier,
             requested_on=now,
             access_duration_type=access_duration.access_duration_type,
             requested_duration_days=access_duration.days,

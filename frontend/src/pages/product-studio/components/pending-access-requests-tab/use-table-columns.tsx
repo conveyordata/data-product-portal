@@ -25,7 +25,11 @@ export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsTyp
                 title: t('Requested by'),
                 dataIndex: 'requestedBy',
                 key: 'requestedBy',
-                sorter: (a, b) => a.requestedBy?.email.localeCompare(b.requestedBy?.email || '') || 0,
+                sorter: (a, b) => {
+                    const email = (row: typeof a) =>
+                        row.requestedBy?.email ?? row.pendingAction.deleted_requested_by_identifier ?? '';
+                    return email(a).localeCompare(email(b));
+                },
                 render: (requestedBy, { pendingAction }) => {
                     if (requestedBy == null) {
                         return pendingAction.deleted_requested_by_identifier;
