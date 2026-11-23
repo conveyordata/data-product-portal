@@ -192,7 +192,7 @@ class RoleAssignmentService:
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                "A data product must always be owned by at least one identity",
+                "A data product must always be owned by at least one user",
             )
 
     def _count_owners(self, data_product_id: UUID) -> int:
