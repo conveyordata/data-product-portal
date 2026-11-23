@@ -34,6 +34,8 @@ from tests.fixtures.broken_plugin import BrokenPlugin
 from tests.fixtures.example_plugin import ExamplePlugin
 from tests.fixtures.other_plugin import OtherPlugin
 
+pytestmark = pytest.mark.commits
+
 
 def installed() -> list:
     """The plugins the portal itself would reconcile, e.g. S3.

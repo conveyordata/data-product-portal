@@ -1,5 +1,6 @@
 import threading
 
+import pytest
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -33,6 +34,7 @@ class TestTechnicalAssetService:
         assert session.get(TechnicalAssetConfiguration, configuration_id) is None
 
 
+@pytest.mark.commits
 def test_create_technical_asset__concurrent_duplicate_namespace(session: Session):
     data_product = DataProductFactory()
     service = PlatformServiceFactory()

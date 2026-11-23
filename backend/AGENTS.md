@@ -32,6 +32,7 @@ In principle should always be present on non GET endpoints and sensitive GET end
 *   Run `task test:backend` (or `poetry run pytest -v tests/` in the `backend` folder, after starting Postgres with `task db:up`). Tests live in `backend/tests/`, organized to mirror `backend/app/`.
 *   Name tests `test_<method_name>__<scenario>`.
 *   Use factories to build test data.
+*   Each test runs in a transaction that is rolled back afterwards. Assert row locks with `row_lock_modes` from `tests/session_util.py` instead of a second connection. Mark a test `@pytest.mark.commits` only when its data must be visible to another connection, like migrations; its tables are truncated afterwards.
 *   Every new route must ship with full test coverage.
 
 ## Running Commands

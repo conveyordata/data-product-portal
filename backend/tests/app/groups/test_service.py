@@ -3,8 +3,6 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
@@ -18,7 +16,6 @@ from app.core.authz.actions import AuthorizationAction
 from app.groups.model import Group
 from app.groups.schema_request import GroupCreate, GroupUpdate
 from app.groups.service import GroupService
-from tests import engine
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -30,6 +27,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.groups_util import group_has_member
+from tests.session_util import row_lock_modes
 
 
 class TestGroupService:
@@ -499,40 +497,18 @@ class TestGroupService:
 
         assert exc_info.value.status_code == 404
 
-    def test_replace_members__holds_group_lock_until_transaction_ends(self):
+    def test_replace_members__holds_group_lock_until_transaction_ends(self, session):
         group = GroupFactory()
         member = UserFactory()
 
-        with (
-            Session(bind=engine) as first_session,
-            Session(bind=engine) as second_session,
-        ):
-            with first_session.begin():
-                GroupService(first_session).replace_members(
-                    group_id=group.id,
-                    member_identity_ids=[member.id],
-                )
+        GroupService(session).replace_members(
+            group_id=group.id,
+            member_identity_ids=[member.id],
+        )
 
-                with pytest.raises(OperationalError) as exc_info:
-                    second_session.scalar(
-                        select(Group.id)
-                        .where(Group.id == group.id)
-                        .with_for_update(
-                            of=Group,
-                            nowait=True,  # NOWAIT to fail inmediately with 55P03
-                        )
-                    )
-
-                assert exc_info.value.orig.sqlstate == "55P03"
-                second_session.rollback()
-
-            locked_group_id = second_session.scalar(
-                select(Group.id)
-                .where(Group.id == group.id)
-                .with_for_update(of=Group, nowait=True)
-            )
-
-            assert locked_group_id == group.id
+        assert "For Update" in row_lock_modes(session, Group.__table__, group.id)
+        session.rollback()
+        assert not row_lock_modes(session, Group.__table__, group.id)
 
     def test_add_members__assigns_membership_policies_in_batch(
         self, policies: CasbinPolicies, session
