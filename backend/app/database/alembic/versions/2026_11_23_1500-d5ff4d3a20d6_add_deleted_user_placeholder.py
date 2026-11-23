@@ -77,13 +77,20 @@ def downgrade() -> None:
     system_account_id = connection.scalar(
         sa.select(users.c.id).where(users.c.email == "systemaccount@noreply.com")
     )
-    if system_account_id is None:
-        raise RuntimeError(
-            "Cannot downgrade the deleted user placeholder without system account "
-            "systemaccount@noreply.com"
-        )
     for table, column in USER_REFERENCES:
         references = sa.table(table, sa.column(column, sa.UUID))
+        referenced = connection.scalar(
+            sa.select(references.c[column])
+            .where(references.c[column] == DELETED_USER_ID)
+            .limit(1)
+        )
+        if not referenced:
+            continue
+        if system_account_id is None:
+            raise RuntimeError(
+                f"Cannot downgrade {table}.{column} pointing at the deleted user "
+                "placeholder without system account systemaccount@noreply.com"
+            )
         connection.execute(
             references.update()
             .where(references.c[column] == DELETED_USER_ID)
