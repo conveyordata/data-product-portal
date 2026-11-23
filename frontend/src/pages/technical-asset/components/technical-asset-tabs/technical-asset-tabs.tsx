@@ -122,7 +122,7 @@ export function TechnicalAssetTabs({ technicalAsset, dataProductId, canEdit, isL
                     className: styles.tabPane,
                 };
             })}
-            size="middle"
+            size="medium"
             rootClassName={styles.tabContainer}
             onChange={onTabChange}
         />

@@ -118,7 +118,7 @@ export function DataProductsTab() {
         <Flex vertical gap="small">
             {/* Search and Actions */}
             <Flex justify="space-between" align="center">
-                <Flex gap="middle" flex={1} align="center">
+                <Flex gap="medium" flex={1} align="center">
                     <Input.Search
                         placeholder={t('Search Data Products by name')}
                         value={searchTerm ?? ''}

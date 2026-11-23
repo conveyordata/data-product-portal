@@ -113,7 +113,7 @@ export function HomeNotifications() {
     if (isEmpty && !failed && reviewingAction === null) return null;
 
     return (
-        <Flex vertical gap="middle" style={{ marginBottom: token.marginXXL }}>
+        <Flex vertical gap="medium" style={{ marginBottom: token.marginXXL }}>
             {failed ? (
                 <EmptyState
                     size="small"

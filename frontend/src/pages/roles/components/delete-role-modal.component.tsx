@@ -187,7 +187,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             {isLoading ? (
                 <Skeleton active />
             ) : assignments?.length === 0 ? (
-                <Space orientation="vertical" size="middle">
+                <Space orientation="vertical" size="medium">
                     <Alert
                         showIcon
                         type="success"
@@ -202,7 +202,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                     </Text>
                 </Space>
             ) : (
-                <Space orientation="vertical" size="middle">
+                <Space orientation="vertical" size="medium">
                     <Alert
                         showIcon
                         type="warning"
