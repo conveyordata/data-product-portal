@@ -41838,10 +41838,17 @@ func (s *UIElementString) encodeFields(e *jx.Encoder) {
 			s.InitialValue.Encode(e)
 		}
 	}
+	{
+		if s.Placeholder.Set {
+			e.FieldStart("placeholder")
+			s.Placeholder.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfUIElementString = [1]string{
+var jsonFieldsNameOfUIElementString = [2]string{
 	0: "initial_value",
+	1: "placeholder",
 }
 
 // Decode decodes UIElementString from json.
@@ -41861,6 +41868,16 @@ func (s *UIElementString) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"initial_value\"")
+			}
+		case "placeholder":
+			if err := func() error {
+				s.Placeholder.Reset()
+				if err := s.Placeholder.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"placeholder\"")
 			}
 		default:
 			return d.Skip()

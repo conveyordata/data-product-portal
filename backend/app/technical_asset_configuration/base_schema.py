@@ -73,6 +73,7 @@ class UIElementSelect(ORMModel):
 
 class UIElementString(ORMModel):
     initial_value: Optional[str] = None
+    placeholder: Optional[str] = None
 
 
 class UIElementMetadata(ORMModel):

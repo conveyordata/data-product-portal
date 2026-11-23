@@ -15890,6 +15890,7 @@ func (s *UIElementSelect) SetOptions(val OptNilSelectOptionArray) {
 // Ref: #/components/schemas/UIElementString
 type UIElementString struct {
 	InitialValue OptNilString `json:"initial_value"`
+	Placeholder  OptNilString `json:"placeholder"`
 }
 
 // GetInitialValue returns the value of InitialValue.
@@ -15897,9 +15898,19 @@ func (s *UIElementString) GetInitialValue() OptNilString {
 	return s.InitialValue
 }
 
+// GetPlaceholder returns the value of Placeholder.
+func (s *UIElementString) GetPlaceholder() OptNilString {
+	return s.Placeholder
+}
+
 // SetInitialValue sets the value of InitialValue.
 func (s *UIElementString) SetInitialValue(val OptNilString) {
 	s.InitialValue = val
+}
+
+// SetPlaceholder sets the value of Placeholder.
+func (s *UIElementString) SetPlaceholder(val OptNilString) {
+	s.Placeholder = val
 }
 
 // Ref: #/components/schemas/UIElementType

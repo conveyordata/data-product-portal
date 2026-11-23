@@ -19940,6 +19940,17 @@
               }
             ],
             "title": "Initial Value"
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Placeholder"
           }
         },
         "type": "object",

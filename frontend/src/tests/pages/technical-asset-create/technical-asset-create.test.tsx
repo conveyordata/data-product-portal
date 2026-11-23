@@ -115,6 +115,38 @@ describe('TechnicalAssetCreate', async () => {
         expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
     }, 15000);
 
+    it.each(['owner/repository', undefined])('renders an optional plugin placeholder: %s', async (placeholder) => {
+        defaultMocks();
+        mockGetPlugins({
+            plugins: mock_plugins.map((plugin) =>
+                plugin.platform === 'github'
+                    ? {
+                          ...plugin,
+                          ui_metadata: plugin.ui_metadata.map((field) => ({
+                              ...field,
+                              string: { ...field.string, placeholder },
+                          })),
+                      }
+                    : plugin,
+            ),
+        });
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+        const github = await screen.findByLabelText(/^github$/i);
+        await waitFor(() => expect(github).toBeEnabled());
+        await user.click(github);
+
+        const input = screen.getByLabelText(/^repository$/i);
+        if (placeholder) {
+            expect(input).toHaveAttribute('placeholder', placeholder);
+        } else {
+            expect(input).not.toHaveAttribute('placeholder');
+        }
+        expect(input).toHaveValue('');
+        await user.type(input, 'my-org/my-repo');
+        expect(input).toHaveValue('my-org/my-repo');
+    });
+
     it('should be able to select multiple access modes and choose specific modes', async () => {
         defaultMocks();
         mockCreateTechnicalAsset(mockDataProducts[0].id);

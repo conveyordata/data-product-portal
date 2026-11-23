@@ -94,6 +94,7 @@ export type UiElementSelect = {
 };
 export type UiElementString = {
   initial_value?: string | null;
+  placeholder?: string | null;
 };
 export type UiElementRadio = {
   max_count?: number | null;
