@@ -46,7 +46,7 @@ export function transformToTableRow(action: Request): TableRow {
         case RequestType_InputPort:
             return {
                 ...baseRow,
-                requestedBy: action.requested_by,
+                requestedBy: action.requested_by ?? null,
                 decidedBy: action.decided_by ?? null,
                 description: getRequestDescription(action),
                 date: action.requested_on,

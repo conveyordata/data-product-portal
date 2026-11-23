@@ -35,7 +35,6 @@ class InputPortRequest:
         justification (str):
         valid_until (datetime.date | None):
         access_duration_type (AccessDurationType):
-        requested_by (User):
         decision (InputPortRequestDecision):
         created_on (datetime.datetime):
         requested_on (datetime.datetime):
@@ -43,9 +42,13 @@ class InputPortRequest:
         decision_note (None | str | Unset):
         valid_from (datetime.date | None | Unset):
         requested_duration_days (int | None | Unset):
+        requested_by (None | Unset | User):
+        deleted_requested_by_identifier (None | str | Unset):
         decided_by (None | Unset | User):
+        deleted_decided_by_identifier (None | str | Unset):
         revoked_at (datetime.datetime | None | Unset):
         revoked_by (None | Unset | User):
+        deleted_revoked_by_identifier (None | str | Unset):
         access_mode (AccessMode | None | Unset):
         request_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
@@ -54,7 +57,6 @@ class InputPortRequest:
     justification: str
     valid_until: datetime.date | None
     access_duration_type: AccessDurationType
-    requested_by: User
     decision: InputPortRequestDecision
     created_on: datetime.datetime
     requested_on: datetime.datetime
@@ -62,9 +64,13 @@ class InputPortRequest:
     decision_note: None | str | Unset = UNSET
     valid_from: datetime.date | None | Unset = UNSET
     requested_duration_days: int | None | Unset = UNSET
+    requested_by: None | Unset | User = UNSET
+    deleted_requested_by_identifier: None | str | Unset = UNSET
     decided_by: None | Unset | User = UNSET
+    deleted_decided_by_identifier: None | str | Unset = UNSET
     revoked_at: datetime.datetime | None | Unset = UNSET
     revoked_by: None | Unset | User = UNSET
+    deleted_revoked_by_identifier: None | str | Unset = UNSET
     access_mode: AccessMode | None | Unset = UNSET
     request_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -84,8 +90,6 @@ class InputPortRequest:
             valid_until = self.valid_until
 
         access_duration_type = self.access_duration_type.value
-
-        requested_by = self.requested_by.to_dict()
 
         decision = self.decision.value
 
@@ -115,6 +119,20 @@ class InputPortRequest:
         else:
             requested_duration_days = self.requested_duration_days
 
+        requested_by: dict[str, Any] | None | Unset
+        if isinstance(self.requested_by, Unset):
+            requested_by = UNSET
+        elif isinstance(self.requested_by, User):
+            requested_by = self.requested_by.to_dict()
+        else:
+            requested_by = self.requested_by
+
+        deleted_requested_by_identifier: None | str | Unset
+        if isinstance(self.deleted_requested_by_identifier, Unset):
+            deleted_requested_by_identifier = UNSET
+        else:
+            deleted_requested_by_identifier = self.deleted_requested_by_identifier
+
         decided_by: dict[str, Any] | None | Unset
         if isinstance(self.decided_by, Unset):
             decided_by = UNSET
@@ -122,6 +140,12 @@ class InputPortRequest:
             decided_by = self.decided_by.to_dict()
         else:
             decided_by = self.decided_by
+
+        deleted_decided_by_identifier: None | str | Unset
+        if isinstance(self.deleted_decided_by_identifier, Unset):
+            deleted_decided_by_identifier = UNSET
+        else:
+            deleted_decided_by_identifier = self.deleted_decided_by_identifier
 
         revoked_at: None | str | Unset
         if isinstance(self.revoked_at, Unset):
@@ -138,6 +162,12 @@ class InputPortRequest:
             revoked_by = self.revoked_by.to_dict()
         else:
             revoked_by = self.revoked_by
+
+        deleted_revoked_by_identifier: None | str | Unset
+        if isinstance(self.deleted_revoked_by_identifier, Unset):
+            deleted_revoked_by_identifier = UNSET
+        else:
+            deleted_revoked_by_identifier = self.deleted_revoked_by_identifier
 
         access_mode: dict[str, Any] | None | Unset
         if isinstance(self.access_mode, Unset):
@@ -157,7 +187,6 @@ class InputPortRequest:
                 "justification": justification,
                 "valid_until": valid_until,
                 "access_duration_type": access_duration_type,
-                "requested_by": requested_by,
                 "decision": decision,
                 "created_on": created_on,
                 "requested_on": requested_on,
@@ -170,12 +199,22 @@ class InputPortRequest:
             field_dict["valid_from"] = valid_from
         if requested_duration_days is not UNSET:
             field_dict["requested_duration_days"] = requested_duration_days
+        if requested_by is not UNSET:
+            field_dict["requested_by"] = requested_by
+        if deleted_requested_by_identifier is not UNSET:
+            field_dict["deleted_requested_by_identifier"] = (
+                deleted_requested_by_identifier
+            )
         if decided_by is not UNSET:
             field_dict["decided_by"] = decided_by
+        if deleted_decided_by_identifier is not UNSET:
+            field_dict["deleted_decided_by_identifier"] = deleted_decided_by_identifier
         if revoked_at is not UNSET:
             field_dict["revoked_at"] = revoked_at
         if revoked_by is not UNSET:
             field_dict["revoked_by"] = revoked_by
+        if deleted_revoked_by_identifier is not UNSET:
+            field_dict["deleted_revoked_by_identifier"] = deleted_revoked_by_identifier
         if access_mode is not UNSET:
             field_dict["access_mode"] = access_mode
         if request_type is not UNSET:
@@ -210,8 +249,6 @@ class InputPortRequest:
         valid_until = _parse_valid_until(d.pop("valid_until"))
 
         access_duration_type = AccessDurationType(d.pop("access_duration_type"))
-
-        requested_by = User.from_dict(d.pop("requested_by"))
 
         decision = InputPortRequestDecision(d.pop("decision"))
 
@@ -258,6 +295,34 @@ class InputPortRequest:
             d.pop("requested_duration_days", UNSET)
         )
 
+        def _parse_requested_by(data: object) -> None | Unset | User:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                requested_by_type_0 = User.from_dict(data)
+
+                return requested_by_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | User, data)
+
+        requested_by = _parse_requested_by(d.pop("requested_by", UNSET))
+
+        def _parse_deleted_requested_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_requested_by_identifier = _parse_deleted_requested_by_identifier(
+            d.pop("deleted_requested_by_identifier", UNSET)
+        )
+
         def _parse_decided_by(data: object) -> None | Unset | User:
             if data is None:
                 return data
@@ -274,6 +339,17 @@ class InputPortRequest:
             return cast(None | Unset | User, data)
 
         decided_by = _parse_decided_by(d.pop("decided_by", UNSET))
+
+        def _parse_deleted_decided_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_decided_by_identifier = _parse_deleted_decided_by_identifier(
+            d.pop("deleted_decided_by_identifier", UNSET)
+        )
 
         def _parse_revoked_at(data: object) -> datetime.datetime | None | Unset:
             if data is None:
@@ -309,6 +385,17 @@ class InputPortRequest:
 
         revoked_by = _parse_revoked_by(d.pop("revoked_by", UNSET))
 
+        def _parse_deleted_revoked_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_revoked_by_identifier = _parse_deleted_revoked_by_identifier(
+            d.pop("deleted_revoked_by_identifier", UNSET)
+        )
+
         def _parse_access_mode(data: object) -> AccessMode | None | Unset:
             if data is None:
                 return data
@@ -337,7 +424,6 @@ class InputPortRequest:
             justification=justification,
             valid_until=valid_until,
             access_duration_type=access_duration_type,
-            requested_by=requested_by,
             decision=decision,
             created_on=created_on,
             requested_on=requested_on,
@@ -345,9 +431,13 @@ class InputPortRequest:
             decision_note=decision_note,
             valid_from=valid_from,
             requested_duration_days=requested_duration_days,
+            requested_by=requested_by,
+            deleted_requested_by_identifier=deleted_requested_by_identifier,
             decided_by=decided_by,
+            deleted_decided_by_identifier=deleted_decided_by_identifier,
             revoked_at=revoked_at,
             revoked_by=revoked_by,
+            deleted_revoked_by_identifier=deleted_revoked_by_identifier,
             access_mode=access_mode,
             request_type=request_type,
         )

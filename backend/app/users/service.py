@@ -2,17 +2,29 @@ from itertools import chain
 from typing import Any, Final, Sequence
 from uuid import UUID
 
-from sqlalchemy import asc, or_, select
+from sqlalchemy import asc, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
+from app.abstract_data_product.input_ports.model import InputPortRequest
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
+from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.core.authz import CasbinPolicies
+from app.data_products.output_port_technical_assets_link.model import (
+    TechnicalAssetOutputPortAssociation,
+)
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
+from app.explorations.model import Exploration
 from app.groups.model import Group, GroupMembership
 from app.groups.schema_response import GroupGet
 from app.identities.schema_response import (
@@ -32,6 +44,22 @@ from app.users.schema_response import (
 )
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
+
+USER_REFERENCES: Final = [
+    (DataProductRoleAssignment, "requested_by"),
+    (DataProductRoleAssignment, "decided_by"),
+    (DatasetRoleAssignment, "requested_by"),
+    (DatasetRoleAssignment, "decided_by"),
+    (GlobalRoleAssignment, "requested_by"),
+    (GlobalRoleAssignment, "decided_by"),
+    (InputPortRequest, "requested_by"),
+    (InputPortRequest, "decided_by"),
+    (InputPortRequest, "revoked_by"),
+    (TechnicalAssetOutputPortAssociation, "requested_by"),
+    (TechnicalAssetOutputPortAssociation, "approved_by"),
+    (TechnicalAssetOutputPortAssociation, "denied_by"),
+    (Exploration, "owner"),
+]
 
 
 class UserService:
@@ -80,6 +108,12 @@ class UserService:
         self.db.flush()
 
     def _remove_user(self, user: UserModel) -> None:
+        for model, field in USER_REFERENCES:
+            self.db.execute(
+                update(model)
+                .where(getattr(model, f"{field}_id") == user.id)
+                .values({f"deleted_{field}_identifier": user.email})
+            )
         user.data_products = []
         user.datasets = []
         self.db.delete(user)

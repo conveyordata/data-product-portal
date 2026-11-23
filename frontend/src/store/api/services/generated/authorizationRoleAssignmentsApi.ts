@@ -376,8 +376,10 @@ export type GlobalRoleAssignmentResponse = {
   decision: DecisionStatus;
   requested_on: string | null;
   requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_on: string | null;
   decided_by: User | null;
+  deleted_decided_by_identifier?: string | null;
 };
 export type CreateGlobalRoleAssignment = {
   user_id: string;
@@ -431,8 +433,10 @@ export type DataProductRoleAssignmentResponse = {
   decision: DecisionStatus;
   requested_on: string | null;
   requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_on: string | null;
   decided_by: User | null;
+  deleted_decided_by_identifier?: string | null;
 };
 export type ModifyDataProductRoleAssignment = {
   role_id: string;
@@ -493,8 +497,10 @@ export type OutputPortRoleAssignmentResponse = {
   decision: DecisionStatus;
   requested_on: string | null;
   requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_on: string | null;
   decided_by: User | null;
+  deleted_decided_by_identifier?: string | null;
 };
 export type ModifyOutputPortRoleAssignment = {
   role_id: string;

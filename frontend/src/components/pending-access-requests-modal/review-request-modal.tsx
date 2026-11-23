@@ -33,7 +33,7 @@ import {
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import type { AbstractDataProductType, InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
+import type { AbstractDataProductType, InputPortRequest, User } from '@/store/api/services/generated/usersApi.ts';
 import {
     createDataOutputIdPath,
     createDataProductIdPath,
@@ -163,16 +163,20 @@ function LinkableCard({ linkTo, style, children }: { linkTo?: string; style?: CS
 const isInputPortRequest = (action: Request): action is InputPortRequest =>
     action.request_type === RequestType_InputPort;
 
+const requester = (user?: User | null, deletedIdentifier?: string | null) => ({
+    requesterName: user ? `${user.first_name} ${user.last_name}` : (deletedIdentifier ?? ''),
+    requesterEmail: user?.email ?? deletedIdentifier ?? '',
+});
+
 function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): RequestDetails | undefined {
     if (isInputPortRequest(action)) {
         return {
-            requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
-            requesterEmail: action.requested_by.email,
+            ...requester(action.requested_by, action.deleted_requested_by_identifier),
             source: {
                 name: action.input_port.consuming_abstract_data_product.is_redacted
                     ? hiddenDataProductName(action.input_port.consuming_abstract_data_product.name, t, token)
                     : action.input_port.consuming_abstract_data_product.name,
-                email: action.requested_by.email,
+                email: action.requested_by?.email ?? action.deleted_requested_by_identifier ?? '',
                 type: t(
                     abstractDataProductTypeName(
                         action.input_port.consuming_abstract_data_product.abstract_data_product_type,
@@ -226,11 +230,10 @@ function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): R
 
     if (action.request_type === RequestType_TechnicalAssetOutputPort) {
         return {
-            requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
-            requesterEmail: action.requested_by.email,
+            ...requester(action.requested_by, action.deleted_requested_by_identifier),
             source: {
                 name: action.technical_asset.name,
-                email: action.requested_by.email,
+                email: action.requested_by?.email ?? action.deleted_requested_by_identifier ?? '',
                 type: t('Technical Asset'),
                 icon: <TechnicalAssetOutlined />,
                 linkTo: createDataOutputIdPath(action.technical_asset_id, action.technical_asset.owner_id),
@@ -252,8 +255,7 @@ function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): R
     if (action.request_type === RequestType_DataProductRoleAssignment) {
         const roleName = action.role ? action.role.name : t('a role');
         return {
-            requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
-            requesterEmail: action.requested_by?.email || '',
+            ...requester(action.requested_by, action.deleted_requested_by_identifier),
             source: {
                 name: `${action.user.first_name} ${action.user.last_name}`,
                 email: action.user.email,

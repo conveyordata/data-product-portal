@@ -26,7 +26,10 @@ export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsTyp
                 dataIndex: 'requestedBy',
                 key: 'requestedBy',
                 sorter: (a, b) => a.requestedBy?.email.localeCompare(b.requestedBy?.email || '') || 0,
-                render: (requestedBy) => {
+                render: (requestedBy, { pendingAction }) => {
+                    if (requestedBy == null) {
+                        return pendingAction.deleted_requested_by_identifier;
+                    }
                     return (
                         <Space size="small">
                             <UserAvatarWithEmail user={requestedBy} color={secondaryColor} />

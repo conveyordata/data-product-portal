@@ -15,13 +15,9 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
         DatasetRoleAssignment,
     )
-    from app.data_products.output_port_technical_assets_link.model import (
-        TechnicalAssetOutputPortAssociation,
-    )
     from app.data_products.output_ports.model import (
         OutputPort,
     )
-    from app.explorations.model import Exploration
     from app.users.notifications.model import Notification
 
 
@@ -54,10 +50,6 @@ class User(Identity):
         lazy="raise",
     )
 
-    explorations: Mapped[list["Exploration"]] = relationship(
-        foreign_keys="Exploration.owner_id", back_populates="owner", lazy="raise"
-    )
-
     # Relationships - Datasets
     dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
         foreign_keys="DatasetRoleAssignment.user_id",
@@ -70,29 +62,6 @@ class User(Identity):
     )
     datasets: AssociationProxy[list["OutputPort"]] = association_proxy(
         "dataset_roles", "dataset"
-    )
-
-    # Relationships - Data outputs
-    requested_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
-        relationship(
-            foreign_keys="TechnicalAssetOutputPortAssociation.requested_by_id",
-            back_populates="requested_by",
-            lazy="raise",
-        )
-    )
-    denied_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
-        relationship(
-            foreign_keys="TechnicalAssetOutputPortAssociation.denied_by_id",
-            back_populates="denied_by",
-            lazy="raise",
-        )
-    )
-    approved_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
-        relationship(
-            foreign_keys="TechnicalAssetOutputPortAssociation.approved_by_id",
-            back_populates="approved_by",
-            lazy="raise",
-        )
     )
 
     __mapper_args__ = {

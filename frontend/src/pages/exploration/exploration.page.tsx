@@ -52,7 +52,7 @@ export function ExplorationPage() {
         return null;
     }
 
-    const canEdit = !!currentUser && exploration?.owner.id === currentUser.id;
+    const canEdit = !!currentUser && exploration?.owner?.id === currentUser.id;
 
     return (
         <DetailPageLayout

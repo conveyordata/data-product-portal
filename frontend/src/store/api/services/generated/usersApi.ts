@@ -202,8 +202,10 @@ export type GlobalRoleAssignmentResponse = {
   decision: DecisionStatus;
   requested_on: string | null;
   requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_on: string | null;
   decided_by: User | null;
+  deleted_decided_by_identifier?: string | null;
 };
 export type UsersGet = {
   id: string;
@@ -317,11 +319,14 @@ export type InputPortRequestBase = {
   valid_until: string | null;
   access_duration_type: AccessDurationType;
   requested_duration_days?: number | null;
-  requested_by: User;
+  requested_by?: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_by?: User | null;
+  deleted_decided_by_identifier?: string | null;
   decision: InputPortRequestDecision;
   revoked_at?: string | null;
   revoked_by?: User | null;
+  deleted_revoked_by_identifier?: string | null;
   created_on: string;
   requested_on: string;
   access_mode?: AccessMode | null;
@@ -343,11 +348,14 @@ export type InputPortRequest = {
   valid_until: string | null;
   access_duration_type: AccessDurationType;
   requested_duration_days?: number | null;
-  requested_by: User;
+  requested_by?: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_by?: User | null;
+  deleted_decided_by_identifier?: string | null;
   decision: InputPortRequestDecision;
   revoked_at?: string | null;
   revoked_by?: User | null;
+  deleted_revoked_by_identifier?: string | null;
   created_on: string;
   requested_on: string;
   access_mode?: AccessMode | null;
@@ -382,9 +390,12 @@ export type TechnicalAssetOutputPortRequest = {
   requested_on: string;
   denied_on: string | null;
   approved_on: string | null;
-  requested_by: User;
+  requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   denied_by: User | null;
+  deleted_denied_by_identifier?: string | null;
   approved_by: User | null;
+  deleted_approved_by_identifier?: string | null;
   request_type?: "TechnicalAssetOutputPort";
 };
 export type AbstractDataProductStatus =
@@ -419,8 +430,10 @@ export type DataProductRoleAssignmentRequest = {
   decision: DecisionStatus;
   requested_on: string | null;
   requested_by: User | null;
+  deleted_requested_by_identifier?: string | null;
   decided_on: string | null;
   decided_by: User | null;
+  deleted_decided_by_identifier?: string | null;
   request_type?: "DataProductRoleAssignment";
 };
 export type MyRequestsResponse = {

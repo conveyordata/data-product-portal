@@ -7,6 +7,7 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import joinedload
 
 from app.abstract_data_product.service import AbstractDataProductService
+from app.authorization.role_assignments.global_.admin import is_user_admin
 from app.configuration.domains.service import DomainService
 from app.database.deps import DbSession
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
@@ -63,7 +64,9 @@ class ExplorationService(AbstractDataProductService):
 
     def ensure_owner(self, id: UUID, authenticated_user: User) -> ExplorationModel:
         exploration = self.get_exploration(id, authenticated_user)
-        if exploration.owner_id != authenticated_user.id:
+        if exploration.owner_id != authenticated_user.id and not self.db.scalar(
+            select(is_user_admin(authenticated_user.id))
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You are not the owner of this exploration",

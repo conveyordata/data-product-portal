@@ -9,6 +9,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.decision_status import DecisionStatus
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.data_product import DataProduct
@@ -32,6 +33,8 @@ class DataProductRoleAssignmentResponse:
         requested_by (None | User):
         decided_on (datetime.datetime | None):
         decided_by (None | User):
+        deleted_requested_by_identifier (None | str | Unset):
+        deleted_decided_by_identifier (None | str | Unset):
     """
 
     id: UUID
@@ -43,6 +46,8 @@ class DataProductRoleAssignmentResponse:
     requested_by: None | User
     decided_on: datetime.datetime | None
     decided_by: None | User
+    deleted_requested_by_identifier: None | str | Unset = UNSET
+    deleted_decided_by_identifier: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -87,6 +92,18 @@ class DataProductRoleAssignmentResponse:
         else:
             decided_by = self.decided_by
 
+        deleted_requested_by_identifier: None | str | Unset
+        if isinstance(self.deleted_requested_by_identifier, Unset):
+            deleted_requested_by_identifier = UNSET
+        else:
+            deleted_requested_by_identifier = self.deleted_requested_by_identifier
+
+        deleted_decided_by_identifier: None | str | Unset
+        if isinstance(self.deleted_decided_by_identifier, Unset):
+            deleted_decided_by_identifier = UNSET
+        else:
+            deleted_decided_by_identifier = self.deleted_decided_by_identifier
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -102,6 +119,12 @@ class DataProductRoleAssignmentResponse:
                 "decided_by": decided_by,
             }
         )
+        if deleted_requested_by_identifier is not UNSET:
+            field_dict["deleted_requested_by_identifier"] = (
+                deleted_requested_by_identifier
+            )
+        if deleted_decided_by_identifier is not UNSET:
+            field_dict["deleted_decided_by_identifier"] = deleted_decided_by_identifier
 
         return field_dict
 
@@ -195,6 +218,28 @@ class DataProductRoleAssignmentResponse:
 
         decided_by = _parse_decided_by(d.pop("decided_by"))
 
+        def _parse_deleted_requested_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_requested_by_identifier = _parse_deleted_requested_by_identifier(
+            d.pop("deleted_requested_by_identifier", UNSET)
+        )
+
+        def _parse_deleted_decided_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_decided_by_identifier = _parse_deleted_decided_by_identifier(
+            d.pop("deleted_decided_by_identifier", UNSET)
+        )
+
         data_product_role_assignment_response = cls(
             id=id,
             data_product=data_product,
@@ -205,6 +250,8 @@ class DataProductRoleAssignmentResponse:
             requested_by=requested_by,
             decided_on=decided_on,
             decided_by=decided_by,
+            deleted_requested_by_identifier=deleted_requested_by_identifier,
+            deleted_decided_by_identifier=deleted_decided_by_identifier,
         )
 
         data_product_role_assignment_response.additional_properties = d

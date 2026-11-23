@@ -92,8 +92,10 @@ def convert_to_role_assignment(
         decision=assignment.decision,
         requested_on=assignment.requested_on,
         requested_by=assignment.requested_by,
+        deleted_requested_by_identifier=assignment.deleted_requested_by_identifier,
         decided_on=assignment.decided_on,
         decided_by=assignment.decided_by,
+        deleted_decided_by_identifier=assignment.deleted_decided_by_identifier,
     )
 
 

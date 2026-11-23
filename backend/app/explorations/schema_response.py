@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
@@ -23,7 +23,8 @@ class CreateExplorationResponse(Exploration):
 
 
 class GetExplorationResponse(Exploration):
-    owner: User
+    owner: Optional[User]
+    deleted_owner_identifier: Optional[str] = None
 
 
 class GetExplorationsResponse(ORMModel):

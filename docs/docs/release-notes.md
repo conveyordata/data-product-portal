@@ -18,6 +18,8 @@ sidebar_position: 200
 
 ### bugfixes
 
+- **[User Deletion]**: Deleting a user no longer fails when they requested or decided a role assignment or input port request, or own an Exploration. These, and Technical Asset links, keep the deleted user's email in a `deleted_<field>_identifier` field, while the user field itself is empty in the API, like the actor of an audit event.
+- **[API]**: Admins can manage Explorations they don't own, also when the owner was deleted.
 - **[UI]**: The namespace check when creating a Technical Asset no longer reports a namespace as taken because an Output Port uses it. It now checks the Technical Assets of the Data Product, like saving does.
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.

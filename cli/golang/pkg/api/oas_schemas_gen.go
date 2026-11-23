@@ -2459,15 +2459,17 @@ func (s *DataProductLifeCyclesGetItem) SetIsDefault(val bool) {
 
 // Ref: #/components/schemas/DataProductRoleAssignmentResponse
 type DataProductRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id"`
-	DataProduct DataProduct    `json:"data_product"`
-	User        User           `json:"user"`
-	Role        NilRole        `json:"role"`
-	Decision    DecisionStatus `json:"decision"`
-	RequestedOn NilDateTime    `json:"requested_on"`
-	RequestedBy NilUser        `json:"requested_by"`
-	DecidedOn   NilDateTime    `json:"decided_on"`
-	DecidedBy   NilUser        `json:"decided_by"`
+	ID                           uuid.UUID      `json:"id"`
+	DataProduct                  DataProduct    `json:"data_product"`
+	User                         User           `json:"user"`
+	Role                         NilRole        `json:"role"`
+	Decision                     DecisionStatus `json:"decision"`
+	RequestedOn                  NilDateTime    `json:"requested_on"`
+	RequestedBy                  NilUser        `json:"requested_by"`
+	DeletedRequestedByIdentifier OptNilString   `json:"deleted_requested_by_identifier"`
+	DecidedOn                    NilDateTime    `json:"decided_on"`
+	DecidedBy                    NilUser        `json:"decided_by"`
+	DeletedDecidedByIdentifier   OptNilString   `json:"deleted_decided_by_identifier"`
 }
 
 // GetID returns the value of ID.
@@ -2505,6 +2507,11 @@ func (s *DataProductRoleAssignmentResponse) GetRequestedBy() NilUser {
 	return s.RequestedBy
 }
 
+// GetDeletedRequestedByIdentifier returns the value of DeletedRequestedByIdentifier.
+func (s *DataProductRoleAssignmentResponse) GetDeletedRequestedByIdentifier() OptNilString {
+	return s.DeletedRequestedByIdentifier
+}
+
 // GetDecidedOn returns the value of DecidedOn.
 func (s *DataProductRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 	return s.DecidedOn
@@ -2513,6 +2520,11 @@ func (s *DataProductRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 // GetDecidedBy returns the value of DecidedBy.
 func (s *DataProductRoleAssignmentResponse) GetDecidedBy() NilUser {
 	return s.DecidedBy
+}
+
+// GetDeletedDecidedByIdentifier returns the value of DeletedDecidedByIdentifier.
+func (s *DataProductRoleAssignmentResponse) GetDeletedDecidedByIdentifier() OptNilString {
+	return s.DeletedDecidedByIdentifier
 }
 
 // SetID sets the value of ID.
@@ -2550,6 +2562,11 @@ func (s *DataProductRoleAssignmentResponse) SetRequestedBy(val NilUser) {
 	s.RequestedBy = val
 }
 
+// SetDeletedRequestedByIdentifier sets the value of DeletedRequestedByIdentifier.
+func (s *DataProductRoleAssignmentResponse) SetDeletedRequestedByIdentifier(val OptNilString) {
+	s.DeletedRequestedByIdentifier = val
+}
+
 // SetDecidedOn sets the value of DecidedOn.
 func (s *DataProductRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 	s.DecidedOn = val
@@ -2558,6 +2575,11 @@ func (s *DataProductRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 // SetDecidedBy sets the value of DecidedBy.
 func (s *DataProductRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 	s.DecidedBy = val
+}
+
+// SetDeletedDecidedByIdentifier sets the value of DeletedDecidedByIdentifier.
+func (s *DataProductRoleAssignmentResponse) SetDeletedDecidedByIdentifier(val OptNilString) {
+	s.DeletedDecidedByIdentifier = val
 }
 
 func (*DataProductRoleAssignmentResponse) createDataProductRoleAssignmentRes()  {}
@@ -5609,14 +5631,15 @@ func (*GetExplorationInputPortsResponse) getExplorationInputPortsRes() {}
 
 // Ref: #/components/schemas/GetExplorationResponse
 type GetExplorationResponse struct {
-	ID          uuid.UUID                 `json:"id"`
-	Name        string                    `json:"name"`
-	Namespace   string                    `json:"namespace"`
-	Description string                    `json:"description"`
-	Domain      Domain                    `json:"domain"`
-	Status      AbstractDataProductStatus `json:"status"`
-	Finalizers  []string                  `json:"finalizers"`
-	Owner       User                      `json:"owner"`
+	ID                     uuid.UUID                 `json:"id"`
+	Name                   string                    `json:"name"`
+	Namespace              string                    `json:"namespace"`
+	Description            string                    `json:"description"`
+	Domain                 Domain                    `json:"domain"`
+	Status                 AbstractDataProductStatus `json:"status"`
+	Finalizers             []string                  `json:"finalizers"`
+	Owner                  NilUser                   `json:"owner"`
+	DeletedOwnerIdentifier OptNilString              `json:"deleted_owner_identifier"`
 }
 
 // GetID returns the value of ID.
@@ -5655,8 +5678,13 @@ func (s *GetExplorationResponse) GetFinalizers() []string {
 }
 
 // GetOwner returns the value of Owner.
-func (s *GetExplorationResponse) GetOwner() User {
+func (s *GetExplorationResponse) GetOwner() NilUser {
 	return s.Owner
+}
+
+// GetDeletedOwnerIdentifier returns the value of DeletedOwnerIdentifier.
+func (s *GetExplorationResponse) GetDeletedOwnerIdentifier() OptNilString {
+	return s.DeletedOwnerIdentifier
 }
 
 // SetID sets the value of ID.
@@ -5695,8 +5723,13 @@ func (s *GetExplorationResponse) SetFinalizers(val []string) {
 }
 
 // SetOwner sets the value of Owner.
-func (s *GetExplorationResponse) SetOwner(val User) {
+func (s *GetExplorationResponse) SetOwner(val NilUser) {
 	s.Owner = val
+}
+
+// SetDeletedOwnerIdentifier sets the value of DeletedOwnerIdentifier.
+func (s *GetExplorationResponse) SetDeletedOwnerIdentifier(val OptNilString) {
+	s.DeletedOwnerIdentifier = val
 }
 
 func (*GetExplorationResponse) getExplorationRes() {}
@@ -6669,14 +6702,16 @@ func (*GetUsersResponse) getUsersRes() {}
 
 // Ref: #/components/schemas/GlobalRoleAssignmentResponse
 type GlobalRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id"`
-	User        User           `json:"user"`
-	Role        Role           `json:"role"`
-	Decision    DecisionStatus `json:"decision"`
-	RequestedOn NilDateTime    `json:"requested_on"`
-	RequestedBy NilUser        `json:"requested_by"`
-	DecidedOn   NilDateTime    `json:"decided_on"`
-	DecidedBy   NilUser        `json:"decided_by"`
+	ID                           uuid.UUID      `json:"id"`
+	User                         User           `json:"user"`
+	Role                         Role           `json:"role"`
+	Decision                     DecisionStatus `json:"decision"`
+	RequestedOn                  NilDateTime    `json:"requested_on"`
+	RequestedBy                  NilUser        `json:"requested_by"`
+	DeletedRequestedByIdentifier OptNilString   `json:"deleted_requested_by_identifier"`
+	DecidedOn                    NilDateTime    `json:"decided_on"`
+	DecidedBy                    NilUser        `json:"decided_by"`
+	DeletedDecidedByIdentifier   OptNilString   `json:"deleted_decided_by_identifier"`
 }
 
 // GetID returns the value of ID.
@@ -6709,6 +6744,11 @@ func (s *GlobalRoleAssignmentResponse) GetRequestedBy() NilUser {
 	return s.RequestedBy
 }
 
+// GetDeletedRequestedByIdentifier returns the value of DeletedRequestedByIdentifier.
+func (s *GlobalRoleAssignmentResponse) GetDeletedRequestedByIdentifier() OptNilString {
+	return s.DeletedRequestedByIdentifier
+}
+
 // GetDecidedOn returns the value of DecidedOn.
 func (s *GlobalRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 	return s.DecidedOn
@@ -6717,6 +6757,11 @@ func (s *GlobalRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 // GetDecidedBy returns the value of DecidedBy.
 func (s *GlobalRoleAssignmentResponse) GetDecidedBy() NilUser {
 	return s.DecidedBy
+}
+
+// GetDeletedDecidedByIdentifier returns the value of DeletedDecidedByIdentifier.
+func (s *GlobalRoleAssignmentResponse) GetDeletedDecidedByIdentifier() OptNilString {
+	return s.DeletedDecidedByIdentifier
 }
 
 // SetID sets the value of ID.
@@ -6749,6 +6794,11 @@ func (s *GlobalRoleAssignmentResponse) SetRequestedBy(val NilUser) {
 	s.RequestedBy = val
 }
 
+// SetDeletedRequestedByIdentifier sets the value of DeletedRequestedByIdentifier.
+func (s *GlobalRoleAssignmentResponse) SetDeletedRequestedByIdentifier(val OptNilString) {
+	s.DeletedRequestedByIdentifier = val
+}
+
 // SetDecidedOn sets the value of DecidedOn.
 func (s *GlobalRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 	s.DecidedOn = val
@@ -6757,6 +6807,11 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 // SetDecidedBy sets the value of DecidedBy.
 func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 	s.DecidedBy = val
+}
+
+// SetDeletedDecidedByIdentifier sets the value of DeletedDecidedByIdentifier.
+func (s *GlobalRoleAssignmentResponse) SetDeletedDecidedByIdentifier(val OptNilString) {
+	s.DeletedDecidedByIdentifier = val
 }
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
@@ -7595,21 +7650,24 @@ func (s *IngestOutputPortContractYamlReq) SetFile(val ht.MultipartFile) {
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
-	ID                    uuid.UUID                `json:"id"`
-	Justification         string                   `json:"justification"`
-	DecisionNote          OptNilString             `json:"decision_note"`
-	ValidFrom             OptNilDate               `json:"valid_from"`
-	ValidUntil            NilDate                  `json:"valid_until"`
-	AccessDurationType    AccessDurationType       `json:"access_duration_type"`
-	RequestedDurationDays OptNilInt                `json:"requested_duration_days"`
-	RequestedBy           User                     `json:"requested_by"`
-	DecidedBy             OptNilUser               `json:"decided_by"`
-	Decision              InputPortRequestDecision `json:"decision"`
-	RevokedAt             OptNilDateTime           `json:"revoked_at"`
-	RevokedBy             OptNilUser               `json:"revoked_by"`
-	CreatedOn             time.Time                `json:"created_on"`
-	RequestedOn           time.Time                `json:"requested_on"`
-	AccessMode            OptNilAccessMode         `json:"access_mode"`
+	ID                           uuid.UUID                `json:"id"`
+	Justification                string                   `json:"justification"`
+	DecisionNote                 OptNilString             `json:"decision_note"`
+	ValidFrom                    OptNilDate               `json:"valid_from"`
+	ValidUntil                   NilDate                  `json:"valid_until"`
+	AccessDurationType           AccessDurationType       `json:"access_duration_type"`
+	RequestedDurationDays        OptNilInt                `json:"requested_duration_days"`
+	RequestedBy                  OptNilUser               `json:"requested_by"`
+	DeletedRequestedByIdentifier OptNilString             `json:"deleted_requested_by_identifier"`
+	DecidedBy                    OptNilUser               `json:"decided_by"`
+	DeletedDecidedByIdentifier   OptNilString             `json:"deleted_decided_by_identifier"`
+	Decision                     InputPortRequestDecision `json:"decision"`
+	RevokedAt                    OptNilDateTime           `json:"revoked_at"`
+	RevokedBy                    OptNilUser               `json:"revoked_by"`
+	DeletedRevokedByIdentifier   OptNilString             `json:"deleted_revoked_by_identifier"`
+	CreatedOn                    time.Time                `json:"created_on"`
+	RequestedOn                  time.Time                `json:"requested_on"`
+	AccessMode                   OptNilAccessMode         `json:"access_mode"`
 }
 
 // GetID returns the value of ID.
@@ -7648,13 +7706,23 @@ func (s *InputPortRequestBase) GetRequestedDurationDays() OptNilInt {
 }
 
 // GetRequestedBy returns the value of RequestedBy.
-func (s *InputPortRequestBase) GetRequestedBy() User {
+func (s *InputPortRequestBase) GetRequestedBy() OptNilUser {
 	return s.RequestedBy
+}
+
+// GetDeletedRequestedByIdentifier returns the value of DeletedRequestedByIdentifier.
+func (s *InputPortRequestBase) GetDeletedRequestedByIdentifier() OptNilString {
+	return s.DeletedRequestedByIdentifier
 }
 
 // GetDecidedBy returns the value of DecidedBy.
 func (s *InputPortRequestBase) GetDecidedBy() OptNilUser {
 	return s.DecidedBy
+}
+
+// GetDeletedDecidedByIdentifier returns the value of DeletedDecidedByIdentifier.
+func (s *InputPortRequestBase) GetDeletedDecidedByIdentifier() OptNilString {
+	return s.DeletedDecidedByIdentifier
 }
 
 // GetDecision returns the value of Decision.
@@ -7670,6 +7738,11 @@ func (s *InputPortRequestBase) GetRevokedAt() OptNilDateTime {
 // GetRevokedBy returns the value of RevokedBy.
 func (s *InputPortRequestBase) GetRevokedBy() OptNilUser {
 	return s.RevokedBy
+}
+
+// GetDeletedRevokedByIdentifier returns the value of DeletedRevokedByIdentifier.
+func (s *InputPortRequestBase) GetDeletedRevokedByIdentifier() OptNilString {
+	return s.DeletedRevokedByIdentifier
 }
 
 // GetCreatedOn returns the value of CreatedOn.
@@ -7723,13 +7796,23 @@ func (s *InputPortRequestBase) SetRequestedDurationDays(val OptNilInt) {
 }
 
 // SetRequestedBy sets the value of RequestedBy.
-func (s *InputPortRequestBase) SetRequestedBy(val User) {
+func (s *InputPortRequestBase) SetRequestedBy(val OptNilUser) {
 	s.RequestedBy = val
+}
+
+// SetDeletedRequestedByIdentifier sets the value of DeletedRequestedByIdentifier.
+func (s *InputPortRequestBase) SetDeletedRequestedByIdentifier(val OptNilString) {
+	s.DeletedRequestedByIdentifier = val
 }
 
 // SetDecidedBy sets the value of DecidedBy.
 func (s *InputPortRequestBase) SetDecidedBy(val OptNilUser) {
 	s.DecidedBy = val
+}
+
+// SetDeletedDecidedByIdentifier sets the value of DeletedDecidedByIdentifier.
+func (s *InputPortRequestBase) SetDeletedDecidedByIdentifier(val OptNilString) {
+	s.DeletedDecidedByIdentifier = val
 }
 
 // SetDecision sets the value of Decision.
@@ -7745,6 +7828,11 @@ func (s *InputPortRequestBase) SetRevokedAt(val OptNilDateTime) {
 // SetRevokedBy sets the value of RevokedBy.
 func (s *InputPortRequestBase) SetRevokedBy(val OptNilUser) {
 	s.RevokedBy = val
+}
+
+// SetDeletedRevokedByIdentifier sets the value of DeletedRevokedByIdentifier.
+func (s *InputPortRequestBase) SetDeletedRevokedByIdentifier(val OptNilString) {
+	s.DeletedRevokedByIdentifier = val
 }
 
 // SetCreatedOn sets the value of CreatedOn.
@@ -12380,15 +12468,17 @@ func (s *OutputPortQueryStatsUpdate) SetQueryCount(val int) {
 
 // Ref: #/components/schemas/OutputPortRoleAssignmentResponse
 type OutputPortRoleAssignmentResponse struct {
-	ID          uuid.UUID      `json:"id"`
-	OutputPort  OutputPort     `json:"output_port"`
-	User        User           `json:"user"`
-	Role        NilRole        `json:"role"`
-	Decision    DecisionStatus `json:"decision"`
-	RequestedOn NilDateTime    `json:"requested_on"`
-	RequestedBy NilUser        `json:"requested_by"`
-	DecidedOn   NilDateTime    `json:"decided_on"`
-	DecidedBy   NilUser        `json:"decided_by"`
+	ID                           uuid.UUID      `json:"id"`
+	OutputPort                   OutputPort     `json:"output_port"`
+	User                         User           `json:"user"`
+	Role                         NilRole        `json:"role"`
+	Decision                     DecisionStatus `json:"decision"`
+	RequestedOn                  NilDateTime    `json:"requested_on"`
+	RequestedBy                  NilUser        `json:"requested_by"`
+	DeletedRequestedByIdentifier OptNilString   `json:"deleted_requested_by_identifier"`
+	DecidedOn                    NilDateTime    `json:"decided_on"`
+	DecidedBy                    NilUser        `json:"decided_by"`
+	DeletedDecidedByIdentifier   OptNilString   `json:"deleted_decided_by_identifier"`
 }
 
 // GetID returns the value of ID.
@@ -12426,6 +12516,11 @@ func (s *OutputPortRoleAssignmentResponse) GetRequestedBy() NilUser {
 	return s.RequestedBy
 }
 
+// GetDeletedRequestedByIdentifier returns the value of DeletedRequestedByIdentifier.
+func (s *OutputPortRoleAssignmentResponse) GetDeletedRequestedByIdentifier() OptNilString {
+	return s.DeletedRequestedByIdentifier
+}
+
 // GetDecidedOn returns the value of DecidedOn.
 func (s *OutputPortRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 	return s.DecidedOn
@@ -12434,6 +12529,11 @@ func (s *OutputPortRoleAssignmentResponse) GetDecidedOn() NilDateTime {
 // GetDecidedBy returns the value of DecidedBy.
 func (s *OutputPortRoleAssignmentResponse) GetDecidedBy() NilUser {
 	return s.DecidedBy
+}
+
+// GetDeletedDecidedByIdentifier returns the value of DeletedDecidedByIdentifier.
+func (s *OutputPortRoleAssignmentResponse) GetDeletedDecidedByIdentifier() OptNilString {
+	return s.DeletedDecidedByIdentifier
 }
 
 // SetID sets the value of ID.
@@ -12471,6 +12571,11 @@ func (s *OutputPortRoleAssignmentResponse) SetRequestedBy(val NilUser) {
 	s.RequestedBy = val
 }
 
+// SetDeletedRequestedByIdentifier sets the value of DeletedRequestedByIdentifier.
+func (s *OutputPortRoleAssignmentResponse) SetDeletedRequestedByIdentifier(val OptNilString) {
+	s.DeletedRequestedByIdentifier = val
+}
+
 // SetDecidedOn sets the value of DecidedOn.
 func (s *OutputPortRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 	s.DecidedOn = val
@@ -12479,6 +12584,11 @@ func (s *OutputPortRoleAssignmentResponse) SetDecidedOn(val NilDateTime) {
 // SetDecidedBy sets the value of DecidedBy.
 func (s *OutputPortRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 	s.DecidedBy = val
+}
+
+// SetDeletedDecidedByIdentifier sets the value of DeletedDecidedByIdentifier.
+func (s *OutputPortRoleAssignmentResponse) SetDeletedDecidedByIdentifier(val OptNilString) {
+	s.DeletedDecidedByIdentifier = val
 }
 
 func (*OutputPortRoleAssignmentResponse) createOutputPortRoleAssignmentRes()  {}

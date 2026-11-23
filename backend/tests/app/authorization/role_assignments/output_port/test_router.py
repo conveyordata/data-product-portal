@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 from unittest.mock import patch
+from uuid import uuid4
 
 import pytest
 from fastapi import status
@@ -44,6 +45,22 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data["role_assignments"]) == 1
         assert data["role_assignments"][0]["id"] == str(assignment.id)
+
+    def test_list_assignments__deleted_requester(self, client: TestClient):
+        DatasetRoleAssignmentFactory(
+            output_port_id=OutputPortFactory().id,
+            user_id=UserFactory().id,
+            role_id=RoleFactory(scope=Scope.DATASET).id,
+            requested_by_id=uuid4(),
+            deleted_requested_by_identifier="deleted@example.com",
+        )
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        assignment = response.json()["role_assignments"][0]
+        assert assignment["requested_by"] is None
+        assert assignment["deleted_requested_by_identifier"] == "deleted@example.com"
 
     def test_list_assignments__query_count_is_constant(self, client: TestClient):
         def count_queries() -> int:
@@ -278,6 +295,23 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
+
+    @pytest.mark.usefixtures("admin")
+    def test_decide_assignment__deleted_requester(self, client: TestClient):
+        assignment = DatasetRoleAssignmentFactory(
+            output_port_id=OutputPortFactory().id,
+            user_id=UserFactory().id,
+            role_id=RoleFactory(scope=Scope.DATASET).id,
+            decision=DecisionStatus.PENDING,
+            requested_by_id=uuid4(),
+        )
+
+        response = client.post(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+        assert response.status_code == 200, response.text
 
     def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)

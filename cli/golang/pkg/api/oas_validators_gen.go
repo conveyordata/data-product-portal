@@ -2779,8 +2779,15 @@ func (s *GetExplorationResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Owner.Validate(); err != nil {
-			return err
+		if value, ok := s.Owner.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -4276,8 +4283,15 @@ func (s *InputPortRequestBase) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.RequestedBy.Validate(); err != nil {
-			return err
+		if value, ok := s.RequestedBy.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {

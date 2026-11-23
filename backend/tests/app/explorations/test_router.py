@@ -341,6 +341,11 @@ class TestExplorationRouter:
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 403, response.text
 
+    def test_delete_exploration__as_admin_not_owner(self, client, admin):
+        exploration = ExplorationFactory()
+        response = client.delete(f"{ROUTE}/{exploration.id}")
+        assert response.status_code == 200, response.text
+
     def test_delete_exploration_with_finalizers_returns_202(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user, finalizers=["some-system"])

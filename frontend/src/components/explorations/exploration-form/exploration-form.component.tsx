@@ -47,7 +47,7 @@ export function ExplorationForm({ explorationId }: Props) {
         ]);
     }, [t, setBreadcrumbs, currentExploration]);
 
-    const canDelete = currentExploration?.owner.id === currentUser?.id;
+    const canDelete = currentExploration?.owner?.id === currentUser?.id;
 
     const [form] = Form.useForm<Exploration>();
 

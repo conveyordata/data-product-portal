@@ -42,8 +42,10 @@ class GlobalRoleAssignmentResponse(ORMModel):
     decision: DecisionStatus
     requested_on: Optional[datetime]
     requested_by: Optional[User]
+    deleted_requested_by_identifier: Optional[str] = None
     decided_on: Optional[datetime]
     decided_by: Optional[User]
+    deleted_decided_by_identifier: Optional[str] = None
 
     class Meta:
         orm_model = GlobalRoleAssignmentModel

@@ -27,10 +27,12 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
     EventFactory,
+    ExplorationFactory,
     GlobalRoleAssignmentFactory,
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
+    InputPortRequestFactory,
     NotificationFactory,
     OutputPortFactory,
     RoleFactory,
@@ -289,6 +291,80 @@ class TestUsersRouter:
             session.get(DataProductRoleAssignment, data_product_assignment_id) is None
         )
         assert session.get(DatasetRoleAssignment, dataset_assignment_id) is None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        ("create", "fields"),
+        [
+            (
+                lambda user: DataProductRoleAssignmentFactory(
+                    identity_id=UserFactory().id,
+                    data_product_id=DataProductFactory().id,
+                    role_id=RoleFactory(scope=Scope.DATA_PRODUCT).id,
+                    requested_by_id=user.id,
+                    decided_by_id=user.id,
+                ),
+                ["requested_by", "decided_by"],
+            ),
+            (
+                lambda user: DatasetRoleAssignmentFactory(
+                    user_id=UserFactory().id,
+                    output_port=OutputPortFactory(),
+                    role_id=RoleFactory(scope=Scope.DATASET).id,
+                    requested_by_id=user.id,
+                    decided_by_id=user.id,
+                ),
+                ["requested_by", "decided_by"],
+            ),
+            (
+                lambda user: GlobalRoleAssignmentFactory(
+                    identity_id=UserFactory().id,
+                    role_id=RoleFactory(scope=Scope.GLOBAL).id,
+                    requested_by_id=user.id,
+                    decided_by_id=user.id,
+                ),
+                ["requested_by", "decided_by"],
+            ),
+            (
+                lambda user: InputPortRequestFactory(
+                    requested_by=user, decided_by=user, revoked_by=user
+                ),
+                ["requested_by", "decided_by", "revoked_by"],
+            ),
+            (
+                lambda user: TechnicalAssetOutputPortAssociationFactory(
+                    requested_by=user, approved_by=user, denied_by=user
+                ),
+                ["requested_by", "approved_by", "denied_by"],
+            ),
+            (lambda user: ExplorationFactory(owner=user), ["owner"]),
+        ],
+        ids=[
+            "data_product_role",
+            "output_port_role",
+            "global_role",
+            "input_port_request",
+            "technical_asset_link",
+            "exploration",
+        ],
+    )
+    def test_remove_user__preserves_references(self, client, session, create, fields):
+        user = UserFactory()
+        row = create(user)
+        model, row_id, user_id, email = type(row), row.id, user.id, user.email
+
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        row = session.get(model, row_id)
+        assert row is not None
+        session.refresh(row, fields)
+        for field in fields:
+            assert getattr(row, f"{field}_id") == user_id
+            assert getattr(row, field) is None
+            assert getattr(row, f"deleted_{field}_identifier") == email
 
     def test_post_user_not_admin(self, client):
         response = client.post(f"{ENDPOINT}")

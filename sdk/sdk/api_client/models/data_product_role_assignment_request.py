@@ -39,6 +39,8 @@ class DataProductRoleAssignmentRequest:
         requested_by (None | User):
         decided_on (datetime.datetime | None):
         decided_by (None | User):
+        deleted_requested_by_identifier (None | str | Unset):
+        deleted_decided_by_identifier (None | str | Unset):
         request_type (Literal['DataProductRoleAssignment'] | Unset):  Default: 'DataProductRoleAssignment'.
     """
 
@@ -51,6 +53,8 @@ class DataProductRoleAssignmentRequest:
     requested_by: None | User
     decided_on: datetime.datetime | None
     decided_by: None | User
+    deleted_requested_by_identifier: None | str | Unset = UNSET
+    deleted_decided_by_identifier: None | str | Unset = UNSET
     request_type: Literal["DataProductRoleAssignment"] | Unset = (
         "DataProductRoleAssignment"
     )
@@ -98,6 +102,18 @@ class DataProductRoleAssignmentRequest:
         else:
             decided_by = self.decided_by
 
+        deleted_requested_by_identifier: None | str | Unset
+        if isinstance(self.deleted_requested_by_identifier, Unset):
+            deleted_requested_by_identifier = UNSET
+        else:
+            deleted_requested_by_identifier = self.deleted_requested_by_identifier
+
+        deleted_decided_by_identifier: None | str | Unset
+        if isinstance(self.deleted_decided_by_identifier, Unset):
+            deleted_decided_by_identifier = UNSET
+        else:
+            deleted_decided_by_identifier = self.deleted_decided_by_identifier
+
         request_type = self.request_type
 
         field_dict: dict[str, Any] = {}
@@ -115,6 +131,12 @@ class DataProductRoleAssignmentRequest:
                 "decided_by": decided_by,
             }
         )
+        if deleted_requested_by_identifier is not UNSET:
+            field_dict["deleted_requested_by_identifier"] = (
+                deleted_requested_by_identifier
+            )
+        if deleted_decided_by_identifier is not UNSET:
+            field_dict["deleted_decided_by_identifier"] = deleted_decided_by_identifier
         if request_type is not UNSET:
             field_dict["request_type"] = request_type
 
@@ -210,6 +232,28 @@ class DataProductRoleAssignmentRequest:
 
         decided_by = _parse_decided_by(d.pop("decided_by"))
 
+        def _parse_deleted_requested_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_requested_by_identifier = _parse_deleted_requested_by_identifier(
+            d.pop("deleted_requested_by_identifier", UNSET)
+        )
+
+        def _parse_deleted_decided_by_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_decided_by_identifier = _parse_deleted_decided_by_identifier(
+            d.pop("deleted_decided_by_identifier", UNSET)
+        )
+
         request_type = cast(
             Literal["DataProductRoleAssignment"] | Unset, d.pop("request_type", UNSET)
         )
@@ -230,6 +274,8 @@ class DataProductRoleAssignmentRequest:
             requested_by=requested_by,
             decided_on=decided_on,
             decided_by=decided_by,
+            deleted_requested_by_identifier=deleted_requested_by_identifier,
+            deleted_decided_by_identifier=deleted_decided_by_identifier,
             request_type=request_type,
         )
 

@@ -127,12 +127,9 @@ class NotificationService:
 
         `extra_receiver_ids` paraam is also filtered out to allow only users.
         """
-        extra_user_ids = set(
-            self.db.scalars(
-                select(UserModel.id).where(UserModel.id.in_(extra_receiver_ids))
-            )
+        receivers = self._data_product_member_ids([data_product_id]) | set(
+            extra_receiver_ids
         )
-        receivers = self._data_product_member_ids([data_product_id]) | extra_user_ids
 
         self._notify(receivers, event_id)
 
@@ -215,7 +212,10 @@ class NotificationService:
                 )
             )
         )
-        for receiver in receivers - already_notified - {event.actor_id}:
+        existing_users = set(
+            self.db.scalars(select(UserModel.id).where(UserModel.id.in_(receivers)))
+        )
+        for receiver in existing_users - already_notified - {event.actor_id}:
             self.db.add(NotificationModel(user_id=receiver, event_id=event_id))
 
     def _data_product_member_ids(self, data_product_ids: Iterable[UUID]) -> set[UUID]:
