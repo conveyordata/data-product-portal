@@ -10,8 +10,10 @@ from app.configuration.data_product_settings.enums import DataProductSettingScop
 from app.configuration.data_product_settings.model import DataProductSetting
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import Base
+from app.plugins.registry import TechnicalAssetType
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
+from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
 
 class NamespaceValidation(BaseModel):
@@ -82,8 +84,9 @@ class NamespaceValidator:
 
 
 class TechnicalAssetNamespaceValidator(NamespaceValidator):
-    def __init__(self):
+    def __init__(self, technical_asset_type: TechnicalAssetType):
         super().__init__(model=TechnicalAsset)
+        self.technical_asset_type = technical_asset_type
 
     def _is_unique(
         self,
@@ -103,6 +106,10 @@ class TechnicalAssetNamespaceValidator(NamespaceValidator):
                     and_(
                         TechnicalAsset.namespace == namespace,
                         TechnicalAsset.owner_id == data_product_id,
+                        TechnicalAsset.configuration_id
+                        == TechnicalAssetConfiguration.id,
+                        TechnicalAssetConfiguration.configuration_type
+                        == self.technical_asset_type,
                     )
                 )
             )

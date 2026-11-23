@@ -50,6 +50,7 @@ Technical assets are linked to and owned by a single **Data Product**.
 3. **Click 'Add a technical Asset'**: This opens the New Technical Asset page. You will need to have the correct access rights on the **Data Product** to be able to do this action.
 4. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
+   - **Namespace**: Generated from the name, see [Technical assets - Namespace](../concepts/technical-assets.md#namespace).
    - **Description**
    - **Technical Mapping** Choose between *Default* and *Custom* (see [Technical mapping](#technical-mapping) below).
    - **Technical Asset Type** Choose from one of the enabled technologies within your organization.

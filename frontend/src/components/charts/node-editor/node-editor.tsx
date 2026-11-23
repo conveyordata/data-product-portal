@@ -1,6 +1,14 @@
 import '@xyflow/react/dist/style.css';
 
-import type { Connection, Edge, EdgeChange, FitViewOptions, Node, NodeChange, ReactFlowProps } from '@xyflow/react';
+import type {
+    Connection,
+    Edge,
+    FitViewOptions,
+    Node,
+    OnEdgesChange,
+    OnNodesChange,
+    ReactFlowProps,
+} from '@xyflow/react';
 import { Background, ConnectionLineType, Controls, ReactFlow } from '@xyflow/react';
 
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -11,7 +19,6 @@ const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 2;
 
 export const defaultFitViewOptions: FitViewOptions = {
-    padding: 0.1,
     maxZoom: 1.25,
     duration: 650,
 };
@@ -20,8 +27,8 @@ type Props = {
     nodes: Node[];
     edges: Edge[];
     onConnect: (connection: Connection) => void;
-    onNodesChange: (changes: NodeChange[]) => void;
-    onEdgesChange: (changes: EdgeChange[]) => void;
+    onNodesChange: OnNodesChange;
+    onEdgesChange: OnEdgesChange;
     onNodeClick?: ReactFlowProps['onNodeClick'];
     onPaneClick?: ReactFlowProps['onPaneClick'];
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
@@ -53,6 +60,7 @@ export function NodeEditor({
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             fitView
+            forceColorMode="light"
             onInit={(instance) => instance.fitView(defaultFitViewOptions)}
             minZoom={MIN_ZOOM}
             maxZoom={MAX_ZOOM}

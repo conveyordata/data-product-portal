@@ -1,3 +1,6 @@
+from typing import Optional
+from uuid import UUID
+
 from casbin_sqlalchemy_adapter import CasbinRule
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -20,8 +23,9 @@ from app.authorization.role_assignments.output_port.service import (
 )
 from app.authorization.roles.auth import AuthRole
 from app.authorization.roles.service import RoleService
-from app.core.authz import Authorization
+from app.core.authz import Authorization, CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
+from app.core.authz.resolvers import output_port_parent
 from app.core.logging import logger
 from app.groups.model import GroupMembership
 from app.users.model import User as UserModel
@@ -33,10 +37,29 @@ OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
 class AuthorizationService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        self.authorizer = Authorization()
+        self.policies = CasbinPolicies()
+
+    def check_access(
+        self,
+        *,
+        user_id: UUID,
+        action: AuthorizationAction,
+        resource: Optional[UUID],
+        domain: Optional[UUID],
+    ) -> bool:
+        dom = "*" if domain is None else str(domain)
+        obj = "*" if resource is None else str(resource)
+        parent = output_port_parent(self.db, obj) if action.targets_output_port else "*"
+        return Authorization(self.db).has_access(
+            sub=str(user_id),
+            dom=dom,
+            obj=obj,
+            parent=parent,
+            act=action,
+        )
 
     def reload_enforcer(self) -> None:
-        self.authorizer.pause_enforcer_for_reload()
+        self.policies.pause_enforcer_for_reload()
 
         changed_roles, total_roles = self._sync_roles()
         logger.info(f"Synced {changed_roles}/{total_roles} roles to the casbin table")
@@ -65,18 +88,13 @@ class AuthorizationService:
         self._sync_data_products_reader_role()
         logger.info("Synced data products reader role permissions")
 
-        from app.data_products.service import DataProductService
-
-        DataProductService(self.db).sync_data_product_consumer_access()
-        logger.info("Synced data product consumer access")
-
         self._sync_output_ports_reader_role()
         logger.info("Synced output ports reader role permissions")
 
         self._sync_group_memberships()
         logger.info("Synced group membership edges to the casbin table")
 
-        self.authorizer.start_enforcer_after_reload()
+        self.policies.start_enforcer_after_reload()
 
         logger.info(
             "Authorization reload done - the casbin table"
@@ -137,12 +155,12 @@ class AuthorizationService:
         for user_id in self.db.scalars(
             select(UserModel.id).where(admin_expiry_in_future)
         ):
-            self.authorizer.assign_admin_role(user_id=str(user_id))
+            self.policies.assign_admin_role(user_id=str(user_id))
 
     def _sync_data_products_reader_role(self):
         from app.data_products.service import DataProductService
 
-        self.authorizer.sync_role_permissions(
+        self.policies.sync_role_permissions(
             role_id=DATA_PRODUCT_READER_ROLE,
             actions=[AuthorizationAction.HIDDEN__DATA_PRODUCT__READ],
         )
@@ -151,7 +169,7 @@ class AuthorizationService:
     def _sync_output_ports_reader_role(self):
         from app.data_products.output_ports.service import OutputPortService
 
-        self.authorizer.sync_role_permissions(
+        self.policies.sync_role_permissions(
             role_id=OUTPUT_PORT_READER_ROLE,
             actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
         )
@@ -168,4 +186,4 @@ class AuthorizationService:
                 )
             )
         ]
-        self.authorizer.assign_group_memberships(memberships=memberships)
+        self.policies.assign_group_memberships(memberships=memberships)

@@ -1,3 +1,4 @@
+import { StyleProvider } from '@ant-design/cssinjs';
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { type RenderOptions, render } from '@testing-library/react';
@@ -56,16 +57,18 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     // biome-ignore lint/correctness/noComponentHookFactories: closes over a per-test store, see https://redux.js.org/usage/writing-tests#setting-up-a-reusable-test-render-function
     const Wrapper = ({ children }: { children: ReactNode }) => {
         return (
-            <Provider store={store}>
-                <I18nextProvider i18n={i18n}>
-                    <FeedbackBridge />
-                    <BreadcrumbProvider>
-                        <NuqsTestingAdapter hasMemory={true}>
-                            {routerProps ? <MemoryRouter {...routerProps}>{children}</MemoryRouter> : children}
-                        </NuqsTestingAdapter>
-                    </BreadcrumbProvider>
-                </I18nextProvider>
-            </Provider>
+            <StyleProvider mock="server">
+                <Provider store={store}>
+                    <I18nextProvider i18n={i18n}>
+                        <FeedbackBridge />
+                        <BreadcrumbProvider>
+                            <NuqsTestingAdapter hasMemory={true}>
+                                {routerProps ? <MemoryRouter {...routerProps}>{children}</MemoryRouter> : children}
+                            </NuqsTestingAdapter>
+                        </BreadcrumbProvider>
+                    </I18nextProvider>
+                </Provider>
+            </StyleProvider>
         );
     };
 

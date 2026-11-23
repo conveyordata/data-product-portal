@@ -8,7 +8,7 @@ from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from tests import test_session
 
 faker: Final[Faker] = Faker()
@@ -28,9 +28,9 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
-        authorizer = Authorization()
+        policies = CasbinPolicies()
         if self.id != ADMIN_UUID:
-            authorizer.sync_role_permissions(
+            policies.sync_role_permissions(
                 role_id=str(self.id), actions=self.permissions
             )
 

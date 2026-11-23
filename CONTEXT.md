@@ -20,6 +20,14 @@ _Avoid_: Dataset
 A Data Product's approved or pending link to consume another Data Product's Output Port.
 _Avoid_: Dataset link
 
+**Technical Asset**:
+A physical data resource (a table, an S3 path, a parameter, ...) owned by one Data Product. Output Ports expose Technical Assets.
+_Avoid_: Data Output
+
+**Technical Asset Type**:
+The installed plugin that defines a Technical Asset's configuration, such as S3 or Glue, identified by its plugin name (e.g. `S3TechnicalAssetConfiguration`).
+_Avoid_: plugin type, configuration type
+
 **Consuming Data Product**:
 A Data Product that has an approved Input Port on a given Output Port.
 _Avoid_: Consumer (when the Data Product is meant, not a user)
@@ -63,6 +71,7 @@ A name a Provisioner registers on a Data Product, Exploration or Domain to block
 
 ## Relationships
 
+- A **Technical Asset**'s namespace is unique among the **Technical Assets** of the same **Technical Asset Type** in its **Data Product**.
 - An **Output Port** has exactly one **Access Type**; its **Access Function** is the Access Type's.
 - An **Output Port** of a **Hidden** **Data Product** must have an Access Type mapped to **Invite only**.
 - At least one **Access Type** is always mapped to **Invite only**.

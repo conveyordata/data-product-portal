@@ -8297,6 +8297,15 @@
               "format": "uuid",
               "title": "Data Product Id"
             }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Technical Asset Type"
+            }
           }
         ],
         "responses": {

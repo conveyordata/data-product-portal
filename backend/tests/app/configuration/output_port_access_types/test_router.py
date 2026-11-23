@@ -5,7 +5,7 @@ from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.output_port_access_types.model import (
     OutputPortAccessType,
 )
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
@@ -163,7 +163,7 @@ class TestOutputPortAccessTypesRouter:
         assert session.get(OutputPort, output_port.id).access_function == (
             OutputPortAccessFunction.PRIVATE
         )
-        assert not Authorization().has_resource_role(
+        assert not CasbinPolicies().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=output_port.id
         )
 
@@ -205,7 +205,7 @@ class TestOutputPortAccessTypesRouter:
         )
 
         assert response.status_code == 400
-        assert not Authorization().has_resource_role(
+        assert not CasbinPolicies().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=output_port.id
         )
 

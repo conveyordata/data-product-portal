@@ -180,40 +180,40 @@ class TestUsersRouter:
             assert returned_event["deleted_actor_identifier"] == actor_email
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_user__clears_authorization(self, client, authorizer, session):
+    def test_remove_user__clears_authorization(self, client, policies, session):
         user = UserFactory()
         other_user = UserFactory()
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
         user_id = user.id
         group_id = group.id
-        authorizer.assign_resource_role(
+        policies.assign_resource_role(
             user_id=user_id, role_id="resource-role", resource_id="resource"
         )
-        authorizer.assign_domain_role(
+        policies.assign_domain_role(
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
-        authorizer.assign_global_role(user_id=user_id, role_id="global-role")
-        authorizer.assign_group_memberships(
+        policies.assign_global_role(user_id=user_id, role_id="global-role")
+        policies.assign_group_memberships(
             memberships=[(user_id, group_id)],
         )
-        authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
+        policies.assign_global_role(user_id=other_user.id, role_id="global-role")
 
         response = client.delete(f"{ENDPOINT}/{user_id}")
 
         assert response.status_code == 200, response.text
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=user_id, role_id="resource-role", resource_id="resource"
         )
-        assert not authorizer.has_domain_role(
+        assert not policies.has_domain_role(
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
-        assert not authorizer.has_global_role(user_id=user_id, role_id="global-role")
-        assert not authorizer.has_resource_role(
+        assert not policies.has_global_role(user_id=user_id, role_id="global-role")
+        assert not policies.has_resource_role(
             user_id=user_id, role_id=group_id, resource_id="*"
         )
-        assert not authorizer.has_global_role(user_id=user_id, role_id=group_id)
-        assert authorizer.has_global_role(user_id=other_user.id, role_id="global-role")
+        assert not policies.has_global_role(user_id=user_id, role_id=group_id)
+        assert policies.has_global_role(user_id=other_user.id, role_id="global-role")
 
     @pytest.mark.usefixtures("admin")
     def test_remove_user__with_data_product_role(self, client, session):

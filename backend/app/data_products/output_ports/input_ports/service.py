@@ -115,11 +115,6 @@ class InputPortService:
             )
         return current_link
 
-    def _sync_hidden_data_product_access(self, data_product_id: UUID) -> None:
-        from app.data_products.service import DataProductService
-
-        DataProductService(self.db)._sync_consumer_reader_grouping(data_product_id)
-
     def approve_request(
         self,
         request: InputPortRequestModel,
@@ -148,9 +143,6 @@ class InputPortService:
                 )
         request.input_port.recompute_status()
         self.db.flush()
-        self._sync_hidden_data_product_access(
-            request.input_port.output_port.data_product_id
-        )
 
     def approve_output_port_as_input_port(
         self,
@@ -255,7 +247,6 @@ class InputPortService:
         target.revoked_by = actor
         target.revoked_at = datetime.now(timezone.utc)
         current_link.recompute_status()
-        self._sync_hidden_data_product_access(data_product_id)
         return RedactedInputPort.of(
             current_link, current_link.latest_request.requested_by_id
         )
@@ -278,7 +269,6 @@ class InputPortService:
         )
         self.db.delete(current_link)
         self.db.flush()
-        self._sync_hidden_data_product_access(data_product_id)
         return result
 
     def notify_if_expiring_soon(
@@ -398,7 +388,7 @@ class InputPortService:
                 .all()
             )
 
-            authorizer = Authorization()
+            authorizer = Authorization(self.db)
             return self._redact(
                 a
                 for a in requested_associations

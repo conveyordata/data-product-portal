@@ -3,7 +3,6 @@ from sqlalchemy import select
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
 from app.data_products.output_ports.announcements.model import Announcement
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType, EventType
@@ -58,11 +57,6 @@ def _consumer(output_port):
     role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
     DataProductRoleAssignmentFactory(
         data_product_id=consumer.id, identity_id=user.id, role_id=role.id
-    )
-    Authorization().add_input_port_link(
-        consumer_id=consumer.id,
-        producer_data_product_id=output_port.data_product_id,
-        producer_output_port_id=output_port.id,
     )
     return user
 

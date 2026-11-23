@@ -186,12 +186,17 @@ class OutputPortResolver(SubjectResolver):
 
     @classmethod
     async def _resolve_parent(cls, db: Session, id_: str) -> str:
-        if id_ == cls.DEFAULT:
-            return cls.DEFAULT
-        data_product_id = db.scalar(
-            select(OutputPort.data_product_id).where(OutputPort.id == id_)
-        )
-        return cls.DEFAULT if data_product_id is None else str(data_product_id)
+        return output_port_parent(db, id_)
+
+
+def output_port_parent(db: Session, id_: str) -> str:
+    """The Data Product owning Output Port `id_`, or the wildcard when `id_` is no Output Port."""
+    if id_ == SubjectResolver.DEFAULT:
+        return SubjectResolver.DEFAULT
+    data_product_id = db.scalar(
+        select(OutputPort.data_product_id).where(OutputPort.id == id_)
+    )
+    return SubjectResolver.DEFAULT if data_product_id is None else str(data_product_id)
 
 
 class DataProductNameResolver(SubjectResolver):

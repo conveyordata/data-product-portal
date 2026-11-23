@@ -10,7 +10,6 @@ from sqlalchemy.orm import Mapper, Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.configuration.data_product_settings.model import DataProductSetting
-from app.data_products.technical_assets.model import TechnicalAsset
 from app.settings import settings
 from app.shared.schema import ORMModel
 
@@ -92,34 +91,6 @@ class ResourceNameService:
     ) -> ResourceNameLengthLimits:
         return ResourceNameLengthLimits(
             max_length=cls.max_length,
-        )
-
-
-class DataOutputResourceNameValidator(ResourceNameService):
-    def __init__(self):
-        super().__init__(model=TechnicalAsset)
-
-    def _is_unique(
-        self,
-        resource_name: str,
-        db: Session,
-        data_product_id: Optional[UUID] = None,
-    ) -> bool:
-        if data_product_id is None:
-            raise ValueError(
-                "DataOutputResourceNameValidator requires a data product ID "
-                "to check uniqueness with the data product as scope"
-            )
-
-        return not db.scalar(
-            select(
-                exists().where(
-                    and_(
-                        TechnicalAsset.namespace == resource_name,
-                        TechnicalAsset.owner_id == data_product_id,
-                    )
-                )
-            )
         )
 
 
