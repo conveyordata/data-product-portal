@@ -288,14 +288,14 @@ files = [
 
 [[package]]
 name = "authlib"
-version = "1.9.8"
+version = "1.9.9"
 description = "The ultimate Python library in building OAuth and OpenID Connect servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "plugins"]
 files = [
-    {file = "authlib-1.9.8-py2.py3-none-any.whl", hash = "sha256:de0b0138d398d0058f3139d8332bc8f674143dca0b446116ff285c7f417a4f7e"},
-    {file = "authlib-1.9.8.tar.gz", hash = "sha256:879735216a0b805a4dfedb4fdd19e7d75ebb8debd70cc7566da9d813db34458d"},
+    {file = "authlib-1.9.9-py2.py3-none-any.whl", hash = "sha256:0199649865fefb4304fc57683eaebb15614523073e41e09d98c72f3268ce5cbc"},
+    {file = "authlib-1.9.9.tar.gz", hash = "sha256:cca3dffa51c8d80d6df19aee2279e47219dc996f5a527c06ac2e39d0757c99ef"},
 ]
 
 [package.dependencies]
@@ -6099,4 +6099,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "6adf3f215ec9e855fbc15138ebd3ea9d1c410a28540d61f865d71e3b3a0a77bc"
+content-hash = "856f0dda22589f3fd0c2822b30e69f28ff17da941d494fb2d0323026c901c479"
