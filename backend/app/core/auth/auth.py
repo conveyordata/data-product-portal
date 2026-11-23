@@ -11,7 +11,7 @@ from app.core.auth.oidc import OIDCIdentity, is_address
 from app.core.logging import logger
 from app.database.database import SystemDbSession
 from app.settings import settings
-from app.users.model import DELETED_USER_EMAIL, DELETED_USER_ID
+from app.users.model import DELETED_USER_ID
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_request import UserCreate
@@ -23,18 +23,17 @@ def update_db_user(
     oidc_user: OIDCIdentity, token: JWTToken, db: Session, link_by_email: bool = True
 ) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
-    if oidc_user.email.lower() == DELETED_USER_EMAIL or (
-        db_user and db_user.id == DELETED_USER_ID
-    ):
-        logger.warning("Identity matches the deleted user placeholder")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="This account can't log in",
-        )
     email_owner = None
     if not db_user or db_user.email != oidc_user.email:
         email_owner = db.scalar(
             select(UserModel).where(UserModel.email == oidc_user.email)
+        )
+    matched_user = db_user or email_owner
+    if matched_user and matched_user.id == DELETED_USER_ID:
+        logger.warning("Identity matches the deleted user placeholder")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account can't log in",
         )
     if db_user:
         if email_owner:

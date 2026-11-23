@@ -24,6 +24,7 @@ from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import Base, get_system_db_session
 from app.main import app
 from app.settings import settings
+from app.users.model import DELETED_USER_ID, User
 from tests.factories import reset_unique_fakers
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
@@ -233,6 +234,15 @@ def _clear_database(session: Session) -> None:
     roles_table = Base.metadata.tables.get("roles")
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
+    session.add(
+        User(
+            id=DELETED_USER_ID,
+            external_id=f"deleted-user-{DELETED_USER_ID}",
+            email="deleted-user@example.com",
+            first_name="Deleted",
+            last_name="user",
+        )
+    )
     AuthorizationService(session).reload_enforcer()
     session.commit()  # allow-commit
 

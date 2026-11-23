@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from app.users.notifications.model import Notification
 
 DELETED_USER_ID = uuid.UUID("6183c216-de6a-4045-b102-04ee611b79c7")
-DELETED_USER_EMAIL = "deleted-user@example.com"
 
 
 class User(Identity):

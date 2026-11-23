@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.core.auth import jwt as jwt_module
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.settings import settings
-from app.users.model import DELETED_USER_EMAIL, DELETED_USER_ID, User
+from app.users.model import DELETED_USER_ID, User
 from tests.factories import UserFactory
 
 
@@ -383,35 +383,30 @@ class TestUserinfoIdentitySource:
         session.refresh(existing)
         assert existing.external_id == "keycloak-sub-1"
 
-    @pytest.mark.parametrize(
-        ("placeholder_external_id", "email"),
-        [
-            ("placeholder-sub", DELETED_USER_EMAIL),
-            (None, DELETED_USER_EMAIL),
-            ("keycloak-sub-1", "new@example.org"),
-        ],
-        ids=["email_of_placeholder", "email_before_placeholder", "subject"],
-    )
+    @pytest.mark.parametrize("matches", ["email", "subject"])
     def test_get_authenticated_user__never_logs_in_as_deleted_user_placeholder(
-        self, idp, session, placeholder_external_id, email
+        self, idp, session, matches
     ):
         idp(audience="portal")
-        if placeholder_external_id:
-            UserFactory(
-                id=DELETED_USER_ID,
-                external_id=placeholder_external_id,
-                email=DELETED_USER_EMAIL,
-            )
-        bearer = sign(KEYCLOAK_ACCESS_TOKEN)
-        body = {**KEYCLOAK_ACCESS_TOKEN, "email": email}
+        placeholder = session.get(User, DELETED_USER_ID)
+        before = (placeholder.external_id, placeholder.first_name, placeholder.email)
+        claims = {**KEYCLOAK_ACCESS_TOKEN, "email": "new@example.org"}
+        if matches == "email":
+            claims["email"] = placeholder.email
+        else:
+            claims["sub"] = placeholder.external_id
+        bearer = sign(claims)
 
-        with userinfo_returns(200, body), pytest.raises(HTTPException) as error:
+        with userinfo_returns(200, claims), pytest.raises(HTTPException) as error:
             log_in(bearer, session)
 
         assert error.value.status_code == status.HTTP_401_UNAUTHORIZED
-        assert session.scalars(
-            select(User.external_id).where(User.email.in_([DELETED_USER_EMAIL, email]))
-        ).all() == ([placeholder_external_id] if placeholder_external_id else [])
+        session.refresh(placeholder)
+        assert (
+            placeholder.external_id,
+            placeholder.first_name,
+            placeholder.email,
+        ) == before
 
     def test_authorize_user__email_change_to_taken_address_keeps_old_email(
         self, idp, session

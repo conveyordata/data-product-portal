@@ -1,10 +1,9 @@
 from itertools import chain
-from typing import Any, Final, Sequence, cast
+from typing import Any, Final, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Table, asc, or_, select, update
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import asc, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.model import InputPortRequest
@@ -29,19 +28,12 @@ from app.data_products.output_ports.input_ports.service import InputPortService
 from app.explorations.model import Exploration
 from app.groups.model import Group, GroupMembership
 from app.groups.schema_response import GroupGet
-from app.identities.model import Identity
 from app.identities.schema_response import (
     IdentityBatchCreateError,
     IdentityBatchCreateResponse,
 )
 from app.identities.service import validate_batch_create_items
-from app.identities.type import IdentityType
-from app.users.model import (
-    DELETED_USER_EMAIL,
-    DELETED_USER_ID,
-    User,
-    ensure_user_exists,
-)
+from app.users.model import DELETED_USER_ID, User, ensure_user_exists
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import (
@@ -124,36 +116,12 @@ class UserService:
         self.db.flush()
 
     def _reassign_to_deleted_user(self, user_ids: list[UUID]) -> None:
-        if not user_ids:
-            return
-        self._ensure_deleted_user()
         for model, column in USER_REFERENCES:
             self.db.execute(
                 update(model)
                 .where(getattr(model, column).in_(user_ids))
                 .values({column: DELETED_USER_ID})
             )
-
-    def _ensure_deleted_user(self) -> None:
-        self.db.execute(
-            insert(cast("Table", Identity.__table__))
-            .values(
-                id=DELETED_USER_ID,
-                type=IdentityType.USER.value,
-                external_id=f"deleted-user-{DELETED_USER_ID}",
-            )
-            .on_conflict_do_nothing()
-        )
-        self.db.execute(
-            insert(cast("Table", UserModel.__table__))
-            .values(
-                id=DELETED_USER_ID,
-                email=DELETED_USER_EMAIL,
-                first_name="Deleted",
-                last_name="user",
-            )
-            .on_conflict_do_nothing()
-        )
 
     def _remove_user(self, user: UserModel) -> None:
         user.data_products = []
