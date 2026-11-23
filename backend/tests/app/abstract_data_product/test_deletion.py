@@ -1,7 +1,5 @@
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
 
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.schema_request import (
@@ -9,13 +7,13 @@ from app.abstract_data_product.schema_request import (
 )
 from app.abstract_data_product.service import AbstractDataProductService
 from app.data_products.status import AbstractDataProductStatus
-from tests import engine
 from tests.factories import (
     DataProductFactory,
     ExplorationFactory,
     OutputPortFactory,
     UserFactory,
 )
+from tests.session_util import row_lock_modes
 
 
 class TestMarkForDeletion:
@@ -258,12 +256,5 @@ def test_finalizer_checks__lock_the_abstract_data_product_until_commit(
 ):
     dp = DataProductFactory(finalizers=finalizers)
     call(AbstractDataProductService(db=session), dp.id)
-    try:
-        with engine.connect() as other, pytest.raises(OperationalError):
-            other.execute(
-                select(AbstractDataProduct.id)
-                .where(AbstractDataProduct.id == dp.id)
-                .with_for_update(nowait=True)
-            )
-    finally:
-        session.rollback()
+
+    assert "For Update" in row_lock_modes(session, AbstractDataProduct.__table__, dp.id)
