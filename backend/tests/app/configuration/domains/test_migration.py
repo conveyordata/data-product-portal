@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+import pytest
 from alembic import command
 from sqlalchemy import column, delete, insert, select, table
 
@@ -13,6 +14,8 @@ from app.plugins.registry import plugin_registry
 from tests import engine
 
 PREVIOUS = "a82c9b3e7d41"
+
+pytestmark = pytest.mark.commits
 
 
 def test_migration__backfills_unique_namespaces_from_names():
