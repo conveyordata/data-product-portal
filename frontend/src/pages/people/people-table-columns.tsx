@@ -1,4 +1,4 @@
-import { Checkbox, Flex, Select, type TableColumnsType } from 'antd';
+import { Checkbox, Flex, Select, type TableColumnsType, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { GlobalRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
@@ -14,23 +14,26 @@ type SelectorProps = {
     options: { label: string; value: string }[];
     onChange: (value: string) => void;
     disabled?: boolean;
+    disabledReason?: string;
 };
-function RoleSelector({ role, options, onChange, disabled = false }: SelectorProps) {
+function RoleSelector({ role, options, onChange, disabled = false, disabledReason }: SelectorProps) {
     return (
-        <Select
-            className={styles.select}
-            value={
-                role && role.decision !== DecisionStatus.Approved
-                    ? null
-                    : role?.role.prototype === Prototype.ADMIN
-                      ? ''
-                      : (role?.role.id ?? '')
-            }
-            placeholder={role?.role.name}
-            options={options}
-            onChange={(value: string) => onChange(value)}
-            disabled={disabled}
-        />
+        <Tooltip title={disabledReason}>
+            <Select
+                className={styles.select}
+                value={
+                    role && role.decision !== DecisionStatus.Approved
+                        ? null
+                        : role?.role.prototype === Prototype.ADMIN
+                          ? ''
+                          : (role?.role.id ?? '')
+                }
+                placeholder={role?.role.name}
+                options={options}
+                onChange={(value: string) => onChange(value)}
+                disabled={disabled || !!disabledReason}
+            />
+        </Tooltip>
     );
 }
 
@@ -39,6 +42,7 @@ export const getPeopleTableColumns = ({
     identities: data,
     assignments,
     canAssignRole,
+    canDeleteRole,
     allRoles,
     onChange,
     changeCheckbox,
@@ -48,6 +52,7 @@ export const getPeopleTableColumns = ({
     identities: Identity[];
     assignments: GlobalRoleAssignmentResponse[];
     canAssignRole: boolean;
+    canDeleteRole: boolean;
     allRoles: Role[];
     onChange: (identity_id: string, value: string, original: GlobalRoleAssignment | null) => void;
     changeCheckbox: (user_id: string, can_become_admin: boolean) => void;
@@ -125,6 +130,13 @@ export const getPeopleTableColumns = ({
                                 onChange={(value: string) => onChange(identity.id, value, role)}
                                 options={options}
                                 disabled={isSaving}
+                                disabledReason={
+                                    role?.decision === DecisionStatus.Denied && !canDeleteRole
+                                        ? t(
+                                              'This role was previously rejected. You don’t have enough permission to modify it.',
+                                          )
+                                        : undefined
+                                }
                             />
                         </TableCellItem>
                     );

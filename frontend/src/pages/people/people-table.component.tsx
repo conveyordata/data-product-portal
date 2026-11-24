@@ -16,7 +16,6 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useSetCanBecomeAdminMutation } from '@/store/api/services/generated/usersApi.ts';
-import { getApiErrorDetail } from '@/store/common/errors.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus, type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -41,6 +40,7 @@ export function PeoplePage() {
     const rolesQuery = useGetRolesQuery(Scope.GLOBAL);
     const assignmentsQuery = useListGlobalRoleAssignmentsQuery({});
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
+    const { data: deleteAccess } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__DELETE_USER });
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
     const [createAssignment, { isLoading: isCreating }] = useCreateGlobalRoleAssignmentMutation();
     const [updateAssignment, { isLoading: isUpdating }] = useModifyGlobalRoleAssignmentMutation();
@@ -83,16 +83,7 @@ export function PeoplePage() {
                 }
             } else if (value) {
                 if (original) {
-                    try {
-                        await deleteAssignment(original.id).unwrap();
-                    } catch (error) {
-                        if (getApiErrorDetail(error) === "You don't have permission to perform this action") {
-                            failure = t(
-                                "This identity has a previously denied role assignment. You don't have permission to replace it. Ask an administrator to assign the role.",
-                            );
-                        }
-                        throw error;
-                    }
+                    await deleteAssignment(original.id).unwrap();
                 }
                 const created = await createAssignment({ identity_id, role_id: value }).unwrap();
                 failure = t('Could not confirm the role assignment. Select the role again to retry.');
@@ -138,6 +129,7 @@ export function PeoplePage() {
                                     identities,
                                     assignments: assignmentsQuery.currentData?.role_assignments ?? [],
                                     canAssignRole: access?.allowed ?? false,
+                                    canDeleteRole: deleteAccess?.allowed ?? false,
                                     allRoles: (rolesQuery.currentData?.roles ?? []).filter(
                                         (role) => role.prototype !== Prototype.ADMIN,
                                     ),

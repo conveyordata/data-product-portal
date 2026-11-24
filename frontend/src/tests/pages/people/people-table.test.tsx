@@ -7,6 +7,7 @@ import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockGroup, mockIdentitiesHttp, mockMachineUser } from '@/tests/mocks/identities.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users';
 import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus, Prototype, Scope } from '@/types/roles';
 import { getIdentityDisplayName, type Identity } from '@/utils/identity.ts';
 import { server } from '../../mocks/server';
@@ -306,41 +307,80 @@ describe('PeoplePage', () => {
         expect(assignments[0].decision).toBe(DecisionStatus.Approved);
     });
 
-    it.each([
-        {
-            status: 403,
-            detail: "You don't have permission to perform this action",
-            message:
-                "This identity has a previously denied role assignment. You don't have permission to replace it. Ask an administrator to assign the role.",
-        },
-        { status: 500, detail: 'Unavailable', message: 'Could not assign global role' },
-    ])(
-        'explains deletion failure ($status) without recreating a denied assignment',
-        async ({ status, detail, message }) => {
-            const denied = globalAssignment(mockGroup, member, DecisionStatus.Denied);
-            const create = vi.fn();
+    it.each([alice, mockGroup, mockMachineUser])(
+        'disables a denied $type role with an explanation when deletion is not allowed',
+        async (identity) => {
+            const denied = globalAssignment(identity, member, DecisionStatus.Denied);
+            const mutate = vi.fn();
             server.use(
+                http.get('*/api/v2/authz/access/:action', ({ params }) =>
+                    HttpResponse.json({ allowed: Number(params.action) !== AuthorizationAction.GLOBAL__DELETE_USER }),
+                ),
                 http.get(endpoint, () => HttpResponse.json({ role_assignments: [denied] })),
-                http.delete(`${endpoint}/:id`, () => HttpResponse.json({ detail }, { status })),
+                http.all(`${endpoint}/*`, () => {
+                    mutate();
+                    return HttpResponse.json({ detail: 'Forbidden' }, { status: 403 });
+                }),
                 http.post(endpoint, () => {
-                    create();
-                    return HttpResponse.json(globalAssignment(mockGroup, editor, DecisionStatus.Pending));
+                    mutate();
+                    return HttpResponse.json({ detail: 'Forbidden' }, { status: 403 });
                 }),
             );
             const user = userEvent.setup();
             renderWithProviders(<PeoplePage />);
-            const row = (await screen.findByText('Finance Team')).closest('tr');
+            const row = (await screen.findByText(getIdentityDisplayName(identity))).closest('tr');
             const select = row?.querySelector('input');
-            if (!row || !select) throw new Error('Missing group role selector');
-            await waitFor(() => expect(select).toBeEnabled());
-            await user.click(select);
-            await user.click(await screen.findByText('Editor', { selector: '.ant-select-item-option-content' }));
-            expect(await screen.findByText(message)).toBeInTheDocument();
-            await waitFor(() => expect(select).toBeEnabled());
-            expect(within(row).getByText('Member')).toBeInTheDocument();
-            expect(create).not.toHaveBeenCalled();
+            if (!row || !select) throw new Error('Missing identity role selector');
+            await within(row).findByText('Member');
+            expect(select).toBeDisabled();
+            await user.hover(within(row).getByText('Member'));
+            expect(
+                await screen.findByText(
+                    'This role was previously rejected. You don’t have enough permission to modify it.',
+                ),
+            ).toBeInTheDocument();
+            await user.click(within(row).getByText('Member'));
+            expect(screen.queryByText('Editor', { selector: '.ant-select-item-option-content' })).toBeNull();
+            expect(mutate).not.toHaveBeenCalled();
+            const otherIdentity = identity.type === 'group' ? mockMachineUser : mockGroup;
+            const otherSelect = screen
+                .getByText(getIdentityDisplayName(otherIdentity))
+                .closest('tr')
+                ?.querySelector('input');
+            await waitFor(() => expect(otherSelect).toBeEnabled());
         },
     );
+
+    it.each([
+        {
+            status: 403,
+            detail: "You don't have permission to perform this action",
+        },
+        { status: 500, detail: 'Unavailable' },
+    ])('explains deletion failure ($status) without recreating a denied assignment', async ({ status, detail }) => {
+        const denied = globalAssignment(mockGroup, member, DecisionStatus.Denied);
+        const create = vi.fn();
+        server.use(
+            http.get(endpoint, () => HttpResponse.json({ role_assignments: [denied] })),
+            http.delete(`${endpoint}/:id`, () => HttpResponse.json({ detail }, { status })),
+            http.post(endpoint, () => {
+                create();
+                return HttpResponse.json(globalAssignment(mockGroup, editor, DecisionStatus.Pending));
+            }),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<PeoplePage />);
+        const row = (await screen.findByText('Finance Team')).closest('tr');
+        const select = row?.querySelector('input');
+        if (!row || !select) throw new Error('Missing group role selector');
+        await waitFor(() => expect(select).toBeEnabled());
+        await user.click(select);
+        await user.click(await screen.findByText('Editor', { selector: '.ant-select-item-option-content' }));
+        expect(await screen.findByText('Could not assign global role')).toBeInTheDocument();
+        await waitFor(() => expect(select).toBeEnabled());
+        expect(within(row).getByText('Member')).toBeInTheDocument();
+        expect(create).not.toHaveBeenCalled();
+    });
 
     it('keeps existing roles read-only without permission and hides admin eligibility', async () => {
         server.use(
