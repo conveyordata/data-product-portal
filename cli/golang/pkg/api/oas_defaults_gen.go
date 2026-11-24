@@ -260,6 +260,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 		val := bool(true)
 		s.Shareable.SetTo(val)
 	}
+	{
+		val := int(64)
+		s.NamespaceMaxLength.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.

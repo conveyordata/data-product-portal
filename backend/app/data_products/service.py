@@ -1,11 +1,12 @@
 import copy
-from typing import Sequence, assert_never
+from typing import Optional, Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import joinedload, selectinload, undefer
+from sqlalchemy.orm import Session, joinedload, selectinload, undefer
+from sqlalchemy.orm.util import identity_key
 
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
@@ -29,6 +30,8 @@ from app.configuration.tags.schema import Tag
 from app.core import context
 from app.core.authz import CasbinPolicies
 from app.core.aws.get_url import _get_data_product_role_arn
+from app.core.context import discard_events
+from app.core.embed.model import get_text_embedding_model
 from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import (
@@ -40,6 +43,7 @@ from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.schema import DataProductEmbedModel
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -68,6 +72,10 @@ from app.users.schema import User
 
 
 class DataProductService(AbstractDataProductService):
+    def __init__(self, db: Session):
+        super().__init__(db)
+        self.embedding_model = get_text_embedding_model()
+
     @staticmethod
     def _sync_public_reader_grouping(
         data_product_id: UUID, visibility: DataProductVisibility
@@ -148,11 +156,32 @@ class DataProductService(AbstractDataProductService):
         *,
         assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
+        query = self._data_products_query(assignment_filter).order_by(
+            asc(DataProductModel.name)
         )
+        return self._with_default_lifecycle(self.db.scalars(query).unique().all())
+
+    def search_data_products(
+        self,
+        query: Optional[str],
+        limit: int,
+        assignment_filter: AssignmentFilter,
+    ) -> Sequence[DataProductModel]:
+        ordered_by = DataProductModel.name.asc()
+        if query:
+            query_embedding = self.embedding_model.embed(query)
+            ordered_by = DataProductModel.embeddings.cosine_distance(
+                *query_embedding
+            ).asc()
+
+        stmt = (
+            self._data_products_query(assignment_filter)
+            .order_by(ordered_by)
+            .limit(limit)
+        )
+        return self._with_default_lifecycle(self.db.scalars(stmt).unique().all())
+
+    def _data_products_query(self, assignment_filter: AssignmentFilter):
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
             selectinload(DataProductModel.environments),
@@ -165,14 +194,19 @@ class DataProductService(AbstractDataProductService):
                 query = query.where(member_of(self.db, DataProductModel.id))
             case _:
                 assert_never(assignment_filter)
-        query = query.order_by(asc(DataProductModel.name))
+        return query
 
-        dps = self.db.scalars(query).unique().all()
-
+    def _with_default_lifecycle(
+        self, dps: Sequence[DataProductModel]
+    ) -> Sequence[DataProductModel]:
+        default_lifecycle = self.db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
+        )
         for dp in dps:
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle
-
         return dps
 
     def get_owners(self, id: UUID) -> Sequence[User]:
@@ -218,6 +252,7 @@ class DataProductService(AbstractDataProductService):
         self.db.add(model)
         self._set_environments(model, data_product.environment_ids)
         self._sync_public_reader_grouping(model.id, model.visibility)
+        self.recalculate_search(model.id)
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -280,6 +315,7 @@ class DataProductService(AbstractDataProductService):
         if data_product.environment_ids is not None:
             self._set_environments(current_data_product, data_product.environment_ids)
         self.db.flush()
+        self.recalculate_search(current_data_product.id)
         return UpdateDataProductResponse(id=current_data_product.id)
 
     def _set_environments(
@@ -346,6 +382,7 @@ class DataProductService(AbstractDataProductService):
         self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
         self.db.flush()
+        self.recalculate_search(id)
         return current_data_product
 
     def update_data_product_status(
@@ -541,3 +578,63 @@ class DataProductService(AbstractDataProductService):
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)
+
+    def recalculate_search(self, id: UUID) -> None:
+        self.db.flush()
+        if cached := self.db.identity_map.get(identity_key(DataProductModel, id)):
+            self.db.expire(cached, ["datasets", "technical_assets"])
+        data_product = self.db.scalar(
+            select(DataProductModel)
+            .where(DataProductModel.id == id)
+            .options(*self._recalculate_search_load_options()),
+            # Recalculation will never be done by users, so we can safely skip the filters here
+            execution_options=UNFILTERED,
+        )
+        self._recalculate_embeddings([data_product])
+
+    def recalculate_search_for_all_data_products(self, batch_size: int = 50) -> None:
+        data_product_ids = self.db.scalars(
+            select(DataProductModel.id).execution_options(**UNFILTERED)
+        ).all()
+        for i in range(0, len(data_product_ids), batch_size):
+            data_products = (
+                self.db.scalars(
+                    select(DataProductModel)
+                    .where(
+                        DataProductModel.id.in_(data_product_ids[i : i + batch_size])
+                    )
+                    .options(*self._recalculate_search_load_options())
+                    .execution_options(**UNFILTERED),
+                )
+                .unique()
+                .all()
+            )
+            if data_products:
+                self._recalculate_embeddings(data_products)
+        # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
+        self.db.commit()  # allow-commit
+
+    @staticmethod
+    def _recalculate_search_load_options():
+        return [
+            selectinload(DataProductModel.datasets),
+            selectinload(DataProductModel.technical_assets).selectinload(
+                TechnicalAssetModel.output_port_links
+            ),
+        ]
+
+    def _recalculate_embeddings(
+        self, data_products: Sequence[DataProductModel]
+    ) -> None:
+        # Flush pending domain changes first so their events are not discarded below
+        self.db.flush()
+        embeddings = self.embedding_model.embed(
+            DataProductEmbedModel.model_validate(dp).model_dump_json()
+            for dp in data_products
+        )
+        # Search index maintenance is not a domain change, so emit no webhook events
+        with discard_events():
+            for data_product, emb in zip(data_products, embeddings):
+                data_product.embeddings = emb.tolist()
+                self.db.add(data_product)
+            self.db.flush()

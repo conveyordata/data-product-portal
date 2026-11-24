@@ -105,7 +105,7 @@ def test_identity_event_migration__preserves_deleted_identity_history(
 
     migration = import_module(
         "app.database.alembic.versions."
-        "2026_11_16_1501-4b6d2a8f1c35_add_identity_event_reference_entity"
+        "2026_11_23_1437-4b6d2a8f1c35_add_identity_event_reference_entity"
     )
     monkeypatch.setattr(
         migration, "op", Operations(MigrationContext.configure(session.connection()))

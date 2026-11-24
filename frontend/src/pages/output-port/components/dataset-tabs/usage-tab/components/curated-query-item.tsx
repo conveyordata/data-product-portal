@@ -40,7 +40,7 @@ export function CuratedQueryItem({ query, isExpanded, onToggle, onCopy }: Curate
                     </Flex>
                     <Button
                         type="default"
-                        size="middle"
+                        size="medium"
                         icon={<CopyOutlined />}
                         aria-label={t('Copy SQL')}
                         onClick={() => onCopy(query.query_text)}

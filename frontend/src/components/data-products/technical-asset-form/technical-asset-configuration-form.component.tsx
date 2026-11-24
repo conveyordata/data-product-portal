@@ -141,7 +141,7 @@ export function TechnicalAssetConfigurationForm({
                 break;
             }
             default:
-                inputComponent = <Input />;
+                inputComponent = <Input placeholder={string?.placeholder ?? undefined} />;
                 break;
         }
         return (

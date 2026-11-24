@@ -1,8 +1,8 @@
 """add identity event reference entity
 
 Revision ID: 4b6d2a8f1c35
-Revises: 5c7e2a91b4d3
-Create Date: 2026-11-16 15:01:00.000000
+Revises: 8a1d4c7e2f90
+Create Date: 2026-11-23 14:37:00.000000
 """
 
 from typing import Sequence, Union
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "4b6d2a8f1c35"
-down_revision: Union[str, None] = "5c7e2a91b4d3"
+down_revision: Union[str, None] = "8a1d4c7e2f90"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

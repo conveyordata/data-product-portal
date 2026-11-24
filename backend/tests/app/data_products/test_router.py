@@ -118,10 +118,10 @@ class TestDataProductsRouter:
         )
         environment.is_global = False
         session.flush()
-        assert (
-            client.get(f"{ENDPOINT}/{product['id']}").json()["environments"]
-            == product["environments"]
-        )
+        assert [
+            item["environment_id"]
+            for item in client.get(f"{ENDPOINT}/{product['id']}").json()["environments"]
+        ] == [str(environment.id)]
 
     def test_create_data_product__uses_selection_not_global_defaults(
         self, payload, client, user_with_create_data_product_rights

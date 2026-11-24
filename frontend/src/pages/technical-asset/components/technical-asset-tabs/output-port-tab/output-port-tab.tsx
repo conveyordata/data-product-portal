@@ -33,7 +33,7 @@ export function OutputPortTab({ technicalAssetId, dataProductId }: Props) {
     }, [technicalAsset?.output_port_links, searchTerm]);
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Input.Search
                 placeholder={t('Search Output Ports by name')}
                 allowClear

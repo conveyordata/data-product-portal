@@ -5,6 +5,7 @@ from jinja2 import Template
 
 from app.authorization.service import AuthorizationService
 from app.data_products.output_ports.service import OutputPortService
+from app.data_products.service import DataProductService
 from app.database.database import get_system_db_session
 
 if TYPE_CHECKING:
@@ -29,3 +30,4 @@ def seed_db(path: str, **template_vars):
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()
     OutputPortService(db).recalculate_search_for_all_output_ports()
+    DataProductService(db).recalculate_search_for_all_data_products()

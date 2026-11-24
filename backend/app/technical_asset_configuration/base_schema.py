@@ -27,6 +27,7 @@ from app.configuration.platforms.platform_services.model import (
 from app.core.logging import logger
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.enums import TechnicalMapping
+from app.settings import settings
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
@@ -72,6 +73,7 @@ class UIElementSelect(ORMModel):
 
 class UIElementString(ORMModel):
     initial_value: Optional[str] = None
+    placeholder: Optional[str] = None
 
 
 class UIElementMetadata(ORMModel):
@@ -123,6 +125,7 @@ class PlatformMetadata(ORMModel):
     detailed_name: str
     show_in_form: bool = True
     shareable: bool = True
+    namespace_max_length: int = Field(default=settings.NAMESPACE_MAX_LENGTH, gt=0)
     result_string_template: Optional[str] = None
     technical_info_template: Optional[str] = None
 

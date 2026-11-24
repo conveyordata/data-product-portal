@@ -121,6 +121,7 @@ class TestOutputPortSearchRouter:
         output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == len(output_ports)
 
+    @pytest.mark.commits
     def test_benchmark_output_ports(self, session, client):
         self.reseed(session)
 

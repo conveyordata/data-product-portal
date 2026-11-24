@@ -15,6 +15,7 @@ import {
     useRemoveTechnicalAssetMutation,
     useUpdateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
@@ -67,6 +68,8 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
     const { data: constraints } = useResourceNameConstraintsQuery();
+    const { data: { plugins } = {} } = useGetPluginsQuery();
+    const pluginMetadata = plugins?.find((plugin) => plugin.plugin === currentTechnicalAsset?.configuration.name);
 
     const handleDeleteTechnicalAsset = async () => {
         if (canDelete && currentTechnicalAsset && dataProduct) {
@@ -178,7 +181,7 @@ export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Pr
             <ResourceNameFormItem
                 form={form}
                 tooltip={t('The namespace of the Technical Asset')}
-                max_length={constraints?.max_length}
+                max_length={pluginMetadata?.namespace_max_length ?? constraints?.max_length}
                 editToggleDisabled
                 canEditResourceName={false}
             />
