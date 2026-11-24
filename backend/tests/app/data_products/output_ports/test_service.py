@@ -1,3 +1,5 @@
+from unittest.mock import PropertyMock, patch
+
 from sqlalchemy.orm import selectinload
 
 from app.authorization.role_assignments.enums import AssignmentFilter
@@ -364,11 +366,15 @@ class TestDatasetsService:
 
     @staticmethod
     def search_with_static_embeddings(session, query: str, user, limit: int):
-        service = OutputPortService(session)
-        service.embedding_model = StaticEmbeddingModel()
-        return service.search_output_ports(
-            query=query,
-            limit=limit,
-            user=user,
-            assignment_filter=AssignmentFilter.ALL,
-        )
+        with patch.object(
+            OutputPortService,
+            "embedding_model",
+            new_callable=PropertyMock,
+            return_value=StaticEmbeddingModel(),
+        ):
+            return OutputPortService(session).search_output_ports(
+                query=query,
+                limit=limit,
+                user=user,
+                assignment_filter=AssignmentFilter.ALL,
+            )
