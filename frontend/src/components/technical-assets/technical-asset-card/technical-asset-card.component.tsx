@@ -225,7 +225,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                                         align="center"
                                                         style={{ width: '100%' }}
                                                     >
-                                                        <Flex align="center" gap={8}>
+                                                        <Flex align="center" gap="small">
                                                             <Badge
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"

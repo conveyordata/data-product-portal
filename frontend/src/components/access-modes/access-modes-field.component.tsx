@@ -17,7 +17,7 @@ export function AccessModesField({ accessModes, className }: Props) {
     const { t } = useTranslation();
 
     return (
-        <Flex className={className} align="center" gap={8}>
+        <Flex className={className} align="center" gap="small">
             <Typography.Text strong>{t('Access modes')}</Typography.Text>
             {accessModes.length === 0 ? (
                 <Typography.Text>{t('None')}</Typography.Text>
