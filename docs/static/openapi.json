@@ -198,15 +198,6 @@
               "default": 100,
               "title": "Limit"
             }
-          },
-          {
-            "name": "assignment_filter",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/AssignmentFilter",
-              "default": "all"
-            }
           }
         ],
         "responses": {
@@ -18997,6 +18988,38 @@
         ],
         "title": "Scope"
       },
+      "SearchDataProductsOutputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "access_modes"
+        ],
+        "title": "SearchDataProductsOutputPort"
+      },
       "SearchDataProductsResponse": {
         "properties": {
           "data_products": {
@@ -19028,37 +19051,12 @@
             "type": "string",
             "title": "Description"
           },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "status": {
-            "$ref": "#/components/schemas/AbstractDataProductStatus"
-          },
-          "finalizers": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Finalizers"
-          },
           "tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
             },
             "type": "array",
             "title": "Tags"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
           },
           "domain": {
             "$ref": "#/components/schemas/Domain"
@@ -19076,27 +19074,16 @@
               }
             ]
           },
-          "visibility": {
-            "$ref": "#/components/schemas/DataProductVisibility"
-          },
-          "environments": {
+          "output_ports": {
             "items": {
-              "$ref": "#/components/schemas/DataProductEnvironment"
+              "$ref": "#/components/schemas/SearchDataProductsOutputPort"
             },
             "type": "array",
-            "title": "Environments"
+            "title": "Output Ports"
           },
-          "user_count": {
+          "consumer_count": {
             "type": "integer",
-            "title": "User Count"
-          },
-          "input_port_count": {
-            "type": "integer",
-            "title": "Input Port Count"
-          },
-          "technical_asset_count": {
-            "type": "integer",
-            "title": "Technical Asset Count"
+            "title": "Consumer Count"
           }
         },
         "type": "object",
@@ -19104,19 +19091,12 @@
           "id",
           "name",
           "description",
-          "namespace",
-          "status",
-          "finalizers",
           "tags",
-          "usage",
           "domain",
           "type",
           "lifecycle",
-          "visibility",
-          "environments",
-          "user_count",
-          "input_port_count",
-          "technical_asset_count"
+          "output_ports",
+          "consumer_count"
         ],
         "title": "SearchDataProductsResponseItem"
       },
