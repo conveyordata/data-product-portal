@@ -24,7 +24,7 @@ It consists of a 3-tier web architecture.
 *   **Task Runner**: `Taskfile.yml` is primarily for release automation.
 *   **Pre-commit**: Stage your change and run `scripts/precommit.sh` rather than invoking Ruff, mypy, or Biome directly. It sets up the backend environment (also in a worktree without its own venv), reruns the hooks until the generators (OpenAPI client, SDK, CLI, translations) stop changing files, and stages what they write. Commit only once it exits 0. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
-*   **Agent Skills**: Issue tracker, triage labels and domain docs for skills are configured in `docs/agents/`.
+*   **Agent Skills**: Issue tracker and domain docs for skills are configured in `docs/agents/`.
 *   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
 
 ## Development Process
@@ -33,7 +33,7 @@ Follow [Our Development Process](CONTRIBUTING.md#our-development-process). At th
 
 1. If the user gave an issue or link, read it with the tools you have; if you can't, ask them to paste it.
 2. If there is no GitHub issue yet, offer to draft one (title, body, `bug` or `enhancement`, source link) and create it once the user says yes. If it isn't clear yet what they want, suggest a grilling session first.
-3. Read the issue (see `docs/agents/issue-tracker.md`) and, if it has a linked PR (`closedByPullRequestsReferences`), the PR with `gh pr view <n> --json isDraft,reviews`. Propose the first matching next step:
+3. Read the issue and, if it has a linked PR (`closedByPullRequestsReferences`), the PR with `gh pr view <n> --json isDraft,reviews`. Propose the first matching next step:
 
 | State | Next step |
 |-------|-----------|
