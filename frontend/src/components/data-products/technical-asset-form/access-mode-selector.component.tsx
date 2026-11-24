@@ -1,17 +1,25 @@
-import { Table } from 'antd';
+import { Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useTranslation } from 'react-i18next';
 import type { AccessMode } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
 type Props = {
     accessModes: AccessMode[];
+    defaultAccessModeId?: string;
     selectionMode?: 'multiple' | 'single';
     value?: string[];
     loading?: boolean;
     onChange?: (selectedIds: string[]) => void;
 };
 
-export function AccessModeSelector({ loading, value, selectionMode, accessModes, onChange }: Props) {
+export function AccessModeSelector({
+    loading,
+    value,
+    selectionMode,
+    accessModes,
+    defaultAccessModeId,
+    onChange,
+}: Props) {
     const { t } = useTranslation();
 
     const columns: ColumnsType<AccessMode> = [
@@ -19,6 +27,12 @@ export function AccessModeSelector({ loading, value, selectionMode, accessModes,
             title: t('Name'),
             dataIndex: 'name',
             key: 'name',
+            render: (name: string, accessMode) => (
+                <Space size="small">
+                    {name}
+                    {accessMode.id === defaultAccessModeId && <Tag>{t('Default')}</Tag>}
+                </Space>
+            ),
         },
         {
             title: t('Description'),

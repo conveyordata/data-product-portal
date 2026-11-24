@@ -146,6 +146,23 @@ class TestTechnicalAssetsRouter:
         assert len(technical_asset.json()["access_modes"]) == 1
         assert technical_asset.json()["access_modes"][0]["name"] == access_mode.name
 
+    def test_create_technical_asset__without_access_modes_for_type_with_access_modes(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        AccessModeFactory(
+            technical_asset_types=[technical_asset_payload["configuration"]["name"]]
+        )
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+
+        assert created_technical_asset.status_code == 400, created_technical_asset.text
+        assert (
+            "requires at least one access mode"
+            in (created_technical_asset.json()["detail"])
+        )
+
     def test_create_technical_asset__incorrect_access_modes(
         self, technical_asset_payload, data_product_role_assignment, client
     ):

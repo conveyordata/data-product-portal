@@ -7,6 +7,22 @@ import (
 )
 
 // setDefaults set default value of fields.
+func (s *AccessModeCreate) setDefaults() {
+	{
+		var defaultVal0 []string
+		s.DefaultForTechnicalAssetTypes = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *AccessModeUpdate) setDefaults() {
+	{
+		var defaultVal0 []string
+		s.DefaultForTechnicalAssetTypes = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *BitolContractRequest) setDefaults() {
 	{
 		var defaultVal0 []SchemaObjectRequest

@@ -9,12 +9,12 @@ from app.configuration.access_modes.schema_request import (
 )
 from app.configuration.access_modes.schema_response import (
     AccessMode,
-    AccessModeWithType,
     GetAccessModes,
 )
 from app.configuration.access_modes.service import (
     ACCESS_MODE_NOT_FOUND_ERROR,
     CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
+    CAN_NOT_REMOVE_DEFAULT_ACCESS_MODE_ERROR,
     CAN_NOT_REMOVE_TECHNICAL_ASSET_TYPES_ERROR,
     AccessModeService,
 )
@@ -47,6 +47,11 @@ def create_access_mode(
 
 @router.put(
     "/{id}",
+    responses=process_errors_as_route_responses(
+        [
+            CAN_NOT_REMOVE_DEFAULT_ACCESS_MODE_ERROR,
+        ]
+    ),
     dependencies=[
         Depends(
             Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
@@ -73,12 +78,7 @@ def update_access_mode(
 def get_access_modes(
     access_mode_service: Annotated[AccessModeService, Depends(AccessModeService)],
 ) -> GetAccessModes:
-    return GetAccessModes(
-        access_modes=[
-            AccessModeWithType.model_validate(am)
-            for am in access_mode_service.get_access_modes()
-        ],
-    )
+    return GetAccessModes(access_modes=access_mode_service.get_access_modes())
 
 
 @router.delete(
@@ -86,6 +86,7 @@ def get_access_modes(
     responses=process_errors_as_route_responses(
         [
             CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
+            CAN_NOT_REMOVE_DEFAULT_ACCESS_MODE_ERROR,
         ]
     ),
     dependencies=[

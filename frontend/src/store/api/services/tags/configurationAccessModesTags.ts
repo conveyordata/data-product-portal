@@ -9,17 +9,11 @@ export const configurationAccessModesTags = {
     },
     updateAccessMode: {
         invalidatesTags: () => [{ type: TagTypes.AccessMode, id: STATIC_TAG_ID.LIST }],
-        extraOptions: {
-            suppressErrorToast: true,
-        },
     },
     createAccessMode: {
         invalidatesTags: () => [{ type: TagTypes.AccessMode, id: STATIC_TAG_ID.LIST }],
     },
     deleteAccessMode: {
         invalidatesTags: () => [{ type: TagTypes.AccessMode, id: STATIC_TAG_ID.LIST }],
-        extraOptions: {
-            suppressErrorToast: true,
-        },
     },
 } satisfies EndpointDefinitions;

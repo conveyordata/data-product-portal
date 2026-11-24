@@ -2,7 +2,6 @@ import { Alert, Button, Col, Form, type FormProps, Input, Radio, Row, Select, Sp
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
-import { CardSelection } from '@/components/card-selection/card-selection.tsx';
 import {
     buildDefaultValues,
     type EnvironmentSettingsError,
@@ -62,8 +61,6 @@ type ServiceConfig = {
     configuration: string[];
 };
 
-type AccessModeType = 'single' | 'multiple';
-
 export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, debounce = 500 }: Props) {
     const { t } = useTranslation();
 
@@ -106,6 +103,13 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         }
         return accessModes.filter((mode) => mode.technical_asset_types.includes(pluginMetadata.plugin));
     }, [pluginMetadata, accessModes]);
+    const defaultAccessModeId = useMemo(
+        () =>
+            accessModesForSelectedPlugin.find((mode) =>
+                pluginMetadata ? mode.default_for_technical_asset_types.includes(pluginMetadata.plugin) : false,
+            )?.id,
+        [accessModesForSelectedPlugin, pluginMetadata],
+    );
 
     const [form] = Form.useForm();
     const technical_mapping = Form.useWatch('technical_mapping', form);
@@ -127,7 +131,6 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     const [validateNamespace] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
-    const accessMode = Form.useWatch('access_mode_type', form) as 'single' | 'multiple' | undefined;
 
     const [fetchResultString, { isLoading: isFetchingResultString }] = useRenderTechnicalAssetAccessPathMutation();
 
@@ -279,6 +282,11 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
     ];
 
     const technicalAssetType = pluginMetadata?.plugin;
+    useEffect(() => {
+        if (technicalAssetType) {
+            form.setFieldValue('access_mode_ids', defaultAccessModeId ? [defaultAccessModeId] : []);
+        }
+    }, [form, technicalAssetType, defaultAccessModeId]);
     const revalidateNamespace = useCallback(() => {
         if (technicalAssetType) {
             form.validateFields(['namespace']);
@@ -560,56 +568,27 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                         )}
                         {accessModesForSelectedPlugin.length > 0 && (
                             <Form.Item<TechnicalAssetsCreateForm>
-                                name="access_mode_type"
-                                label={t('Access mode')}
-                                initialValue="single"
-                                rules={[{ required: true, message: t('Please select an access mode') }]}
+                                name="access_mode_ids"
+                                label={t('Access modes')}
+                                tooltip={t(
+                                    'Consumers choose one of these access modes when they request access. The default access mode is preselected.',
+                                )}
+                                rules={[
+                                    {
+                                        type: 'array',
+                                        required: true,
+                                        message: t('Please select at least one access mode'),
+                                    },
+                                ]}
                             >
-                                <CardSelection<AccessModeType>
-                                    style={{ padding: '4px' }}
-                                    options={[
-                                        {
-                                            value: 'single',
-                                            title: t('Single access mode'),
-                                            description: t(
-                                                'Assign one access level to all users who connect to this asset.',
-                                            ),
-                                        },
-                                        {
-                                            value: 'multiple',
-                                            title: t('Configure access modes'),
-                                            description: t(
-                                                "Define multiple access modes for this asset. You'll be able to create custom access levels with specific permissions, connection strings, and configurations.",
-                                            ),
-                                        },
-                                    ]}
+                                <AccessModeSelector
+                                    accessModes={accessModesForSelectedPlugin}
+                                    defaultAccessModeId={defaultAccessModeId}
+                                    loading={isFetchingAccessModes}
+                                    selectionMode="multiple"
                                 />
                             </Form.Item>
                         )}
-                        <Form.Item
-                            name="access_mode_ids"
-                            label={t('Access modes')}
-                            initialValue={[]}
-                            hidden={accessMode !== 'multiple'}
-                            dependencies={['access_mode_type']}
-                            rules={[
-                                {
-                                    validator: async (_, value) => {
-                                        if (accessMode === 'multiple' && (!value || value.length === 0)) {
-                                            return Promise.reject(
-                                                new Error(t('Please select at least one access mode')),
-                                            );
-                                        }
-                                    },
-                                },
-                            ]}
-                        >
-                            <AccessModeSelector
-                                accessModes={accessModesForSelectedPlugin}
-                                loading={isFetchingAccessModes}
-                                selectionMode="multiple"
-                            />
-                        </Form.Item>
                     </>
                 )}
                 <Form.Item>

@@ -57,7 +57,15 @@ This option allows you to override the default provisioning and specify your own
 ## Access modes
 
 An admin can configure access modes for certain technical asset types.
-When creating a technical asset with a type that has access modes enabled, the producer can choose which access modes to enable, or choose single access mode (meaning read only).
+Each technical asset type with access modes has exactly one default access mode. The first access mode of a type becomes its default, and the admin can make another access mode the default in the access mode settings.
+The default can't be removed from a type while that type has other access modes: make another access mode the default first.
+
+When creating a technical asset with a type that has access modes, the producer chooses which of them to enable, with the default access mode preselected.
+At least one access mode is required, also through the API: a request without access modes for such a type is rejected.
+
+Creating an access mode, or adding a technical asset type to one, doesn't change existing technical assets.
+Technical assets that existed before their type had access modes, including those created with the former single access mode option, keep no access modes.
+They behave as if their type had no access modes: they add no access modes to the Output Ports they are linked to, so consumers only choose an access mode when another technical asset of that Output Port has access modes.
 
 When granting access to a technical asset via an output port, the consumer must choose which access mode they want to use — but only when access modes are enabled for that technical asset.
 
