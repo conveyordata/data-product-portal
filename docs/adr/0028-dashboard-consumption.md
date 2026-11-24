@@ -1,6 +1,6 @@
 # Consumption of Data by Dashboards, Applications and End Users
 
-**Status:** Proposed. Up for a team vote between the three options.
+**Status:** Accepted.
 
 ## Context and Problem Statement
 
@@ -103,7 +103,21 @@ A reader, or a Group, requests it through an Exploration.
 
 ## Decision Outcome
 
-Open for the team vote.
+**Chosen option:** *Option 1: Output Ports open to identities*, with one Output Port serving both Data Products and identities.
+Datasets, dashboards and APIs stay one concept, every reader justifies their own access, and Access Types and access modes work the same for every requester.
+
+* **Admins decide what may be shared with identities, per Technical Asset type.** For example, an admin can decide that S3 assets are never shared with identities.
+* **An Output Port opens to identities only when all its Technical Assets are of a type admins allow.** Identities never receive part of an Output Port.
+* **The owner chooses per Output Port**, within what admins allow, whether Data Products, identities or both consume it.
+* **When admins disallow a type later**, new requests from identities on Output Ports with that type are blocked, and existing access is flagged to the Output Port owner. Existing access is kept until the owner revokes it.
+* **Access modes give one Output Port different views for identities too.** A reader requests the mode they need, for example with or without personal data, and justifies it. The Provisioner maps each mode to the platform's row filters and column masks.
+* **Explorations stay as they are.**
+
+### Consequences
+
+* A person can hold an Input Port: an Input Port is held by a Data Product or an identity, which changes the data model and the rules that build on it.
+* A team that only builds a dashboard on other teams' data creates a Data Product for it.
+* A large audience means many requests, unless Groups request or the Access Type approves automatically.
 
 ## Pros and Cons of the Options
 
@@ -136,27 +150,6 @@ Open for the team vote.
 
 ## Open Questions
 
-1. **Explorations.** With Option 1, people request Output Ports directly. Is an Exploration still needed, only as a personal, time-bound workspace, or not at all?
-2. **Machine users.** Does a machine user always consume through a Data Product, because it automates work, or may it consume an Output Port as an identity?
-3. **Groups as requester.** Who may request on behalf of a Group, and does its justification cover every member?
-4. **The split variant.** Should one Output Port be able to serve both Data Products and identities, or should identities consume a separate audience?
-5. **Rules that change.** Which requesters may consume an Invite only Output Port, who receives Announcements, and how the definition of an Output Port covers dashboards.
-6. **Moving a Technical Asset.** In Option 2, a dashboard a team built inside its Data Product is rebuilt in a Consumption once others need it. Should Portal move the Technical Asset instead, keeping the underlying resource?
-7. **Name.** "Consumption" is a working name for Option 2. See Appendix A for how other tools and open standards name it.
-
-## Appendix A: How others name it
-
-None of the open standards has an entity for the thing that consumes; they describe the producing side.
-
-| Source | Name | Notes |
-|---|---|---|
-| [dbt](https://docs.getdbt.com/docs/build/exposures) | Exposure | "A downstream use of your dbt project". Types: dashboard, notebook, analysis, ml, application. Metadata only. |
-| [Collibra](https://productresources.collibra.com/docs/collibra/latest/Content/Catalog/DataSets/ta_request-access-to-data-set.htm) | Data Usage | Created by an access request; holds the assets, purpose and dates. |
-| [DataHub](https://docs.datahub.com/docs/generated/metamodel/entities/dashboard) | Dashboard, Chart | One entity per kind, linked to data by "Consumes". |
-| [Purview](https://learn.microsoft.com/en-us/purview/concept-data-products) | Subscribers, use cases | Subscribers of a data product; the data product lists use cases. |
-| Delta Sharing | Recipient | The identity that receives a share. |
-| Power BI | App, Audience | An app has audiences of readers. |
-| [Bitol ODPS](https://github.com/bitol-io/open-data-product-standard/blob/main/schema/odps-json-schema-latest.json) | `usage` | Input, output and management ports; "Recommended usage of the data". |
-| [Bitol ODCS](https://github.com/bitol-io/open-data-contract-standard/blob/main/docs/roles.md) | consumer | A party; `roles` lists the roles a consumer needs, with approvers. |
-| [Open Data Mesh DPDS](https://github.com/opendatamesh-initiative/odm-specification-dpdescriptor/blob/main/versions/1.0.0-DRAFT.md) | `audience`, `usage` | Expectations a port declares about who uses it and how. |
-| [Open Data Product Specification](https://opendataproducts.org/v4.0/) | `useCases` | Use cases of a data product; AI agents as an access type. |
+1. **Machine users.** Does a machine user always consume through a Data Product, because it automates work, or may it consume an Output Port as an identity?
+2. **Groups as requester.** Who may request on behalf of a Group, and does its justification cover every member?
+3. **Rules that change.** Whether identities may consume an Invite only Output Port, whether they receive Announcements, and how the definition of an Output Port covers dashboards.
