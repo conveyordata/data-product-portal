@@ -200,7 +200,7 @@ tasks:
     desc: "Install the backend python project so the precommit does not fail"
     dir: backend
     cmds:
-      - poetry install
+      - poetry install --with dev
 
   setup:backend:
     desc: "Install backend dependencies, including the test group"

@@ -46,37 +46,30 @@ repos:
     - id: gitleaks
 # Splitting up the mypy checks as monorepos are not well supported:
 # https://github.com/python/mypy/issues/4008
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.1
-  hooks:
-    - id: mypy
-      name: mypy (backend)
-      language_version: python3.14
-      files: ^backend/
-      args: [--config-file=backend/pyproject.toml]
-      additional_dependencies: &mypy-stubs
-        - types-cachetools
-        - types-requests
-        - types-PyYAML
-    - id: mypy
-      name: mypy (plugins)
-      language_version: python3.14
-      files: ^plugins/
-      args: [--config-file=plugins/pyproject.toml]
-      additional_dependencies: *mypy-stubs
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.1
-  hooks:
-    - id: mypy
-      name: mypy (sdk)
-      language_version: python3.14
-      files: ^sdk/
-      exclude: ^sdk/sdk/api_client/
-      args: [--config-file=sdk/pyproject.toml]
-      additional_dependencies:
-        - attrs
 - repo: local
   hooks:
+    - id: mypy-backend
+      name: mypy (backend)
+      entry: ./scripts/mypy.sh --config-file=backend/pyproject.toml
+      language: script
+      types_or: [python, pyi]
+      files: ^backend/
+      require_serial: true
+    - id: mypy-plugins
+      name: mypy (plugins)
+      entry: ./scripts/mypy.sh --config-file=plugins/pyproject.toml
+      language: script
+      types_or: [python, pyi]
+      files: ^plugins/
+      require_serial: true
+    - id: mypy-sdk
+      name: mypy (sdk)
+      entry: ./scripts/mypy.sh --config-file=sdk/pyproject.toml
+      language: script
+      types_or: [python, pyi]
+      files: ^sdk/
+      exclude: ^sdk/sdk/api_client/
+      require_serial: true
     - id: add-helm-version
       name: add-helm-version
       entry: ./scripts/add_helm_version.sh
@@ -86,7 +79,7 @@ repos:
       name: Check Python version pins match the backend
       entry: ./scripts/check_python_version.sh
       language: script
-      files: ^(backend/pyproject\.toml|backend/\.python-version|plugins/pyproject\.toml|Dockerfile|\.pre-commit-config\.yaml|scripts/check_python_version\.sh)$
+      files: ^(backend/pyproject\.toml|backend/\.python-version|plugins/pyproject\.toml|Dockerfile|scripts/check_python_version\.sh)$
       pass_filenames: false
     - id: regen-openapi-spec
       name: Regen openapi spec
