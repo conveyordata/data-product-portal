@@ -64,6 +64,8 @@ steps:
       node-version-file: frontend/package.json
   - name: Install frontend dependencies
     run: task setup:frontend
+  - name: Install pre-commit
+    run: pip install -r .github/requirements-pre-commit.txt --require-hashes && pre-commit install-hooks
   - name: Preload embedding model
     working-directory: backend
     run: mkdir -p $FASTEMBED_CACHE_PATH && poetry run python -m app.embed
@@ -75,12 +77,12 @@ safe-outputs:
   create-pull-request:
     draft: false
     title-prefix: "[bug list] "
-    labels: [agent-bug]
+    labels: [bug-list]
     github-token-for-extra-empty-commit: none
   push-to-pull-request-branch:
     target: "*"
     required-title-prefix: "[bug list] "
-    required-labels: [agent-bug]
+    required-labels: [bug-list]
   noop:
     report-as-issue: false
 ---
@@ -91,9 +93,13 @@ Find bugs in the Data Product Portal and keep them in the bug list, `docs/bugs.m
 
 ## 1. Start from the current list
 
-Search for an open pull request with the label `agent-bug`. If there is one, check out its branch and work on its `docs/bugs.md`: people triage in that pull request, so their edits to risks and statuses must stay as they are. Otherwise work on `docs/bugs.md` from the default branch.
+Stay on the default branch for all your analysis: that is the code you check.
 
-Read the list. Never add a bug that is already in it, in any status, or a variation of it. A `rejected` row is a decision of the team: never add it again.
+Search for an open pull request with the label `bug-list`. If there is one, read its `docs/bugs.md` without checking out the branch (`git show <its head ref>:docs/bugs.md`): people triage in that pull request, so that file, with their edits to risks and statuses, is the current list. Otherwise the current list is `docs/bugs.md` on the default branch.
+
+Also read the closed `bug-list` pull requests that were never merged. Their rows count as already listed, and their IDs as used.
+
+Never add a bug that is already listed, in any status, or a variation of it. A `rejected` row is a decision of the team: never add it again.
 
 ## 2. Learn the repository
 
@@ -114,21 +120,23 @@ A bug is code that does the wrong thing for a realistic input or state. Kinds of
 9. Errors caught and logged where the caller needs the failure.
 10. A recent dependency bump or change whose effect wasn't followed through everywhere it reaches.
 
-Every bug you add needs concrete evidence: where it is, the input or state that triggers it, and what happens against what should happen. Where practical, prove it with a test that fails on the current code; run it, but don't commit it. A suspicion without a trigger is not a bug. Add at most 10 new bugs per run, the highest risk first.
+Every bug you add needs concrete evidence: where it is, the input or state that triggers it, and what happens against what should happen. Where practical, prove it with a test that fails on the current code. Write such tests under `/tmp`, never in the repository. A suspicion without a trigger is not a bug. Add at most 10 new bugs per run, the highest risk first.
 
 Give each bug a risk as defined at the top of `docs/bugs.md`, judged by what happens to a user, not by how hard the code is.
 
 ## 4. Check the open bugs
 
-For every `open` row, check whether it still happens. If the code changed and it no longer does, set it to `fixed` and link the pull request or commit that fixed it in the notes.
+For every `open` row, check whether it still happens. If the code changed and it no longer does, set it to `fixed` and link the pull request that fixed it in the notes. The checkout has no git history: find that pull request with the GitHub tools.
 
 ## 5. Update the list
 
-Add each new bug as a row with the next free ID (`BUG-001`, `BUG-002`, ...; never reuse one), status `open`, today's date as found, and a link to the code in the notes. Keep rows in ID order. Change nothing else in the file and no other file.
+If there is an open `bug-list` pull request, check out its branch now. Edit its `docs/bugs.md`. Add each new bug as a row with the next free ID (`BUG-001`, `BUG-002`, ...; never reuse one), status `open`, today's date as found, and a link to the code in the notes. Keep rows in ID order. Touch only the rows you add or change, so edits people make in the meantime still apply.
+
+Run `pre-commit run --files docs/bugs.md`. Before reporting, `git status` must show `docs/bugs.md` as the only changed file.
 
 ## 6. Report
 
-- An open `agent-bug` pull request: commit the change on its branch and push it with `push_to_pull_request_branch`, with that pull request's number.
+- An open `bug-list` pull request: commit the change on its branch and push it with `push_to_pull_request_branch`, with that pull request's number.
 - None open: create one with `create_pull_request`, titled with the date.
 
 In both cases the pull request body, or the commit message for a push, lists each new bug with its evidence and test output, and each bug that is now fixed. Use the domain language from `CONTEXT.md`.

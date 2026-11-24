@@ -2,7 +2,7 @@
 
 Bugs found by the bug-finder background agent. It runs every Wednesday, adds what it finds as `open` and marks bugs `fixed` once they no longer happen. It never fixes them.
 
-Triage in the pull request that adds them: change a risk, or set a row to `rejected` with the reason. Merging the pull request means the rows are triaged. Refer to a bug by its ID; when you take one up, link its issue or pull request in the row.
+Triage in the pull request that adds them: change a risk, or set a row to `rejected` with the reason. Merging the pull request means the rows are triaged. Always merge it, never close it: reject rows instead. Refer to a bug by its ID; when you take one up, link its issue or pull request in the row.
 
 ## Risk
 
