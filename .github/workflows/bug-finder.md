@@ -3,6 +3,7 @@ name: "Background agent: Bug finder"
 description: Finds bugs and keeps them in the bug list in docs/bugs.md for the team to triage
 on:
   schedule: weekly on wednesday
+  skip-if-match: 'is:open is:pr label:bug-list'
 permissions:
   contents: read
   issues: read
@@ -13,8 +14,6 @@ engine: copilot
 sandbox:
   agent:
     runtime: docker-sudo-iptables
-checkout:
-  fetch: ["refs/pulls/open/*"]
 env:
   FASTEMBED_CACHE_PATH: /tmp/gh-aw/fastembed
 runtimes:
@@ -79,10 +78,6 @@ safe-outputs:
     title-prefix: "[bug list] "
     labels: [bug-list]
     github-token-for-extra-empty-commit: none
-  push-to-pull-request-branch:
-    target: "*"
-    required-title-prefix: "[bug list] "
-    required-labels: [bug-list]
   noop:
     report-as-issue: false
 ---
@@ -93,9 +88,7 @@ Find bugs in the Data Product Portal and keep them in the bug list, `docs/bugs.m
 
 ## 1. Start from the current list
 
-Stay on the default branch for all your analysis: that is the code you check.
-
-Search for an open pull request with the label `bug-list`. If there is one, read its `docs/bugs.md` without checking out the branch (`git show <its head ref>:docs/bugs.md`): people triage in that pull request, so that file, with their edits to risks and statuses, is the current list. Otherwise the current list is `docs/bugs.md` on the default branch.
+The current list is `docs/bugs.md` on the default branch. The run is skipped while a `bug-list` pull request is open, so the last one has been triaged and merged.
 
 Also read the closed `bug-list` pull requests that were never merged. Their rows count as already listed, and their IDs as used.
 
@@ -130,16 +123,13 @@ For every `open` row, check whether it still happens. If the code changed and it
 
 ## 5. Update the list
 
-If there is an open `bug-list` pull request, check out its branch now. Edit its `docs/bugs.md`. Add each new bug as a row with the next free ID (`BUG-001`, `BUG-002`, ...; never reuse one), status `open`, today's date as found, and a link to the code in the notes. Keep rows in ID order. Touch only the rows you add or change, so edits people make in the meantime still apply.
+Add each new bug as a row with the next free ID (`BUG-001`, `BUG-002`, ...; never reuse one), status `open`, today's date as found, and a link to the code in the notes. Keep rows in ID order. Touch only the rows you add or change.
 
 Run `pre-commit run --files docs/bugs.md`. Before reporting, `git status` must show `docs/bugs.md` as the only changed file.
 
 ## 6. Report
 
-- An open `bug-list` pull request: commit the change on its branch and push it with `push_to_pull_request_branch`, with that pull request's number.
-- None open: create one with `create_pull_request`, titled with the date.
-
-In both cases the pull request body, or the commit message for a push, lists each new bug with its evidence and test output, and each bug that is now fixed. Use the domain language from `CONTEXT.md`.
+Create a pull request with `create_pull_request`, titled with the date. Its body lists each new bug with its evidence and test output, and each bug that is now fixed. Use the domain language from `CONTEXT.md`.
 
 If you found no new bugs and none was fixed, call `noop` with what you looked at.
 
