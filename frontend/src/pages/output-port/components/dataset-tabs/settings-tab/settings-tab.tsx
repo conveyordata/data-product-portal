@@ -222,7 +222,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
     ];
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Title level={5} style={{ margin: 0 }}>
                 {t('Access Settings')}
             </Title>

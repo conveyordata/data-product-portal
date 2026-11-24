@@ -38,7 +38,7 @@ export function EnvironmentSettingsSection({ dataProductId, technicalAsset, canE
     };
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <SettingsSectionHeader
                 title={t('Environment Settings')}
                 description={

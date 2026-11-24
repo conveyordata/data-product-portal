@@ -46,9 +46,9 @@ export const ExplorationStart = () => {
     ];
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Card>
-                <Flex vertical gap="middle">
+                <Flex vertical gap="medium">
                     <Flex align="center" gap="small">
                         <BookOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
                         <Title level={5} style={{ margin: 0 }}>
@@ -60,7 +60,7 @@ export const ExplorationStart = () => {
                 </Flex>
             </Card>
             <Card>
-                <Flex vertical gap="middle">
+                <Flex vertical gap="medium">
                     <Flex align="center" gap="small">
                         <InfoCircleOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
                         <Title level={5} style={{ margin: 0 }}>

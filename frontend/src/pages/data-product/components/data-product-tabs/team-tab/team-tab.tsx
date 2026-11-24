@@ -84,7 +84,7 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical gap="middle">
+            <Flex vertical gap="medium">
                 <Flex gap="small">
                     <Input.Search
                         placeholder={t('Search users by email or name')}

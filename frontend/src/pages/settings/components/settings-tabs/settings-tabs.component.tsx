@@ -98,7 +98,7 @@ export function SettingsTabs() {
                         icon,
                     };
                 })}
-            size="middle"
+            size="medium"
         />
     );
 }

@@ -19,7 +19,7 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")
-    namespace = factory.Faker("word")
+    namespace = factory.Sequence(lambda n: f"technical-asset-{n}")
     description = factory.Faker("text", max_nb_chars=20)
     status = TechnicalAssetStatus.ACTIVE.value
 

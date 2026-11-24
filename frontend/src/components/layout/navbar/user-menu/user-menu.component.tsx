@@ -116,7 +116,7 @@ export function UserMenu() {
     ].filter(Boolean) as MenuItem[];
 
     return (
-        <Flex gap="middle" align="center">
+        <Flex gap="medium" align="center">
             <Notifications />
             <CartButton />
             <DownloadCLIButton />

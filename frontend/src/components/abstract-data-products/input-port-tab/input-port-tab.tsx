@@ -43,7 +43,7 @@ export function InputPortTab({
     }, [inputPorts, searchTerm]);
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <Flex gap="small">
                 <Input.Search
                     placeholder={t('Filter by name')}

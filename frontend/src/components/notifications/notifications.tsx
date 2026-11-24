@@ -196,7 +196,7 @@ export function Notifications() {
                     content={
                         <div>
                             {header}
-                            <Flex vertical gap="middle" className={styles.notificationItems}>
+                            <Flex vertical gap="medium" className={styles.notificationItems}>
                                 {notificationItems}
                             </Flex>
                         </div>

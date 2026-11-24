@@ -474,7 +474,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         }
     };
 
-    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName({ name }), DEBOUNCE);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
