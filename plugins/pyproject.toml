@@ -8,8 +8,8 @@ dependencies = [
     "data-product-portal>=0.8.1",
     "fastapi>=0.141.1",
     "pydantic>=2.14.3",
-    "sqlalchemy>=2.0.52",
-    "alembic>=1.20.0",
+    "sqlalchemy>=2.1.9",
+    "alembic>=1.20.1",
     "boto3>=1.43.93",
     "fastmcp>=3.4.7",
 ]
