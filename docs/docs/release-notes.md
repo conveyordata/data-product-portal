@@ -6,17 +6,28 @@ sidebar_position: 200
 
 ## Unreleased
 
+This migration can take some time, depending on the amount of Data Products present, as embeddings are calculated for every Data Product.
+
 ### breaking changes
 
 - **[API/SDK]**: Requests in `/api/v2/users/current/pending_actions` and `/api/v2/users/current/my_requests` no longer embed the owning Data Product in `technical_asset`, so a Hidden Data Product is not exposed to approvers who can't see it. Use `technical_asset.owner_id` instead. The SDK model `OwnedTechnicalAsset` is removed.
+- **[API/SDK]**: A Technical Asset's namespace only has to be unique among Technical Assets of the same Technical Asset Type in its Data Product, so for example an S3 and a Parameter Store Technical Asset can share one. `GET /api/v2/resource_names/validate` with `model=technical_asset` now requires `technical_asset_type` next to `data_product_id`: it returns a 400 when either is missing, where a missing `data_product_id` used to return a 500, and a 422 for an unknown Technical Asset Type. Existing namespaces are not changed. See [Technical assets - Namespace](./concepts/technical-assets.md#namespace).
 
 ### features
 
+- **[Marketplace]**: The marketplace lists Data Products instead of Output Ports. Search matches on a Data Product's name, description, about, Output Ports and the Technical Assets those Output Ports expose. When a Data Product has a single Output Port with at most one access mode, **Add to cart** adds it directly; otherwise a dialog lets you pick the Output Ports and an access mode for each.
+- **[Plugins/UI]**: Plugins can set `UIElementString.placeholder` to show placeholder text in string inputs.
+- **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
+- **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
+- **[Plugins]**: Core provides `get_azure_plugin_url`, shared with Azure Blob, so custom Azure plugins can use the same parent-platform link.
 - **[Auth]**: `OIDC_IDENTITY_SOURCE=access_token` reads the user's name and email from the validated access token instead of the userinfo endpoint, so providers such as Microsoft Entra ID can log in. `OIDC_USER_ID_CLAIM` and `OIDC_EMAIL_CLAIM` choose the claims to use. The default stays `userinfo`, so existing setups need no change. See [Authentication](./developer-guide/authentication.md#setting-up-oidc).
 - **[Deployment]**: `POSTGRES_AUTH_MODE=azure` logs in to Azure Database for PostgreSQL with a short-lived Microsoft Entra ID token instead of a password, for every database connection the backend opens. The default stays `password`, so existing setups need no change. Other token sources can write a password file for `PGPASSFILE`. See [Installation](./developer-guide/installation.md#database).
 
 ### bugfixes
 
+- **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
+- **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.
+- **[UI]**: The namespace check when creating a Technical Asset no longer reports a namespace as taken because an Output Port uses it. It now checks the Technical Assets of the Data Product, like saving does.
 - **[API]**: Configuration managers who are not admins can no longer delete a Data Product type that only Hidden Data Products use, and migrating a Data Product type now also moves the Hidden Data Products they can't see.
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
@@ -35,6 +46,7 @@ sidebar_position: 200
 - **[API]**: Deleting a Domain that has finalizers returns `202` and marks it as `deleting` until every finalizer is removed. A `deleting` Domain cannot be updated or assigned to Data Products or Explorations; the database enforces the assignment rule too. If a write made directly in the database still leaves the Domain in use when its last finalizer is removed, the deletion is cancelled and the Domain is active again.
 - **[API]**: Namespaces made only of dots (`.`, `..`) are rejected for every resource, so they can never resolve to a parent path when used to name infrastructure. Existing namespaces are not changed.
 - **[API/UI]**: Adding an Output Port is now a Data Product permission instead of a global one, so only users and groups with a role on that Data Product can add Output Ports to it. The upgrade removes the global permission from every role and grants the new one to every Data Product role that can add Technical Assets, such as Owner.
+- **[SDK]**: `update_environment_is_global` is renamed to `update_environment`, and its body `EnvironmentUpdateGlobal` to `EnvironmentUpdate`, in the Python SDK and the CLI's `pkg/api`. The same `PATCH /api/v2/configuration/environments/{id}` now also sets the Environment `position`, and only changes the fields you send. `SelectOption.value` can now also be an integer, so its type in the SDK and the CLI widens to include one.
 - **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
 - **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
 
@@ -46,6 +58,9 @@ sidebar_position: 200
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
 - **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
 - **[API/UI]**: Producing teams can post [Announcements](./concepts/output-ports/announcements.md) on an Output Port. Members of its Consuming Data Products and owners of its consuming Explorations are notified, and the top of the Home page shows their pending requests and Announcements.
+- **[API/UI/Plugins]**: Technical Assets can have settings per Environment, such as a smaller database in `dev` than in `prd`. Plugins declare them as typed fields with a default, defaults per Environment and options that are disabled per Environment. Teams choose them in a matrix when they create a Technical Asset and edit them later in its Settings tab. The values are in `environment_values` on `GET` and `POST /technical_assets`, and `PUT /technical_assets/{id}/environment_configuration` saves them, with errors per Environment and field. `POST /technical_assets/{id}/environment_configuration/validate` and `POST /technical_assets/environment_configuration/validate` (for a Technical Asset that doesn't exist yet) run the same checks without saving, and the UI calls them right after each change. The PostgreSQL plugin has engine version, size, storage and instance name per Environment; its migration fills them for existing Technical Assets.
+- **[UI]**: Creating a Technical Asset opens a full page instead of a popup.
+- **[UI]**: Admins can set the order of Environments in Settings → Environments. The portal shows Environments in that order everywhere, for example `dev` before `prd`.
 
 ### bugfixes
 

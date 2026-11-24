@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.schema_request import AccessDurationUpdate
@@ -13,7 +12,7 @@ from app.configuration.access_durations.schema_response import (
 from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.settings import settings
 
 router = APIRouter(
@@ -35,22 +34,16 @@ def get_expiring_soon_threshold():
 @router.get("/{abstract_data_product_type}/default", response_model=AccessDuration)
 def get_default_access_duration(
     abstract_data_product_type: AbstractDataProductType,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ):
-    access_duration = AccessDurationService(db).get_default_access_duration(
+    return AccessDurationService(db).get_default_access_duration(
         abstract_data_product_type
     )
-    if access_duration is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No default access duration found for the given abstract data product type.",
-        )
-    return access_duration
 
 
 @router.get("")
 def get_all_access_durations(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetAccessDurationResponse:
     return GetAccessDurationResponse(
         access_durations=AccessDurationService(db).get_access_durations()
@@ -68,7 +61,7 @@ def get_all_access_durations(
 def update_access_duration(
     abstract_data_product_type: AbstractDataProductType,
     update: AccessDurationUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> UpdateAccessDurationResponse:
     return UpdateAccessDurationResponse(
         access_durations=AccessDurationService(db).upsert_access_duration(

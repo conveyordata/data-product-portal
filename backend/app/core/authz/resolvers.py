@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Type, TypeAlias, Union
 
-from fastapi import Depends, Request
+from fastapi import Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,6 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.deps import get_db_session
 from app.explorations.model import Exploration
 
 Model: TypeAlias = Union[
@@ -45,7 +44,7 @@ class SubjectResolver(ABC):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         dependant = request.scope["route"].dependant
         value = None
@@ -82,7 +81,7 @@ class SubjectResolver(ABC):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ) -> AuthorizationContext:
         object_id = str(await cls._resolve(request, key, db))
         return AuthorizationContext(
@@ -98,7 +97,7 @@ class EmptyResolver(SubjectResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         return cls.DEFAULT
 
@@ -119,7 +118,7 @@ class OutputPortRoleAssignmentResolver(SubjectResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -151,7 +150,7 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -187,12 +186,17 @@ class OutputPortResolver(SubjectResolver):
 
     @classmethod
     async def _resolve_parent(cls, db: Session, id_: str) -> str:
-        if id_ == cls.DEFAULT:
-            return cls.DEFAULT
-        data_product_id = db.scalar(
-            select(OutputPort.data_product_id).where(OutputPort.id == id_)
-        )
-        return cls.DEFAULT if data_product_id is None else str(data_product_id)
+        return output_port_parent(db, id_)
+
+
+def output_port_parent(db: Session, id_: str) -> str:
+    """The Data Product owning Output Port `id_`, or the wildcard when `id_` is no Output Port."""
+    if id_ == SubjectResolver.DEFAULT:
+        return SubjectResolver.DEFAULT
+    data_product_id = db.scalar(
+        select(OutputPort.data_product_id).where(OutputPort.id == id_)
+    )
+    return SubjectResolver.DEFAULT if data_product_id is None else str(data_product_id)
 
 
 class DataProductNameResolver(SubjectResolver):
@@ -203,7 +207,7 @@ class DataProductNameResolver(SubjectResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -223,7 +227,7 @@ class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         obj = await SubjectResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -243,7 +247,7 @@ class DataProductOutputPortAssociationResolver(OutputPortResolver):
         cls,
         request: Request,
         key: str,
-        db: Session = Depends(get_db_session, scope="function"),
+        db: Session,
     ):
         obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:

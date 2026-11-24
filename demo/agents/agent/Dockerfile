@@ -12,15 +12,15 @@ ENV POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_HOME='/usr/local'
 
-RUN --mount=type=bind,src=./requirements-poetry.txt,dst=/requirements-poetry.txt \
+RUN --mount=type=bind,src=./tools/poetry/requirements-poetry.txt,dst=/requirements-poetry.txt \
     apt-get update && apt-get upgrade -y && \
     pip install -r requirements-poetry.txt --require-hashes
 
-COPY pyproject.toml poetry.lock ./
+COPY demo/agents/agent/pyproject.toml demo/agents/agent/poetry.lock ./
 RUN poetry install --no-root
 
-COPY ./dpp_agent ./dpp_agent
-COPY ./skills ./skills
+COPY demo/agents/agent/dpp_agent ./dpp_agent
+COPY demo/agents/agent/skills ./skills
 
 EXPOSE 7070
 

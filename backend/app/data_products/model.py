@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     UUID,
     Column,
@@ -16,7 +17,9 @@ from sqlalchemy.orm import (
     Mapped,
     Session,
     column_property,
+    deferred,
     mapped_column,
+    query_expression,
     relationship,
 )
 
@@ -74,6 +77,8 @@ class DataProduct(
         nullable=False,
         default=DataProductVisibility.DISCOVERABLE,
     )
+    embeddings = deferred(Column(Vector(384)))
+    consumer_count: Mapped[int] = query_expression()
 
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(
@@ -116,7 +121,7 @@ class DataProduct(
     )
     environments: Mapped[list["DataProductEnvironment"]] = relationship(
         cascade="all, delete-orphan",
-        order_by="DataProductEnvironment.creation_date, DataProductEnvironment.environment_id",
+        order_by=lambda: DataProductEnvironment.display_order(),
         lazy="raise",
     )
 
@@ -158,6 +163,19 @@ class DataProductEnvironment(Base):
         UTCDateTime(), server_default=utcnow()
     )
     environment: Mapped[Environment] = relationship(lazy="joined")
+
+    @classmethod
+    def display_order(cls):
+        environment = select(Environment.position, Environment.name).where(
+            Environment.id == cls.environment_id
+        )
+        return (
+            environment.with_only_columns(Environment.position)
+            .scalar_subquery()
+            .asc()
+            .nulls_last(),
+            environment.with_only_columns(Environment.name).scalar_subquery(),
+        )
 
 
 def ensure_data_product_exists(

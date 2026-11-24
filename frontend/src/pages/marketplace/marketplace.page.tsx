@@ -1,17 +1,23 @@
 import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Alert, Col, Flex, Input, Pagination, Row, Typography, theme } from 'antd';
-import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
+import { parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, emptyStateQueryProps } from '@/components/empty-state/empty-state.component.tsx';
-import { OutputPortOutlined } from '@/components/icons';
+import { DataProductOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { SearchSuggestions } from '@/pages/marketplace/search-suggestions.tsx';
-import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { OutputPortMarketplaceCard } from './output-port-marketplace-card/output-port-marketplace-card.component';
+import { useGridColumnCount } from '@/pages/marketplace/use-grid-column-count.tsx';
+import { useMarketplacePagination } from '@/pages/marketplace/use-marketplace-pagination.tsx';
+import { useSearchDataProductsQuery } from '@/store/api/services/generated/dataProductsSearchApi.ts';
+import { DataProductMarketplaceCard } from './data-product-marketplace-card/data-product-marketplace-card.component';
+
+const CARD_MIN_WIDTH = 360;
+const ROWS_PER_PAGE = 3;
+const FALLBACK_COLUMNS = 4;
 
 export function Marketplace() {
     const { t } = useTranslation();
@@ -49,39 +55,30 @@ export function Marketplace() {
         [t],
     );
 
-    const pageSize = 12;
-    const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1));
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
     const [searchInput, setSearchInput] = useState(searchTerm);
     useEffect(() => setSearchInput(searchTerm), [searchTerm]);
 
     const effectiveSearch = searchTerm.length >= 3 ? searchTerm : undefined;
-    const outputPortsQuery = useSearchOutputPortsQuery({ query: effectiveSearch });
-    const { currentData: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
+    const dataProductsQuery = useSearchDataProductsQuery({ query: effectiveSearch });
+    const { currentData: { data_products: dataProducts = [] } = {}, isFetching } = dataProductsQuery;
 
-    const page = Math.max(1, Math.min(currentPage, Math.ceil(outputPorts.length / pageSize)));
-    const hasResults = outputPortsQuery.currentData !== undefined;
-    useEffect(() => {
-        if (hasResults && page !== currentPage) setCurrentPage(page);
-    }, [hasResults, page, currentPage, setCurrentPage]);
-    const paginatedOutputPorts = useMemo(() => {
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        return outputPorts.slice(startIndex, endIndex);
-    }, [outputPorts, page]);
+    const { ref: gridRef, columns } = useGridColumnCount(CARD_MIN_WIDTH, token.padding, FALLBACK_COLUMNS);
+    const pageSize = columns * ROWS_PER_PAGE;
+    const { page, setPage, pageItems } = useMarketplacePagination(
+        dataProducts,
+        pageSize,
+        dataProductsQuery.currentData !== undefined,
+    );
 
     const clearSearch = () => {
         setSearchTerm(null);
-        setCurrentPage(1);
-    };
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+        setPage(1);
     };
 
     useEffect(() => {
         if (searchTerm?.length < 3) return;
-        posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
+        posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATA_PRODUCT, {
             search_term: searchTerm,
         });
     }, [posthog, searchTerm]);
@@ -97,7 +94,7 @@ export function Marketplace() {
                     allowClear
                     onSearch={(e) => {
                         setSearchTerm(e);
-                        setCurrentPage(1);
+                        setPage(1);
                     }}
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
@@ -110,63 +107,74 @@ export function Marketplace() {
             </Col>
             <Col span={14} />
             <Col span={24}>
-                {searchTerm && searchTerm.length < 3 && (
-                    <Alert
-                        title={t('Search only works when providing at least 3 characters as a search term')}
-                        type="warning"
-                        style={{ marginBottom: token.paddingSM }}
-                    />
-                )}
-                {isFetching ? (
-                    <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
-                ) : outputPorts.length > 0 ? (
-                    // Cards use CSS subgrid on these rows so their sections align across each visual row
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-                            gap: token.paddingSM,
-                        }}
-                    >
-                        {paginatedOutputPorts.map((outputPort) => (
-                            <OutputPortMarketplaceCard key={outputPort.id} outputPort={outputPort} />
-                        ))}
-                    </div>
-                ) : (
-                    <EmptyState
-                        icon={<OutputPortOutlined />}
-                        title={t('No Output Ports published yet')}
-                        description={t('Output Ports shared with the organisation show up here, ready to request.')}
-                        subject={t('Output Ports')}
-                        filter={{ searchTerm: effectiveSearch, onClear: clearSearch }}
-                        {...emptyStateQueryProps(outputPortsQuery)}
-                    />
-                )}
-
-                {!isFetching && outputPorts.length > pageSize && (
-                    <Flex
-                        key="pagination-container"
-                        justify="flex-end"
-                        style={{
-                            marginTop: 12,
-                        }}
-                    >
-                        <Pagination
-                            current={page}
-                            pageSize={pageSize}
-                            total={outputPorts.length}
-                            onChange={handlePageChange}
-                            showSizeChanger={false} // Disable page size changer
-                            showTotal={(total, range) =>
-                                t('Showing {{range0}}-{{range1}} of {{count}} Output Ports', {
-                                    range0: range[0],
-                                    range1: range[1],
-                                    count: total,
-                                })
-                            }
+                <div
+                    style={{
+                        background: token.colorBgLayout,
+                        padding: token.padding,
+                        borderRadius: token.borderRadiusLG,
+                    }}
+                >
+                    {searchTerm && searchTerm.length < 3 && (
+                        <Alert
+                            title={t('Search only works when providing at least 3 characters as a search term')}
+                            type="warning"
+                            style={{ marginBottom: token.paddingSM }}
                         />
-                    </Flex>
-                )}
+                    )}
+                    {isFetching ? (
+                        <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
+                    ) : dataProducts.length > 0 ? (
+                        // Cards use CSS subgrid on these rows so their sections align across each visual row
+                        <div
+                            ref={gridRef}
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: `repeat(auto-fill, minmax(${CARD_MIN_WIDTH}px, 1fr))`,
+                                gap: token.padding,
+                            }}
+                        >
+                            {pageItems.map((dataProduct) => (
+                                <DataProductMarketplaceCard key={dataProduct.id} dataProduct={dataProduct} />
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon={<DataProductOutlined />}
+                            title={t('No Data Products published yet')}
+                            description={t(
+                                'Data Products shared with the organisation show up here, ready to request.',
+                            )}
+                            subject={t('Data Products')}
+                            filter={{ searchTerm: effectiveSearch, onClear: clearSearch }}
+                            {...emptyStateQueryProps(dataProductsQuery)}
+                        />
+                    )}
+
+                    {!isFetching && dataProducts.length > pageSize && (
+                        <Flex
+                            key="pagination-container"
+                            justify="flex-end"
+                            style={{
+                                marginTop: 12,
+                            }}
+                        >
+                            <Pagination
+                                current={page}
+                                pageSize={pageSize}
+                                total={dataProducts.length}
+                                onChange={(page) => setPage(page)}
+                                showSizeChanger={false} // Disable page size changer
+                                showTotal={(total, range) =>
+                                    t('Showing {{range0}}-{{range1}} of {{count}} Data Products', {
+                                        range0: range[0],
+                                        range1: range[1],
+                                        count: total,
+                                    })
+                                }
+                            />
+                        </Flex>
+                    )}
+                </div>
             </Col>
         </Row>
     );

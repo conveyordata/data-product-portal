@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy.orm import Session
 
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
@@ -13,7 +12,7 @@ from app.configuration.domains.schema_response import (
 from app.configuration.domains.service import DomainService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.shared.schema import FinalizerRequest
 
 router = APIRouter(tags=["Configuration - Domains"], prefix="/v2/configuration/domains")
@@ -36,7 +35,8 @@ router = APIRouter(tags=["Configuration - Domains"], prefix="/v2/configuration/d
     ],
 )
 def create_domain(
-    domain: DomainCreate, db: Session = Depends(get_db_session, scope="function")
+    domain: DomainCreate,
+    db: DbSession,
 ) -> CreateDomainResponse:
     return DomainService(db).create_domain(domain)
 
@@ -52,7 +52,7 @@ def create_domain(
 def update_domain(
     id: UUID,
     domain: DomainUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> UpdateDomainResponse:
     return DomainService(db).update_domain(id, domain)
 
@@ -69,9 +69,7 @@ def update_domain(
         ),
     ],
 )
-def remove_domain(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> None:
+def remove_domain(id: UUID, db: DbSession) -> None:
     service = DomainService(db)
     if not service.mark_for_deletion(id):
         return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -87,7 +85,7 @@ def remove_domain(
 def add_domain_finalizer(
     id: UUID,
     request: FinalizerRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     DomainService(db).add_finalizer(id, request.finalizer)
 
@@ -101,7 +99,7 @@ def add_domain_finalizer(
 def remove_domain_finalizer(
     id: UUID,
     finalizer: str,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     service = DomainService(db)
     if service.remove_finalizer(id, finalizer):
@@ -117,14 +115,16 @@ def remove_domain_finalizer(
     ],
 )
 def migrate_domain(
-    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session, scope="function")
+    from_id: UUID,
+    to_id: UUID,
+    db: DbSession,
 ) -> None:
     return DomainService(db).migrate_domain(from_id, to_id)
 
 
 @router.get("")
 def get_domains(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetDomainsResponse:
     return GetDomainsResponse(
         domains=DomainService(db).get_domains(),
@@ -132,7 +132,5 @@ def get_domains(
 
 
 @router.get("/{id}")
-def get_domain(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> GetDomainResponse:
+def get_domain(id: UUID, db: DbSession) -> GetDomainResponse:
     return DomainService(db).get_domain(id)

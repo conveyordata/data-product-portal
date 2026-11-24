@@ -16,7 +16,7 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from app.core.context import _pending_events
 from app.core.logging import logger
 from app.core.webhooks.events import V2Event
@@ -29,7 +29,7 @@ from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 
-from . import TestingSessionLocal
+from . import RollbackSession, TestingSessionLocal, engine, rollback_sessionmaker
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
 from .factories.output_port_access_type import OutputPortAccessTypeFactory
@@ -42,7 +42,19 @@ def setup_and_teardown_database():
 
     settings.AUTHORIZER_AUTOLOAD_ENABLED = False
     init(force=True, seed_path=None)
-    return
+    # The Casbin adapter opens its own sessions; make them join the test's
+    # transaction too, so policy changes are rolled back with everything else.
+    adapter = CasbinPolicies()._adapter
+    adapter.session_local = rollback_sessionmaker(bind=adapter._engine)
+    db = TestingSessionLocal()
+    # Lets lock tests see their own row locks without a second connection.
+    db.execute(text("create extension if not exists pgrowlocks"))
+    _use_wall_clock_defaults(db)
+    # The migrations seed rows (platforms, access types, theme settings, a
+    # user, ...), but the tests expect empty tables apart from the prototype
+    # roles. Clearing once here gives the clean state every test then rolls
+    # back to.
+    _clear_database(db)
 
 
 def override_unauthenticated_get_db():
@@ -56,7 +68,7 @@ def override_unauthenticated_get_db():
         test_db.flush()
         test_db.expire_all()
         yield test_db
-        test_db.commit()  # noqa: allow-commit
+        test_db.commit()  # allow-commit
     finally:
         if test_db:
             test_db.close()
@@ -115,7 +127,7 @@ def everyone_role_permissions(session: Session):
         next_permissions = [int(action) for action in permissions]
 
         role.permissions = next_permissions
-        Authorization().sync_everyone_role_permissions(actions=permissions)
+        CasbinPolicies().sync_everyone_role_permissions(actions=permissions)
 
         try:
             yield
@@ -123,7 +135,9 @@ def everyone_role_permissions(session: Session):
             role = everyone_role()
             assert role is not None, "Failed to find the global 'everyone' role"
             role.permissions = original_permissions
-            Authorization().sync_everyone_role_permissions(actions=original_permissions)
+            CasbinPolicies().sync_everyone_role_permissions(
+                actions=original_permissions
+            )
 
     return _change_permissions
 
@@ -157,8 +171,59 @@ def drop_events_outside_request_warning() -> None:
 
 
 @pytest.fixture(autouse=True)
-def clear_db(session: Session) -> None:
-    """Clear database after each test."""
+def clear_db(request: pytest.FixtureRequest) -> Iterator[None]:
+    """Roll back everything a test wrote, or clear the tables after one that commits."""
+    if request.node.get_closest_marker("commits"):
+        yield
+        TestingSessionLocal.close()
+        _use_wall_clock_defaults(TestingSessionLocal())
+        _clear_database(TestingSessionLocal())
+    else:
+        with engine.connect() as connection:
+            transaction = connection.begin()
+            RollbackSession.rollback_connection = connection
+            try:
+                yield
+            finally:
+                RollbackSession.rollback_connection = None
+                TestingSessionLocal.close()
+                transaction.rollback()
+        policies = CasbinPolicies()
+        policies._enforcer.load_policy()
+        policies._cache.clear()
+    reset_unique_fakers()
+
+
+def _use_wall_clock_defaults(session: Session) -> None:
+    """Make column defaults like created_on use the current time.
+
+    These defaults use CURRENT_TIMESTAMP, which Postgres fixes at the start of
+    the transaction. Since a whole test now runs in one transaction, every row
+    it creates would get the same timestamp, and tests that sort by or compare
+    those timestamps (e.g. newest announcement first) would become flaky.
+    clock_timestamp() returns the actual time, like separate transactions did.
+
+    Only the column defaults are changed; app queries keep CURRENT_TIMESTAMP,
+    because the volatile clock_timestamp() makes filters on it too slow.
+    """
+    columns = session.execute(
+        text(
+            "select table_name, column_name from information_schema.columns"
+            " where table_schema = 'public'"
+            " and column_default ilike '%current_timestamp%'"
+        )
+    )
+    for table, column in columns.all():
+        session.execute(
+            text(
+                f'alter table "{table}" alter column "{column}"'
+                " set default timezone('utc', clock_timestamp())"
+            )
+        )
+    session.commit()  # allow-commit
+
+
+def _clear_database(session: Session) -> None:
     truncate_tables = [
         table
         for table in Base.metadata.tables
@@ -169,8 +234,7 @@ def clear_db(session: Session) -> None:
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
     AuthorizationService(session).reload_enforcer()
-    session.commit()  # noqa: allow-commit
-    reset_unique_fakers()
+    session.commit()  # allow-commit
 
 
 @pytest.fixture(autouse=True)
@@ -191,8 +255,8 @@ def admin() -> UserFactory:
 
 
 @pytest.fixture
-def authorizer() -> Authorization:
-    return Authorization()
+def policies() -> CasbinPolicies:
+    return CasbinPolicies()
 
 
 @contextmanager

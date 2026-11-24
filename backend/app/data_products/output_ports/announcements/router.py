@@ -1,9 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.announcements.schema_request import (
     CreateAnnouncement,
@@ -14,11 +13,10 @@ from app.data_products.output_ports.announcements.schema_response import (
 )
 from app.data_products.output_ports.announcements.service import AnnouncementService
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.users.model import User
 from app.users.notifications.service import NotificationService
 
 router = APIRouter(prefix="/{id}/announcements")
@@ -35,7 +33,7 @@ router = APIRouter(prefix="/{id}/announcements")
 def get_output_port_announcements(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetAnnouncementsResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetAnnouncementsResponse(
@@ -57,8 +55,8 @@ def create_output_port_announcement(
     data_product_id: UUID,
     id: UUID,
     request: CreateAnnouncement,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> CreateAnnouncementResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     announcement = AnnouncementService(db).create_announcement(
@@ -94,8 +92,8 @@ def remove_output_port_announcement(
     data_product_id: UUID,
     id: UUID,
     announcement_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     announcement = AnnouncementService(db).remove_announcement(announcement_id, ds.id)

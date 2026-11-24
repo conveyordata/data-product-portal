@@ -18,8 +18,8 @@ class AccessDurationService:
 
     def get_default_access_duration(
         self, abstract_data_product_type: AbstractDataProductType
-    ) -> AccessDuration | None:
-        return (
+    ) -> AccessDuration:
+        access_duration = (
             self.db.query(AccessDurationModel)
             .filter(
                 AccessDurationModel.abstract_data_product_type
@@ -28,6 +28,12 @@ class AccessDurationService:
             )
             .first()
         )
+        if access_duration is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No default access duration found for the given abstract data product type.",
+            )
+        return access_duration
 
     def get_access_durations_by_type(
         self, abstract_data_product_type: AbstractDataProductType

@@ -56,7 +56,7 @@ export function OutputPortAccessTypesTable() {
     );
 
     return (
-        <Flex vertical gap="middle">
+        <Flex vertical gap="medium">
             <SettingsSectionHeader
                 title={t('Access Types')}
                 description={t('Configure how openly Output Ports can be shared and whether access needs approval.')}

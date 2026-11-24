@@ -3,7 +3,8 @@ import uuid
 from fastapi.testclient import TestClient
 
 from app.authorization.schema_response import AccessResponse
-from app.core.authz import Action, Authorization
+from app.core.authz import Action, CasbinPolicies
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
@@ -26,18 +27,18 @@ class TestAuthorizationRouter:
         assert access.allowed is False
 
     def test_check_access_authorized(
-        self, client: TestClient, authorizer: Authorization
+        self, client: TestClient, policies: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role_id = uuid.uuid4()
         resource_id = uuid.uuid4()
         action = Action.GLOBAL__DELETE_USER
 
-        authorizer.sync_role_permissions(
+        policies.sync_role_permissions(
             role_id=str(role_id),
             actions=[action],
         )
-        authorizer.assign_resource_role(
+        policies.assign_resource_role(
             user_id=str(user.id), role_id=str(role_id), resource_id=str(resource_id)
         )
 
@@ -48,7 +49,7 @@ class TestAuthorizationRouter:
         assert access.allowed is True
 
     def test_check_access_authorized_by_data_product_role(
-        self, client: TestClient, authorizer: Authorization
+        self, client: TestClient, policies: CasbinPolicies
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -58,6 +59,26 @@ class TestAuthorizationRouter:
         DataProductRoleAssignmentFactory(
             role_id=role.id, identity_id=user.id, data_product_id=data_product.id
         )
+
+        response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
+
+        assert response.status_code == 200
+        assert AccessResponse(**response.json()).allowed is True
+
+    def test_check_access__owner_member_reads_invite_only_output_port(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        output_port = OutputPortFactory(
+            data_product=data_product, access_function=OutputPortAccessFunction.PRIVATE
+        )
+        action = Action.HIDDEN__OUTPUT_PORT__READ
 
         response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
 

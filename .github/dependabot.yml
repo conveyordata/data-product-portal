@@ -3,21 +3,22 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/cli/golang"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
     groups:
-      docker:
-        patterns:
-          - "github.com/docker/*"
-      aws-sdk-go:
-        patterns:
-          - "github.com/aws/aws-sdk-*"
-          - "github.com/aws/smithy-go"
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
     groups:
       react:
@@ -43,11 +44,43 @@ updates:
       aws-sdk-js:
         patterns:
           - "@aws-sdk/*"
+      antd:
+        patterns:
+          - "antd"
+          - "@ant-design/*"
+      testing:
+        patterns:
+          - "vitest"
+          - "@testing-library/*"
+          - "jsdom"
+          - "msw"
+          - "cypress"
+      lint-and-build:
+        patterns:
+          - "@biomejs/biome"
+          - "knip"
+          - "typescript"
+          - "sass"
+          - "esbuild"
+          - "patch-package"
+          - "rollup-plugin-visualizer"
+      redux:
+        patterns:
+          - "@reduxjs/toolkit"
+          - "react-redux"
+          - "@rtk-query/codegen-openapi"
+      graph-layout:
+        patterns:
+          - "@xyflow/react"
+          - "@dagrejs/dagre"
+          - "elkjs"
 
   - package-ecosystem: "npm"
     directory: "/docs"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
     groups:
       docusaurus:
@@ -59,36 +92,60 @@ updates:
           - "react-dom"
 
   - package-ecosystem: "pip"
-    directory: "/backend"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-
-  - package-ecosystem: "pip"
-    directory: "/.github"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-
-  - package-ecosystem: "pip"
     directories:
+      - "/backend"
+      - "/plugins"
+      - "/tools/poetry"
+      - "/.github"
       - "/demo/**/*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
+    groups:
+      opentelemetry:
+        patterns:
+          - "opentelemetry-*"
+      pydantic:
+        patterns:
+          - "pydantic"
+          - "pydantic-settings"
+      database:
+        patterns:
+          - "sqlalchemy"
+          - "sqlalchemy-*"
+          - "alembic"
+          - "psycopg"
+          - "psycopg-*"
+          - "asyncpg"
+          - "pgvector"
+          - "greenlet"
+          - "casbin_sqlalchemy_adapter"
+      python-dev-tooling:
+        dependency-type: "development"
+      per-dependency:
+        group-by: dependency-name
 
   - package-ecosystem: "docker"
     directories:
       - "/"
       - "/demo/**/*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
+    groups:
+      per-image:
+        group-by: dependency-name
 
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 5
     open-pull-requests-limit: 10
     groups:
       actions-deps:

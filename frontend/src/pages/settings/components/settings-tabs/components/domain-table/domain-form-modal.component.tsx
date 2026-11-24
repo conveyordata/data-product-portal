@@ -65,7 +65,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const { data: constraints } = useResourceNameConstraintsQuery();
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
     const domainNameValue = Form.useWatch('name', form);
-    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), 500);
+    const fetchResourceNameDebounced = useDebouncedCallback((name: string) => sanitizeResourceName({ name }), 500);
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName) {
@@ -75,7 +75,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     }, [form, mode, canEditResourceName, domainNameValue, fetchResourceNameDebounced]);
 
     const namespaceIsCurrent =
-        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (domainNameValue ?? '');
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName?.name === (domainNameValue ?? '');
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {

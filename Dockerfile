@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
@@ -37,7 +37,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
-COPY backend/requirements-poetry.txt .
+COPY tools/poetry/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /

@@ -2,60 +2,57 @@
 name = "data-product-portal"
 version = "0.8.1"
 description = "Data Product Portal core"
+authors = [{ email = "support@conveyordata.com" }]
+readme = "README.md"
+requires-python = ">=3.14,<4.0"
+dynamic = ["dependencies"]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "data-product-portal"
-version = "0.8.1"
-description = "Data Product Portal core"
-authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
-readme = "README.md"
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
-python = "^3.14"
 python-dotenv = "^1.2.3"
-fastapi = "0.141.1"
-gunicorn = ">=26.2,<28.0"
+fastapi = "0.165.0"
+gunicorn = ">=27.0.1,<28.0"
 uvicorn = ">=0.52.4,<0.55.0"
-pydantic = { version = "^2.13.5", extras = ['email'] }
-pydantic-settings = "^2.15.0"
-typer = ">=0.27.2,<0.30.0"
+pydantic = { version = "^2.14.4", extras = ['email'] }
+pydantic-settings = "^2.16.3"
+typer = ">=0.29.2,<0.30.0"
 requests = "^2.34.2"
 httpx = "^0.28.1"
 alembic = "^1.20.0"
-sqlalchemy = { version = "^2.1.8", extras = ['asyncio'] }
+sqlalchemy = { version = "^2.1.9", extras = ['asyncio'] }
 sqlalchemy-utils = ">=0.42.1,<0.44.0"
 sqlalchemy-easy-softdelete = ">=0.9.1,<2.1.0"
 psycopg = { version = "^3.3.0", extras = ["binary"] }
 pyyaml = "^6.0.3"
 pyjwt = "^2.14.0"
 shortuuid = "^1.0.13"
-pytz = "^2026.3"
-boto3 = "^1.43.93"
+boto3 = "^1.44.9"
 jinja2 = "^3.1.6"
 asgi-correlation-id = "^5.0.1"
 cryptography = "^50.0.1"
 emailgen = "^0.1.1"
 casbin_sqlalchemy_adapter = "^1.4.0"
 asyncpg = ">=0.31,<0.33"
-cachetools = ">=7.1.8,<9.0.0"
+cachetools = ">=8.0.2,<9.0.0"
 greenlet = "^3.5.5"
 h11 = "^0.16.0"
-fastmcp = "4.1.7"
-posthog = "^7.53.0"
-authlib = "1.9.5"
+fastmcp = "4.2.3"
+posthog = "^8.1.0"
+authlib = "1.9.10"
 fastembed = ">=0.8,<0.10"
 pgvector = "^0.5.0"
-opentelemetry-api = "^1.39.1"
-opentelemetry-sdk = "^1.39.1"
-opentelemetry-exporter-otlp = "^1.39.1"
-opentelemetry-instrumentation-fastapi = "^0.64b0"
-opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
-opentelemetry-distro = "^0.64b0"
+opentelemetry-api = "^1.45.2"
+opentelemetry-sdk = "^1.45.2"
+opentelemetry-exporter-otlp = "^1.45.2"
+opentelemetry-instrumentation-fastapi = "^0.66b2"
+opentelemetry-instrumentation-sqlalchemy = "^0.66b2"
+opentelemetry-distro = "^0.66b2"
 pycasbin = "^2.8.0"
 azure-identity = "^1.27.0"
 
@@ -73,6 +70,7 @@ pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
 data-product-portal-sdk = { path = "../sdk", develop = true }
+pytest-xdist = "^3.8.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -81,7 +79,6 @@ optional = true
 mypy = ">=2.3.1"
 types-cachetools = "*"
 types-requests = "*"
-types-pytz = "*"
 types-PyYAML = "*"
 locust = "^2.46.5"
 
@@ -96,7 +93,7 @@ select = [
     "E9",
     "F",
     "I",
-    "FAST001", "FAST003", #Currently Fast002 is disabled it leads to many changes
+    "FAST001", "FAST002", "FAST003",
     "YTT", #flake-2020 rules, check for YTT bugs
     "ASYNC", #flake8 async rules
     "S", #flake-8 bandit, security rules
@@ -115,12 +112,20 @@ select = [
     "PERF",
     "FLY",
 ]
+ignore = ["TC001", "TC002", "TC003"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic_settings.BaseSettings",
+    "app.shared.schema.ORMModel",
+    "app.database.database.Base",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S311"]
-"tests/__init__.py" = ["TID251"]
+"tests/__init__.py" = ["TID251", "E402"]
 "tests/factories/**" = ["TID251"]
-"tests/seed_random_data.py" = ["TID251"]
 "app/database/alembic/versions/*.py" = ["TID251"]
 
 [tool.ruff.lint.isort]

@@ -169,6 +169,61 @@
         }
       }
     },
+    "/api/v2/search/data_products": {
+      "get": {
+        "tags": [
+          "Search Data Products"
+        ],
+        "summary": "Search Data Products",
+        "operationId": "search_data_products",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "title": "Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchDataProductsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats": {
       "get": {
         "tags": [
@@ -4775,7 +4830,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTechnicalAssetsResponseItem"
+                  "$ref": "#/components/schemas/GetTechnicalAssetResponse"
                 }
               }
             }
@@ -4976,6 +5031,162 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/environment_configuration": {
+      "put": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Update Technical Asset Environment Configuration",
+        "operationId": "update_technical_asset_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TechnicalAssetEnvironmentConfigurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTechnicalAssetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Technical asset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical asset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid environment configuration",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "environment_id": "random environment id",
+                      "field": "size",
+                      "message": "Option is not allowed in this environment"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/environment_configuration/validate": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Validate Technical Asset Environment Configuration",
+        "operationId": "validate_technical_asset_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TechnicalAssetEnvironmentConfigurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Technical asset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical asset id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid environment configuration",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "environment_id": "random environment id",
+                      "field": "size",
+                      "message": "Option is not allowed in this environment"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/technical_assets/{id}/status": {
       "put": {
         "tags": [
@@ -5103,6 +5314,73 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/technical_assets/environment_configuration/validate": {
+      "post": {
+        "tags": [
+          "Data Products - Technical assets"
+        ],
+        "summary": "Validate New Technical Asset Environment Configuration",
+        "operationId": "validate_new_technical_asset_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewTechnicalAssetEnvironmentConfigurationValidation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Data product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Required item random id does not exist"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid environment configuration",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "environment_id": "random environment id",
+                      "field": "size",
+                      "message": "Option is not allowed in this environment"
+                    }
+                  ]
                 }
               }
             }
@@ -5517,8 +5795,8 @@
         "tags": [
           "Configuration - Environments"
         ],
-        "summary": "Update Environment Is Global",
-        "operationId": "update_environment_is_global",
+        "summary": "Update Environment",
+        "operationId": "update_environment",
         "parameters": [
           {
             "name": "id",
@@ -5536,7 +5814,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EnvironmentUpdateGlobal"
+                "$ref": "#/components/schemas/EnvironmentUpdate"
               }
             }
           }
@@ -8014,6 +8292,22 @@
               "type": "string",
               "title": "Name"
             }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technical Asset Type"
+            }
           }
         ],
         "responses": {
@@ -8073,6 +8367,15 @@
               "type": "string",
               "format": "uuid",
               "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "technical_asset_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Technical Asset Type"
             }
           }
         ],
@@ -11922,6 +12225,18 @@
             },
             "type": "array",
             "title": "Tag Ids"
+          },
+          "environment_values": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Environment Values",
+            "default": {}
           }
         },
         "type": "object",
@@ -13550,6 +13865,17 @@
             "type": "boolean",
             "title": "Is Global",
             "default": true
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
           }
         },
         "type": "object",
@@ -13661,6 +13987,17 @@
             "type": "boolean",
             "title": "Is Global",
             "default": true
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
           }
         },
         "type": "object",
@@ -13709,18 +14046,55 @@
         ],
         "title": "EnvironmentPlatformConfigGet"
       },
-      "EnvironmentUpdateGlobal": {
+      "EnvironmentUIMetadata": {
         "properties": {
-          "is_global": {
-            "type": "boolean",
-            "title": "Is Global"
+          "environment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Environment Id"
+          },
+          "ui_metadata": {
+            "items": {
+              "$ref": "#/components/schemas/UIElementMetadata"
+            },
+            "type": "array",
+            "title": "Ui Metadata"
           }
         },
         "type": "object",
         "required": [
-          "is_global"
+          "environment_id",
+          "ui_metadata"
         ],
-        "title": "EnvironmentUpdateGlobal"
+        "title": "EnvironmentUIMetadata"
+      },
+      "EnvironmentUpdate": {
+        "properties": {
+          "is_global": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Global"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          }
+        },
+        "type": "object",
+        "title": "EnvironmentUpdate"
       },
       "EnvironmentsGet": {
         "properties": {
@@ -14792,6 +15166,155 @@
           "roles"
         ],
         "title": "GetRolesResponse"
+      },
+      "GetTechnicalAssetResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "owner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Id"
+          },
+          "platform_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Platform Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
+          "configuration": {
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "title": "Configuration",
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
+          },
+          "owner": {
+            "$ref": "#/components/schemas/DataProduct"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductEnvironment"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
+          "output_port_links": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortLink"
+            },
+            "type": "array",
+            "title": "Output Port Links"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "environment_values": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Environment Values"
+          },
+          "sourceAligned": {
+            "type": "boolean",
+            "title": "Sourcealigned",
+            "description": "DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version."
+          },
+          "result_string": {
+            "type": "string",
+            "title": "Result String"
+          },
+          "technical_info": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalInfo"
+            },
+            "type": "array",
+            "title": "Technical Info"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "namespace",
+          "owner_id",
+          "status",
+          "technical_mapping",
+          "access_modes",
+          "configuration",
+          "owner",
+          "environments",
+          "output_port_links",
+          "tags",
+          "environment_values",
+          "sourceAligned",
+          "result_string",
+          "technical_info"
+        ],
+        "title": "GetTechnicalAssetResponse"
       },
       "GetTechnicalAssetsResponse": {
         "properties": {
@@ -16150,6 +16673,50 @@
           "my_requests"
         ],
         "title": "MyRequestsResponse"
+      },
+      "NewTechnicalAssetEnvironmentConfigurationValidation": {
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "configuration": {
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "title": "Configuration",
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping",
+            "default": "default"
+          },
+          "environment_values": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Environment Values",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "namespace",
+          "configuration"
+        ],
+        "title": "NewTechnicalAssetEnvironmentConfigurationValidation"
       },
       "Node": {
         "properties": {
@@ -18421,6 +18988,118 @@
         ],
         "title": "Scope"
       },
+      "SearchDataProductsOutputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "access_modes"
+        ],
+        "title": "SearchDataProductsOutputPort"
+      },
+      "SearchDataProductsResponse": {
+        "properties": {
+          "data_products": {
+            "items": {
+              "$ref": "#/components/schemas/SearchDataProductsResponseItem"
+            },
+            "type": "array",
+            "title": "Data Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_products"
+        ],
+        "title": "SearchDataProductsResponse"
+      },
+      "SearchDataProductsResponseItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/Domain"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DataProductType"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataProductLifeCycle"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_ports": {
+            "items": {
+              "$ref": "#/components/schemas/SearchDataProductsOutputPort"
+            },
+            "type": "array",
+            "title": "Output Ports"
+          },
+          "consumer_count": {
+            "type": "integer",
+            "title": "Consumer Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "tags",
+          "domain",
+          "type",
+          "lifecycle",
+          "output_ports",
+          "consumer_count"
+        ],
+        "title": "SearchDataProductsResponseItem"
+      },
       "SearchOutputPortsResponse": {
         "properties": {
           "output_ports": {
@@ -18569,9 +19248,23 @@
               },
               {
                 "type": "boolean"
+              },
+              {
+                "type": "integer"
               }
             ],
             "title": "Value"
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disabled"
           }
         },
         "type": "object",
@@ -18761,6 +19454,26 @@
           "configuration"
         ],
         "title": "TechnicalAsset"
+      },
+      "TechnicalAssetEnvironmentConfigurationUpdate": {
+        "properties": {
+          "environment_values": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Environment Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment_values"
+        ],
+        "title": "TechnicalAssetEnvironmentConfigurationUpdate"
       },
       "TechnicalAssetEvent": {
         "properties": {
@@ -19187,6 +19900,14 @@
             "type": "array",
             "title": "Ui Metadata"
           },
+          "environment_ui_metadata": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentUIMetadata"
+            },
+            "type": "array",
+            "title": "Environment Ui Metadata",
+            "default": []
+          },
           "plugin": {
             "type": "string",
             "title": "Plugin"
@@ -19258,6 +19979,11 @@
             "type": "boolean",
             "title": "Shareable",
             "default": true
+          },
+          "namespace_max_length": {
+            "type": "integer",
+            "title": "Namespace Max Length",
+            "default": 64
           },
           "detailed_name": {
             "type": "string",
@@ -19333,6 +20059,17 @@
             "title": "Max Count",
             "default": 1
           },
+          "initial_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Value"
+          },
           "options": {
             "anyOf": [
               {
@@ -19363,6 +20100,17 @@
               }
             ],
             "title": "Initial Value"
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Placeholder"
           }
         },
         "type": "object",

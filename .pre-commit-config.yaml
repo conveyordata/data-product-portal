@@ -57,7 +57,6 @@ repos:
       additional_dependencies: &mypy-stubs
         - types-cachetools
         - types-requests
-        - types-pytz
         - types-PyYAML
     - id: mypy
       name: mypy (plugins)
@@ -141,7 +140,7 @@ repos:
       pass_filenames: false
     - id: no-commit
       name: Prevent .commit() in backend tests, routers and services
-      entry: '\.commit\((?![^\n]*#\s*noqa:\s*allow-commit)'
+      entry: '\.commit\((?![^\n]*#\s*allow-commit)'
       language: pygrep
       types: [python]
       files: ^(backend/tests/|backend/app/.*/service\.py|backend/app/.*/router\.py$)

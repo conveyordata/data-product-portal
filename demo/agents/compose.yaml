@@ -47,7 +47,9 @@ services:
 
   agent:
     platform: linux/amd64
-    build: ./agent
+    build:
+      context: ../..
+      dockerfile: demo/agents/agent/Dockerfile
     env_file:
       - .env.secret
     volumes:

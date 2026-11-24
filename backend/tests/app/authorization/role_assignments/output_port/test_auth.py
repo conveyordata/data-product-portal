@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.roles.schema import Role, Scope
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from tests.factories import (
     DatasetRoleAssignmentFactory,
     OutputPortFactory,
@@ -20,11 +20,11 @@ if TYPE_CHECKING:
 
 
 class TestAuth:
-    def test_add(self, authorizer: Authorization):
+    def test_add(self, policies: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         DatasetRoleAssignmentFactory(
@@ -34,15 +34,15 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    def test_remove(self, authorizer: Authorization):
+    def test_remove(self, policies: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
@@ -52,15 +52,15 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         DatasetAuthAssignment(assignment).remove()
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    def test_swap(self, authorizer: Authorization):
+    def test_swap(self, policies: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -74,16 +74,16 @@ class TestAuth:
         )
 
         DatasetAuthAssignment(assignment).add()
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
         assignment.role_id = new_role.id
         DatasetAuthAssignment(assignment, previous_role_id=role.id).swap()
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=str(user.id), role_id=str(new_role.id), resource_id=str(dataset.id)
         )

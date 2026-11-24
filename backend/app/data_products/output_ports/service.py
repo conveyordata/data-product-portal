@@ -3,6 +3,7 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from fastembed import TextEmbedding
 from sqlalchemy import String, case, func, literal_column, select
 from sqlalchemy.orm import (
     Session,
@@ -39,7 +40,7 @@ from app.configuration.output_port_access_types.model import (
 )
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.context import discard_events
 from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
@@ -71,6 +72,7 @@ from app.data_products.output_ports.schema_response import (
     OutputPortAccessDuration,
     output_port_not_found_exception,
 )
+from app.data_products.service import DataProductService
 from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
@@ -107,7 +109,10 @@ class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
-        self.embedding_model = get_text_embedding_model()
+
+    @property
+    def embedding_model(self) -> TextEmbedding:
+        return get_text_embedding_model()
 
     def _ensure_access_durations_are_configured(
         self,
@@ -379,7 +384,7 @@ class OutputPortService:
             if batch_datasets:
                 self._recalculate_embeddings_and_search_vector(batch_datasets)
         # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
-        self.db.commit()  # noqa: allow-commit
+        self.db.commit()  # allow-commit
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
@@ -484,6 +489,7 @@ class OutputPortService:
         self.db.flush()
         self._sync_public_reader_grouping([model.id], model.access_function)
         self.recalculate_search(model.id)
+        DataProductService(self.db).recalculate_search(data_product_id)
         return model
 
     def remove_output_port(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
@@ -496,6 +502,7 @@ class OutputPortService:
 
         result = copy.deepcopy(output_port)
         self.db.delete(output_port)
+        DataProductService(self.db).recalculate_search(data_product_id)
         return result
 
     def update_output_port(
@@ -543,6 +550,7 @@ class OutputPortService:
                 [current_output_port.id], current_output_port.access_function
             )
         self.recalculate_search(id)
+        DataProductService(self.db).recalculate_search(data_product_id)
 
         return current_output_port.id
 
@@ -721,7 +729,7 @@ class OutputPortService:
     def _sync_public_reader_grouping(
         output_port_ids: Sequence[UUID], access_function: OutputPortAccessFunction
     ):
-        Authorization().sync_resource_roles(
+        CasbinPolicies().sync_resource_roles(
             user_id="*",
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=output_port_ids,
@@ -735,7 +743,7 @@ class OutputPortService:
             ),
             execution_options=UNFILTERED,
         ).all()
-        Authorization().sync_resource_roles(
+        CasbinPolicies().sync_resource_roles(
             user_id="*",
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=visible_output_port_ids,

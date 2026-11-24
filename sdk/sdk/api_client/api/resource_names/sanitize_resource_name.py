@@ -7,17 +7,25 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.resource_name_suggestion import ResourceNameSuggestion
-from ...types import UNSET, Response
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     name: str,
+    technical_asset_type: None | str | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
 
     params["name"] = name
+
+    json_technical_asset_type: None | str | Unset
+    if isinstance(technical_asset_type, Unset):
+        json_technical_asset_type = UNSET
+    else:
+        json_technical_asset_type = technical_asset_type
+    params["technical_asset_type"] = json_technical_asset_type
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -64,11 +72,13 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     name: str,
+    technical_asset_type: None | str | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameSuggestion]:
     """Sanitize Resource Name
 
     Args:
         name (str):
+        technical_asset_type (None | str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -80,6 +90,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         name=name,
+        technical_asset_type=technical_asset_type,
     )
 
     response = client.get_httpx_client().request(
@@ -93,11 +104,13 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     name: str,
+    technical_asset_type: None | str | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameSuggestion | None:
     """Sanitize Resource Name
 
     Args:
         name (str):
+        technical_asset_type (None | str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -110,6 +123,7 @@ def sync(
     return sync_detailed(
         client=client,
         name=name,
+        technical_asset_type=technical_asset_type,
     ).parsed
 
 
@@ -117,11 +131,13 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     name: str,
+    technical_asset_type: None | str | Unset = UNSET,
 ) -> Response[HTTPValidationError | ResourceNameSuggestion]:
     """Sanitize Resource Name
 
     Args:
         name (str):
+        technical_asset_type (None | str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -133,6 +149,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         name=name,
+        technical_asset_type=technical_asset_type,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -144,11 +161,13 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     name: str,
+    technical_asset_type: None | str | Unset = UNSET,
 ) -> HTTPValidationError | ResourceNameSuggestion | None:
     """Sanitize Resource Name
 
     Args:
         name (str):
+        technical_asset_type (None | str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -162,5 +181,6 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             name=name,
+            technical_asset_type=technical_asset_type,
         )
     ).parsed

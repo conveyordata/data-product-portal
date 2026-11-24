@@ -32,7 +32,7 @@ class TestPluginEndpoints:
 
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 2
+        assert len(data["plugins"]) == 3
 
         for plugin in data["plugins"]:
             assert "plugin" in plugin
@@ -54,6 +54,28 @@ class TestPluginEndpoints:
         assert shareable == {
             "FakeTechnicalAssetConfiguration": False,
             "FakeLinkPlugin": True,
+            "SizingTechnicalAssetConfiguration": True,
+        }
+
+    def test_list_plugins__exposes_namespace_length_override(self, client, monkeypatch):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "_platform_metadata",
+            FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+                update={"namespace_max_length": 24}
+            ),
+        )
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        limits = {
+            p["plugin"]: p["namespace_max_length"] for p in response.json()["plugins"]
+        }
+        assert limits == {
+            "FakeTechnicalAssetConfiguration": 24,
+            "FakeLinkPlugin": settings.NAMESPACE_MAX_LENGTH,
+            "SizingTechnicalAssetConfiguration": settings.NAMESPACE_MAX_LENGTH,
         }
 
     def test_list_plugins_includes_expected_platforms(self, client: TestClient):
@@ -64,7 +86,11 @@ class TestPluginEndpoints:
         data = response.json()
 
         plugin_names = {p["plugin"] for p in data["plugins"]}
-        assert plugin_names == {"FakeTechnicalAssetConfiguration", "FakeLinkPlugin"}
+        assert plugin_names == {
+            "FakeTechnicalAssetConfiguration",
+            "FakeLinkPlugin",
+            "SizingTechnicalAssetConfiguration",
+        }
 
     def test_get_plugin_form_by_name_returns_correct_plugin(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form returns specific plugin"""

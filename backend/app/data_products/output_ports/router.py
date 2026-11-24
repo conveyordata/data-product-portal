@@ -13,8 +13,8 @@ from app.authorization.role_assignments.output_port.service import RoleAssignmen
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
-from app.core.auth.auth import get_authenticated_user
-from app.core.authz import Action, Authorization, OutputPortResolver
+from app.core.auth.auth import AuthenticatedUser
+from app.core.authz import Action, Authorization, CasbinPolicies, OutputPortResolver
 from app.core.authz.resolvers import DataProductResolver
 from app.data_products.output_ports.announcements.router import (
     router as announcements_router,
@@ -46,7 +46,7 @@ from app.data_products.output_ports.schema_response import (
     UpdateOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -117,8 +117,8 @@ router.include_router(announcements_router)
 )
 def get_data_product_output_ports(
     data_product_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ) -> GetDataProductOutputPortsResponse:
     return GetDataProductOutputPortsResponse(
         output_ports=OutputPortService(db).get_output_ports(data_product_id, user)
@@ -137,8 +137,8 @@ def get_data_product_output_ports(
 def get_output_port(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ):
     return OutputPortService(db).get_output_port(id, user, data_product_id)
 
@@ -154,7 +154,7 @@ def get_output_port(
 def get_output_ports_event_history(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetEventHistoryResponse:
     output_port = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
@@ -192,8 +192,8 @@ def get_output_ports_event_history(
 def create_output_port(
     data_product_id: UUID,
     output_port_request: CreateOutputPortRequest,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> CreateOutputPortResponse:
     output_port = OutputPortService(db).create_output_port(
         data_product_id, output_port_request
@@ -233,11 +233,11 @@ def create_output_port(
 def remove_output_port(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     dataset = OutputPortService(db).remove_output_port(id, data_product_id)
-    Authorization().clear_assignments_for_resource(resource_id=str(id))
+    CasbinPolicies().clear_assignments_for_resource(resource_id=str(id))
 
     event_id = EventService(db).create_event(
         CreateEvent(
@@ -277,8 +277,8 @@ def update_output_port(
     data_product_id: UUID,
     id: UUID,
     update: OutputPortUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> UpdateOutputPortResponse:
     response = OutputPortService(db).update_output_port(id, data_product_id, update)
 
@@ -315,8 +315,8 @@ def update_output_port_about(
     data_product_id: UUID,
     id: UUID,
     output_port: OutputPortAboutUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     OutputPortService(db).update_output_port_about(id, data_product_id, output_port)
 
@@ -350,8 +350,8 @@ def update_output_port_status(
     data_product_id: UUID,
     id: UUID,
     output_port: OutputPortStatusUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     OutputPortService(db).update_dataset_status(id, data_product_id, output_port)
 
@@ -376,7 +376,7 @@ def update_output_port_status(
 def get_output_port_graph_data(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
     level: int = 3,
 ) -> Graph:
     return OutputPortService(db).get_graph_data(id, data_product_id, level)
@@ -397,8 +397,8 @@ def set_value_for_output_port(
     id: UUID,
     setting_id: UUID,
     value: str,
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     ensure_output_port_exists(id, db, data_product_id=data_product_id)
     DataProductSettingService(db).set_value_for_product(setting_id, id, value)
@@ -424,7 +424,7 @@ def set_value_for_output_port(
 def get_output_port_access_durations(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ):
     return OutputPortService(db).get_access_durations(id, user, data_product_id)

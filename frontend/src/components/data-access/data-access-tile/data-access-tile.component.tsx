@@ -80,7 +80,7 @@ export function AccessDataTile<T extends string>({
                     </Space>
                 </Dropdown>
             </div>
-            <Typography.Text className={styles.label} ellipsis>
+            <Typography.Text className={styles.label} ellipsis={{ tooltip: dataPlatform.label }}>
                 {dataPlatform.label}
             </Typography.Text>
         </Flex>

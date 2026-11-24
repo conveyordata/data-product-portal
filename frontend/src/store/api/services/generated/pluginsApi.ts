@@ -84,14 +84,17 @@ export type UiElementCheckbox = {
 };
 export type SelectOption = {
   label: string;
-  value: string | boolean;
+  value: string | boolean | number;
+  disabled?: boolean | null;
 };
 export type UiElementSelect = {
   max_count?: number | null;
+  initial_value?: string | null;
   options?: SelectOption[] | null;
 };
 export type UiElementString = {
   initial_value?: string | null;
+  placeholder?: string | null;
 };
 export type UiElementRadio = {
   max_count?: number | null;
@@ -117,9 +120,14 @@ export type UiElementMetadata = {
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
 };
+export type EnvironmentUiMetadata = {
+  environment_id: string;
+  ui_metadata: UiElementMetadata[];
+};
 export type UiElementMetadataResponse = {
   not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
+  environment_ui_metadata?: EnvironmentUiMetadata[];
   plugin: string;
   has_environments: boolean;
   result_label?: string;
@@ -132,6 +140,7 @@ export type UiElementMetadataResponse = {
   platform_tile?: PlatformTile | null;
   show_in_form?: boolean;
   shareable?: boolean;
+  namespace_max_length?: number;
   detailed_name: string;
 };
 export type PluginResponse = {

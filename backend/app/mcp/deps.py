@@ -11,7 +11,7 @@ from typing import Any, Optional
 import jwt as pyjwt
 from fastmcp.dependencies import Depends
 from fastmcp.server.auth.oidc_proxy import OIDCProxy
-from fastmcp.server.dependencies import get_access_token
+from fastmcp.server.dependencies import get_access_token, get_context
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session, configure_mappers
 
@@ -25,6 +25,8 @@ from app.database.visibility import acting_as
 from app.settings import settings
 from app.users.model import User
 from app.users.model import User as UserModel
+
+MCP_USER_ID_STATE_KEY = "mcp_user_id"
 
 
 def initialize_models() -> None:
@@ -102,7 +104,9 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
     return None
 
 
-def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
+async def get_mcp_authenticated_user(
+    db: Session = Depends(db_session),
+) -> UserModel:
     """Get the authenticated portal user from the current MCP request context.
 
     When OIDC is enabled the FastMCP access token carries upstream identity claims
@@ -111,6 +115,12 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
 
     When OIDC is disabled the default portal user is returned.
     """
+    user = _resolve_mcp_user(db)
+    await get_context().set_state(MCP_USER_ID_STATE_KEY, user.id, serializable=False)
+    return user
+
+
+def _resolve_mcp_user(db: Session) -> UserModel:
     if not settings.OIDC_ENABLED:
         from app.core.auth.auth import generate_default_jwt_token
 
@@ -180,7 +190,7 @@ def authorize_data_product_read_integrations(
     obj = str(data_product.id)
     sub = str(authorized_user.id)
 
-    if not Authorization().has_access(
+    if not Authorization(db).has_access(
         sub=sub, dom=dom, obj=obj, act=Action.DATA_PRODUCT__READ_INTEGRATIONS
     ):
         raise PermissionError(

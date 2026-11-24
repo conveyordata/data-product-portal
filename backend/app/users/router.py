@@ -1,12 +1,12 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
 
-from app.core.auth.auth import authorize_user, get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser, authorize_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.groups.schema_response import GroupsGetResponse
 from app.identities.schema_request import (
     IdentityBatchCreateRequest,
@@ -28,7 +28,7 @@ router = APIRouter(tags=["Users"], prefix="/v2/users")
 
 @router.get("")
 def get_users(
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GetUsersResponse:
     return GetUsersResponse(users=UserService(db).get_users())
 
@@ -47,9 +47,7 @@ def get_users(
         Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
     ],
 )
-def create_user(
-    user: UserCreate, db: Session = Depends(get_db_session, scope="function")
-) -> UserCreateResponse:
+def create_user(user: UserCreate, db: DbSession) -> UserCreateResponse:
     return UserService(db).create_user(user)
 
 
@@ -61,7 +59,7 @@ def create_user(
 )
 def create_users_batch(
     request: IdentityBatchCreateRequest[UserCreate],
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> IdentityBatchCreateResponse:
     return UserService(db).create_users_batch(request.items)
 
@@ -75,7 +73,7 @@ def create_users_batch(
 )
 def remove_users_batch(
     request: IdentityBatchDeleteRequest,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     UserService(db).remove_users_batch(request.ids)
 
@@ -88,47 +86,47 @@ def remove_users_batch(
 )
 def set_can_become_admin(
     request: CanBecomeAdminUpdate,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     UserService(db).set_can_become_admin(request)
 
 
 @router.get("/current")
-def get_current_user(authorized_user: User = Depends(authorize_user)) -> User:
+def get_current_user(authorized_user: Annotated[User, Depends(authorize_user)]) -> User:
     return authorized_user
 
 
 @router.get("/current/groups")
 def get_current_user_groups(
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> GroupsGetResponse:
     return GroupsGetResponse(groups=UserService(db).get_groups(authenticated_user.id))
 
 
 @router.get("/current/my_requests")
 def get_user_requests(
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
-    hide_old_inactive: bool = Query(
-        default=True, description="Filter out inactive requests older than 30 days"
-    ),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
+    hide_old_inactive: Annotated[
+        bool, Query(description="Filter out inactive requests older than 30 days")
+    ] = True,
 ) -> MyRequestsResponse:
     return UserService(db).get_user_requests(authenticated_user, hide_old_inactive)
 
 
 @router.get("/current/pending_actions")
 def get_user_pending_actions(
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    authenticated_user: AuthenticatedUser,
 ) -> PendingActionResponse:
     return UserService(db).get_user_pending_actions(authenticated_user)
 
 
 @router.post("/current/seen_tour")
 def mark_tour_as_seen(
-    db: Session = Depends(get_db_session, scope="function"),
-    user: User = Depends(get_authenticated_user),
+    db: DbSession,
+    user: AuthenticatedUser,
 ) -> None:
     UserService(db).mark_tour_as_seen(user.id)
 
@@ -144,7 +142,7 @@ def mark_tour_as_seen(
 )
 def get_user_groups(
     id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> GroupsGetResponse:
     return GroupsGetResponse(groups=UserService(db).get_groups(id))
 
@@ -161,7 +159,5 @@ def get_user_groups(
         Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
     ],
 )
-def remove_user(
-    id: UUID, db: Session = Depends(get_db_session, scope="function")
-) -> None:
+def remove_user(id: UUID, db: DbSession) -> None:
     return UserService(db).remove_user(id)

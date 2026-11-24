@@ -4,13 +4,12 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
-from sqlalchemy.orm import Session
 
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
-from app.core.auth.auth import get_authenticated_user
+from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.deps import get_db_session
+from app.database.deps import DbSession
 from app.explorations.schema_request import (
     CreateExplorationRequest,
     CreateExplorationRequestWithInputPorts,
@@ -28,7 +27,6 @@ from app.explorations.schema_response import (
 )
 from app.explorations.service import ExplorationService
 from app.shared.schema import FinalizerRequest
-from app.users.model import User
 
 route = "/v2/explorations"
 router = APIRouter(tags=["Explorations"], prefix=route)
@@ -36,7 +34,7 @@ router = APIRouter(tags=["Explorations"], prefix=route)
 
 @router.get("", response_model=GetExplorationsResponse)
 def get_explorations(
-    exploration_service: ExplorationService = Depends(ExplorationService),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
     filter_to_user_with_assigment: Annotated[
         UUID | SkipJsonSchema[None], Query()
     ] = None,
@@ -58,8 +56,8 @@ def get_explorations(
 def create_exploration(
     request: CreateExplorationRequestWithInputPorts,
     background_tasks: BackgroundTasks,
-    authenticated_user: User = Depends(get_authenticated_user),
-    exploration_service: ExplorationService = Depends(ExplorationService),
+    authenticated_user: AuthenticatedUser,
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
 ):
     created_exploration = exploration_service.create_exploration(
         CreateExplorationRequest(**request.model_dump(exclude={"input_ports"})),
@@ -83,8 +81,8 @@ def create_exploration(
 @router.get("/{id}", response_model=GetExplorationResponse)
 def get_exploration(
     id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ):
     return exploration_service.get_exploration(id, authenticated_user)
 
@@ -92,7 +90,7 @@ def get_exploration(
 @router.get("/{id}/input_ports", response_model=GetExplorationInputPortsResponse)
 def get_exploration_input_ports(
     id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
 ):
     return GetExplorationInputPortsResponse(
         input_ports=[
@@ -108,8 +106,8 @@ def get_exploration_input_ports(
 def request_input_ports_for_exploration(
     id: UUID,
     request: RequestInputPortsForExplorationRequest,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ):
     exploration_service.ensure_owner(id, authenticated_user)
 
@@ -130,8 +128,8 @@ def request_input_ports_for_exploration(
 def renew_input_port_for_exploration(
     id: UUID,
     output_port_id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ) -> RenewInputPortForExplorationResponse:
     exploration_service.ensure_owner(id, authenticated_user)
 
@@ -145,8 +143,8 @@ def renew_input_port_for_exploration(
 def revoke_input_port_for_exploration(
     id: UUID,
     output_port_id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ) -> RevokeInputPortForExplorationResponse:
     exploration_service.ensure_owner(id, authenticated_user)
 
@@ -160,8 +158,8 @@ def revoke_input_port_for_exploration(
 def cancel_input_port_for_exploration(
     id: UUID,
     output_port_id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ) -> CancelInputPortForExplorationResponse:
     exploration_service.ensure_owner(id, authenticated_user)
     input_port = exploration_service.cancel_input_port_request(
@@ -176,8 +174,8 @@ def cancel_input_port_for_exploration(
 def remove_input_port_for_exploration(
     id: UUID,
     output_port_id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     exploration_service.ensure_owner(id, authenticated_user)
     exploration_service.remove_input_port(id, output_port_id)
@@ -201,8 +199,8 @@ def remove_input_port_for_exploration(
 )
 def remove_exploration(
     id: UUID,
-    exploration_service: ExplorationService = Depends(ExplorationService),
-    authenticated_user: User = Depends(get_authenticated_user),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
+    authenticated_user: AuthenticatedUser,
 ) -> None:
     exploration_service.ensure_owner(id, authenticated_user)
     can_delete = exploration_service.mark_for_deletion(id)
@@ -221,7 +219,7 @@ def remove_exploration(
 def add_exploration_finalizer(
     id: UUID,
     request: FinalizerRequest,
-    exploration_service: ExplorationService = Depends(ExplorationService),
+    exploration_service: Annotated[ExplorationService, Depends(ExplorationService)],
 ) -> None:
     exploration_service.add_finalizer(id, request.finalizer)
 
@@ -235,7 +233,7 @@ def add_exploration_finalizer(
 def remove_exploration_finalizer(
     id: UUID,
     finalizer: str,
-    db: Session = Depends(get_db_session, scope="function"),
+    db: DbSession,
 ) -> None:
     service = ExplorationService(db)
     should_delete = service.remove_finalizer(id, finalizer)

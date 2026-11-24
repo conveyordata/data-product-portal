@@ -1,4 +1,4 @@
-import { Form, Space } from 'antd';
+import { Flex, Form, theme } from 'antd';
 
 import { AccessDataTile } from '@/components/data-access/data-access-tile/data-access-tile.component.tsx';
 import type { Environment } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
@@ -30,6 +30,7 @@ export function DataAccessTileGrid({
     onTileClick,
 }: Props) {
     const [accessDataForm] = Form.useForm<AccessDataForm>();
+    const { token } = theme.useToken();
 
     if (dataPlatforms.length === 0) {
         return null;
@@ -50,7 +51,7 @@ export function DataAccessTileGrid({
             disabled={isLoading}
         >
             <Form.Item>
-                <Space wrap className={styles.radioButtonContainer}>
+                <Flex wrap justify="center" gap={token.sizeSM}>
                     {dataPlatforms.map((dataPlatform) => (
                         <AccessDataTile<string>
                             key={dataPlatform.value}
@@ -68,7 +69,7 @@ export function DataAccessTileGrid({
                             }
                         />
                     ))}
-                </Space>
+                </Flex>
             </Form.Item>
         </Form>
     );

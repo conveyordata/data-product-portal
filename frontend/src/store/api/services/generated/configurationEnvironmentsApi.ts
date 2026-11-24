@@ -9,14 +9,14 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/configuration/environments/${queryArg}`,
       }),
     }),
-    updateEnvironmentIsGlobal: build.mutation<
-      UpdateEnvironmentIsGlobalApiResponse,
-      UpdateEnvironmentIsGlobalApiArg
+    updateEnvironment: build.mutation<
+      UpdateEnvironmentApiResponse,
+      UpdateEnvironmentApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/configuration/environments/${queryArg.id}`,
         method: "PATCH",
-        body: queryArg.environmentUpdateGlobal,
+        body: queryArg.environmentUpdate,
       }),
     }),
     getEnvironmentConfigsById: build.query<
@@ -72,11 +72,11 @@ export { injectedRtkApi as api };
 export type GetEnvironmentApiResponse =
   /** status 200 Successful Response */ Environment;
 export type GetEnvironmentApiArg = string;
-export type UpdateEnvironmentIsGlobalApiResponse =
+export type UpdateEnvironmentApiResponse =
   /** status 200 Successful Response */ Environment;
-export type UpdateEnvironmentIsGlobalApiArg = {
+export type UpdateEnvironmentApiArg = {
   id: string;
-  environmentUpdateGlobal: EnvironmentUpdateGlobal;
+  environmentUpdate: EnvironmentUpdate;
 };
 export type GetEnvironmentConfigsByIdApiResponse =
   /** status 200 Successful Response */ EnvironmentConfigsGetItem;
@@ -113,6 +113,7 @@ export type Environment = {
   context: string;
   is_default?: boolean;
   is_global?: boolean;
+  position?: number | null;
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -124,8 +125,9 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
-export type EnvironmentUpdateGlobal = {
-  is_global: boolean;
+export type EnvironmentUpdate = {
+  is_global?: boolean | null;
+  position?: number | null;
 };
 export type Awss3Config = {
   identifier: string;
@@ -227,6 +229,7 @@ export type EnvironmentGetItem = {
   context: string;
   is_default?: boolean;
   is_global?: boolean;
+  position?: number | null;
 };
 export type EnvironmentsGet = {
   environments: EnvironmentGetItem[];
@@ -237,7 +240,7 @@ export type EnvironmentConfigsGet = {
 export const {
   useGetEnvironmentQuery,
   useLazyGetEnvironmentQuery,
-  useUpdateEnvironmentIsGlobalMutation,
+  useUpdateEnvironmentMutation,
   useGetEnvironmentConfigsByIdQuery,
   useLazyGetEnvironmentConfigsByIdQuery,
   useGetEnvironmentPlatformServiceConfigQuery,

@@ -613,7 +613,14 @@ type RevokeOutputPortAsInputPortParams struct {
 
 // SanitizeResourceNameParams is parameters of sanitize_resource_name operation.
 type SanitizeResourceNameParams struct {
-	Name string
+	Name               string
+	TechnicalAssetType OptNilString `json:",omitempty,omitzero"`
+}
+
+// SearchDataProductsParams is parameters of search_data_products operation.
+type SearchDataProductsParams struct {
+	Query OptString `json:",omitempty,omitzero"`
+	Limit OptInt    `json:",omitempty,omitzero"`
 }
 
 // SearchOutputPortsParams is parameters of search_output_ports operation.
@@ -694,8 +701,8 @@ type UpdateDomainParams struct {
 	ID uuid.UUID
 }
 
-// UpdateEnvironmentIsGlobalParams is parameters of update_environment_is_global operation.
-type UpdateEnvironmentIsGlobalParams struct {
+// UpdateEnvironmentParams is parameters of update_environment operation.
+type UpdateEnvironmentParams struct {
 	ID uuid.UUID
 }
 
@@ -754,15 +761,33 @@ type UpdateTechnicalAssetParams struct {
 	ID            uuid.UUID
 }
 
+// UpdateTechnicalAssetEnvironmentConfigurationParams is parameters of update_technical_asset_environment_configuration operation.
+type UpdateTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // UpdateTechnicalAssetStatusParams is parameters of update_technical_asset_status operation.
 type UpdateTechnicalAssetStatusParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }
 
+// ValidateNewTechnicalAssetEnvironmentConfigurationParams is parameters of validate_new_technical_asset_environment_configuration operation.
+type ValidateNewTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+}
+
 // ValidateResourceNameParams is parameters of validate_resource_name operation.
 type ValidateResourceNameParams struct {
-	ResourceName  string
-	Model         ResourceNameModel
-	DataProductID OptUUID `json:",omitempty,omitzero"`
+	ResourceName       string
+	Model              ResourceNameModel
+	DataProductID      OptUUID   `json:",omitempty,omitzero"`
+	TechnicalAssetType OptString `json:",omitempty,omitzero"`
+}
+
+// ValidateTechnicalAssetEnvironmentConfigurationParams is parameters of validate_technical_asset_environment_configuration operation.
+type ValidateTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
 }

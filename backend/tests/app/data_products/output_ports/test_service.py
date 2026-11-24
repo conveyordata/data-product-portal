@@ -58,9 +58,14 @@ class TestDatasetsService:
         OutputPortService(session).recalculate_search(ds.id)
 
     def test_recalculate_search_for_all_output_ports(self, session):
-        for i in range(51):  # Ensure we load 2 batches
-            OutputPortFactory()
-        OutputPortService(session).recalculate_search_for_all_output_ports()
+        output_ports = [OutputPortFactory() for _ in range(3)]
+
+        OutputPortService(session).recalculate_search_for_all_output_ports(batch_size=2)
+
+        for output_port in output_ports:
+            session.refresh(output_port)
+            assert output_port.embeddings is not None
+            assert output_port.search_vector is not None
 
     def test_search_output_ports_excludes_private_datasets(self, session):
         """Test that private output ports are not visible in search results to unauthorized users"""

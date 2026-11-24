@@ -3,8 +3,6 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
@@ -13,12 +11,11 @@ from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.roles.schema import Scope
-from app.core.authz import Authorization
+from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.groups.model import Group
 from app.groups.schema_request import GroupCreate, GroupUpdate
 from app.groups.service import GroupService
-from tests import engine
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -30,6 +27,7 @@ from tests.factories import (
     UserFactory,
 )
 from tests.groups_util import group_has_member
+from tests.session_util import row_lock_modes
 
 
 class TestGroupService:
@@ -149,7 +147,7 @@ class TestGroupService:
 
     def test_membership__immediately_adds_and_revokes_existing_group_access(
         self,
-        authorizer: Authorization,
+        policies: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -184,13 +182,13 @@ class TestGroupService:
             member_identity_ids=[user.id],
         )
 
-        assert authorizer.has_access(
+        assert policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert authorizer.has_access(
+        assert policies.allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -202,13 +200,13 @@ class TestGroupService:
             member_identity_ids=[user.id],
         )
 
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -217,7 +215,7 @@ class TestGroupService:
 
     def test_add_members__existing_member_immediately_inherits_new_group_data_product_role(
         self,
-        authorizer: Authorization,
+        policies: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -228,17 +226,17 @@ class TestGroupService:
 
         service = GroupService(session)
         service.add_members(group_id=group.id, member_identity_ids=[user.id])
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=user.id,
             role_id=group.id,
             resource_id="*",
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=user.id,
             role_id=group.id,
             resource_id=data_product.id,
         )
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
@@ -251,32 +249,32 @@ class TestGroupService:
             data_product_id=data_product.id,
             role_id=role.id,
         )
-        assert authorizer.has_access(
+        assert policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=action,
         )
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(other_data_product.domain_id),
             obj=str(other_data_product.id),
             act=action,
         )
 
-        authorizer.revoke_resource_role(
+        policies.revoke_resource_role(
             user_id=group.id,
             role_id=role.id,
             resource_id=data_product.id,
         )
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=action,
         )
         # The reusable membership edge remains.
-        assert authorizer.has_resource_role(
+        assert policies.has_resource_role(
             user_id=user.id,
             role_id=group.id,
             resource_id="*",
@@ -284,7 +282,7 @@ class TestGroupService:
 
     def test_delete_group_deleting_group_revokes_inherited_access(
         self,
-        authorizer: Authorization,
+        policies: CasbinPolicies,
         session,
     ):
         group = GroupFactory()
@@ -318,13 +316,13 @@ class TestGroupService:
             group_id=group.id,
             member_identity_ids=[user.id],
         )
-        assert authorizer.has_access(
+        assert policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert authorizer.has_access(
+        assert policies.allows(
             sub=str(user.id),
             dom="*",
             obj="*",
@@ -332,24 +330,24 @@ class TestGroupService:
         )
 
         service.delete_group(group_id=group.id)
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=data_product_action,
         )
-        assert not authorizer.has_access(
+        assert not policies.allows(
             sub=str(user.id),
             dom="*",
             obj="*",
             act=global_action,
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=user.id,
             role_id=group.id,
             resource_id="*",
         )
-        assert not authorizer.has_global_role(
+        assert not policies.has_global_role(
             user_id=user.id,
             role_id=group.id,
         )
@@ -499,43 +497,21 @@ class TestGroupService:
 
         assert exc_info.value.status_code == 404
 
-    def test_replace_members__holds_group_lock_until_transaction_ends(self):
+    def test_replace_members__holds_group_lock_until_transaction_ends(self, session):
         group = GroupFactory()
         member = UserFactory()
 
-        with (
-            Session(bind=engine) as first_session,
-            Session(bind=engine) as second_session,
-        ):
-            with first_session.begin():
-                GroupService(first_session).replace_members(
-                    group_id=group.id,
-                    member_identity_ids=[member.id],
-                )
+        GroupService(session).replace_members(
+            group_id=group.id,
+            member_identity_ids=[member.id],
+        )
 
-                with pytest.raises(OperationalError) as exc_info:
-                    second_session.scalar(
-                        select(Group.id)
-                        .where(Group.id == group.id)
-                        .with_for_update(
-                            of=Group,
-                            nowait=True,  # NOWAIT to fail inmediately with 55P03
-                        )
-                    )
-
-                assert exc_info.value.orig.sqlstate == "55P03"
-                second_session.rollback()
-
-            locked_group_id = second_session.scalar(
-                select(Group.id)
-                .where(Group.id == group.id)
-                .with_for_update(of=Group, nowait=True)
-            )
-
-            assert locked_group_id == group.id
+        assert "For Update" in row_lock_modes(session, Group.__table__, group.id)
+        session.rollback()
+        assert not row_lock_modes(session, Group.__table__, group.id)
 
     def test_add_members__assigns_membership_policies_in_batch(
-        self, authorizer: Authorization, session
+        self, policies: CasbinPolicies, session
     ):
         group = GroupFactory()
         first = UserFactory()
@@ -546,13 +522,13 @@ class TestGroupService:
         )
 
         for member in (first, second):
-            assert authorizer.has_resource_role(
+            assert policies.has_resource_role(
                 user_id=member.id, role_id=group.id, resource_id="*"
             )
-            assert authorizer.has_global_role(user_id=member.id, role_id=group.id)
+            assert policies.has_global_role(user_id=member.id, role_id=group.id)
 
     def test_remove_members__revokes_only_removed_membership_policies(
-        self, authorizer: Authorization, session
+        self, policies: CasbinPolicies, session
     ):
         group = GroupFactory()
         removed = UserFactory()
@@ -564,17 +540,17 @@ class TestGroupService:
 
         service.remove_members(group_id=group.id, member_identity_ids=[removed.id])
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=removed.id, role_id=group.id, resource_id="*"
         )
-        assert not authorizer.has_global_role(user_id=removed.id, role_id=group.id)
-        assert authorizer.has_resource_role(
+        assert not policies.has_global_role(user_id=removed.id, role_id=group.id)
+        assert policies.has_resource_role(
             user_id=retained.id, role_id=group.id, resource_id="*"
         )
-        assert authorizer.has_global_role(user_id=retained.id, role_id=group.id)
+        assert policies.has_global_role(user_id=retained.id, role_id=group.id)
 
     def test_replace_members__updates_membership_policies(
-        self, authorizer: Authorization, session
+        self, policies: CasbinPolicies, session
     ):
         group = GroupFactory()
         removed = UserFactory()
@@ -589,16 +565,16 @@ class TestGroupService:
             group_id=group.id, member_identity_ids=[retained.id, added.id]
         )
 
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=removed.id, role_id=group.id, resource_id="*"
         )
-        assert not authorizer.has_global_role(user_id=removed.id, role_id=group.id)
+        assert not policies.has_global_role(user_id=removed.id, role_id=group.id)
 
         for member in (retained, added):
-            assert authorizer.has_resource_role(
+            assert policies.has_resource_role(
                 user_id=member.id, role_id=group.id, resource_id="*"
             )
-            assert authorizer.has_global_role(user_id=member.id, role_id=group.id)
+            assert policies.has_global_role(user_id=member.id, role_id=group.id)
 
     def test_create_groups_batch__creates_all_valid_groups(self, session):
         result = GroupService(session).create_groups_batch(
@@ -722,7 +698,7 @@ class TestGroupService:
         assert second_member in session
 
     def test_delete_groups_batch__clears_subject_and_membership_policies(
-        self, authorizer: Authorization, session
+        self, policies: CasbinPolicies, session
     ):
         first_group = GroupFactory()
         second_group = GroupFactory()
@@ -735,29 +711,29 @@ class TestGroupService:
         service.add_members(
             group_id=second_group.id, member_identity_ids=[second_member.id]
         )
-        authorizer.assign_global_role(user_id=first_group.id, role_id="first-role")
-        authorizer.assign_resource_role(
+        policies.assign_global_role(user_id=first_group.id, role_id="first-role")
+        policies.assign_resource_role(
             user_id=second_group.id, role_id="second-role", resource_id="resource"
         )
 
         service.delete_groups_batch([first_group.id, second_group.id])
 
-        assert not authorizer.has_global_role(
+        assert not policies.has_global_role(
             user_id=first_group.id, role_id="first-role"
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=second_group.id, role_id="second-role", resource_id="resource"
         )
-        assert not authorizer.has_global_role(
+        assert not policies.has_global_role(
             user_id=first_member.id, role_id=first_group.id
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=first_member.id, role_id=first_group.id, resource_id="*"
         )
-        assert not authorizer.has_global_role(
+        assert not policies.has_global_role(
             user_id=second_member.id, role_id=second_group.id
         )
-        assert not authorizer.has_resource_role(
+        assert not policies.has_resource_role(
             user_id=second_member.id, role_id=second_group.id, resource_id="*"
         )
 

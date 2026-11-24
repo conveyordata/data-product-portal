@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Sequence
 from uuid import UUID
 
-import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, contains_eager
@@ -17,6 +16,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.service import DataProductService
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
@@ -93,8 +93,9 @@ class TechnicalAssetOutputPortService:
 
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
-        current_link.approved_on = datetime.now(tz=pytz.utc)
+        current_link.approved_on = datetime.now(tz=timezone.utc)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return current_link
 
     def deny_technical_asset_link(
@@ -112,7 +113,7 @@ class TechnicalAssetOutputPortService:
         )
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
-        current_link.denied_on = datetime.now(tz=pytz.utc)
+        current_link.denied_on = datetime.now(tz=timezone.utc)
         self.db.flush()
         return current_link
 
@@ -175,7 +176,7 @@ class TechnicalAssetOutputPortService:
                 .all()
             )
 
-            authorizer = Authorization()
+            authorizer = Authorization(self.db)
             return [
                 TechnicalAssetOutputPortRequest.model_validate(a)
                 for a in requested_associations

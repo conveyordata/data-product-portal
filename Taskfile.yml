@@ -126,17 +126,26 @@ tasks:
   test:backend:
     desc: "Run the tests for the backend"
     dir: backend
+    env:
+      TEST_EMBEDDING_LATENCY_BOUND: "5.000"
     cmds:
       - poetry install --with test
       - docker compose up -d postgresql
-      - poetry run pytest -v
-      - docker compose kill
+      # -n logical is set here, not in pytest.ini: every worker imports the app
+      # and sets up its own test database, which doubles the time to run a single
+      # test, and debuggers do not work inside a worker. worksteal lets idle
+      # workers take over tests a busy worker has not started yet, so the worker
+      # that drew the slow tests does not hold up the run.
+      - poetry run pytest -v -n logical --dist worksteal
 
   coverage:backend:
     desc: "Run the backend tests with a coverage report"
     dir: backend
+    env:
+      TEST_EMBEDDING_LATENCY_BOUND: "5.000"
     cmds:
-      - poetry run pytest --cov-report term-missing --cov-report html --cov=app tests/
+      # See test:backend for why -n logical is set here.
+      - poetry run pytest -n logical --dist worksteal --cov-report term-missing --cov-report html --cov=app tests/
 
   lint:backend:
     desc: "Lint and format the backend with ruff"
@@ -170,7 +179,7 @@ tasks:
 
   poetry:reqs:
     desc: "Regenerate the hashed Poetry bootstrap requirements"
-    dir: backend
+    dir: tools/poetry
     cmds:
       - uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --universal --python-version 3.14 --upgrade
 

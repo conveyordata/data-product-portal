@@ -1,10 +1,9 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Sequence
 from uuid import UUID
 
-import pytz
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
@@ -12,9 +11,8 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
-from app.core.namespace.validation import (
-    TechnicalAssetNamespaceValidator,
-)
+from app.core.context import queue_event
+from app.core.namespace.validation import TechnicalAssetNamespaceValidator
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
@@ -28,11 +26,16 @@ from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
+from app.data_products.technical_assets.environment_configuration_service import (
+    TechnicalAssetEnvironmentConfigurationService,
+)
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
+    NewTechnicalAssetEnvironmentConfigurationValidation,
+    TechnicalAssetEnvironmentConfigurationUpdate,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
 )
@@ -40,9 +43,8 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
-from app.database.deps import get_db_session
 from app.graph.graph import Graph
-from app.plugins.registry import plugin_registry
+from app.plugins.registry import TechnicalAssetType, plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
@@ -75,9 +77,8 @@ def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> No
 
 
 class TechnicalAssetService:
-    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
+    def __init__(self, db: Session):
         self.db = db
-        self.namespace_validator = TechnicalAssetNamespaceValidator()
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
@@ -177,27 +178,38 @@ class TechnicalAssetService:
     def create_technical_asset(
         self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
+        self.db.execute(
+            select(DataProductModel.id)
+            .where(DataProductModel.id == data_product_id)
+            .with_for_update()
+        )
         if (
-            validity := self.namespace_validator.validate_namespace(
-                technical_asset.namespace, self.db, data_product_id
-            ).validity
+            validity := self.validate_namespace(
+                data_product_id,
+                technical_asset.namespace,
+                technical_asset.configuration.name,
+            )
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        context = self._new_asset_context(
+            data_product_id,
+            technical_asset.namespace,
+            technical_asset.technical_mapping or TechnicalMapping.Default,
+        )
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            technical_asset.configuration.validate_configuration(
-                PluginContext.build(
-                    ensure_data_product_exists(data_product_id, self.db),
-                    technical_asset.namespace,
-                    TechnicalMapping.Default,
-                ),
-                self.db,
-            )
+            technical_asset.configuration.validate_configuration(context, self.db)
+
+        environment_service = TechnicalAssetEnvironmentConfigurationService(self.db)
+        environment_values = environment_service.prepare_create(
+            technical_asset.configuration, context, technical_asset.environment_values
+        )
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()
+        technical_asset_schema.pop("environment_values")
         tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
         access_modes = self._get_access_modes(
             technical_asset_schema.pop("access_mode_ids", []),
@@ -215,7 +227,84 @@ class TechnicalAssetService:
         )
         self.db.add(model)
         self.db.flush()
+        environment_service.create(
+            model.configuration_id,
+            type(technical_asset.configuration),
+            environment_values,
+        )
+        DataProductService(self.db).recalculate_search(data_product_id)
         return model
+
+    def validate_namespace(
+        self,
+        data_product_id: UUID,
+        namespace: str,
+        technical_asset_type: TechnicalAssetType,
+    ) -> ResourceNameValidityType:
+        return (
+            TechnicalAssetNamespaceValidator(technical_asset_type)
+            .validate_namespace(namespace, self.db, data_product_id)
+            .validity
+        )
+
+    def get_technical_asset_with_environment_values(
+        self, data_product_id: UUID, id: UUID
+    ) -> TechnicalAssetModel:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        technical_asset.environment_values = (  # type: ignore[attr-defined]
+            TechnicalAssetEnvironmentConfigurationService(self.db).get_values(
+                technical_asset
+            )
+        )
+        return technical_asset
+
+    def update_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        update: TechnicalAssetEnvironmentConfigurationUpdate,
+    ) -> UpdateTechnicalAssetResponse:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        TechnicalAssetEnvironmentConfigurationService(self.db).replace(
+            technical_asset, update.environment_values
+        )
+        queue_event(technical_asset.to_event())
+        return UpdateTechnicalAssetResponse(id=technical_asset.id)
+
+    def validate_new_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        validation: NewTechnicalAssetEnvironmentConfigurationValidation,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).prepare_create(
+            validation.configuration,
+            self._new_asset_context(
+                data_product_id, validation.namespace, validation.technical_mapping
+            ),
+            validation.environment_values,
+        )
+
+    def validate_technical_asset_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        update: TechnicalAssetEnvironmentConfigurationUpdate,
+    ) -> None:
+        TechnicalAssetEnvironmentConfigurationService(self.db).validate(
+            self.get_technical_asset(data_product_id, id), update.environment_values
+        )
+
+    def _new_asset_context(
+        self,
+        data_product_id: UUID,
+        namespace: str,
+        technical_mapping: TechnicalMapping,
+    ) -> PluginContext:
+        return PluginContext.build(
+            ensure_data_product_exists(data_product_id, self.db),
+            namespace,
+            technical_mapping,
+        )
 
     def remove_technical_asset(
         self, data_product_id: UUID, id: UUID
@@ -228,6 +317,7 @@ class TechnicalAssetService:
 
         self.update_search_for_associated_datasets(result)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return result
 
     def get_technical_asset_with_links(
@@ -304,7 +394,7 @@ class TechnicalAssetService:
             output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
+            requested_on=datetime.now(tz=timezone.utc),
         )
         technical_asset.output_port_links.append(output_port_link)
         self.db.flush()
@@ -335,6 +425,7 @@ class TechnicalAssetService:
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return technical_asset
 
     def update_technical_asset(
@@ -351,6 +442,7 @@ class TechnicalAssetService:
                 setattr(current_technical_asset, k, v) if v else None
 
         self.db.flush()
+        DataProductService(self.db).recalculate_search(data_product_id)
         return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:

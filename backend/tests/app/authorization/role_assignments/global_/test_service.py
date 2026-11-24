@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.authorization.role_assignments.global_.service import RoleAssignmentService
 from app.authorization.roles import ADMIN_UUID
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import CasbinPolicies
 from tests.factories import GlobalRoleAssignmentFactory, UserFactory
 
 
@@ -24,7 +24,7 @@ class TestRoleAssignmentService:
         service.revoke_admin(user)
 
         assert user.admin_expiry is None
-        assert Authorization().has_admin_role(user_id=str(user.id)) is False
+        assert CasbinPolicies().has_admin_role(user_id=str(user.id)) is False
         assert service.is_admin(user.id) is False
 
     def test_revoke_admin__keeps_permanent_admin_role(self, session):
@@ -35,5 +35,5 @@ class TestRoleAssignmentService:
 
         service.revoke_admin(user)
 
-        assert Authorization().has_admin_role(user_id=str(user.id)) is True
+        assert CasbinPolicies().has_admin_role(user_id=str(user.id)) is True
         assert service.is_admin(user.id) is True
