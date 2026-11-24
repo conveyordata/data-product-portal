@@ -212,6 +212,7 @@ module = [
     "tests.app.machine_users.test_service",
     "tests.app.plugins.test_router",
     "tests.app.resource_names.test_router",
+    "tests.app.search_data_products.test_router",
     "tests.app.search_output_ports.test_router",
     "tests.app.users.notifications.test_router",
     "tests.app.users.test_service",

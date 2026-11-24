@@ -196,12 +196,6 @@ tasks:
       - helm lint helm/
       - helm template data-product-portal helm/ > /dev/null
 
-  poetry:setup:
-    desc: "Install the backend python project so the precommit does not fail"
-    dir: backend
-    cmds:
-      - poetry install --with dev
-
   setup:backend:
     desc: "Install backend dependencies, including the test group"
     dir: backend

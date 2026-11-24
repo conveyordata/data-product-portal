@@ -45,7 +45,7 @@ In order to install all project dependencies using poetry,
 open the 'backend' directory as a workspace in your favorite IDE and execute the command below.
 
 ```sh
-poetry install
+poetry install --all-groups
 ```
 
 ### Starting required services
