@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.schema_request import AccessDurationUpdate
@@ -36,15 +36,9 @@ def get_default_access_duration(
     abstract_data_product_type: AbstractDataProductType,
     db: DbSession,
 ):
-    access_duration = AccessDurationService(db).get_default_access_duration(
+    return AccessDurationService(db).get_default_access_duration(
         abstract_data_product_type
     )
-    if access_duration is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No default access duration found for the given abstract data product type.",
-        )
-    return access_duration
 
 
 @router.get("")
