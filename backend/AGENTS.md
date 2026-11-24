@@ -21,7 +21,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 In principle should always be present on non GET endpoints and sensitive GET endpoints.
 * Check if new actions need to be added.
 * Content tied to a resource (notifications, counts, graph nodes) follows that resource's visibility.
-* A visibility filter can turn a related object into `None`; guard every consumer of that relationship. Visibility filters are for reads: writes, approvals, deletes and in-use checks run with `SKIP_DATA_PRODUCT_VISIBILITY_FILTER`, tested with the counterpart row hidden.
+* A visibility filter can turn a related object into `None`; guard every consumer of that relationship. Visibility filters are for reads: writes, approvals, deletes and in-use checks run with `UNFILTERED` (it skips both the Data Product visibility and the Output Port access filter), tested with the counterpart row hidden.
 * When you widen an authorization or visibility rule, list every read path it opens and add a negative test for each.
 * When acting on "the active" grant, request or assignment, check whether several can be active at once and handle all of them.
 * When a write changes role assignments or group membership, update the Casbin enforcer in that write, not only on reload. Mirror new `AuthorizationAction`s in `frontend/src/types/authorization/rbac-actions.ts`.
@@ -33,7 +33,7 @@ In principle should always be present on non GET endpoints and sensitive GET end
 *   Use SQLAlchemy async models and Alembic for migrations (`backend/app/database/alembic/versions/`).
 *   The backend can run as several replicas: enforce uniqueness and invariants with a database constraint or `SELECT ... FOR UPDATE`, never with only a prior `SELECT` or an in-process lock.
 *   Update `EventTrackedMixin` models through ORM attributes, not bulk `update()`, so events fire.
-*   After a rebase, `alembic heads` must show one head. A downgrade must handle rows the upgrade allowed, and a backfill must pass the same validation as new writes.
+*   After a rebase, core and each plugin migration directory must each still have exactly one head (`migrate_all` fails otherwise); several heads overall are expected. A downgrade must handle rows the upgrade allowed, and a backfill must pass the same validation as new writes.
 
 ## Testing
 
