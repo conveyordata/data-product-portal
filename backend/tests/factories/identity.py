@@ -2,10 +2,12 @@ import factory
 from factory.fuzzy import FuzzyText
 from faker import Faker
 
+from .model_factory import ModelFactory
+
 fake = Faker()
 
 
-class IdentityFactory(factory.alchemy.SQLAlchemyModelFactory):
+class IdentityFactory[T](ModelFactory[T]):
     class Meta:
         abstract = True
 

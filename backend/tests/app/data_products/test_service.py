@@ -1,6 +1,7 @@
 from sqlalchemy import select
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.core.authz import CasbinPolicies
 from app.core.context import close_event_context, open_event_context, pop_events
 from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.service import (
@@ -38,6 +39,21 @@ class TestDataProductService:
         assert session.get(TechnicalAsset, technical_asset_id) is None
         assert session.get(configuration_type, configuration_id) is None
         assert session.get(TechnicalAssetConfiguration, configuration_id) is None
+
+    def test_remove_data_product__clears_output_port_authorization(
+        self, session, policies: CasbinPolicies
+    ):
+        output_port = OutputPortFactory()
+        user = UserFactory()
+        policies.assign_resource_role(
+            user_id=user.id, role_id="role", resource_id=output_port.id
+        )
+
+        DataProductService(session).remove_data_product(output_port.data_product_id)
+
+        assert not policies.has_resource_role(
+            user_id=user.id, role_id="role", resource_id=output_port.id
+        )
 
     def test_recalculate_search__sets_embeddings(self, session):
         data_product = DataProductFactory(name="Churn", description=None, about=None)

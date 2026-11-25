@@ -23,7 +23,6 @@ from app.abstract_data_product.input_ports.model import (
 )
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
-from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import (
     AccessDuration as AccessDurationModel,
@@ -41,6 +40,7 @@ from app.configuration.output_port_access_types.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import CasbinPolicies
+from app.core.authz.rules import EVERYONE, OUTPUT_PORT_READER_ROLE
 from app.core.context import discard_events
 from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
@@ -78,7 +78,10 @@ from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, UNFILTERED
-from app.database.visibility import output_port_visible_ignoring_consumption
+from app.database.visibility import (
+    access_function_visible_to_everyone,
+    output_port_visible_ignoring_consumption,
+)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -479,6 +482,7 @@ class OutputPortService:
         result = copy.deepcopy(output_port)
         self.db.delete(output_port)
         DataProductService(self.db).recalculate_search(data_product_id)
+        CasbinPolicies().clear_assignments_for_resource(resource_id=id)
         return result
 
     def update_output_port(
@@ -706,22 +710,8 @@ class OutputPortService:
         output_port_ids: Sequence[UUID], access_function: OutputPortAccessFunction
     ):
         CasbinPolicies().sync_resource_roles(
-            user_id="*",
+            user_id=EVERYONE,
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=output_port_ids,
-            granted=access_function != OutputPortAccessFunction.PRIVATE,
-        )
-
-    def sync_read_rights_output_ports(self):
-        visible_output_port_ids = self.db.scalars(
-            select(OutputPortModel.id).where(
-                OutputPortModel.access_function != OutputPortAccessFunction.PRIVATE
-            ),
-            execution_options=UNFILTERED,
-        ).all()
-        CasbinPolicies().sync_resource_roles(
-            user_id="*",
-            role_id=OUTPUT_PORT_READER_ROLE,
-            resource_ids=visible_output_port_ids,
-            granted=True,
+            granted=access_function_visible_to_everyone(access_function),
         )

@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.authorization.schema_response import AccessResponse
@@ -26,6 +27,7 @@ class TestAuthorizationRouter:
         access = AccessResponse(**response.json())
         assert access.allowed is False
 
+    @pytest.mark.seeds_casbin
     def test_check_access_authorized(
         self, client: TestClient, policies: CasbinPolicies
     ):

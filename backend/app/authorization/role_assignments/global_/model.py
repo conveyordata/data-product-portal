@@ -1,3 +1,4 @@
+import uuid
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -19,13 +20,13 @@ class GlobalRoleAssignment(Base, BaseORM):
     __table_args__ = (UniqueConstraint("identity_id", name="unique_global_assignment"),)
 
     id = Column(UUID, primary_key=True, default=uuid4)
-    identity_id: Mapped[UUID] = mapped_column(
+    identity_id: Mapped[uuid.UUID] = mapped_column(
         "identity_id", ForeignKey("identities.id")
     )
     identity: Mapped["Identity"] = relationship(
         back_populates="global_role", foreign_keys=[identity_id]
     )
-    role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
+    role_id: Mapped[uuid.UUID] = mapped_column("role_id", ForeignKey("roles.id"))
     role: Mapped["Role"] = relationship(foreign_keys=[role_id])
     decision: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus), default=DecisionStatus.PENDING

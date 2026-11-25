@@ -271,6 +271,7 @@ class TestMachineUserService:
         assert session.get(MachineUser, machine_user.id) is None
         assert user in session
 
+    @pytest.mark.seeds_casbin
     def test_delete_machine_users_batch__clears_only_deleted_authorization(
         self,
         policies: CasbinPolicies,

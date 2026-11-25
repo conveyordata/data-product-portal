@@ -8,13 +8,13 @@ from sqlalchemy.orm import object_session
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Scope
-from app.authorization.service import AuthorizationService
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
@@ -859,7 +859,7 @@ _USERS = {
 def test_visible_ids__agrees_with_casbin_route_check(session, visibility, make_user):
     data_product = DataProductFactory(visibility=visibility)
     user = make_user(data_product)
-    AuthorizationService(session).reload_enforcer()
+    CasbinSync(session).rebuild()
 
     with as_user(session, user.id):
         sees = data_product.id in visible_ids(session, [data_product.id])
@@ -964,7 +964,7 @@ def test_acting_as__output_port_agrees_with_casbin_route_check(
         data_product=data_product, access_function=access_function
     )
     user = make_user(output_port)
-    AuthorizationService(session).reload_enforcer()
+    CasbinSync(session).rebuild()
 
     with as_user(session, user.id):
         sees = (

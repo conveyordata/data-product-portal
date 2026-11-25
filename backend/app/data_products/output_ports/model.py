@@ -94,7 +94,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         ),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     namespace = Column(String)
     name = Column(String)
     description = Column(String)
@@ -112,7 +114,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
-    data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
+    data_product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_products.id"))
     access_type_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), nullable=False, index=True
     )
