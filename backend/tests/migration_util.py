@@ -23,6 +23,7 @@ def before_migration(revision: str) -> Iterator[None]:
         engine.url.render_as_string(hide_password=False),
     )
     previous = ScriptDirectory.from_config(config).get_revision(revision).down_revision
+    assert isinstance(previous, str)
     command.downgrade(config, previous)
     try:
         yield
