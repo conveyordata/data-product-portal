@@ -274,8 +274,8 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
         namespaceRequest?.technicalAssetType === pluginMetadata?.plugin;
 
     const options = [
-        { label: t('Default'), value: 'default' },
-        { label: t('Custom'), value: 'custom' },
+        { label: t('Default'), value: TechnicalMapping.Default },
+        { label: t('Custom'), value: TechnicalMapping.Custom },
     ];
 
     const technicalAssetType = pluginMetadata?.plugin;
@@ -477,7 +477,7 @@ export function TechnicalAssetForm({ mode, dataProductId, onCreated, onCancel, d
                     tooltip={t(
                         'Default mapping applies the platform’s standards to your asset. Choose Custom if your asset exists outside these standards and requires explicit configuration, which may be subject to manual approval before activation.',
                     )}
-                    initialValue="default"
+                    initialValue={TechnicalMapping.Default}
                 >
                     <Select allowClear={false} options={options} />
                 </Form.Item>

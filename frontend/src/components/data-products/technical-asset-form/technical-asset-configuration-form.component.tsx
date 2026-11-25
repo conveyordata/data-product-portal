@@ -3,7 +3,7 @@ import type { Rule } from 'antd/es/form';
 import type { BaseOptionType } from 'antd/es/select';
 import { type ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TechnicalMapping } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { TechnicalMapping } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { UiElementMetadata } from '@/store/api/services/generated/pluginsApi';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { configurationFieldName } from './components/configuration-field-name';
@@ -49,7 +49,7 @@ export function TechnicalAssetConfigurationForm({
                 form.setFieldValue(
                     // biome-ignore lint: dynamic field names can't be statically typed at compile time.
                     configurationFieldName(field.name) as any,
-                    technical_mapping === 'default' ? namespace : undefined,
+                    technical_mapping === TechnicalMapping.Default ? namespace : undefined,
                 );
             }
         });
@@ -101,7 +101,8 @@ export function TechnicalAssetConfigurationForm({
         }
 
         // Determine if field should be disabled
-        const isDisabled = disabled || (use_namespace_when_not_source_aligned && technical_mapping === 'default');
+        const isDisabled =
+            disabled || (use_namespace_when_not_source_aligned && technical_mapping === TechnicalMapping.Default);
 
         // Render the appropriate input component based on type
         let inputComponent: ReactElement;
@@ -112,7 +113,7 @@ export function TechnicalAssetConfigurationForm({
 
             case 'select': {
                 const selectOptions: BaseOptionType[] =
-                    use_namespace_when_not_source_aligned && technical_mapping === 'default'
+                    use_namespace_when_not_source_aligned && technical_mapping === TechnicalMapping.Default
                         ? [namespace].map((val) => ({ label: val, value: val }))
                         : (select?.options?.map((option) => ({
                               label: option.label,
