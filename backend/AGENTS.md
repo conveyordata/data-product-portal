@@ -20,12 +20,20 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 *   When creating new endpoints check with the user if authorization is needed with `Authorization.enforce()`.
 In principle should always be present on non GET endpoints and sensitive GET endpoints.
 * Check if new actions need to be added.
+* Content tied to a resource (notifications, counts, graph nodes) follows that resource's visibility.
+* A visibility filter can turn a related object into `None`; guard every consumer of that relationship. Visibility filters are for reads: writes, approvals, deletes and in-use checks run with `UNFILTERED` (it skips both the Data Product visibility and the Output Port access filter), tested with the counterpart row hidden.
+* When you widen an authorization or visibility rule, list every read path it opens and add a negative test for each.
+* When acting on "the active" grant, request or assignment, check whether several can be active at once and handle all of them.
+* When a write changes role assignments or group membership, update the Casbin enforcer in that write, not only on reload. Mirror new `AuthorizationAction`s in `frontend/src/types/authorization/rbac-actions.ts`.
 * Who sees a Data Product, Exploration, Technical Asset or Output Port is decided in `app/database/visibility.py`, and who is an admin in `app/authorization/role_assignments/global_/admin.py`; don't read `session.info` or write visibility or admin predicates elsewhere.
 
 ## SQLAlchemy
 *   SQLAlchemy: use `joined` lazy loading for 1:1 relationships; otherwise use `raise` and specify explicit eager loading.
 *   No enums in the database — store strings, use `Enum`s in Pydantic models, and reuse existing enums where possible.
 *   Use SQLAlchemy async models and Alembic for migrations (`backend/app/database/alembic/versions/`).
+*   The backend can run as several replicas: enforce uniqueness and invariants with a database constraint or `SELECT ... FOR UPDATE`, never with only a prior `SELECT` or an in-process lock.
+*   Update `EventTrackedMixin` models through ORM attributes, not bulk `update()`, so events fire.
+*   After a rebase, core and each plugin migration directory must each still have exactly one head (`migrate_all` fails otherwise); several heads overall are expected. A downgrade must handle rows the upgrade allowed, and a backfill must pass the same validation as new writes.
 
 ## Testing
 

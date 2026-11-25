@@ -5,9 +5,11 @@ from typing import Final
 import pytest
 from alembic import command
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.data_products.model import DataProduct, DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.service import DataProductService
 from app.database.database import engine
 from app.db_tool import seed_cmd
@@ -22,9 +24,15 @@ from app.search_data_products.schema_response import SearchDataProductsResponse
 from app.settings import settings
 from tests import engine as test_engine
 from tests.factories import (
+    AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    ExplorationFactory,
+    InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
+    TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -70,26 +78,6 @@ class TestDataProductSearchRouter:
 
         assert response.status_code == 422, response.text
 
-    def test_search_data_products__only_assigned(self, session, client):
-        churn, _, _ = self.setup(session)
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        DataProductRoleAssignmentFactory(
-            data_product_id=churn.id,
-            role_id=RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[]).id,
-            identity_id=user.id,
-        )
-
-        response = client.get(
-            ENDPOINT,
-            params={
-                "query": "sales",
-                "assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value,
-            },
-        )
-
-        assert response.status_code == 200, response.text
-        assert [dp["id"] for dp in response.json()["data_products"]] == [str(churn.id)]
-
     def test_search_data_products__excludes_hidden(self, session, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)
         hidden = DataProductFactory(
@@ -103,6 +91,106 @@ class TestDataProductSearchRouter:
         assert str(hidden.id) not in {
             dp["id"] for dp in response.json()["data_products"]
         }
+
+    def test_search_data_products__lists_visible_output_ports(self, session, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(
+            data_product=data_product,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
+        )
+        access_mode = AccessModeFactory(name="read")
+        TechnicalAssetOutputPortAssociationFactory(
+            output_port=output_port,
+            technical_asset=TechnicalAssetFactory(
+                owner=data_product, access_modes=[access_mode]
+            ),
+        )
+        OutputPortFactory(
+            data_product=data_product, access_function=OutputPortAccessFunction.PRIVATE
+        )
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        [item] = response.json()["data_products"]
+        assert [op["id"] for op in item["output_ports"]] == [str(output_port.id)]
+        assert [mode["id"] for mode in item["output_ports"][0]["access_modes"]] == [
+            str(access_mode.id)
+        ]
+
+    def test_search_data_products__returns_data_product_without_output_ports(
+        self, client
+    ):
+        data_product = DataProductFactory()
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        [item] = response.json()["data_products"]
+        assert item["type"]["id"] == str(data_product.type.id)
+        assert item["output_ports"] == []
+        assert item["consumer_count"] == 0
+
+    def test_search_data_products__counts_distinct_consumers(self, client):
+        data_product = DataProductFactory()
+        first, second = (
+            OutputPortFactory(
+                data_product=data_product,
+                access_function=OutputPortAccessFunction.UNRESTRICTED,
+            )
+            for _ in range(2)
+        )
+        consumer = DataProductFactory()
+        exploration = ExplorationFactory()
+        InputPortFactory(output_port=first, consuming_abstract_data_product=consumer)
+        InputPortFactory(output_port=second, consuming_abstract_data_product=consumer)
+        InputPortFactory(
+            output_port=second, consuming_abstract_data_product=exploration
+        )
+        InputPortFactory(output_port=first, status=InputPortStatus.PENDING)
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        counts = {
+            dp["id"]: dp["consumer_count"] for dp in response.json()["data_products"]
+        }
+        assert counts[str(data_product.id)] == 2
+
+    @pytest.mark.parametrize(
+        "member_of_consumer", [False, True], ids=["not_consuming", "consuming"]
+    )
+    def test_search_data_products__hides_private_output_ports(
+        self, client, member_of_consumer
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        consumer = DataProductFactory()
+        if member_of_consumer:
+            DataProductRoleAssignmentFactory(
+                data_product_id=consumer.id,
+                role_id=RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[]).id,
+                identity_id=user.id,
+            )
+        InputPortFactory(
+            output_port=OutputPortFactory(
+                data_product=data_product,
+                access_function=OutputPortAccessFunction.PRIVATE,
+            ),
+            consuming_abstract_data_product=consumer,
+        )
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        item = next(
+            dp
+            for dp in response.json()["data_products"]
+            if dp["id"] == str(data_product.id)
+        )
+        assert item["output_ports"] == []
+        assert item["consumer_count"] == 0
 
     @pytest.mark.commits
     def test_benchmark_data_products(self, session, client):

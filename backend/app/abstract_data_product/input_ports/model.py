@@ -109,21 +109,22 @@ class InputPort(
         )
 
     @property
-    def active_grant(self) -> Optional["InputPortRequest"]:
+    def active_grants(self) -> list["InputPortRequest"]:
         today = utc_today()
-        return next(
-            (
-                request
-                for request in sorted(
-                    self.requests, key=lambda request: request.created_on, reverse=True
-                )
-                if request.decision == InputPortRequestDecision.APPROVED
-                and request.revoked_at is None
-                and (request.valid_from is None or request.valid_from <= today)
-                and (request.valid_until is None or request.valid_until >= today)
-            ),
-            None,
-        )
+        return [
+            request
+            for request in sorted(
+                self.requests, key=lambda request: request.created_on, reverse=True
+            )
+            if request.decision == InputPortRequestDecision.APPROVED
+            and request.revoked_at is None
+            and (request.valid_from is None or request.valid_from <= today)
+            and (request.valid_until is None or request.valid_until >= today)
+        ]
+
+    @property
+    def active_grant(self) -> Optional["InputPortRequest"]:
+        return next(iter(self.active_grants), None)
 
     @property
     def renewal_status(self) -> Optional[RenewalStatus]:

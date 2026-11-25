@@ -1,9 +1,11 @@
 import { format, parseISO } from 'date-fns';
 
-import type { OutputPortQueryStatsResponse } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    type OutputPortQueryStatsResponse,
+    QueryStatsGranularity,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 
 export type DayRange = number;
-export type Granularity = 'day' | 'week' | 'month';
 
 export type ChartDataPoint = {
     date: string;
@@ -19,16 +21,16 @@ export type ConsumerTotal = {
 
 export function transformDataForChart(
     responses: OutputPortQueryStatsResponse[],
-    granularity: Granularity,
+    granularity: QueryStatsGranularity,
     unknownLabel: string,
 ): ChartDataPoint[] {
     // format the time series data for the chart
     const chartData = responses.map((stat) => {
         const date = parseISO(stat.date);
         let displayDate: string;
-        if (granularity === 'month') {
+        if (granularity === QueryStatsGranularity.Month) {
             displayDate = format(date, 'MMM-yyyy');
-        } else if (granularity === 'week') {
+        } else if (granularity === QueryStatsGranularity.Week) {
             displayDate = `${format(date, 'yyyy')}-W${format(date, 'II')}`;
         } else {
             displayDate = format(date, 'dd-MM-yyyy');

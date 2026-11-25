@@ -668,4 +668,27 @@ describe('Cart', () => {
             });
         });
     });
+    describe('Cart should hide the access mode dropdown for output ports without access modes', () => {
+        it('should not show the access mode dropdown when the output port has no access modes', async () => {
+            const user = userEvent.setup();
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockDataProductsHttp();
+            mockDataProductInputPorts(mockDataProducts[0].id, []);
+            mockDataProductOutputPorts(mockDataProducts[0].id, []);
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts(user);
+            await user.click(await screen.findByText('op1'));
+
+            await screen.findByText('Owner');
+            expect(screen.queryByText('Access mode')).not.toBeInTheDocument();
+        });
+    });
 });

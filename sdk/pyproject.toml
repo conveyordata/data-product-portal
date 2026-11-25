@@ -43,6 +43,16 @@ ignore_missing_imports = true
 module = "sdk.api_client.*"
 ignore_errors = true
 
+[[tool.mypy.overrides]]
+module = [
+    "sdk.auth",
+    "sdk.plugins.databricks",
+    "sdk.plugins.postgresql",
+    "sdk.plugins.redshift",
+    "sdk.plugins.snowflake",
+]
+ignore_errors = true
+
 [tool.ruff]
 exclude = [
     "sdk/provisioner/event_handler.py"

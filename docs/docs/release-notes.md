@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+This migration can take some time, depending on the amount of Data Products present, as embeddings are calculated for every Data Product.
+
 ### breaking changes
 
 - **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Data Product Owner assignments require a user. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
@@ -16,6 +18,7 @@ sidebar_position: 200
 
 - **[UI]**: The People page now assigns global roles to groups and machine users alongside users. Different columns can be sorted together. Admin eligibility remains user-only.
 - **[UI]**: Data Product teams can now include groups and machine users alongside users. The Add team member modal provides a searchable identity table with type filtering and a role selector. The Owner option is available only for users.
+- **[Marketplace]**: The marketplace lists Data Products instead of Output Ports. Search matches on a Data Product's name, description, about, Output Ports and the Technical Assets those Output Ports expose. When a Data Product has a single Output Port with at most one access mode, **Add to cart** adds it directly; otherwise a dialog lets you pick the Output Ports and an access mode for each.
 - **[Plugins/UI]**: Plugins can set `UIElementString.placeholder` to show placeholder text in string inputs.
 - **[API/UI/Plugins]**: Plugins can set `PlatformMetadata.namespace_max_length` to control Technical Asset namespace suggestions and validation, including API creation. The default remains `NAMESPACE_MAX_LENGTH` (64 unless configured otherwise). Existing namespaces are unchanged.
 - **[API/UI]**: Technical Asset namespaces now need to be unique only within the same asset type and Data Product. Different asset types in a Data Product can share a namespace.
@@ -32,6 +35,7 @@ sidebar_position: 200
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
 - **[API/UI]**: Users whose only role is on an Output Port of a Hidden Data Product can approve and deny its Technical Asset link requests again, and their pending actions no longer fail.
+- **[API/UI]**: Revoking an Input Port ends every active grant, also when a renewal overlaps the grant it replaces. Before, the consumer kept access through the older grant.
 - **[API/UI]**: Request, decision and revocation times are stored in UTC, also when the backend or database server is not in UTC. They used to be stored in the server's local time on such setups. Existing rows are not converted, so on those setups times recorded before the upgrade can show up to a few hours off.
 - **[Auth]**: When loading the current user, a missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
 

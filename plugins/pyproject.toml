@@ -6,12 +6,12 @@ authors = [{ email = "support@conveyordata.com" }]
 requires-python = ">=3.14"
 dependencies = [
     "data-product-portal>=0.8.1",
-    "fastapi>=0.141.1",
-    "pydantic>=2.13.5",
-    "sqlalchemy>=2.0.52",
-    "alembic>=1.20.0",
-    "boto3>=1.43.93",
-    "fastmcp>=3.4.7",
+    "fastapi>=0.165.0",
+    "pydantic>=2.14.3",
+    "sqlalchemy>=2.1.9",
+    "alembic>=1.20.1",
+    "boto3>=1.44.6",
+    "fastmcp>=4.2.2",
 ]
 
 [project.entry-points."data_product_portal.plugins"]
@@ -38,6 +38,24 @@ python = "^3.14"
 ignore_missing_imports = true
 explicit_package_bases = true
 mypy_path = "$MYPY_CONFIG_FILE_DIR:$MYPY_CONFIG_FILE_DIR/../backend"
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "portal_plugins.agno.schema",
+    "portal_plugins.azure_blob.schema",
+    "portal_plugins.conveyor.schema",
+    "portal_plugins.databricks.schema",
+    "portal_plugins.github.schema",
+    "portal_plugins.glue.mcp_tools",
+    "portal_plugins.glue.schema",
+    "portal_plugins.parameter_store.schema",
+    "portal_plugins.postgresql.schema",
+    "portal_plugins.redshift.schema",
+    "portal_plugins.s3.schema",
+    "portal_plugins.snowflake.schema",
+]
+ignore_errors = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

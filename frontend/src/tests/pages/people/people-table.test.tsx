@@ -112,6 +112,32 @@ describe('PeoplePage', () => {
         expect(screen.getByText('bob@example.com')).toBeInTheDocument();
     });
 
+    it('preserves the current page when searching and lets the table clamp it to the last available page', async () => {
+        mockUsersHttp(
+            Array.from({ length: 24 }, (_, index) => ({
+                ...mockUsers[0],
+                id: `user-${index}`,
+                first_name: `Person ${String(index).padStart(2, '0')}`,
+                email: `${index < 12 ? 'match' : 'other'}${index}@example.com`,
+            })),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<PeoplePage />);
+        await screen.findByText('Showing 1-10 of 26 identities');
+        await user.click(within(screen.getByTitle('3')).getByText('3'));
+        expect(screen.getByText('Showing 21-26 of 26 identities')).toBeInTheDocument();
+
+        const search = screen.getByLabelText('Search identities');
+        await user.type(search, 'Person');
+        expect(screen.getByText('Showing 21-24 of 24 identities')).toBeInTheDocument();
+        await user.clear(search);
+        expect(screen.getByText('Showing 21-26 of 26 identities')).toBeInTheDocument();
+        await user.type(search, 'match');
+        expect(screen.getByText('Showing 11-12 of 12 identities')).toBeInTheDocument();
+        await user.clear(search);
+        expect(screen.getByText('Showing 21-26 of 26 identities')).toBeInTheDocument();
+    });
+
     it('combines email and external IDs without Name or Email column filters', async () => {
         const { container } = renderWithProviders(<PeoplePage />);
         await screen.findByText('Finance Team');

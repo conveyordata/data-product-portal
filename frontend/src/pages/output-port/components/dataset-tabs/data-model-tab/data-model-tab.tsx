@@ -78,7 +78,7 @@ function getPropertyColumns(t: TFunction) {
             title: t('Flags'),
             key: 'flags',
             render: (_: unknown, record: SchemaPropertyResponse) => (
-                <Space size={8}>
+                <Space size="small">
                     {record.primary_key && <Text className={styles['primary-key-flag']}>{t('PK')}</Text>}
                     {record.unique && <Text className={styles['unique-flag']}>{t('Unique')}</Text>}
                     {record.partitioned && <Text className={styles['partitioned-flag']}>{t('Partitioned')}</Text>}

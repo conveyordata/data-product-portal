@@ -100,7 +100,7 @@ function formatAccessPeriodLabel(
         access_duration_type: 'permanent' | 'time_bound';
     },
 ): string {
-    if (current.access_duration_type === 'permanent') {
+    if (current.access_duration_type === AccessDurationType.Permanent) {
         return t('Permanent');
     }
     if (current.valid_from && current.valid_until) {

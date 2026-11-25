@@ -406,6 +406,7 @@ from .schema_object_response import SchemaObjectResponse
 from .schema_property_request import SchemaPropertyRequest
 from .schema_property_response import SchemaPropertyResponse
 from .scope import Scope
+from .search_data_products_output_port import SearchDataProductsOutputPort
 from .search_data_products_response import SearchDataProductsResponse
 from .search_data_products_response_item import SearchDataProductsResponseItem
 from .search_output_ports_response import SearchOutputPortsResponse
@@ -770,6 +771,7 @@ __all__ = (
     "SchemaPropertyRequest",
     "SchemaPropertyResponse",
     "Scope",
+    "SearchDataProductsOutputPort",
     "SearchDataProductsResponse",
     "SearchDataProductsResponseItem",
     "SearchOutputPortsResponse",

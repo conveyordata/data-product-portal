@@ -29,6 +29,7 @@ const services = [
     { name: 'Explorations', file: 'explorations' },
     { name: 'Resource names', file: 'resourceNames' },
     { name: 'Search Output ports', file: 'outputPortsSearch' },
+    { name: 'Search Data Products', file: 'dataProductsSearch' },
     { name: 'Graph', file: 'graph' },
     { name: 'Version', file: 'version' },
     { name: 'CompleteService', file: 'completeService' }, // Always keep this as the last service otherwise the endpoint is not added to the complete service.
