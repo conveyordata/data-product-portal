@@ -1,5 +1,5 @@
 import { TeamOutlined } from '@ant-design/icons';
-import { Col, Flex, type FlexProps, Input, Row, type TableColumnsType, type TableProps, Typography } from 'antd';
+import { Col, Flex, Input, Row, type TableColumnsType, type TableProps, Typography } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
@@ -22,10 +22,9 @@ type Props = {
     actionTitle?: ReactNode;
     identityIdsToHide?: string[];
     disabled?: boolean;
-    gap?: FlexProps['gap'];
     columns?: (identities: Identity[], disabled: boolean) => TableColumnsType<Identity>;
     search?: { value: string; onChange: (value: string) => void; span: number };
-    tableProps?: Pick<TableProps<Identity>, 'pagination' | 'tableLayout' | 'scroll' | 'rowClassName' | 'rowHoverable'>;
+    tableProps?: Pick<TableProps<Identity>, 'tableLayout' | 'scroll' | 'rowClassName' | 'rowHoverable'>;
 };
 
 export function IdentitySelector({
@@ -33,7 +32,6 @@ export function IdentitySelector({
     actionTitle,
     identityIdsToHide,
     disabled = false,
-    gap = 'middle',
     columns: buildColumns,
     search,
     tableProps,
@@ -83,7 +81,7 @@ export function IdentitySelector({
     }
 
     return (
-        <Flex vertical gap={gap}>
+        <Flex vertical gap="middle">
             <Row gutter={16}>
                 <Col span={search?.span ?? 24}>
                     <Input.Search

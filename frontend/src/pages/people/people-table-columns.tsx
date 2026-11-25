@@ -4,7 +4,12 @@ import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item
 import type { GlobalRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { DecisionStatus, type GlobalRoleAssignment, Prototype } from '@/types/roles';
-import { getIdentityDisplayName, getIdentityTypeLabel, type Identity } from '@/utils/identity.ts';
+import {
+    getIdentityDisplayName,
+    getIdentitySecondaryLabel,
+    getIdentityTypeLabel,
+    type Identity,
+} from '@/utils/identity.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './people-table.module.scss';
@@ -59,8 +64,6 @@ export const getPeopleTableColumns = ({
     isSaving: boolean;
 }): TableColumnsType<Identity> => {
     const sorter = new Sorter<Identity>();
-    const emailOrExternalId = (identity: Identity) =>
-        identity.type === 'user' ? identity.email : identity.external_id;
     const assignmentsByIdentity = new Map(assignments.map((assignment) => [assignment.identity.id, assignment]));
     const roleFor = (identity: Identity) => assignmentsByIdentity.get(identity.id) ?? null;
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
@@ -91,11 +94,11 @@ export const getPeopleTableColumns = ({
             key: 'email_or_external_id',
             ellipsis: { showTitle: false },
             render: (_, identity) => {
-                const text = emailOrExternalId(identity);
+                const text = getIdentitySecondaryLabel(identity);
                 return <TableCellItem text={text} tooltip={{ content: text }} />;
             },
             sorter: {
-                compare: sorter.stringSorter(emailOrExternalId),
+                compare: sorter.stringSorter(getIdentitySecondaryLabel),
                 multiple: 3,
             },
         },
