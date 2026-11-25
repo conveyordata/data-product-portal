@@ -482,6 +482,7 @@ class OutputPortService:
         result = copy.deepcopy(output_port)
         self.db.delete(output_port)
         DataProductService(self.db).recalculate_search(data_product_id)
+        CasbinPolicies().clear_assignments_for_resource(resource_id=id)
         return result
 
     def update_output_port(

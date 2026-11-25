@@ -497,6 +497,7 @@ class TestGroupService:
 
         assert exc_info.value.status_code == 404
 
+    @pytest.mark.seeds_casbin
     def test_replace_members__holds_group_lock_until_transaction_ends(self, session):
         group = GroupFactory()
         member = UserFactory()

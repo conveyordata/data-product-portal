@@ -179,11 +179,14 @@ def clear_db(request: pytest.FixtureRequest) -> Iterator[None]:
         _use_wall_clock_defaults(TestingSessionLocal())
         _clear_database(TestingSessionLocal())
     else:
+        stale = []
         with engine.connect() as connection:
             transaction = connection.begin()
             RollbackSession.rollback_connection = connection
             try:
                 yield
+                if not request.node.get_closest_marker("seeds_casbin"):
+                    stale = _rules_rebuild_would_remove()
             finally:
                 RollbackSession.rollback_connection = None
                 TestingSessionLocal.close()
@@ -191,7 +194,26 @@ def clear_db(request: pytest.FixtureRequest) -> Iterator[None]:
         policies = CasbinPolicies()
         policies._enforcer.load_policy()
         policies._cache.clear()
+        assert not stale, (
+            f"Casbin holds rules that CasbinSync.rebuild() would remove: {stale}."
+            " Build them in app/authorization/casbin_sync.py, or clean them up."
+        )
     reset_unique_fakers()
+
+
+def _rules_rebuild_would_remove() -> list[tuple[str, ...]]:
+    model = CasbinPolicies()._enforcer.get_model()
+    stored = {
+        (ptype, *rule)
+        for section in ("p", "g")
+        for ptype in model[section]
+        for rule in model[section][ptype].policy
+    }
+    built = {
+        (rule.ptype, *map(str, rule))
+        for rule in CasbinSync(TestingSessionLocal()).rules()
+    }
+    return sorted(stored - built)
 
 
 def _use_wall_clock_defaults(session: Session) -> None:

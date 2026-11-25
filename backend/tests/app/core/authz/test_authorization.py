@@ -29,6 +29,8 @@ from tests.factories import (
 ANY: str = "does_not_matter"
 ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
+pytestmark = pytest.mark.seeds_casbin
+
 
 class TestHasAccess:
     @staticmethod

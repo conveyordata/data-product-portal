@@ -48,18 +48,21 @@ class CasbinSync:
         self.db = db
 
     def rebuild(self) -> None:
-        rules: set[Rule] = {
+        rules = self.rules()
+        added, removed = CasbinPolicies().replace_all(rules)
+        logger.info(
+            f"Authorization rebuild done - the casbin table now contains {len(rules)} rows"
+            f" ({added} added, {removed} removed)"
+        )
+
+    def rules(self) -> set[Rule]:
+        return {
             *self._permissions(),
             *self._resource_roles(),
             *self._readers(),
             *self._global_roles(),
             *self._group_members(),
         }
-        added, removed = CasbinPolicies().replace_all(rules)
-        logger.info(
-            f"Authorization rebuild done - the casbin table now contains {len(rules)} rows"
-            f" ({added} added, {removed} removed)"
-        )
 
     def _permissions(self) -> Iterator[Permission]:
         for id, prototype, permissions in self._rows(

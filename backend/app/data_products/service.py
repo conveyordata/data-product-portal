@@ -288,8 +288,14 @@ class DataProductService(AbstractDataProductService):
             )
 
         result = copy.deepcopy(data_product)
+        output_port_ids = self.db.scalars(
+            select(OutputPortModel.id).where(OutputPortModel.data_product_id == id)
+        ).all()
         self.db.delete(data_product)
         self.db.flush()
+        policies = CasbinPolicies()
+        for resource_id in (id, *output_port_ids):
+            policies.clear_assignments_for_resource(resource_id=resource_id)
         return result
 
     def update_data_product(
