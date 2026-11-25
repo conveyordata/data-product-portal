@@ -1,8 +1,6 @@
 from uuid import UUID
 from warnings import deprecated
 
-from pydantic import Field, field_validator
-
 from app.configuration.access_modes.schema_response import AccessMode
 from app.configuration.output_port_access_types.schema import (
     OutputPortAccessType,
@@ -28,28 +26,3 @@ class OutputPort(ORMModel):
 class Dataset(OutputPort):
     def convert(self) -> OutputPort:
         return OutputPort(**self.model_dump())
-
-
-class DataProductEmbed(ORMModel):
-    name: str
-    description: str
-
-
-class TechnicalAssetEmbed(ORMModel):
-    name: str
-    description: str
-
-
-class DatasetEmbedModel(ORMModel):
-    name: str
-    namespace: str
-    description: str
-    data_product: DataProductEmbed
-    technical_assets: list[TechnicalAssetEmbed] = Field(
-        validation_alias="technical_asset_links"
-    )
-
-    @field_validator("technical_assets", mode="before")
-    @classmethod
-    def map_technical_assets(cls, v):
-        return [link.technical_asset for link in v]

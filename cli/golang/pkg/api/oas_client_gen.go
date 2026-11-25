@@ -564,6 +564,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
 	GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error)
+	// GetOutputPorts invokes get_output_ports operation.
+	//
+	// Get Output Ports.
+	//
+	// GET /api/v2/output_ports
+	GetOutputPorts(ctx context.Context, params GetOutputPortsParams) (GetOutputPortsRes, error)
 	// GetOutputPortsEventHistory invokes get_output_ports_event_history operation.
 	//
 	// Get Output Ports Event History.
@@ -996,12 +1002,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/search/data_products
 	SearchDataProducts(ctx context.Context, params SearchDataProductsParams) (SearchDataProductsRes, error)
-	// SearchOutputPorts invokes search_output_ports operation.
-	//
-	// Search Output Ports.
-	//
-	// GET /api/v2/search/output_ports
-	SearchOutputPorts(ctx context.Context, params SearchOutputPortsParams) (SearchOutputPortsRes, error)
 	// SetCanBecomeAdmin invokes set_can_become_admin operation.
 	//
 	// Set Can Become Admin.
@@ -6771,6 +6771,69 @@ func (c *Client) sendGetOutputPortSchema(ctx context.Context, params GetOutputPo
 	return result, nil
 }
 
+// GetOutputPorts invokes get_output_ports operation.
+//
+// Get Output Ports.
+//
+// GET /api/v2/output_ports
+func (c *Client) GetOutputPorts(ctx context.Context, params GetOutputPortsParams) (GetOutputPortsRes, error) {
+	res, err := c.sendGetOutputPorts(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetOutputPorts(ctx context.Context, params GetOutputPortsParams) (res GetOutputPortsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/output_ports"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "assignment_filter" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "assignment_filter",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.AssignmentFilter.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetOutputPortsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetOutputPortsEventHistory invokes get_output_ports_event_history operation.
 //
 // Get Output Ports Event History.
@@ -11674,103 +11737,6 @@ func (c *Client) sendSearchDataProducts(ctx context.Context, params SearchDataPr
 	}()
 
 	result, err := decodeSearchDataProductsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// SearchOutputPorts invokes search_output_ports operation.
-//
-// Search Output Ports.
-//
-// GET /api/v2/search/output_ports
-func (c *Client) SearchOutputPorts(ctx context.Context, params SearchOutputPortsParams) (SearchOutputPortsRes, error) {
-	res, err := c.sendSearchOutputPorts(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendSearchOutputPorts(ctx context.Context, params SearchOutputPortsParams) (res SearchOutputPortsRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/search/output_ports"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "query" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "query",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Query.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "assignment_filter" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "assignment_filter",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.AssignmentFilter.Get(); ok {
-				return e.EncodeValue(conv.StringToString(string(val)))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeSearchOutputPortsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

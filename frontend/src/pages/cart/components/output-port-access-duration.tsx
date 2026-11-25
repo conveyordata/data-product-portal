@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     AccessDurationType,
+    type GetOutputPortsResponseItem,
     useGetOutputPortAccessDurationsQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
 
 type Props = {
-    outputPort: SearchOutputPortsResponseItem;
+    outputPort: GetOutputPortsResponseItem;
     dataProductTypeChoice: DataProductChoiceOptions;
 };
 

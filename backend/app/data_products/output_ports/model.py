@@ -2,7 +2,6 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     UUID,
     Column,
@@ -13,7 +12,6 @@ from sqlalchemy import (
     func,
     select,
 )
-from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import (
     Mapped,
     Session,
@@ -106,8 +104,6 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
     usage = Column(String, nullable=True)
-    search_vector = Column(TSVECTOR)
-    embeddings = deferred(Column(Vector(384)))
 
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")

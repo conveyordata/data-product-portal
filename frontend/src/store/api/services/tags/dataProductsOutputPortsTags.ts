@@ -53,6 +53,9 @@ const invalidateDeletedOutputPort = (
 ];
 
 export const dataProductOutputPortTags = {
+    getOutputPorts: {
+        providesTags: [{ type: TagTypes.OutputPort, id: STATIC_TAG_ID.LIST }],
+    },
     getDataProductOutputPorts: {
         providesTags: (_, __, id) => [
             {

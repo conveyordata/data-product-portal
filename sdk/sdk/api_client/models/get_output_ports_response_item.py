@@ -20,11 +20,11 @@ if TYPE_CHECKING:
     from ..models.tag import Tag
 
 
-T = TypeVar("T", bound="SearchOutputPortsResponseItem")
+T = TypeVar("T", bound="GetOutputPortsResponseItem")
 
 
 @_attrs_define
-class SearchOutputPortsResponseItem:
+class GetOutputPortsResponseItem:
     """
     Attributes:
         id (UUID):
@@ -249,7 +249,7 @@ class SearchOutputPortsResponseItem:
 
         quality_status = _parse_quality_status(d.pop("quality_status", UNSET))
 
-        search_output_ports_response_item = cls(
+        get_output_ports_response_item = cls(
             id=id,
             namespace=namespace,
             name=name,
@@ -270,8 +270,8 @@ class SearchOutputPortsResponseItem:
             quality_status=quality_status,
         )
 
-        search_output_ports_response_item.additional_properties = d
-        return search_output_ports_response_item
+        get_output_ports_response_item.additional_properties = d
+        return get_output_ports_response_item
 
     @property
     def additional_keys(self) -> list[str]:

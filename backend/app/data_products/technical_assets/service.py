@@ -23,7 +23,6 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.environment_configuration_service import (
@@ -328,9 +327,6 @@ class TechnicalAssetService:
         result = copy.deepcopy(technical_asset)
         self.db.delete(technical_asset)
         self.db.flush()
-
-        self.update_search_for_associated_datasets(result)
-        self.db.flush()
         DataProductService(self.db).recalculate_search(data_product_id)
         return result
 
@@ -347,11 +343,6 @@ class TechnicalAssetService:
             )
         return technical_asset
 
-    def update_search_for_associated_datasets(self, result: TechnicalAssetModel):
-        dataset_service = OutputPortService(self.db)
-        for dataset_link in result.output_port_links:
-            dataset_service.recalculate_search(dataset_link.output_port_id)
-
     def update_technical_asset_status(
         self,
         data_product_id: UUID,
@@ -364,9 +355,6 @@ class TechnicalAssetService:
             data_product_id, id
         )
         current_technical_asset.status = technical_asset_update.status
-        self.db.flush()
-
-        self.update_search_for_associated_datasets(current_technical_asset)
         self.db.flush()
 
     def link_output_port_to_technical_asset(
@@ -412,7 +400,6 @@ class TechnicalAssetService:
         )
         technical_asset.output_port_links.append(output_port_link)
         self.db.flush()
-        OutputPortService(self.db).recalculate_search(output_port_id)
         return output_port_link
 
     def unlink_output_port_from_technical_asset(
@@ -436,8 +423,6 @@ class TechnicalAssetService:
             )
 
         technical_asset.output_port_links.remove(link)
-        self.db.flush()
-        OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.flush()
         DataProductService(self.db).recalculate_search(data_product_id)
         return technical_asset

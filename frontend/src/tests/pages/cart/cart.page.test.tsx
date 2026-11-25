@@ -15,7 +15,7 @@ import { mockGetEnvironments } from '@/tests/mocks/configurationEnvironments.ts'
 import { mockDataProductOutputPorts } from '@/tests/mocks/dataProductOutputPorts.ts';
 import { mockDataProductInputPorts, mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
 import { mockExplorationInputPorts, mockExplorations, mockExplorationsHttp } from '@/tests/mocks/explorations.ts';
-import { mockOutputPortsSearch } from '@/tests/mocks/outputPortsSearch.ts';
+import { mockGetOutputPorts } from '@/tests/mocks/outputPorts.ts';
 import {
     mockGetResourceNamesConstraints,
     mockResourceNamesSanitize,
@@ -62,7 +62,7 @@ describe('Cart', () => {
     };
     describe('Empty cart page', () => {
         it('Should show a message to direct to the Marketplace', async () => {
-            mockOutputPortsSearch([]);
+            mockGetOutputPorts([]);
             renderWithProviders(<Cart />, {
                 routerProps: { initialEntries: ['/cart'] },
                 currentUser: mockUsers[0],
@@ -83,7 +83,7 @@ describe('Cart', () => {
             // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockDataProductsHttp();
             mockDataProductInputPorts(mockDataProducts[0].id, []);
             mockDataProductOutputPorts(mockDataProducts[0].id, []);
@@ -123,7 +123,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockDataProductsHttp();
             mockDataProductInputPorts(mockDataProducts[0].id);
             mockDataProductOutputPorts(mockDataProducts[0].id, []);
@@ -155,7 +155,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockDataProductsHttp();
             mockDataProductInputPorts(mockDataProducts[0].id, []);
             mockDataProductOutputPorts(mockDataProducts[0].id);
@@ -232,7 +232,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetTags();
             mockGetResourceNamesConstraints();
@@ -268,7 +268,7 @@ describe('Cart', () => {
             const user = userEvent.setup();
             allowAllAuth();
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetTags();
             mockGetResourceNamesConstraints();
@@ -298,7 +298,7 @@ describe('Cart', () => {
             const user = userEvent.setup();
             allowAllAuth();
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetTags();
             mockGetResourceNamesConstraints();
@@ -331,7 +331,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetTags();
             mockGetResourceNamesConstraints();
@@ -380,7 +380,7 @@ describe('Cart', () => {
             // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetResourceNamesConstraints();
             mockResourceNamesSanitize();
@@ -429,7 +429,7 @@ describe('Cart', () => {
             // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetResourceNamesConstraints();
             mockResourceNamesSanitize();
@@ -460,7 +460,7 @@ describe('Cart', () => {
             const user = userEvent.setup();
             allowAllAuth();
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockUsersHttp(mockUsers);
             mockGetResourceNamesConstraints();
             mockResourceNamesSanitize('');
@@ -505,7 +505,7 @@ describe('Cart', () => {
             // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id, []);
 
@@ -559,7 +559,7 @@ describe('Cart', () => {
 
             const cartOutputPortId = 'op-1';
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id);
 
@@ -589,7 +589,7 @@ describe('Cart', () => {
             const cartOutputPortId = 'op-1';
 
             mockGetDomains();
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id);
 
@@ -629,7 +629,7 @@ describe('Cart', () => {
             allowAllAuth();
 
             const cartOutputPortId = 'op-1';
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id, []);
 
@@ -673,7 +673,7 @@ describe('Cart', () => {
             const user = userEvent.setup();
             allowAllAuth();
 
-            mockOutputPortsSearch();
+            mockGetOutputPorts();
             mockDataProductsHttp();
             mockDataProductInputPorts(mockDataProducts[0].id, []);
             mockDataProductOutputPorts(mockDataProducts[0].id, []);

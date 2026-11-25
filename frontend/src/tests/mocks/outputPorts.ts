@@ -1,13 +1,13 @@
 import { HttpResponse, http } from 'msw';
 import {
     AccessDurationType,
+    type GetOutputPortsResponseItem,
     OutputPortAccessFunction,
     OutputPortStatus,
-    type SearchOutputPortsResponseItem,
-} from '@/store/api/services/generated/outputPortsSearchApi.ts';
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 
-export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
+export const mockOutputPorts: GetOutputPortsResponseItem[] = [
     {
         id: 'op-1',
         namespace: 'op1',
@@ -38,9 +38,9 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
     },
 ];
 
-export const mockOutputPortsSearch = (output_ports: SearchOutputPortsResponseItem[] = mockOutputPorts) => {
+export const mockGetOutputPorts = (output_ports: GetOutputPortsResponseItem[] = mockOutputPorts) => {
     server.use(
-        http.get('*/api/v2/search/output_ports', () => {
+        http.get('*/api/v2/output_ports', () => {
             return HttpResponse.json({
                 output_ports: output_ports,
             });

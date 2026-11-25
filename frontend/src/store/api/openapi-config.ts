@@ -26,7 +26,6 @@ const services = [
     { name: 'Data Products - Output Ports - Data Quality', file: 'dataProductsOutputPortsDataQuality' },
     { name: 'Explorations', file: 'explorations' },
     { name: 'Resource names', file: 'resourceNames' },
-    { name: 'Search Output ports', file: 'outputPortsSearch' },
     { name: 'Search Data Products', file: 'dataProductsSearch' },
     { name: 'Graph', file: 'graph' },
     { name: 'Version', file: 'version' },

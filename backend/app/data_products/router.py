@@ -29,7 +29,6 @@ from app.configuration.data_product_settings.service import DataProductSettingSe
 from app.core.auth.auth import AuthenticatedUser
 from app.core.authz import Action, Authorization, CasbinPolicies, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -276,7 +275,6 @@ def update_data_product(
             actor_id=authenticated_user.id,
         )
     )
-    OutputPortService(db).recalculate_search_for_output_ports_of_product(id)
     return result
 
 

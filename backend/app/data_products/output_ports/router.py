@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.role_assignments.output_port.schema import (
     UpdateOutputPortRoleAssignment,
@@ -43,6 +43,8 @@ from app.data_products.output_ports.schema_response import (
     GetDataProductOutputPortsResponse,
     GetOutputPortAccessDurationsResponse,
     GetOutputPortResponse,
+    GetOutputPortsResponse,
+    GetOutputPortsResponseItem,
     UpdateOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
@@ -101,6 +103,26 @@ router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
 router.include_router(contract_router)
 router.include_router(announcements_router)
+
+output_ports_router = APIRouter(
+    tags=["Data Products - Output ports"], prefix="/v2/output_ports"
+)
+
+
+@output_ports_router.get("")
+def get_output_ports(
+    db: DbSession,
+    user: AuthenticatedUser,
+    assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
+) -> GetOutputPortsResponse:
+    return GetOutputPortsResponse(
+        output_ports=[
+            GetOutputPortsResponseItem.model_validate(output_port)
+            for output_port in OutputPortService(db).list_output_ports(
+                user=user, assignment_filter=assignment_filter
+            )
+        ]
+    )
 
 
 @router.get(

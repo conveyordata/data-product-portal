@@ -12,6 +12,7 @@ from app.configuration.domains.service import DomainService
 from app.configuration.environments.schema_response import EnvironmentGetItem
 from app.configuration.environments.service import EnvironmentService
 from app.data_products.output_ports.schema import OutputPort
+from app.data_products.output_ports.schema_response import GetOutputPortsResponseItem
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import (
     GetDataProductResponse,
@@ -23,7 +24,6 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
-from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
 
 
@@ -69,11 +69,8 @@ def register_config_tools(mcp) -> None:
         all_data_products = DataProductService(db).get_data_products(
             assignment_filter=AssignmentFilter.ALL
         )
-        all_output_ports = OutputPortService(db).search_output_ports(
-            query=None,
-            limit=1000,
-            user=user,
-            assignment_filter=AssignmentFilter.ALL,
+        all_output_ports = OutputPortService(db).list_output_ports(
+            user=user, assignment_filter=AssignmentFilter.ALL
         )
         all_technical_assets = TechnicalAssetService(db).get_technical_assets()
         all_domains = DomainService(db).get_domains()
@@ -96,7 +93,7 @@ def register_config_tools(mcp) -> None:
                     for dp in popular_data_products
                 ],
                 "popular_output_ports": [
-                    SearchOutputPortsResponseItem.model_validate(ds).model_dump()
+                    GetOutputPortsResponseItem.model_validate(ds).model_dump()
                     for ds in popular_datasets
                 ],
             },

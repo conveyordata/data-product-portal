@@ -18,6 +18,7 @@ from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema import (
     TechnicalAssetOutputPortAssociation,
 )
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.schema import (
@@ -73,6 +74,17 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
 class GetDataProductOutputPortsResponse(ORMModel):
     output_ports: Sequence[OutputPort]
+
+
+class GetOutputPortsResponseItem(BaseOutputPortGet):
+    abstract_data_product_count: int
+    technical_assets_count: int
+    data_product_name: str
+    quality_status: Optional[DataQualityStatus] = None
+
+
+class GetOutputPortsResponse(ORMModel):
+    output_ports: Sequence[GetOutputPortsResponseItem]
 
 
 class CreateOutputPortResponse(ORMModel):

@@ -14,15 +14,15 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { AssignmentFilter } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
-    type SearchOutputPortsResponseItem,
-    useSearchOutputPortsQuery,
-} from '@/store/api/services/generated/outputPortsSearchApi.ts';
+    type GetOutputPortsResponseItem,
+    useGetOutputPortsQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createOutputPortPath } from '@/types/navigation.ts';
 import styles from './output-ports-tab.module.scss';
 import { getOutputPortTableColumns } from './output-ports-table-columns';
 
-function filterOutputPorts(outputPorts: SearchOutputPortsResponseItem[], searchTerm?: string) {
+function filterOutputPorts(outputPorts: GetOutputPortsResponseItem[], searchTerm?: string) {
     if (!searchTerm) {
         return outputPorts;
     }
@@ -33,7 +33,7 @@ function filterOutputPorts(outputPorts: SearchOutputPortsResponseItem[], searchT
     );
 }
 
-function filterOutputPortsByRoles(outputPorts: SearchOutputPortsResponseItem[], selectedPortIds: string[]) {
+function filterOutputPortsByRoles(outputPorts: GetOutputPortsResponseItem[], selectedPortIds: string[]) {
     if (!selectedPortIds.length) {
         return outputPorts;
     }
@@ -86,10 +86,7 @@ export function OutputPortsTab() {
         setIsInitialized(true);
     }, [userDatasetRoles, isInitialized]);
 
-    const outputPortsQuery = useSearchOutputPortsQuery({
-        assignmentFilter,
-        limit: 1000,
-    });
+    const outputPortsQuery = useGetOutputPortsQuery(assignmentFilter);
     const { data: { output_ports: outputPorts = [] } = {} } = outputPortsQuery;
 
     const onSearch = useCallback(

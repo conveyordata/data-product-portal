@@ -1,7 +1,6 @@
 from sqlalchemy.orm import selectinload
 
 from app.authorization.role_assignments.enums import AssignmentFilter
-from app.core.context import close_event_context, open_event_context, pop_events
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
@@ -10,58 +9,14 @@ from tests.factories import (
     DatasetRoleAssignmentFactory,
     OutputPortFactory,
     RoleFactory,
-    TechnicalAssetFactory,
-    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 from tests.session_util import as_user
 
 
-class TestDatasetsService:
-    def test_recalculate_search(self, session):
-        ds = OutputPortFactory()
-        OutputPortService(session).recalculate_search(ds.id)
-
-    def test_recalculate_search__queues_no_events(self, session):
-        ds = OutputPortFactory()
-        token = open_event_context()
-        try:
-            OutputPortService(session).recalculate_search(ds.id)
-            session.flush()
-            assert pop_events() == []
-        finally:
-            close_event_context(token)
-
-    def test_recalculate_search__keeps_events_of_pending_changes(self, session):
-        ds = OutputPortFactory()
-        token = open_event_context()
-        try:
-            ds.name = "Renamed"
-            OutputPortService(session).recalculate_search(ds.id)
-            assert len(pop_events()) == 1
-        finally:
-            close_event_context(token)
-
-    def test_recalculate_search_with_technical_asset(self, session):
-        ds = OutputPortFactory()
-        technical_asset = TechnicalAssetFactory(owner=ds.data_product)
-        TechnicalAssetOutputPortAssociationFactory(
-            technical_asset=technical_asset, output_port=ds
-        )
-        OutputPortService(session).recalculate_search(ds.id)
-
-    def test_recalculate_search_for_all_output_ports(self, session):
-        output_ports = [OutputPortFactory() for _ in range(3)]
-
-        OutputPortService(session).recalculate_search_for_all_output_ports(batch_size=2)
-
-        for output_port in output_ports:
-            session.refresh(output_port)
-            assert output_port.embeddings is not None
-            assert output_port.search_vector is not None
-
-    def test_search_output_ports_excludes_private_datasets(self, session):
-        """Test that private output ports are not visible in search results to unauthorized users"""
+class TestOutputPortService:
+    def test_list_output_ports__excludes_private_output_ports(self, session):
+        """Test that private output ports are not listed for unauthorized users"""
         # Create a regular user without special permissions
         regular_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 
@@ -90,18 +45,9 @@ class TestDatasetsService:
             user_id=owner.id,
         )
 
-        # Recalculate search embeddings for all datasets
-        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
-        OutputPortService(session).recalculate_search(private_dataset.id)
-        OutputPortService(session).recalculate_search(owned_private_dataset.id)
-
-        # Search as the regular user
         with as_user(session, regular_user.id):
-            search_results = OutputPortService(session).search_output_ports(
-                query=None,
-                limit=100,
-                user=regular_user,
-                assignment_filter=AssignmentFilter.ALL,
+            search_results = OutputPortService(session).list_output_ports(
+                user=regular_user, assignment_filter=AssignmentFilter.ALL
             )
 
         # Extract dataset IDs from results
@@ -120,8 +66,8 @@ class TestDatasetsService:
             "Owner's private dataset should not be visible to other users"
         )
 
-    def test_search_output_ports_owner_can_see_own_private_datasets(self, session):
-        """Test that owners can see their own private output ports in search results"""
+    def test_list_output_ports__owner_sees_own_private_output_ports(self, session):
+        """Test that owners see their own private output ports listed"""
         # Create a user who will own a private dataset
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         owner_role = RoleFactory.dataset_owner()
@@ -139,17 +85,10 @@ class TestDatasetsService:
             name="Unrestricted Dataset",
             access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
-        # Recalculate search embeddings
-        OutputPortService(session).recalculate_search(private_dataset.id)
-        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
 
         with as_user(session, owner.id):
-            # Search as the owner
-            search_results = OutputPortService(session).search_output_ports(
-                query=None,
-                limit=100,
-                user=owner,
-                assignment_filter=AssignmentFilter.ALL,
+            search_results = OutputPortService(session).list_output_ports(
+                user=owner, assignment_filter=AssignmentFilter.ALL
             )
 
         # Extract dataset IDs from results

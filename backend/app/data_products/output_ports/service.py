@@ -3,8 +3,7 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from fastembed import TextEmbedding
-from sqlalchemy import func, literal_column, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import (
     Session,
     joinedload,
@@ -41,8 +40,6 @@ from app.configuration.output_port_access_types.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import CasbinPolicies
-from app.core.context import discard_events
-from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
     NamespaceValidator,
 )
@@ -59,7 +56,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
     OutputPortAboutUpdate,
@@ -106,10 +103,6 @@ class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
-
-    @property
-    def embedding_model(self) -> TextEmbedding:
-        return get_text_embedding_model()
 
     def _ensure_access_durations_are_configured(
         self,
@@ -224,41 +217,13 @@ class OutputPortService:
             output_port.lifecycle = default_lifecycle
         return output_port
 
-    def search_output_ports(
-        self,
-        query: Optional[str],
-        limit: int,
-        user: UserModel,
-        assignment_filter: AssignmentFilter,
+    def list_output_ports(
+        self, user: UserModel, assignment_filter: AssignmentFilter
     ) -> Sequence[OutputPortModel]:
-        """An attempt was made to use the elbow method to determine a cut-off for returned results.
-        The results of this method were quite poor, hence the search currently works as a sorting operation only,
-        no filtering is applied other than the limit.
-        """
-        ordered_by = OutputPortModel.name.asc()
-        if query:
-            query_embedding = self.embedding_model.embed(query)
-            semantic_score = (
-                1 - OutputPortModel.embeddings.cosine_distance(*query_embedding)
-            ).label("semantic_score")
-            ts_query = func.websearch_to_tsquery("english", query)
-            keyword_score = func.coalesce(
-                func.ts_rank_cd(OutputPortModel.search_vector, ts_query, 32), 0
-            ).label("keyword_score")
-
-            semantic_weight = 2.0 / 3.0
-            keyword_weight = 1.0 - semantic_weight
-            ordered_by = (
-                ((semantic_weight * semantic_score) + (keyword_weight * keyword_score))
-                .label("hybrid_score")
-                .desc()
-            )
-
         stmt = (
             select(OutputPortModel)
             .where(output_port_visible_ignoring_consumption(self.db, OutputPortModel))
-            .order_by(ordered_by)
-            .limit(limit)
+            .order_by(OutputPortModel.name.asc())
         )
         match assignment_filter:
             case AssignmentFilter.ALL:
@@ -271,96 +236,7 @@ class OutputPortService:
             undefer(OutputPortModel.abstract_data_product_count),
             undefer(OutputPortModel.technical_assets_count),
         )
-        results = self.db.scalars(stmt).unique().all()
-
-        return results
-
-    @staticmethod
-    def recalculate_embeddings_load_options():
-        return [
-            selectinload(OutputPortModel.data_product),
-            selectinload(OutputPortModel.technical_asset_links).selectinload(
-                TechnicalAssetOutputPortAssociationModel.technical_asset
-            ),
-        ]
-
-    def recalculate_search_for_output_ports_of_product(
-        self, data_product_id: UUID
-    ) -> None:
-        self.db.flush()
-        datasets = (
-            self.db.scalars(
-                select(OutputPortModel)
-                .where(OutputPortModel.data_product_id == data_product_id)
-                .options(*self.recalculate_embeddings_load_options()),
-                # Recalculation will never be done by users, so we can safely skip the filters here
-                execution_options=UNFILTERED,
-            )
-            .unique()
-            .all()
-        )
-        self._recalculate_embeddings_and_search_vector(datasets)
-
-    def recalculate_search(self, dataset_id: UUID) -> None:
-        dataset = self.db.scalar(
-            select(OutputPortModel)
-            .where(OutputPortModel.id == dataset_id)
-            .options(*self.recalculate_embeddings_load_options()),
-            # Recalculation will never be done by users, so we can safely skip the filters here
-            execution_options=UNFILTERED,
-        )
-        self._recalculate_embeddings_and_search_vector([dataset])
-
-    def _recalculate_embeddings_and_search_vector(
-        self, datasets: Sequence[OutputPortModel]
-    ) -> None:
-        # Flush pending domain changes first so their events are not discarded below
-        self.db.flush()
-        embeddings = self.embedding_model.embed(
-            DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
-        )
-        # Search index maintenance is not a domain change, so emit no webhook events
-        with discard_events():
-            for dataset, emb in zip(datasets, embeddings):
-                dataset.embeddings = emb.tolist()
-                self._recalculate_search_vector(dataset)
-                self.db.add(dataset)
-            self.db.flush()
-
-    @staticmethod
-    def _recalculate_search_vector(output_port: OutputPortModel) -> None:
-        output_port.search_vector = func.setweight(
-            func.to_tsvector("english", output_port.name), literal_column("'A'")
-        ).op("||")(
-            func.setweight(
-                func.to_tsvector("english", output_port.description),
-                literal_column("'B'"),
-            )
-        )
-
-    def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
-        dataset_ids = self.db.scalars(
-            select(OutputPortModel.id).execution_options(**UNFILTERED)
-        ).all()
-        # Process in batches to reduce load
-        for i in range(0, len(dataset_ids), batch_size):
-            batch_ids = dataset_ids[i : i + batch_size]
-
-            batch_datasets = (
-                self.db.scalars(
-                    select(OutputPortModel)
-                    .where(OutputPortModel.id.in_(batch_ids))
-                    .options(*self.recalculate_embeddings_load_options())
-                    .execution_options(**UNFILTERED),
-                )
-                .unique()
-                .all()
-            )
-
-            if batch_datasets:
-                self._recalculate_embeddings_and_search_vector(batch_datasets)
-        # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
-        self.db.commit()  # allow-commit
+        return self.db.scalars(stmt).unique().all()
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
@@ -464,7 +340,6 @@ class OutputPortService:
         self.db.add(model)
         self.db.flush()
         self._sync_public_reader_grouping([model.id], model.access_function)
-        self.recalculate_search(model.id)
         DataProductService(self.db).recalculate_search(data_product_id)
         return model
 
@@ -525,7 +400,6 @@ class OutputPortService:
             self._sync_public_reader_grouping(
                 [current_output_port.id], current_output_port.access_function
             )
-        self.recalculate_search(id)
         DataProductService(self.db).recalculate_search(data_product_id)
 
         return current_output_port.id
@@ -692,14 +566,18 @@ class OutputPortService:
         return Graph(nodes=set(nodes), edges=set(edges))
 
     def get_output_ports(
-        self, data_product_id: Optional[UUID], user: User
+        self, data_product_id: UUID, user: User
     ) -> Sequence[OutputPort]:
-        query = select(OutputPortModel)
-        if data_product_id is not None:
-            ensure_data_product_exists(data_product_id, self.db)
-            query = query.filter(OutputPortModel.data_product_id == data_product_id)
-
-        return self.db.scalars(query).unique().all()
+        ensure_data_product_exists(data_product_id, self.db)
+        return (
+            self.db.scalars(
+                select(OutputPortModel).filter(
+                    OutputPortModel.data_product_id == data_product_id
+                )
+            )
+            .unique()
+            .all()
+        )
 
     @staticmethod
     def _sync_public_reader_grouping(
