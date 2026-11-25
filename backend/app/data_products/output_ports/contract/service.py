@@ -2,6 +2,9 @@ import uuid
 from collections import defaultdict
 from uuid import UUID
 
+import yaml
+from fastapi import HTTPException, status
+from pydantic import ValidationError
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
@@ -23,6 +26,30 @@ from app.data_products.output_ports.contract.schema_response import (
 class OutputPortContractService:
     def __init__(self, db: Session):
         self.db = db
+
+    @staticmethod
+    def parse_contract_yaml(raw: bytes) -> BitolContractRequest:
+        try:
+            payload = yaml.safe_load(raw)
+        except yaml.YAMLError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid YAML payload",
+            ) from exc
+
+        if not isinstance(payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="YAML payload must be a mapping/object",
+            )
+
+        try:
+            return BitolContractRequest.model_validate(payload)
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=exc.errors(include_url=False),
+            ) from exc
 
     def ingest_contract(
         self, output_port_id: UUID, contract: BitolContractRequest
