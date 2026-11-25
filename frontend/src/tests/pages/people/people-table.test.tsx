@@ -188,7 +188,7 @@ describe('PeoplePage', () => {
         },
     );
 
-    it('keeps Name sorting active while combining Type, Email and Global Role sorting', async () => {
+    it('keeps Name sorting active with Type and Identifier sorting while Global Role stays unsortable', async () => {
         server.use(
             http.get(endpoint, () => HttpResponse.json({ role_assignments: [globalAssignment(alice, editor)] })),
         );
@@ -200,14 +200,16 @@ describe('PeoplePage', () => {
         const header = (name: string) => screen.getByText(name, { selector: 'th .ant-table-column-title' });
         await user.click(header('Type'));
         expect(names()).toEqual(['Finance Team', 'ETL Runner', 'Alice Smith', 'Bob Jones']);
-        await user.click(header('Global Role'));
+        const roleHeader = screen.getByText('Global Role', { selector: 'th' });
+        await user.click(roleHeader);
+        expect(roleHeader).not.toHaveAttribute('aria-sort');
+        expect(names()).toEqual(['Finance Team', 'ETL Runner', 'Alice Smith', 'Bob Jones']);
         await user.click(header('Name'));
         expect(header('Name').closest('th')).toHaveAttribute('aria-sort', 'descending');
         expect(header('Type').closest('th')).toHaveAttribute('aria-sort', 'ascending');
-        expect(header('Global Role').closest('th')).toHaveAttribute('aria-sort', 'ascending');
-        expect(names()).toEqual(['Finance Team', 'ETL Runner', 'Alice Smith', 'Bob Jones']);
+        expect(names()).toEqual(['Finance Team', 'ETL Runner', 'Bob Jones', 'Alice Smith']);
         await user.click(header('Identifier'));
-        for (const name of ['Type', 'Identifier', 'Global Role']) {
+        for (const name of ['Type', 'Identifier']) {
             await user.click(header(name));
             await user.click(header(name));
             expect(header(name).closest('th')).not.toHaveAttribute('aria-sort');

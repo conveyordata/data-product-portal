@@ -115,10 +115,6 @@ export const getPeopleTableColumns = ({
             dataIndex: 'global_role',
             ellipsis: { showTitle: false },
             width: '15%',
-            sorter: {
-                compare: sorter.stringSorter((identity) => roleFor(identity)?.role.name ?? everyone?.name),
-                multiple: 2,
-            },
             render: (_, identity) => {
                 const role = roleFor(identity);
                 let name = role?.role.name;
