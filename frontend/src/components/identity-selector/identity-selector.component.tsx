@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { IdentityAvatarWithDetails } from '@/components/identity-avatar/identity-avatar.component.tsx';
 import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { useIdentities } from '@/hooks/use-identities.ts';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     getIdentityDisplayName,
     getIdentityTypeLabel,
@@ -35,7 +34,6 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
             (identity) => !hiddenIds.has(identity.id) && identityMatchesSearch(identity, searchTerm),
         );
     }, [identitiesQuery.currentData, identityIdsToHide, searchTerm]);
-    const { pagination, handlePaginationChange, handleCurrentPageChange } = useTablePagination(filteredIdentities);
 
     const columns: TableColumnsType<Identity> = [
         {
@@ -77,10 +75,7 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
                 allowClear
                 disabled={disabled}
                 value={searchTerm}
-                onChange={(event) => {
-                    setSearchTerm(event.target.value);
-                    handleCurrentPageChange(1);
-                }}
+                onChange={(event) => setSearchTerm(event.target.value)}
             />
             <ListTable<Identity>
                 query={identitiesQuery}
@@ -95,14 +90,9 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
                 }}
                 filter={{
                     searchTerm,
-                    onClear: () => {
-                        setSearchTerm('');
-                        handleCurrentPageChange(1);
-                    },
+                    onClear: () => setSearchTerm(''),
                 }}
                 pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
                     placement: ['bottomEnd'],
                     size: 'small',
                     showSizeChanger: false,
@@ -114,7 +104,6 @@ export function IdentitySelector({ renderAction, actionTitle, identityIdsToHide,
                             count: total,
                         }),
                 }}
-                onChange={handlePaginationChange}
                 rowKey="id"
                 size="small"
                 tableLayout="fixed"

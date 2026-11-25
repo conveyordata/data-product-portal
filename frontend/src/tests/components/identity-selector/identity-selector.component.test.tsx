@@ -94,28 +94,31 @@ describe('IdentitySelector', () => {
         }
     });
 
-    it('paginates locally and resets the page and total when search or header filters change', async () => {
-        const users = Array.from({ length: 12 }, (_, index) => ({
+    it('preserves the page when searching, clamps it to the last page, and resets it for header filters', async () => {
+        const users = Array.from({ length: 24 }, (_, index) => ({
             ...mockUsers[0],
             id: `user-${index}`,
             first_name: `Person ${String(index).padStart(2, '0')}`,
             last_name: 'User',
-            email: `person${index}@example.com`,
+            email: `${index < 12 ? 'match' : 'other'}${index}@example.com`,
             external_id: `external-${index}`,
         }));
         const handlers = mockIdentities(users);
         const user = userEvent.setup();
         renderWithProviders(<IdentitySelector />);
         await screen.findByText('Person 00 User');
-        expect(screen.getByText('Showing 1-10 of 14 identities')).toBeInTheDocument();
-        await user.click(within(screen.getByTitle('2')).getByText('2'));
-        expect(screen.getByText('Showing 11-14 of 14 identities')).toBeInTheDocument();
+        expect(screen.getByText('Showing 1-10 of 26 identities')).toBeInTheDocument();
+        await user.click(within(screen.getByTitle('3')).getByText('3'));
+        expect(screen.getByText('Showing 21-26 of 26 identities')).toBeInTheDocument();
         const search = screen.getByLabelText('Search identities');
-        await user.type(search, 'person0@example.com');
-        expect(screen.getByText('Person 00 User')).toBeInTheDocument();
-        expect(screen.getByText('Showing 1-1 of 1 identities')).toBeInTheDocument();
+        await user.type(search, 'Person');
+        expect(screen.getByText('Showing 21-24 of 24 identities')).toBeInTheDocument();
         await user.clear(search);
-        await user.click(within(screen.getByTitle('2')).getByText('2'));
+        await user.type(search, 'match');
+        expect(screen.getByText('Showing 11-12 of 12 identities')).toBeInTheDocument();
+        expect(screen.getByText('Person 10 User')).toBeInTheDocument();
+        await user.clear(search);
+        expect(screen.getByText('Showing 21-26 of 26 identities')).toBeInTheDocument();
         await user.click(screen.getByLabelText('filter', { selector: 'th [aria-label]' }));
         await user.click(filterMenu().getByText('Group'));
         await user.click(filterMenu().getByText('Machine User'));
@@ -127,7 +130,7 @@ describe('IdentitySelector', () => {
         expect(screen.getByText('No identities match "Alice" with the current filters')).toBeInTheDocument();
         await user.click(screen.getByText('Clear filters'));
         expect(screen.getByText('Person 00 User')).toBeInTheDocument();
-        expect(screen.getByText('Showing 1-10 of 14 identities')).toBeInTheDocument();
+        expect(screen.getByText('Showing 1-10 of 26 identities')).toBeInTheDocument();
         for (const handler of Object.values(handlers)) {
             expect(handler).toHaveBeenCalledTimes(1);
         }
