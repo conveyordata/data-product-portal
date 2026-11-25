@@ -27,6 +27,7 @@ This migration can take some time, depending on the amount of Data Products pres
 
 ### bugfixes
 
+- **[API]**: The backend turns off PostgreSQL JIT compilation for its own connections. With about 1,000 Data Products, compiling took over a second per marketplace search and Output Port list, for queries that run in milliseconds.
 - **[API]**: Deleting a Technical Asset, directly or through its Data Product, also deletes its plugin configuration.
 - **[UI]**: Switching platforms during Technical Asset creation clears the previous service and preview. Switching types refreshes automatic namespace suggestions and revalidates manually entered namespaces without replacing them.
 - **[UI]**: The namespace check when creating a Technical Asset no longer reports a namespace as taken because an Output Port uses it. It now checks the Technical Assets of the Data Product, like saving does.
