@@ -86,7 +86,7 @@ export function IdentitySelector({
                         type="search"
                         data-cy="identity-selector-search"
                         aria-label={t('Search identities')}
-                        placeholder={t('Search by name, email, or external ID')}
+                        placeholder={t('Search by name or identifier')}
                         allowClear
                         disabled={disabled}
                         value={searchTerm}

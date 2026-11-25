@@ -103,7 +103,7 @@ describe('PeoplePage', () => {
             expect(screen.getByText(user1)).toBeInTheDocument();
         });
 
-        const searchInput = screen.getByPlaceholderText('Search by name, email, or external ID');
+        const searchInput = screen.getByPlaceholderText('Search by name or identifier');
         await user.type(searchInput, 'bob');
 
         await waitFor(() => {
