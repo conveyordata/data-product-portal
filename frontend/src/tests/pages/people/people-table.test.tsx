@@ -93,6 +93,28 @@ describe('PeoplePage', () => {
         expect(screen.getByText(user2)).toBeInTheDocument();
     });
 
+    it('shows an existing Admin assignment without offering Admin as an assignable role', async () => {
+        const admin: Role = { ...member, id: 'admin-role', name: 'Admin', prototype: Prototype.ADMIN };
+        server.use(
+            http.get(endpoint, () => HttpResponse.json({ role_assignments: [globalAssignment(alice, admin)] })),
+            http.get('*/api/v2/authz/roles/global', () =>
+                HttpResponse.json({ roles: [everyone, member, editor, admin] }),
+            ),
+        );
+        const user = userEvent.setup();
+        renderWithProviders(<PeoplePage />);
+        const row = (await screen.findByText('Alice Smith')).closest('tr');
+        if (!row) throw new Error('Missing identity row');
+        expect(await within(row).findByText('Admin')).toBeInTheDocument();
+        expect(within(row).queryByText('Everyone')).not.toBeInTheDocument();
+        const select = row.querySelector('input');
+        if (!select) throw new Error('Missing global role selector');
+        await waitFor(() => expect(select).toBeEnabled());
+        await user.click(select);
+        expect(await screen.findByText('Member', { selector: '.ant-select-item-option-content' })).toBeVisible();
+        expect(screen.queryByText('Admin', { selector: '.ant-select-item-option-content' })).not.toBeInTheDocument();
+    });
+
     it('filters users by search term', async () => {
         const user = userEvent.setup();
         mockUsersHttp([mockUsers[0], mockUsers[1]]);

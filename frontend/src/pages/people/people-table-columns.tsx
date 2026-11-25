@@ -26,13 +26,8 @@ function RoleSelector({ role, options, onChange, disabled = false, disabledReaso
         <Tooltip title={disabledReason}>
             <Select
                 className={styles.select}
-                value={
-                    role && role.decision !== DecisionStatus.Approved
-                        ? null
-                        : role?.role.prototype === Prototype.ADMIN
-                          ? ''
-                          : (role?.role.id ?? '')
-                }
+                value={role && role.decision !== DecisionStatus.Approved ? null : (role?.role.id ?? '')}
+                labelRender={({ label }) => label ?? role?.role.name}
                 placeholder={role?.role.name}
                 options={options}
                 onChange={(value: string) => onChange(value)}
