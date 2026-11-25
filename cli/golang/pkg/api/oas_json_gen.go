@@ -1065,12 +1065,23 @@ func (s *AccessModeCreate) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.DefaultForTechnicalAssetTypes != nil {
+			e.FieldStart("default_for_technical_asset_types")
+			e.ArrStart()
+			for _, elem := range s.DefaultForTechnicalAssetTypes {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfAccessModeCreate = [3]string{
+var jsonFieldsNameOfAccessModeCreate = [4]string{
 	0: "name",
 	1: "description",
 	2: "technical_asset_types",
+	3: "default_for_technical_asset_types",
 }
 
 // Decode decodes AccessModeCreate from json.
@@ -1079,6 +1090,7 @@ func (s *AccessModeCreate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode AccessModeCreate to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -1125,6 +1137,25 @@ func (s *AccessModeCreate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_asset_types\"")
+			}
+		case "default_for_technical_asset_types":
+			if err := func() error {
+				s.DefaultForTechnicalAssetTypes = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.DefaultForTechnicalAssetTypes = append(s.DefaultForTechnicalAssetTypes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default_for_technical_asset_types\"")
 			}
 		default:
 			return d.Skip()
@@ -1203,11 +1234,22 @@ func (s *AccessModeUpdate) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.DefaultForTechnicalAssetTypes != nil {
+			e.FieldStart("default_for_technical_asset_types")
+			e.ArrStart()
+			for _, elem := range s.DefaultForTechnicalAssetTypes {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfAccessModeUpdate = [2]string{
+var jsonFieldsNameOfAccessModeUpdate = [3]string{
 	0: "description",
 	1: "technical_asset_types",
+	2: "default_for_technical_asset_types",
 }
 
 // Decode decodes AccessModeUpdate from json.
@@ -1216,6 +1258,7 @@ func (s *AccessModeUpdate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode AccessModeUpdate to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -1250,6 +1293,25 @@ func (s *AccessModeUpdate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_asset_types\"")
+			}
+		case "default_for_technical_asset_types":
+			if err := func() error {
+				s.DefaultForTechnicalAssetTypes = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.DefaultForTechnicalAssetTypes = append(s.DefaultForTechnicalAssetTypes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default_for_technical_asset_types\"")
 			}
 		default:
 			return d.Skip()
@@ -1336,13 +1398,31 @@ func (s *AccessModeWithType) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		e.FieldStart("default_for_technical_asset_types")
+		e.ArrStart()
+		for _, elem := range s.DefaultForTechnicalAssetTypes {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("in_use_technical_asset_types")
+		e.ArrStart()
+		for _, elem := range s.InUseTechnicalAssetTypes {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
 }
 
-var jsonFieldsNameOfAccessModeWithType = [4]string{
+var jsonFieldsNameOfAccessModeWithType = [6]string{
 	0: "id",
 	1: "name",
 	2: "description",
 	3: "technical_asset_types",
+	4: "default_for_technical_asset_types",
+	5: "in_use_technical_asset_types",
 }
 
 // Decode decodes AccessModeWithType from json.
@@ -1410,6 +1490,46 @@ func (s *AccessModeWithType) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_asset_types\"")
 			}
+		case "default_for_technical_asset_types":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.DefaultForTechnicalAssetTypes = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.DefaultForTechnicalAssetTypes = append(s.DefaultForTechnicalAssetTypes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default_for_technical_asset_types\"")
+			}
+		case "in_use_technical_asset_types":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.InUseTechnicalAssetTypes = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.InUseTechnicalAssetTypes = append(s.InUseTechnicalAssetTypes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"in_use_technical_asset_types\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -1420,7 +1540,7 @@ func (s *AccessModeWithType) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -42835,6 +42955,48 @@ func (s *UpdateAccessDurationResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UpdateAccessDurationResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdateAccessModeBadRequestApplicationJSON as json.
+func (s UpdateAccessModeBadRequestApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes UpdateAccessModeBadRequestApplicationJSON from json.
+func (s *UpdateAccessModeBadRequestApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateAccessModeBadRequestApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateAccessModeBadRequestApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdateAccessModeBadRequestApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateAccessModeBadRequestApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

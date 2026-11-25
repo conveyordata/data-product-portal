@@ -15,6 +15,8 @@ class AccessMode(ORMModel):
 
 class AccessModeWithType(AccessMode):
     technical_asset_types: list[str]
+    default_for_technical_asset_types: list[str]
+    in_use_technical_asset_types: list[str]
 
 
 class GetAccessModes(ORMModel):

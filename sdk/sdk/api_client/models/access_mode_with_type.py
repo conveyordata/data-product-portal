@@ -18,12 +18,16 @@ class AccessModeWithType:
         name (str):
         description (str):
         technical_asset_types (list[str]):
+        default_for_technical_asset_types (list[str]):
+        in_use_technical_asset_types (list[str]):
     """
 
     id: UUID
     name: str
     description: str
     technical_asset_types: list[str]
+    default_for_technical_asset_types: list[str]
+    in_use_technical_asset_types: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +39,10 @@ class AccessModeWithType:
 
         technical_asset_types = self.technical_asset_types
 
+        default_for_technical_asset_types = self.default_for_technical_asset_types
+
+        in_use_technical_asset_types = self.in_use_technical_asset_types
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -43,6 +51,8 @@ class AccessModeWithType:
                 "name": name,
                 "description": description,
                 "technical_asset_types": technical_asset_types,
+                "default_for_technical_asset_types": default_for_technical_asset_types,
+                "in_use_technical_asset_types": in_use_technical_asset_types,
             }
         )
 
@@ -59,11 +69,21 @@ class AccessModeWithType:
 
         technical_asset_types = cast(list[str], d.pop("technical_asset_types"))
 
+        default_for_technical_asset_types = cast(
+            list[str], d.pop("default_for_technical_asset_types")
+        )
+
+        in_use_technical_asset_types = cast(
+            list[str], d.pop("in_use_technical_asset_types")
+        )
+
         access_mode_with_type = cls(
             id=id,
             name=name,
             description=description,
             technical_asset_types=technical_asset_types,
+            default_for_technical_asset_types=default_for_technical_asset_types,
+            in_use_technical_asset_types=in_use_technical_asset_types,
         )
 
         access_mode_with_type.additional_properties = d

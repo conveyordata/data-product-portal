@@ -42,6 +42,7 @@ In principle should always be present on non GET endpoints and sensitive GET end
 *   Use factories to build test data.
 *   Each test runs in a transaction that is rolled back afterwards. Assert row locks with `row_lock_modes` from `tests/session_util.py` instead of a second connection. Mark a test `@pytest.mark.commits` only when its data must be visible to another connection, like migrations; its tables are truncated afterwards.
 *   Every new route must ship with full test coverage.
+*   If you want to test a data migration, do it in `tests/app/database/alembic/versions/test_<revision>_<slug>.py`, using `before_migration`. That way the next data migration follows the same pattern.
 
 ## Running Commands
 

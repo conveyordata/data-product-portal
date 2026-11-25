@@ -60,6 +60,8 @@ export type AccessModeWithType = {
   name: string;
   description: string;
   technical_asset_types: string[];
+  default_for_technical_asset_types: string[];
+  in_use_technical_asset_types: string[];
 };
 export type GetAccessModes = {
   access_modes: AccessModeWithType[];
@@ -83,10 +85,14 @@ export type AccessModeCreate = {
   name: string;
   description: string;
   technical_asset_types: string[];
+  /** Technical asset types for which this access mode becomes the default. A type keeps its default until another access mode is made its default. */
+  default_for_technical_asset_types?: string[];
 };
 export type AccessModeUpdate = {
   description: string;
   technical_asset_types: string[];
+  /** Technical asset types for which this access mode becomes the default. A type keeps its default until another access mode is made its default. */
+  default_for_technical_asset_types?: string[];
 };
 export const {
   useGetAccessModesQuery,

@@ -1,5 +1,5 @@
 import { SafetyCertificateOutlined } from '@ant-design/icons';
-import { Button, Flex, Popconfirm } from 'antd';
+import { Button, Flex, Popconfirm, Tooltip } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -12,11 +12,6 @@ import {
     useGetAccessModesQuery,
 } from '@/store/api/services/generated/configurationAccessModesApi.ts';
 import { type UiElementMetadataResponse, useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
-import {
-    CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
-    isCanNotRemoveAccessModeInUseError,
-} from '@/store/common/api-errors.ts';
-import { showGenericErrorMessage } from '@/store/common/errors.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 
@@ -68,16 +63,26 @@ export default function AccessModes() {
             try {
                 await deleteAccessMode(accessMode.id).unwrap();
                 dispatchMessage({ content: t('Access mode deleted successfully'), type: 'success' });
-            } catch (error) {
-                if (isCanNotRemoveAccessModeInUseError(error)) {
-                    dispatchMessage({ content: t(CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR), type: 'error' });
-                } else {
-                    showGenericErrorMessage(error);
-                }
+            } catch {
+                // The request already showed its error.
             }
         },
         [deleteAccessMode, t],
     );
+    const removeBlockedReason = (accessMode: AccessModeWithType) => {
+        if (accessMode.in_use_technical_asset_types.length > 0) {
+            return t('Technical Assets use this access mode');
+        }
+        const defaultTypesWithOtherAccessModes = accessMode.default_for_technical_asset_types.filter((type) =>
+            access_modes.some((other) => other.id !== accessMode.id && other.technical_asset_types.includes(type)),
+        );
+        if (defaultTypesWithOtherAccessModes.length > 0) {
+            return t('Make another access mode the default for {{types}} first', {
+                types: technicalAssetTypeDisplayNames(defaultTypesWithOtherAccessModes).join(', '),
+            });
+        }
+        return undefined;
+    };
 
     return (
         <Flex vertical gap="medium">
@@ -119,7 +124,18 @@ export default function AccessModes() {
                             (record.technical_asset_types ?? []).includes(
                                 typeof value === 'string' ? value : String(value),
                             ),
-                        width: '25%',
+                        width: '20%',
+                    },
+                    {
+                        title: t('Default for'),
+                        dataIndex: 'default_for_technical_asset_types',
+                        render: (default_for_technical_asset_types: string[]) => {
+                            const displayName = technicalAssetTypeDisplayNames(default_for_technical_asset_types).join(
+                                ', ',
+                            );
+                            return <TableCellItem text={displayName} tooltip={{ content: displayName }} />;
+                        },
+                        width: '20%',
                     },
                     {
                         title: t('Description'),
@@ -133,6 +149,7 @@ export default function AccessModes() {
                         key: 'action',
                         width: '10%',
                         render: (record: AccessModeWithType) => {
+                            const blockedReason = removeBlockedReason(record);
                             return (
                                 <Flex>
                                     <Button
@@ -143,20 +160,28 @@ export default function AccessModes() {
                                     >
                                         {t('Edit')}
                                     </Button>
-                                    <Popconfirm
-                                        title={t('Remove')}
-                                        description={t('Are you sure you want to delete this access mode?')}
-                                        onConfirm={() => handleRemove(record)}
-                                        placement="leftTop"
-                                        okText={t('Confirm')}
-                                        cancelText={t('Cancel')}
-                                        okButtonProps={{ loading: isDeleting }}
-                                        autoAdjustOverflow={true}
-                                    >
-                                        <Button loading={isDeleting} disabled={isDeleting} type="link">
-                                            {t('Remove')}
-                                        </Button>
-                                    </Popconfirm>
+                                    {blockedReason ? (
+                                        <Tooltip title={blockedReason}>
+                                            <Button type="link" disabled>
+                                                {t('Remove')}
+                                            </Button>
+                                        </Tooltip>
+                                    ) : (
+                                        <Popconfirm
+                                            title={t('Remove')}
+                                            description={t('Are you sure you want to delete this access mode?')}
+                                            onConfirm={() => handleRemove(record)}
+                                            placement="leftTop"
+                                            okText={t('Confirm')}
+                                            cancelText={t('Cancel')}
+                                            okButtonProps={{ loading: isDeleting }}
+                                            autoAdjustOverflow={true}
+                                        >
+                                            <Button loading={isDeleting} disabled={isDeleting} type="link">
+                                                {t('Remove')}
+                                            </Button>
+                                        </Popconfirm>
+                                    )}
                                 </Flex>
                             );
                         },
