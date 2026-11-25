@@ -32,6 +32,7 @@ This migration can take some time, depending on the amount of Data Products pres
 - **[API]**: Deleting a Data Product lifecycle no longer deletes the Data Products and Output Ports that use it. They keep existing without a lifecycle.
 - **[API]**: Deleting a tag, or updating or deleting a Data Product type or lifecycle, that doesn't exist returns a 404 instead of a 500.
 - **[API/UI]**: Users whose only role is on an Output Port of a Hidden Data Product can approve and deny its Technical Asset link requests again, and their pending actions no longer fail.
+- **[API/UI]**: Revoking an Input Port ends every active grant, also when a renewal overlaps the grant it replaces. Before, the consumer kept access through the older grant.
 - **[API/UI]**: Request, decision and revocation times are stored in UTC, also when the backend or database server is not in UTC. They used to be stored in the server's local time on such setups. Existing rows are not converted, so on those setups times recorded before the upgrade can show up to a few hours off.
 - **[Auth]**: When loading the current user, a missing, invalid or expired access token returns a 401 instead of a 500, and the reason is logged. A userinfo endpoint that rejects the token or returns no valid email returns a 401, and an unreachable or failing one returns a 503, both instead of a 500.
 

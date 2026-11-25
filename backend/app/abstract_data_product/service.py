@@ -467,15 +467,17 @@ class AbstractDataProductService:
         actor: User,
     ) -> InputPortModel:
         input_port = self._get_input_port(id, output_port_id)
-        target = input_port.active_grant
-        if target is None:
+        targets = input_port.active_grants
+        if not targets:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no active access to revoke",
             )
 
-        target.revoked_by = actor
-        target.revoked_at = datetime.now(tz=timezone.utc)
+        revoked_at = datetime.now(tz=timezone.utc)
+        for target in targets:
+            target.revoked_by = actor
+            target.revoked_at = revoked_at
         input_port.recompute_status()
         self.db.flush()
         return input_port
