@@ -9,7 +9,7 @@ from .user import UserFactory
 fake = Faker()
 
 
-class GroupFactory(IdentityFactory):
+class GroupFactory(IdentityFactory[Group]):
     class Meta:
         model = Group
 

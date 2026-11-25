@@ -11,13 +11,14 @@ from tests import test_session
 
 from .access_duration import AccessDurationFactory
 from .data_product import DataProductFactory
+from .model_factory import ModelFactory
 from .output_port_access_type import OutputPortAccessTypeFactory
 from .tags import TagFactory
 
 fake = Faker()
 
 
-class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
+class OutputPortFactory(ModelFactory[OutputPort]):
     class Meta:
         model = OutputPort
 
