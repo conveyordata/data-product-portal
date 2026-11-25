@@ -63,7 +63,7 @@ from app.data_products.technical_assets.environment_configuration_service import
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import UNFILTERED
+from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
 from app.database.visibility import member_of, output_port_visible_ignoring_consumption
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -201,6 +201,7 @@ class DataProductService(AbstractDataProductService):
             )
             .order_by(ordered_by)
             .limit(limit)
+            .execution_options(**{SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True})
         )
         return self._with_default_lifecycle(self.db.scalars(stmt).unique().all())
 
