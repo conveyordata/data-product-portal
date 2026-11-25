@@ -1,18 +1,20 @@
 import pytest
 from fastapi import HTTPException
+from fastmcp.exceptions import ToolError
 
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.service import OutputPortService
+from app.data_products.service import DataProductService
 from app.mcp.details import (
     get_data_product_details,
     get_domain_details,
     get_output_port_details,
     get_technical_asset_details,
 )
-from app.mcp.search import search_data_products, search_output_ports, universal_search
+from app.mcp.search import search_data_products, universal_search
 from app.settings import settings
+from tests.app.mcp.test_permissions import call_mcp_tool
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -23,30 +25,6 @@ from tests.factories import (
     UserFactory,
 )
 from tests.session_util import as_user
-
-
-def test_search_output_ports(session):
-    ds1 = OutputPortFactory(name="Customer Data")
-    ds2 = OutputPortFactory(name="Sales Data")
-    with as_user(session, UserFactory().id):
-        OutputPortService(db=session).recalculate_search_for_all_output_ports()
-        result = search_output_ports(query="Data", db=session)
-
-    assert "output_ports" in result
-    assert result["count"] >= 2
-    returned_names = {op["name"] for op in result["output_ports"]}
-    assert ds1.name in returned_names
-    assert ds2.name in returned_names
-
-
-def test_search_output_ports_no_query(session):
-    OutputPortFactory(name="Customer Data")
-    with as_user(session, UserFactory().id):
-        OutputPortService(db=session).recalculate_search_for_all_output_ports()
-        result = search_output_ports(query=None, db=session)
-
-    assert "output_ports" in result
-    assert result["count"] == 1
 
 
 def test_get_data_product_details(session):
@@ -82,18 +60,28 @@ def test_get_domain_details(session):
 
 
 def test_search_data_products(session):
-    dp1 = DataProductFactory(name="Alpha Product", description="alpha description")
-    dp2 = DataProductFactory(name="Beta Product", description="beta description")
+    churn = DataProductFactory(name="Customer Churn", description="Churn predictions")
+    inventory = DataProductFactory(
+        name="Warehouse Inventory", description="Stock levels per warehouse"
+    )
 
-    user = UserFactory()
-    with as_user(session, user.id):
-        result = search_data_products(query="Alpha", db=session)
+    with as_user(session, UserFactory().id):
+        DataProductService(session).recalculate_search(churn.id)
+        DataProductService(session).recalculate_search(inventory.id)
+        result = search_data_products(query="churn", db=session)
 
-    assert "data_products" in result
-    assert result["count"] == 1
-    returned_names = {dp["name"] for dp in result["data_products"]}
-    assert dp1.name in returned_names
-    assert dp2.name not in returned_names
+    assert [dp["id"] for dp in result["data_products"]] == [churn.id, inventory.id]
+
+
+def test_search_data_products__lists_output_ports(session):
+    output_port = OutputPortFactory()
+
+    with as_user(session, UserFactory().id):
+        result = search_data_products(db=session)
+
+    [data_product] = result["data_products"]
+    assert data_product["id"] == output_port.data_product_id
+    assert [op["id"] for op in data_product["output_ports"]] == [output_port.id]
 
 
 def test_search_data_products_no_query(session):
@@ -108,40 +96,6 @@ def test_search_data_products_no_query(session):
     assert result["count"] >= 2
 
 
-def test_search_data_products_by_domain(session):
-    domain = DomainFactory()
-    dp_in_domain = DataProductFactory(domain=domain)
-    DataProductFactory()  # different domain
-
-    user = UserFactory()
-    with as_user(session, user.id):
-        result = search_data_products(domain_id=str(domain.id), db=session)
-
-    assert "data_products" in result
-    returned_ids = {dp["id"] for dp in result["data_products"]}
-    assert dp_in_domain.id in returned_ids
-    assert result["count"] == 1
-
-
-def test_search_data_products_by_status(session):
-    from app.data_products.status import AbstractDataProductStatus
-
-    active_dp = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
-    DataProductFactory(status=AbstractDataProductStatus.PENDING.value)
-
-    user = UserFactory()
-    with as_user(session, user.id):
-        result = search_data_products(
-            status=AbstractDataProductStatus.ACTIVE.value, db=session
-        )
-
-    assert "data_products" in result
-    returned_ids = {dp["id"] for dp in result["data_products"]}
-    assert active_dp.id in returned_ids
-    for dp in result["data_products"]:
-        assert dp["status"] == "active"
-
-
 def test_search_data_products_limit(session):
     for _ in range(5):
         DataProductFactory()
@@ -154,16 +108,18 @@ def test_search_data_products_limit(session):
     assert len(result["data_products"]) <= 2
 
 
+@pytest.mark.parametrize("limit", [-1, 1001])
+def test_search_data_products__rejects_invalid_limit(session, limit):
+    with pytest.raises(ToolError, match="validation error"):
+        call_mcp_tool("search_data_products", {"limit": limit})
+
+
 def test_search_data_products_filters_applied(session):
     user = UserFactory()
     with as_user(session, user.id):
-        result = search_data_products(
-            query="test", domain_id=None, status="active", db=session
-        )
+        result = search_data_products(query="test", db=session)
 
-    assert result["filters_applied"]["query"] == "test"
-    assert result["filters_applied"]["domain_id"] is None
-    assert result["filters_applied"]["status"] == "active"
+    assert result["filters_applied"] == {"query": "test"}
 
 
 def test_search_data_products__filters_out_hidden(session):
@@ -183,14 +139,16 @@ def test_search_data_products__filters_out_hidden(session):
 
 
 def test_search_data_products_matches_description(session):
-    dp = DataProductFactory(name="IrrelevantName", description="unique_needle_xyz")
-    DataProductFactory(name="OtherProduct", description="something else")
+    dp = DataProductFactory(
+        name="IrrelevantName", description="Customers cancelling their subscription"
+    )
+    other = DataProductFactory(name="OtherProduct", description="Stock per warehouse")
 
-    user = UserFactory()
-    with as_user(session, user.id):
-        result = search_data_products(query="unique_needle_xyz", db=session)
+    with as_user(session, UserFactory().id):
+        DataProductService(session).recalculate_search(dp.id)
+        DataProductService(session).recalculate_search(other.id)
+        result = search_data_products(query="subscription cancellations", db=session)
 
-    assert result["count"] == 1
     assert result["data_products"][0]["id"] == dp.id
 
 
@@ -203,6 +161,18 @@ def test_universal_search(session):
     assert result["total_count"] == 2
     assert dp.id == result["results"]["data_products"][0]["id"]
     assert dp.domain.id == result["results"]["domains"][0]["id"]
+
+
+def test_universal_search__output_ports(session):
+    output_port = OutputPortFactory(name="needle port")
+    OutputPortFactory(name="other port")
+
+    with as_user(session, UserFactory().id):
+        result = universal_search(
+            query="needle", entity_types=["output_ports"], db=session
+        )
+
+    assert [op["id"] for op in result["results"]["output_ports"]] == [output_port.id]
 
 
 def test_get_technical_asset_details__hidden_data_product_without_access(session):

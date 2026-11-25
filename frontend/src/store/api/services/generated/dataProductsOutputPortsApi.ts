@@ -1,6 +1,17 @@
 import { api } from "@/store/api/services/generated/dataProductsTechnicalAssetsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    getOutputPorts: build.query<
+      GetOutputPortsApiResponse,
+      GetOutputPortsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/output_ports`,
+        params: {
+          assignment_filter: queryArg,
+        },
+      }),
+    }),
     getOutputPortQueryStats: build.query<
       GetOutputPortQueryStatsApiResponse,
       GetOutputPortQueryStatsApiArg
@@ -239,6 +250,9 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type GetOutputPortsApiResponse =
+  /** status 200 Successful Response */ GetOutputPortsResponse;
+export type GetOutputPortsApiArg = AssignmentFilter | undefined;
 export type GetOutputPortQueryStatsApiResponse =
   /** status 200 Successful Response */ OutputPortQueryStatsResponses;
 export type GetOutputPortQueryStatsApiArg = {
@@ -406,14 +420,55 @@ export type GetOutputPortAccessDurationsApiArg = {
   dataProductId: string;
   id: string;
 };
-export type OutputPortQueryStatsResponse = {
-  date: string;
-  consumer_data_product_id: string;
-  query_count: number;
-  consumer_data_product_name?: string | null;
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
 };
-export type OutputPortQueryStatsResponses = {
-  output_port_query_stats_responses: OutputPortQueryStatsResponse[];
+export type Tag = {
+  id: string;
+  value: string;
+};
+export type Domain = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+};
+export type DataProductLifeCycle = {
+  id: string;
+  name: string;
+  value: number;
+  color: string;
+  is_default: boolean;
+};
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type GetOutputPortsResponseItem = {
+  id: string;
+  namespace: string;
+  name: string;
+  description: string;
+  status: OutputPortStatus;
+  usage: string | null;
+  access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
+  data_product_id: string;
+  tags: Tag[];
+  domain: Domain;
+  lifecycle: DataProductLifeCycle | null;
+  access_modes: AccessMode[];
+  abstract_data_product_count: number;
+  technical_assets_count: number;
+  data_product_name: string;
+  quality_status?: DataQualityStatus | null;
+};
+export type GetOutputPortsResponse = {
+  output_ports: GetOutputPortsResponseItem[];
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -424,6 +479,15 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type OutputPortQueryStatsResponse = {
+  date: string;
+  consumer_data_product_id: string;
+  query_count: number;
+  consumer_data_product_name?: string | null;
+};
+export type OutputPortQueryStatsResponses = {
+  output_port_query_stats_responses: OutputPortQueryStatsResponse[];
 };
 export type OutputPortQueryStatsUpdate = {
   /** Day the queries were executed, in ISO 8601 format (YYYY-MM-DD) */
@@ -578,20 +642,6 @@ export type CreateAnnouncement = {
   title: AppSharedSchemaNonEmptyStr1;
   message: AppSharedSchemaNonEmptyStr2;
 };
-export type OutputPortAccessType = {
-  id: string;
-  name: string;
-  access_function: OutputPortAccessFunction;
-};
-export type Tag = {
-  id: string;
-  value: string;
-};
-export type AccessMode = {
-  id: string;
-  name: string;
-  description: string;
-};
 export type OutputPort = {
   id: string;
   name: string;
@@ -620,19 +670,6 @@ export type CreateOutputPortRequest = {
   lifecycle_id?: string | null;
   tag_ids: string[];
   owners: string[];
-};
-export type Domain = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-};
-export type DataProductLifeCycle = {
-  id: string;
-  name: string;
-  value: number;
-  color: string;
-  is_default: boolean;
 };
 export type DataProductSetting = {
   id: string;
@@ -797,23 +834,6 @@ export type GetOutputPortAccessDurationsResponse = {
   data_product_access_duration: OutputPortAccessDuration;
   exploration_access_duration: OutputPortAccessDuration;
 };
-export enum QueryStatsGranularity {
-  Day = "day",
-  Week = "week",
-  Month = "month",
-}
-export enum DataQualityStatus {
-  Success = "success",
-  Failure = "failure",
-  Warning = "warning",
-  Error = "error",
-  Unknown = "unknown",
-}
-export enum AnnouncementType {
-  ActionNeeded = "action_needed",
-  Warning = "warning",
-  Info = "info",
-}
 export enum OutputPortStatus {
   Pending = "pending",
   Active = "active",
@@ -827,6 +847,27 @@ export enum OutputPortAccessFunction {
 export enum AccessDurationType {
   Permanent = "permanent",
   TimeBound = "time_bound",
+}
+export enum DataQualityStatus {
+  Success = "success",
+  Failure = "failure",
+  Warning = "warning",
+  Error = "error",
+  Unknown = "unknown",
+}
+export enum AssignmentFilter {
+  All = "all",
+  OnlyAssigned = "only_assigned",
+}
+export enum QueryStatsGranularity {
+  Day = "day",
+  Week = "week",
+  Month = "month",
+}
+export enum AnnouncementType {
+  ActionNeeded = "action_needed",
+  Warning = "warning",
+  Info = "info",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",
@@ -881,6 +922,8 @@ export enum NodeType {
   OutputPortNode = "outputPortNode",
 }
 export const {
+  useGetOutputPortsQuery,
+  useLazyGetOutputPortsQuery,
   useGetOutputPortQueryStatsQuery,
   useLazyGetOutputPortQueryStatsQuery,
   useUpdateOutputPortQueryStatsMutation,

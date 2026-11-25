@@ -63,7 +63,7 @@ def register_detail_tools(mcp) -> None:
         description="""
     Get full details of a single data product by its UUID, including its description,
     domain, lifecycle status, owners, output ports, and technical assets.
-    Use after search_data_products or search_output_ports to drill into a related data product.
+    Use after search_data_products to drill into a data product.
 
     Args:
         data_product_id: UUID obtained from search_data_products or universal_search.
@@ -74,7 +74,7 @@ def register_detail_tools(mcp) -> None:
         description="""
     Get full details of a single output port by its UUID, including schema, access type,
     the data product it belongs to, and owner contact information.
-    Use after search_output_ports to get complete information about a specific dataset.
+    Use after search_data_products to get complete information about one of its output ports.
 
     CRITICAL FOR DATA QUERIES: This returns data_product_links[], which contains the consuming
     data products that have access to this output port. These are typically YOUR access path to
@@ -84,7 +84,7 @@ def register_detail_tools(mcp) -> None:
     Also returns technical_asset_links[] with technical_asset configuration including the database name.
 
     Args:
-        output_port_id: UUID obtained from search_output_ports or universal_search.
+        output_port_id: UUID obtained from search_data_products or universal_search.
 
     Returns:
         - data_product_links: List of consuming data products (YOUR access path!)

@@ -94,11 +94,8 @@ def register_resources(mcp) -> None:
         all_data_products = DataProductService(db).get_data_products(
             assignment_filter=AssignmentFilter.ALL
         )
-        all_output_ports = OutputPortService(db).search_output_ports(
-            query=None,
-            limit=1000,
-            user=user,
-            assignment_filter=AssignmentFilter.ALL,
+        all_output_ports = OutputPortService(db).list_output_ports(
+            user=user, assignment_filter=AssignmentFilter.ALL
         )
         all_technical_assets = TechnicalAssetService(db).get_technical_assets()
         all_domains = DomainService(db).get_domains()

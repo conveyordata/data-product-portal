@@ -6,23 +6,17 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.assignment_filter import AssignmentFilter
+from ...models.get_output_ports_response import GetOutputPortsResponse
 from ...models.http_validation_error import HTTPValidationError
-from ...models.search_output_ports_response import SearchOutputPortsResponse
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    query: str | Unset = UNSET,
-    limit: int | Unset = 100,
     assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
-
-    params["query"] = query
-
-    params["limit"] = limit
 
     json_assignment_filter: str | Unset = UNSET
     if not isinstance(assignment_filter, Unset):
@@ -34,7 +28,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/api/v2/search/output_ports",
+        "url": "/api/v2/output_ports",
         "params": params,
     }
 
@@ -43,9 +37,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | SearchOutputPortsResponse | None:
+) -> GetOutputPortsResponse | HTTPValidationError | None:
     if response.status_code == 200:
-        response_200 = SearchOutputPortsResponse.from_dict(response.json())
+        response_200 = GetOutputPortsResponse.from_dict(response.json())
 
         return response_200
 
@@ -62,7 +56,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
+) -> Response[GetOutputPortsResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,15 +68,11 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    query: str | Unset = UNSET,
-    limit: int | Unset = 100,
     assignment_filter: AssignmentFilter | Unset = UNSET,
-) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
-    """Search Output Ports
+) -> Response[GetOutputPortsResponse | HTTPValidationError]:
+    """Get Output Ports
 
     Args:
-        query (str | Unset):
-        limit (int | Unset):  Default: 100.
         assignment_filter (AssignmentFilter | Unset):
 
     Raises:
@@ -90,12 +80,10 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | SearchOutputPortsResponse]
+        Response[GetOutputPortsResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
-        query=query,
-        limit=limit,
         assignment_filter=assignment_filter,
     )
 
@@ -109,15 +97,11 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    query: str | Unset = UNSET,
-    limit: int | Unset = 100,
     assignment_filter: AssignmentFilter | Unset = UNSET,
-) -> HTTPValidationError | SearchOutputPortsResponse | None:
-    """Search Output Ports
+) -> GetOutputPortsResponse | HTTPValidationError | None:
+    """Get Output Ports
 
     Args:
-        query (str | Unset):
-        limit (int | Unset):  Default: 100.
         assignment_filter (AssignmentFilter | Unset):
 
     Raises:
@@ -125,13 +109,11 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | SearchOutputPortsResponse
+        GetOutputPortsResponse | HTTPValidationError
     """
 
     return sync_detailed(
         client=client,
-        query=query,
-        limit=limit,
         assignment_filter=assignment_filter,
     ).parsed
 
@@ -139,15 +121,11 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    query: str | Unset = UNSET,
-    limit: int | Unset = 100,
     assignment_filter: AssignmentFilter | Unset = UNSET,
-) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
-    """Search Output Ports
+) -> Response[GetOutputPortsResponse | HTTPValidationError]:
+    """Get Output Ports
 
     Args:
-        query (str | Unset):
-        limit (int | Unset):  Default: 100.
         assignment_filter (AssignmentFilter | Unset):
 
     Raises:
@@ -155,12 +133,10 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | SearchOutputPortsResponse]
+        Response[GetOutputPortsResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
-        query=query,
-        limit=limit,
         assignment_filter=assignment_filter,
     )
 
@@ -172,15 +148,11 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    query: str | Unset = UNSET,
-    limit: int | Unset = 100,
     assignment_filter: AssignmentFilter | Unset = UNSET,
-) -> HTTPValidationError | SearchOutputPortsResponse | None:
-    """Search Output Ports
+) -> GetOutputPortsResponse | HTTPValidationError | None:
+    """Get Output Ports
 
     Args:
-        query (str | Unset):
-        limit (int | Unset):  Default: 100.
         assignment_filter (AssignmentFilter | Unset):
 
     Raises:
@@ -188,14 +160,12 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | SearchOutputPortsResponse
+        GetOutputPortsResponse | HTTPValidationError
     """
 
     return (
         await asyncio_detailed(
             client=client,
-            query=query,
-            limit=limit,
             assignment_filter=assignment_filter,
         )
     ).parsed

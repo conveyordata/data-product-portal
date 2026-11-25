@@ -27,8 +27,7 @@ TWO DISTINCT MODES OF OPERATION
 MODE 1: DISCOVERY (Metadata Only — Fast, No Credentials Required)
 ──────────────────────────────────────────────────────────────────────
 Tools for Discovery (no credentials needed):
-- search_output_ports(query)      — find datasets
-- search_data_products(query)     — find data products
+- search_data_products(query)     — find data products and their output ports (datasets)
 - get_output_port_details(id)     — metadata about a dataset
 - get_data_product_details(id)    — details about a data product
 - get_data_product_analytics(id)  — what output ports a data product has
@@ -40,7 +39,8 @@ MODE 2: DATA QUERIES (Actual Data — Requires Credentials)
 DATA QUERY FLOW — Steps 1–3 (common to all plugins)
 
 Step 1: DISCOVER THE DATA
-  search_output_ports("user's query")
+  search_data_products("user's query")
+  → pick the relevant output port from output_ports of the matching data products
 
 Step 2: GET METADATA & CONSUMING DATA PRODUCTS 🔑
   get_output_port_details(output_port_id)

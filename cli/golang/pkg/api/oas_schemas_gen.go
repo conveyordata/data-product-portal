@@ -6042,6 +6042,225 @@ type GetOutputPortSchemaNotFoundApplicationJSON jx.Raw
 
 func (*GetOutputPortSchemaNotFoundApplicationJSON) getOutputPortSchemaRes() {}
 
+// Ref: #/components/schemas/GetOutputPortsResponse
+type GetOutputPortsResponse struct {
+	OutputPorts []GetOutputPortsResponseItem `json:"output_ports"`
+}
+
+// GetOutputPorts returns the value of OutputPorts.
+func (s *GetOutputPortsResponse) GetOutputPorts() []GetOutputPortsResponseItem {
+	return s.OutputPorts
+}
+
+// SetOutputPorts sets the value of OutputPorts.
+func (s *GetOutputPortsResponse) SetOutputPorts(val []GetOutputPortsResponseItem) {
+	s.OutputPorts = val
+}
+
+func (*GetOutputPortsResponse) getOutputPortsRes() {}
+
+// Ref: #/components/schemas/GetOutputPortsResponseItem
+type GetOutputPortsResponseItem struct {
+	ID                            uuid.UUID               `json:"id"`
+	Namespace                     string                  `json:"namespace"`
+	Name                          string                  `json:"name"`
+	Description                   string                  `json:"description"`
+	Status                        OutputPortStatus        `json:"status"`
+	Usage                         NilString               `json:"usage"`
+	AccessType                    OutputPortAccessType    `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID               `json:"data_product_id"`
+	Tags                          []Tag                   `json:"tags"`
+	Domain                        Domain                  `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
+	AccessModes                   []AccessMode            `json:"access_modes"`
+	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
+	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
+	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 OptNilDataQualityStatus `json:"quality_status"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutputPortsResponseItem) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *GetOutputPortsResponseItem) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetName returns the value of Name.
+func (s *GetOutputPortsResponseItem) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *GetOutputPortsResponseItem) GetDescription() string {
+	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetOutputPortsResponseItem) GetStatus() OutputPortStatus {
+	return s.Status
+}
+
+// GetUsage returns the value of Usage.
+func (s *GetOutputPortsResponseItem) GetUsage() NilString {
+	return s.Usage
+}
+
+// GetAccessType returns the value of AccessType.
+func (s *GetOutputPortsResponseItem) GetAccessType() OutputPortAccessType {
+	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *GetOutputPortsResponseItem) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *GetOutputPortsResponseItem) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
+// GetDataProductID returns the value of DataProductID.
+func (s *GetOutputPortsResponseItem) GetDataProductID() uuid.UUID {
+	return s.DataProductID
+}
+
+// GetTags returns the value of Tags.
+func (s *GetOutputPortsResponseItem) GetTags() []Tag {
+	return s.Tags
+}
+
+// GetDomain returns the value of Domain.
+func (s *GetOutputPortsResponseItem) GetDomain() Domain {
+	return s.Domain
+}
+
+// GetLifecycle returns the value of Lifecycle.
+func (s *GetOutputPortsResponseItem) GetLifecycle() NilDataProductLifeCycle {
+	return s.Lifecycle
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetOutputPortsResponseItem) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
+// GetAbstractDataProductCount returns the value of AbstractDataProductCount.
+func (s *GetOutputPortsResponseItem) GetAbstractDataProductCount() int {
+	return s.AbstractDataProductCount
+}
+
+// GetTechnicalAssetsCount returns the value of TechnicalAssetsCount.
+func (s *GetOutputPortsResponseItem) GetTechnicalAssetsCount() int {
+	return s.TechnicalAssetsCount
+}
+
+// GetDataProductName returns the value of DataProductName.
+func (s *GetOutputPortsResponseItem) GetDataProductName() string {
+	return s.DataProductName
+}
+
+// GetQualityStatus returns the value of QualityStatus.
+func (s *GetOutputPortsResponseItem) GetQualityStatus() OptNilDataQualityStatus {
+	return s.QualityStatus
+}
+
+// SetID sets the value of ID.
+func (s *GetOutputPortsResponseItem) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *GetOutputPortsResponseItem) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetName sets the value of Name.
+func (s *GetOutputPortsResponseItem) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *GetOutputPortsResponseItem) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetOutputPortsResponseItem) SetStatus(val OutputPortStatus) {
+	s.Status = val
+}
+
+// SetUsage sets the value of Usage.
+func (s *GetOutputPortsResponseItem) SetUsage(val NilString) {
+	s.Usage = val
+}
+
+// SetAccessType sets the value of AccessType.
+func (s *GetOutputPortsResponseItem) SetAccessType(val OutputPortAccessType) {
+	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *GetOutputPortsResponseItem) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *GetOutputPortsResponseItem) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
+// SetDataProductID sets the value of DataProductID.
+func (s *GetOutputPortsResponseItem) SetDataProductID(val uuid.UUID) {
+	s.DataProductID = val
+}
+
+// SetTags sets the value of Tags.
+func (s *GetOutputPortsResponseItem) SetTags(val []Tag) {
+	s.Tags = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *GetOutputPortsResponseItem) SetDomain(val Domain) {
+	s.Domain = val
+}
+
+// SetLifecycle sets the value of Lifecycle.
+func (s *GetOutputPortsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
+	s.Lifecycle = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetOutputPortsResponseItem) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
+// SetAbstractDataProductCount sets the value of AbstractDataProductCount.
+func (s *GetOutputPortsResponseItem) SetAbstractDataProductCount(val int) {
+	s.AbstractDataProductCount = val
+}
+
+// SetTechnicalAssetsCount sets the value of TechnicalAssetsCount.
+func (s *GetOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
+	s.TechnicalAssetsCount = val
+}
+
+// SetDataProductName sets the value of DataProductName.
+func (s *GetOutputPortsResponseItem) SetDataProductName(val string) {
+	s.DataProductName = val
+}
+
+// SetQualityStatus sets the value of QualityStatus.
+func (s *GetOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualityStatus) {
+	s.QualityStatus = val
+}
+
 type GetPlatformServiceConfigNotFoundApplicationJSON jx.Raw
 
 func (*GetPlatformServiceConfigNotFoundApplicationJSON) getPlatformServiceConfigRes() {}
@@ -7260,6 +7479,7 @@ func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
 func (*HTTPValidationError) getOutputPortSchemaRes()                      {}
 func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
+func (*HTTPValidationError) getOutputPortsRes()                           {}
 func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
 func (*HTTPValidationError) getPlatformServicesRes()                      {}
 func (*HTTPValidationError) getPlatformTilesRes()                         {}
@@ -7328,7 +7548,6 @@ func (*HTTPValidationError) revokeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) revokeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) sanitizeResourceNameRes()                     {}
 func (*HTTPValidationError) searchDataProductsRes()                       {}
-func (*HTTPValidationError) searchOutputPortsRes()                        {}
 func (*HTTPValidationError) setCanBecomeAdminRes()                        {}
 func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
@@ -14752,225 +14971,6 @@ func (s *SearchDataProductsResponseItem) SetOutputPorts(val []SearchDataProducts
 // SetConsumerCount sets the value of ConsumerCount.
 func (s *SearchDataProductsResponseItem) SetConsumerCount(val int) {
 	s.ConsumerCount = val
-}
-
-// Ref: #/components/schemas/SearchOutputPortsResponse
-type SearchOutputPortsResponse struct {
-	OutputPorts []SearchOutputPortsResponseItem `json:"output_ports"`
-}
-
-// GetOutputPorts returns the value of OutputPorts.
-func (s *SearchOutputPortsResponse) GetOutputPorts() []SearchOutputPortsResponseItem {
-	return s.OutputPorts
-}
-
-// SetOutputPorts sets the value of OutputPorts.
-func (s *SearchOutputPortsResponse) SetOutputPorts(val []SearchOutputPortsResponseItem) {
-	s.OutputPorts = val
-}
-
-func (*SearchOutputPortsResponse) searchOutputPortsRes() {}
-
-// Ref: #/components/schemas/SearchOutputPortsResponseItem
-type SearchOutputPortsResponseItem struct {
-	ID                            uuid.UUID               `json:"id"`
-	Namespace                     string                  `json:"namespace"`
-	Name                          string                  `json:"name"`
-	Description                   string                  `json:"description"`
-	Status                        OutputPortStatus        `json:"status"`
-	Usage                         NilString               `json:"usage"`
-	AccessType                    OutputPortAccessType    `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
-	DataProductID                 uuid.UUID               `json:"data_product_id"`
-	Tags                          []Tag                   `json:"tags"`
-	Domain                        Domain                  `json:"domain"`
-	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
-	AccessModes                   []AccessMode            `json:"access_modes"`
-	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
-	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
-	DataProductName               string                  `json:"data_product_name"`
-	QualityStatus                 OptNilDataQualityStatus `json:"quality_status"`
-}
-
-// GetID returns the value of ID.
-func (s *SearchOutputPortsResponseItem) GetID() uuid.UUID {
-	return s.ID
-}
-
-// GetNamespace returns the value of Namespace.
-func (s *SearchOutputPortsResponseItem) GetNamespace() string {
-	return s.Namespace
-}
-
-// GetName returns the value of Name.
-func (s *SearchOutputPortsResponseItem) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *SearchOutputPortsResponseItem) GetDescription() string {
-	return s.Description
-}
-
-// GetStatus returns the value of Status.
-func (s *SearchOutputPortsResponseItem) GetStatus() OutputPortStatus {
-	return s.Status
-}
-
-// GetUsage returns the value of Usage.
-func (s *SearchOutputPortsResponseItem) GetUsage() NilString {
-	return s.Usage
-}
-
-// GetAccessType returns the value of AccessType.
-func (s *SearchOutputPortsResponseItem) GetAccessType() OutputPortAccessType {
-	return s.AccessType
-}
-
-// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
-func (s *SearchOutputPortsResponseItem) GetDataProductAccessDurationType() AccessDurationType {
-	return s.DataProductAccessDurationType
-}
-
-// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
-func (s *SearchOutputPortsResponseItem) GetExplorationAccessDurationType() AccessDurationType {
-	return s.ExplorationAccessDurationType
-}
-
-// GetDataProductID returns the value of DataProductID.
-func (s *SearchOutputPortsResponseItem) GetDataProductID() uuid.UUID {
-	return s.DataProductID
-}
-
-// GetTags returns the value of Tags.
-func (s *SearchOutputPortsResponseItem) GetTags() []Tag {
-	return s.Tags
-}
-
-// GetDomain returns the value of Domain.
-func (s *SearchOutputPortsResponseItem) GetDomain() Domain {
-	return s.Domain
-}
-
-// GetLifecycle returns the value of Lifecycle.
-func (s *SearchOutputPortsResponseItem) GetLifecycle() NilDataProductLifeCycle {
-	return s.Lifecycle
-}
-
-// GetAccessModes returns the value of AccessModes.
-func (s *SearchOutputPortsResponseItem) GetAccessModes() []AccessMode {
-	return s.AccessModes
-}
-
-// GetAbstractDataProductCount returns the value of AbstractDataProductCount.
-func (s *SearchOutputPortsResponseItem) GetAbstractDataProductCount() int {
-	return s.AbstractDataProductCount
-}
-
-// GetTechnicalAssetsCount returns the value of TechnicalAssetsCount.
-func (s *SearchOutputPortsResponseItem) GetTechnicalAssetsCount() int {
-	return s.TechnicalAssetsCount
-}
-
-// GetDataProductName returns the value of DataProductName.
-func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
-	return s.DataProductName
-}
-
-// GetQualityStatus returns the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) GetQualityStatus() OptNilDataQualityStatus {
-	return s.QualityStatus
-}
-
-// SetID sets the value of ID.
-func (s *SearchOutputPortsResponseItem) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-// SetNamespace sets the value of Namespace.
-func (s *SearchOutputPortsResponseItem) SetNamespace(val string) {
-	s.Namespace = val
-}
-
-// SetName sets the value of Name.
-func (s *SearchOutputPortsResponseItem) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *SearchOutputPortsResponseItem) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetStatus sets the value of Status.
-func (s *SearchOutputPortsResponseItem) SetStatus(val OutputPortStatus) {
-	s.Status = val
-}
-
-// SetUsage sets the value of Usage.
-func (s *SearchOutputPortsResponseItem) SetUsage(val NilString) {
-	s.Usage = val
-}
-
-// SetAccessType sets the value of AccessType.
-func (s *SearchOutputPortsResponseItem) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
-}
-
-// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
-func (s *SearchOutputPortsResponseItem) SetDataProductAccessDurationType(val AccessDurationType) {
-	s.DataProductAccessDurationType = val
-}
-
-// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
-func (s *SearchOutputPortsResponseItem) SetExplorationAccessDurationType(val AccessDurationType) {
-	s.ExplorationAccessDurationType = val
-}
-
-// SetDataProductID sets the value of DataProductID.
-func (s *SearchOutputPortsResponseItem) SetDataProductID(val uuid.UUID) {
-	s.DataProductID = val
-}
-
-// SetTags sets the value of Tags.
-func (s *SearchOutputPortsResponseItem) SetTags(val []Tag) {
-	s.Tags = val
-}
-
-// SetDomain sets the value of Domain.
-func (s *SearchOutputPortsResponseItem) SetDomain(val Domain) {
-	s.Domain = val
-}
-
-// SetLifecycle sets the value of Lifecycle.
-func (s *SearchOutputPortsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
-	s.Lifecycle = val
-}
-
-// SetAccessModes sets the value of AccessModes.
-func (s *SearchOutputPortsResponseItem) SetAccessModes(val []AccessMode) {
-	s.AccessModes = val
-}
-
-// SetAbstractDataProductCount sets the value of AbstractDataProductCount.
-func (s *SearchOutputPortsResponseItem) SetAbstractDataProductCount(val int) {
-	s.AbstractDataProductCount = val
-}
-
-// SetTechnicalAssetsCount sets the value of TechnicalAssetsCount.
-func (s *SearchOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
-	s.TechnicalAssetsCount = val
-}
-
-// SetDataProductName sets the value of DataProductName.
-func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
-	s.DataProductName = val
-}
-
-// SetQualityStatus sets the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualityStatus) {
-	s.QualityStatus = val
 }
 
 // Option for select UI elements.

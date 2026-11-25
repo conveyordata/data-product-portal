@@ -7,20 +7,20 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.search_output_ports_response_item import SearchOutputPortsResponseItem
+    from ..models.get_output_ports_response_item import GetOutputPortsResponseItem
 
 
-T = TypeVar("T", bound="SearchOutputPortsResponse")
+T = TypeVar("T", bound="GetOutputPortsResponse")
 
 
 @_attrs_define
-class SearchOutputPortsResponse:
+class GetOutputPortsResponse:
     """
     Attributes:
-        output_ports (list[SearchOutputPortsResponseItem]):
+        output_ports (list[GetOutputPortsResponseItem]):
     """
 
-    output_ports: list[SearchOutputPortsResponseItem]
+    output_ports: list[GetOutputPortsResponseItem]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -41,26 +41,26 @@ class SearchOutputPortsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.search_output_ports_response_item import (
-            SearchOutputPortsResponseItem,  # noqa: PLC0415
+        from ..models.get_output_ports_response_item import (
+            GetOutputPortsResponseItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
         output_ports = []
         _output_ports = d.pop("output_ports")
         for output_ports_item_data in _output_ports:
-            output_ports_item = SearchOutputPortsResponseItem.from_dict(
+            output_ports_item = GetOutputPortsResponseItem.from_dict(
                 output_ports_item_data
             )
 
             output_ports.append(output_ports_item)
 
-        search_output_ports_response = cls(
+        get_output_ports_response = cls(
             output_ports=output_ports,
         )
 
-        search_output_ports_response.additional_properties = d
-        return search_output_ports_response
+        get_output_ports_response.additional_properties = d
+        return get_output_ports_response
 
     @property
     def additional_keys(self) -> list[str]:

@@ -1,14 +1,16 @@
 """Search and discovery tools for data products, output ports, domains, and technical assets."""
 
-from typing import Any, Optional, Sequence
+from typing import Annotated, Any, Optional, Sequence
 from uuid import UUID
 
 from fastmcp.dependencies import Depends
+from pydantic import Field
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.configuration.domains.service import DomainService
 from app.data_products.output_ports.input_ports.service import InputPortService
+from app.data_products.output_ports.schema_response import GetOutputPortsResponseItem
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import GetDataProductsResponseItem
 from app.data_products.service import DataProductService
@@ -17,7 +19,7 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
-from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
+from app.search_data_products.schema_response import SearchDataProductsResponseItem
 from app.users.model import User as UserModel
 
 
@@ -64,11 +66,8 @@ def universal_search(
         total_count += len(filtered_data_products)
 
     if "output_ports" in search_types:
-        all_output_ports = OutputPortService(db).search_output_ports(
-            query=None,
-            limit=1000,
-            user=user,
-            assignment_filter=AssignmentFilter.ALL,
+        all_output_ports = OutputPortService(db).list_output_ports(
+            user=user, assignment_filter=AssignmentFilter.ALL
         )
         filtered_output_ports = []
         for ds in all_output_ports:
@@ -80,7 +79,7 @@ def universal_search(
                     break
 
         result_datasets = [
-            SearchOutputPortsResponseItem.model_validate(op).model_dump()
+            GetOutputPortsResponseItem.model_validate(op).model_dump()
             for op in filtered_output_ports
         ]
         query_results.update({"output_ports": result_datasets})
@@ -133,43 +132,19 @@ def universal_search(
 
 def search_data_products(
     query: Optional[str] = None,
-    domain_id: Optional[str] = None,
-    status: Optional[str] = None,
-    limit: int = 20,
+    limit: Annotated[int, Field(ge=1, le=1000)] = 20,
     db: Session = Depends(get_user_db_session),
-    user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
-    all_data_products = DataProductService(db).get_data_products(
-        assignment_filter=AssignmentFilter.ALL,
+    data_products = DataProductService(db).search_data_products(
+        query=query, limit=limit
     )
-    filtered_data_products = []
-
-    for dp in all_data_products:
-        if (
-            query
-            and query.lower() not in dp.name.lower()
-            and (not dp.description or query.lower() not in dp.description.lower())
-        ):
-            continue
-        if domain_id and str(dp.domain_id) != domain_id:
-            continue
-        if status and dp.status != status:
-            continue
-
-        filtered_data_products.append(GetDataProductsResponseItem.model_validate(dp))
-        if len(filtered_data_products) >= limit:
-            break
     return {
         "data_products": [
-            GetDataProductsResponseItem.model_validate(dp).model_dump()
-            for dp in filtered_data_products
+            SearchDataProductsResponseItem.model_validate(dp).model_dump()
+            for dp in data_products
         ],
-        "count": len(filtered_data_products),
-        "filters_applied": {
-            "query": query,
-            "domain_id": domain_id,
-            "status": status,
-        },
+        "count": len(data_products),
+        "filters_applied": {"query": query},
     }
 
 
@@ -205,36 +180,12 @@ def get_consuming_products(
     }
 
 
-def search_output_ports(
-    query: Optional[str] = None,
-    limit: int = 20,
-    db: Session = Depends(get_user_db_session),
-    user: UserModel = Depends(get_mcp_authenticated_user),
-) -> dict[str, Any]:
-    all_output_ports = OutputPortService(db).search_output_ports(
-        query=query,
-        user=user,
-        limit=limit,
-        assignment_filter=AssignmentFilter.ALL,
-    )
-    return {
-        "output_ports": [
-            SearchOutputPortsResponseItem.model_validate(ds).model_dump()
-            for ds in all_output_ports
-        ],
-        "count": len(all_output_ports),
-        "filters_applied": {
-            "query": query,
-        },
-    }
-
-
 def register_search_tools(mcp) -> None:
     mcp.tool(
         description="""
 Search across data products, output ports, technical assets, and domains in a single call.
 Use this only when the user hasn't specified what type of entity they're looking for.
-For output ports specifically, always prefer search_output_ports — it uses semantic search and returns richer metadata.
+For finding data, always prefer search_data_products — it uses semantic search and lists the output ports of each data product.
 To get the data product details for output ports, you can use the get_data_product_details function with the data_product_id.
 Args:
     query: Search query string
@@ -246,35 +197,21 @@ Args:
 
     mcp.tool(
         description="""
-    Search and filter data products. Only use this when the user explicitly asks to find a data product.
-    For general data discovery, prefer search_output_ports instead.
+    Search data products using semantic search. This is the preferred tool for finding data in the portal.
+    Use this for any question about finding datasets, tables, or data sources.
 
     A data product is a container owned by a team, grouping related output ports and technical assets.
+    An output port is a published, consumable dataset exposed by a data product.
+    Each result lists the output ports of the data product, with their access modes.
+
+    NEXT STEP: After finding a relevant output port, use get_output_port_details() to get the full details
+    including data_product_links (consuming data products) which are essential for querying the data.
     To explore what a data product contains, follow up with get_data_product_details or get_data_product_analytics.
 
     Args:
-        query: Keyword search on name and description. Leave empty to list all data products.
-        domain_id: UUID of the domain to filter by — use get_marketplace_overview to list available domains.
-        status: Lifecycle state. Common values: 'active', 'pending', 'archived'.
+        query: Natural language or keyword search. Results are ranked by relevance; leave empty to list data products by name.
         limit: Maximum number of results to return.
     """
     )(search_data_products)
 
     mcp.tool(get_consuming_products)
-
-    mcp.tool(
-        description="""
-    Search output ports (datasets) using semantic search. This is the preferred tool for finding data in the portal.
-    Use this for any question about finding datasets, tables, or data sources — unless the user explicitly asks for a data product.
-
-    An output port is a published, consumable dataset exposed by a data product.
-    Returns the name, description, access type, owner, and parent data product for each result.
-
-    NEXT STEP: After finding relevant output ports, use get_output_port_details() to get the full details
-    including data_product_links (consuming data products) which are essential for querying the data.
-
-    Args:
-        query: Natural language or keyword search. Leave empty to list all accessible output ports.
-        limit: Maximum number of results to return.
-    """
-    )(search_output_ports)

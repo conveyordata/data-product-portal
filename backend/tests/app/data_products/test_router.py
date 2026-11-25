@@ -1400,12 +1400,12 @@ class TestDataProductsRouter:
         assert str(link.technical_asset.id) in node_ids
         assert str(producer.id) not in node_ids
 
-    def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
+    def test_get_output_ports__consumed_private_output_port_not_listed_for_consumer(
         self, client, session
     ):
         _, output_port, _, _ = self.setup_consumer_of_private_output_port(session)
 
-        response = client.get("/api/v2/search/output_ports")
+        response = client.get("/api/v2/output_ports")
 
         assert response.status_code == 200, response.text
         assert str(output_port.id) not in {

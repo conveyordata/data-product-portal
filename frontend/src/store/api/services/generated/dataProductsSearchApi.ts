@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/outputPortsSearchApi";
+import { api } from "@/store/api/services/generated/resourceNamesApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     searchDataProducts: build.query<

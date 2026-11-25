@@ -17,7 +17,7 @@ import { ExistingExplorationForm } from '@/pages/cart/components/existing-explor
 import { NewDataProductForm } from '@/pages/cart/components/new-data-product-form.tsx';
 import { NewExplorationForm } from '@/pages/cart/components/new-exploration-form.tsx';
 import { useAppDispatch } from '@/store';
-import { useSearchOutputPortsQuery } from '@/store/api/services/generated/outputPortsSearchApi.ts';
+import { AssignmentFilter, useGetOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
     DataProductChoiceOptions,
     ExistingOrNew,
@@ -83,7 +83,7 @@ function ExplorationsCart() {
         data: { output_ports: outputPorts = [] } = {},
         isFetching: fetchingOutputPorts,
         isSuccess,
-    } = useSearchOutputPortsQuery({ limit: 1000 });
+    } = useGetOutputPortsQuery(AssignmentFilter.All);
     const cartOutputPortIds = useSelector(selectCartOutputPortIds);
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import asyncio
 from copy import deepcopy
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
@@ -9,12 +9,14 @@ import pytest
 from app.abstract_data_product.input_ports.background_tasks import expire_input_ports
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.type import AbstractDataProductType
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.authorization.service import OUTPUT_PORT_READER_ROLE, AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import CasbinPolicies
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.events.enums import EventEntityType
@@ -27,6 +29,7 @@ from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
+    DataQualitySummaryFactory,
     DatasetRoleAssignmentFactory,
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
@@ -1198,3 +1201,107 @@ class TestOutputPortRouter:
         response = self.get_access_durations(client, other_dp.id, ds.id)
 
         assert response.status_code == 404
+
+
+class TestGetOutputPorts:
+    ENDPOINT = "/api/v2/output_ports"
+
+    def test_get_output_ports__sorted_by_name(self, client):
+        OutputPortFactory(name="Sales Data")
+        OutputPortFactory(name="Customer Data")
+
+        response = client.get(self.ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        assert [op["name"] for op in response.json()["output_ports"]] == [
+            "Customer Data",
+            "Sales Data",
+        ]
+
+    def test_get_output_ports__only_assigned(self, client):
+        assigned = OutputPortFactory()
+        OutputPortFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        DatasetRoleAssignmentFactory(
+            output_port=assigned,
+            user_id=user.id,
+            role_id=RoleFactory.dataset_owner().id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.get(
+            self.ENDPOINT,
+            params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value},
+        )
+
+        assert response.status_code == 200, response.text
+        assert [op["id"] for op in response.json()["output_ports"]] == [
+            str(assigned.id)
+        ]
+
+    def test_get_output_ports__excludes_private_output_port(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        unrestricted = OutputPortFactory(
+            access_function=OutputPortAccessFunction.UNRESTRICTED
+        )
+        OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+
+        response = client.get(self.ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        assert [op["id"] for op in response.json()["output_ports"]] == [
+            str(unrestricted.id)
+        ]
+
+    def test_get_output_ports__counts_and_data_product_name(self, client):
+        output_port = OutputPortFactory()
+        TechnicalAssetOutputPortAssociationFactory(output_port=output_port)
+        InputPortFactory(output_port=output_port)
+
+        response = client.get(self.ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        [item] = response.json()["output_ports"]
+        assert item["data_product_name"] == output_port.data_product.name
+        assert item["technical_assets_count"] == 1
+        assert item["abstract_data_product_count"] == 1
+
+    @pytest.mark.parametrize("quality_status", [None, *DataQualityStatus])
+    def test_get_output_ports__quality_status(self, client, quality_status):
+        output_port = OutputPortFactory()
+        if quality_status is not None:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id, overall_status=quality_status
+            )
+
+        response = client.get(self.ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        assert response.json()["output_ports"][0]["quality_status"] == quality_status
+
+    def test_get_output_ports__matches_latest_quality_summary(self, client):
+        output_port = OutputPortFactory()
+        now = datetime.now(UTC)
+        for quality_status, created_at in [
+            (DataQualityStatus.FAILURE, now - timedelta(days=1)),
+            (DataQualityStatus.SUCCESS, now),
+            (DataQualityStatus.WARNING, now),
+            (DataQualityStatus.ERROR, now - timedelta(days=2)),
+        ]:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id,
+                overall_status=quality_status,
+                created_at=created_at,
+            )
+
+        response = client.get(self.ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        quality_status = response.json()["output_ports"][0]["quality_status"]
+        assert quality_status in (DataQualityStatus.SUCCESS, DataQualityStatus.WARNING)
+
+        summary_response = client.get(
+            f"{ENDPOINT.format(output_port.data_product_id)}/{output_port.id}/data_quality_summary"
+        )
+        assert summary_response.status_code == 200, summary_response.text
+        assert quality_status == summary_response.json()["overall_status"]

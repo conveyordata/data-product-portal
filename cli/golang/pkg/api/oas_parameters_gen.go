@@ -308,6 +308,11 @@ type GetOutputPortSchemaParams struct {
 	ID            uuid.UUID
 }
 
+// GetOutputPortsParams is parameters of get_output_ports operation.
+type GetOutputPortsParams struct {
+	AssignmentFilter OptAssignmentFilter `json:",omitempty,omitzero"`
+}
+
 // GetOutputPortsEventHistoryParams is parameters of get_output_ports_event_history operation.
 type GetOutputPortsEventHistoryParams struct {
 	DataProductID uuid.UUID
@@ -621,13 +626,6 @@ type SanitizeResourceNameParams struct {
 type SearchDataProductsParams struct {
 	Query OptString `json:",omitempty,omitzero"`
 	Limit OptInt    `json:",omitempty,omitzero"`
-}
-
-// SearchOutputPortsParams is parameters of search_output_ports operation.
-type SearchOutputPortsParams struct {
-	Query            OptString           `json:",omitempty,omitzero"`
-	Limit            OptInt              `json:",omitempty,omitzero"`
-	AssignmentFilter OptAssignmentFilter `json:",omitempty,omitzero"`
 }
 
 // SetValueForDataProductParams is parameters of set_value_for_data_product operation.

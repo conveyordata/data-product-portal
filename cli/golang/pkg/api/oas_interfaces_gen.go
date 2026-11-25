@@ -361,6 +361,10 @@ type GetOutputPortsEventHistoryRes interface {
 	getOutputPortsEventHistoryRes()
 }
 
+type GetOutputPortsRes interface {
+	getOutputPortsRes()
+}
+
 type GetPlatformServiceConfigRes interface {
 	getPlatformServiceConfigRes()
 }
@@ -631,10 +635,6 @@ type SanitizeResourceNameRes interface {
 
 type SearchDataProductsRes interface {
 	searchDataProductsRes()
-}
-
-type SearchOutputPortsRes interface {
-	searchOutputPortsRes()
 }
 
 type SetCanBecomeAdminRes interface {

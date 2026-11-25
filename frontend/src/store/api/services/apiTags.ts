@@ -10,7 +10,6 @@ import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataPr
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
 import { graphTags } from '@/store/api/services/tags/graphTags.ts';
-import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
 import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
@@ -348,7 +347,6 @@ api.enhanceEndpoints({
         ...explorationTags,
         ...configurationAccessDurationsTags,
         ...configurationAccessModesTags,
-        ...outputPortSearchTags,
         ...dataProductsSearchTags,
         ...graphTags,
     },

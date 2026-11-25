@@ -20,7 +20,7 @@ import { Link } from 'react-router';
 import { useCartOverlapCheck } from '@/pages/cart/hooks/use-cart-overlap-check.ts';
 import { useAppDispatch } from '@/store';
 import { useGetAccessModesQuery } from '@/store/api/services/generated/configurationAccessModesApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
+import type { GetOutputPortsResponseItem } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
     type DataProductChoiceOptions,
     removeOutputPortFromCart,
@@ -32,7 +32,7 @@ import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.t
 import { OutputPortAccessDuration } from './output-port-access-duration';
 
 type CartOverviewItemProps = {
-    outputPort: SearchOutputPortsResponseItem;
+    outputPort: GetOutputPortsResponseItem;
 };
 
 function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
@@ -141,7 +141,7 @@ function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
 }
 
 type CartOverviewWarningProps = {
-    outputPort: SearchOutputPortsResponseItem;
+    outputPort: GetOutputPortsResponseItem;
     overlapping?: boolean;
     selectedDataProductId?: string;
 };
@@ -169,7 +169,7 @@ const CartOverviewWarning = ({ outputPort, overlapping, selectedDataProductId }:
 };
 
 type CartOverviewProps = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
+    cartOutputPorts?: GetOutputPortsResponseItem[];
     loading?: boolean;
     selectedDataProductId?: string;
     selectedExplorationId?: string;

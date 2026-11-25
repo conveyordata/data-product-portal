@@ -3,18 +3,20 @@ import os
 from locust import HttpUser, between, task
 
 DATA_PRODUCTS_PATH = os.getenv("LOADTEST_DATA_PRODUCTS_PATH", "/api/v2/data_products")
-SEARCH_OUTPUT_PORTS_PATH = os.getenv(
-    "LOADTEST_SEARCH_OUTPUT_PORTS_PATH", "/api/v2/search/output_ports"
+SEARCH_DATA_PRODUCTS_PATH = os.getenv(
+    "LOADTEST_SEARCH_DATA_PRODUCTS_PATH", "/api/v2/search/data_products"
 )
 SEARCH_QUERY = os.getenv("LOADTEST_SEARCH_QUERY", "data")
 WAIT_TIME_MIN_SECONDS = float(os.getenv("LOADTEST_WAIT_TIME_MIN_SECONDS", "0.2"))
 WAIT_TIME_MAX_SECONDS = float(os.getenv("LOADTEST_WAIT_TIME_MAX_SECONDS", "1.0"))
 DATA_PRODUCTS_WEIGHT = int(os.getenv("LOADTEST_DATA_PRODUCTS_WEIGHT", "70"))
-SEARCH_OUTPUT_PORTS_WEIGHT = int(os.getenv("LOADTEST_SEARCH_OUTPUT_PORTS_WEIGHT", "30"))
+SEARCH_DATA_PRODUCTS_WEIGHT = int(
+    os.getenv("LOADTEST_SEARCH_DATA_PRODUCTS_WEIGHT", "30")
+)
 
-if DATA_PRODUCTS_WEIGHT < 0 or SEARCH_OUTPUT_PORTS_WEIGHT < 0:
+if DATA_PRODUCTS_WEIGHT < 0 or SEARCH_DATA_PRODUCTS_WEIGHT < 0:
     raise ValueError("Endpoint weights must be >= 0")
-if DATA_PRODUCTS_WEIGHT + SEARCH_OUTPUT_PORTS_WEIGHT == 0:
+if DATA_PRODUCTS_WEIGHT + SEARCH_DATA_PRODUCTS_WEIGHT == 0:
     raise ValueError("At least one endpoint weight must be > 0")
 
 
@@ -41,11 +43,11 @@ class PortalReadUser(HttpUser):
             name="GET /api/v2/data_products",
         )
 
-    @task(SEARCH_OUTPUT_PORTS_WEIGHT)
-    def search_output_ports(self) -> None:
+    @task(SEARCH_DATA_PRODUCTS_WEIGHT)
+    def search_data_products(self) -> None:
         self.client.get(
-            SEARCH_OUTPUT_PORTS_PATH,
+            SEARCH_DATA_PRODUCTS_PATH,
             params={"query": SEARCH_QUERY},
             headers=self._headers,
-            name="GET /api/v2/search/output_ports",
+            name="GET /api/v2/search/data_products",
         )

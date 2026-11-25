@@ -30,6 +30,7 @@ from app.data_products.output_port_technical_assets_link.router import (
 from app.data_products.output_ports.input_ports.router import (
     router as data_product_dataset,
 )
+from app.data_products.output_ports.router import output_ports_router
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as technical_assets
@@ -39,7 +40,6 @@ from app.groups.router import router as group
 from app.machine_users.router import router as machine_user
 from app.resource_names.router import router as resource_name
 from app.search_data_products.router import router as search_data_products
-from app.search_output_ports.router import router as search_output_ports
 from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
 from app.users.router import router as user
@@ -51,8 +51,8 @@ router = (
 )
 
 router.include_router(authorization)
-router.include_router(search_output_ports)
 router.include_router(search_data_products)
+router.include_router(output_ports_router)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)

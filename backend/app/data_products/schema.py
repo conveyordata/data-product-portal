@@ -5,7 +5,6 @@ from pydantic import Field, field_validator
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.schema import DataProductType
-from app.data_products.output_ports.schema import TechnicalAssetEmbed
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -20,6 +19,11 @@ class DataProduct(ORMModel):
 
 
 class OutputPortEmbed(ORMModel):
+    name: str
+    description: str
+
+
+class TechnicalAssetEmbed(ORMModel):
     name: str
     description: str
 

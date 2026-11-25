@@ -198,6 +198,8 @@ from .get_output_port_access_durations_response import (
     GetOutputPortAccessDurationsResponse,
 )
 from .get_output_port_response import GetOutputPortResponse
+from .get_output_ports_response import GetOutputPortsResponse
+from .get_output_ports_response_item import GetOutputPortsResponseItem
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
 from .get_technical_asset_response import GetTechnicalAssetResponse
@@ -407,8 +409,6 @@ from .scope import Scope
 from .search_data_products_output_port import SearchDataProductsOutputPort
 from .search_data_products_response import SearchDataProductsResponse
 from .search_data_products_response_item import SearchDataProductsResponseItem
-from .search_output_ports_response import SearchOutputPortsResponse
-from .search_output_ports_response_item import SearchOutputPortsResponseItem
 from .select_option import SelectOption
 from .snowflake_config import SnowflakeConfig
 from .tag import Tag
@@ -626,6 +626,8 @@ __all__ = (
     "GetInputPortsForOutputPortResponse",
     "GetOutputPortAccessDurationsResponse",
     "GetOutputPortResponse",
+    "GetOutputPortsResponse",
+    "GetOutputPortsResponseItem",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
     "GetTechnicalAssetResponse",
@@ -769,8 +771,6 @@ __all__ = (
     "SearchDataProductsOutputPort",
     "SearchDataProductsResponse",
     "SearchDataProductsResponseItem",
-    "SearchOutputPortsResponse",
-    "SearchOutputPortsResponseItem",
     "SelectOption",
     "SnowflakeConfig",
     "Tag",
