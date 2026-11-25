@@ -209,10 +209,9 @@ def _rules_rebuild_would_remove() -> list[tuple[str, ...]]:
         for ptype in model[section]
         for rule in model[section][ptype].policy
     }
-    built = {
-        (rule.ptype, *map(str, rule))
-        for rule in CasbinSync(TestingSessionLocal()).rules()
-    }
+    session = TestingSessionLocal()
+    session.flush()
+    built = {(rule.ptype, *map(str, rule)) for rule in CasbinSync(session).rules()}
     return sorted(stored - built)
 
 

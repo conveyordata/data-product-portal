@@ -289,7 +289,8 @@ class DataProductService(AbstractDataProductService):
 
         result = copy.deepcopy(data_product)
         output_port_ids = self.db.scalars(
-            select(OutputPortModel.id).where(OutputPortModel.data_product_id == id)
+            select(OutputPortModel.id).where(OutputPortModel.data_product_id == id),
+            execution_options=UNFILTERED,
         ).all()
         self.db.delete(data_product)
         self.db.flush()
