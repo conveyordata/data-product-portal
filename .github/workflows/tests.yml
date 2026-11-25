@@ -191,7 +191,7 @@ jobs:
     - name: Install Task
       uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
     - name: Install Python dependencies
-      run: task poetry:setup
+      run: task setup:backend
     - name: Install npm dependencies
       run: task setup:frontend
     - name: Run pre-commit

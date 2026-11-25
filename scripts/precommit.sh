@@ -24,7 +24,7 @@ while read -r env; do
     fi
 done < <(candidates)
 if [[ -z $VIRTUAL_ENV ]]; then
-    echo "No backend environment matches backend/pyproject.toml: run poetry install in backend/." >&2
+    echo "No backend environment matches backend/pyproject.toml: run poetry install --all-groups in backend/." >&2
     exit 1
 fi
 export VIRTUAL_ENV PATH="$VIRTUAL_ENV/bin:$PATH" PYTHONPATH="$PWD/backend:$PWD/plugins" OTEL_SDK_DISABLED=true
