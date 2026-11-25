@@ -33,6 +33,8 @@ It consists of a 3-tier web architecture.
 *   **Analyze First**: Use search tools to find and replicate existing patterns before inventing new ones.
 *   **Surgical Changes**: Modify only what is necessary. Avoid unsolicited refactoring. Edit files directly rather than through one-off scripts; split large edits into multiple steps if needed.
 *   **Validation**: Always verify your changes.
+*   **Blast Radius**: When you rename or change the type of a field, enum, schema, setting, SDK module or endpoint, grep every consumer (backend, frontend, sdk, cli, demo, docs, and the seed files `backend/sample_data.sql` and `demo/*/portal_seed.sql`) and update them in the same PR.
+*   **Docs Match Code**: Check every claim you write in docs, ADRs and release notes against the code that implements it.
 *   **No Dead Code**: Before a commit, check for unused code, redundant returns, and dead statements — never leave them in.
 *   **Failing Tests**: Fix and rerun failing tests one at a time; only rerun the full suite once everything passes.
 *   **Writing style**: Don't over use bold or italic use in markdowns, only use it to be consistent

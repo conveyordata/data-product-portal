@@ -14812,6 +14812,54 @@ func (s *Scope) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/SearchDataProductsOutputPort
+type SearchDataProductsOutputPort struct {
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	AccessModes []AccessMode `json:"access_modes"`
+}
+
+// GetID returns the value of ID.
+func (s *SearchDataProductsOutputPort) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *SearchDataProductsOutputPort) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *SearchDataProductsOutputPort) GetDescription() string {
+	return s.Description
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *SearchDataProductsOutputPort) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
+// SetID sets the value of ID.
+func (s *SearchDataProductsOutputPort) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *SearchDataProductsOutputPort) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *SearchDataProductsOutputPort) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *SearchDataProductsOutputPort) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
 // Ref: #/components/schemas/SearchDataProductsResponse
 type SearchDataProductsResponse struct {
 	DataProducts []SearchDataProductsResponseItem `json:"data_products"`
@@ -14831,22 +14879,15 @@ func (*SearchDataProductsResponse) searchDataProductsRes() {}
 
 // Ref: #/components/schemas/SearchDataProductsResponseItem
 type SearchDataProductsResponseItem struct {
-	ID                  uuid.UUID                 `json:"id"`
-	Name                string                    `json:"name"`
-	Description         string                    `json:"description"`
-	Namespace           string                    `json:"namespace"`
-	Status              AbstractDataProductStatus `json:"status"`
-	Finalizers          []string                  `json:"finalizers"`
-	Tags                []Tag                     `json:"tags"`
-	Usage               NilString                 `json:"usage"`
-	Domain              Domain                    `json:"domain"`
-	Type                DataProductType           `json:"type"`
-	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
-	Visibility          DataProductVisibility     `json:"visibility"`
-	Environments        []DataProductEnvironment  `json:"environments"`
-	UserCount           int                       `json:"user_count"`
-	InputPortCount      int                       `json:"input_port_count"`
-	TechnicalAssetCount int                       `json:"technical_asset_count"`
+	ID            uuid.UUID                      `json:"id"`
+	Name          string                         `json:"name"`
+	Description   string                         `json:"description"`
+	Tags          []Tag                          `json:"tags"`
+	Domain        Domain                         `json:"domain"`
+	Type          DataProductType                `json:"type"`
+	Lifecycle     NilDataProductLifeCycle        `json:"lifecycle"`
+	OutputPorts   []SearchDataProductsOutputPort `json:"output_ports"`
+	ConsumerCount int                            `json:"consumer_count"`
 }
 
 // GetID returns the value of ID.
@@ -14864,29 +14905,9 @@ func (s *SearchDataProductsResponseItem) GetDescription() string {
 	return s.Description
 }
 
-// GetNamespace returns the value of Namespace.
-func (s *SearchDataProductsResponseItem) GetNamespace() string {
-	return s.Namespace
-}
-
-// GetStatus returns the value of Status.
-func (s *SearchDataProductsResponseItem) GetStatus() AbstractDataProductStatus {
-	return s.Status
-}
-
-// GetFinalizers returns the value of Finalizers.
-func (s *SearchDataProductsResponseItem) GetFinalizers() []string {
-	return s.Finalizers
-}
-
 // GetTags returns the value of Tags.
 func (s *SearchDataProductsResponseItem) GetTags() []Tag {
 	return s.Tags
-}
-
-// GetUsage returns the value of Usage.
-func (s *SearchDataProductsResponseItem) GetUsage() NilString {
-	return s.Usage
 }
 
 // GetDomain returns the value of Domain.
@@ -14904,29 +14925,14 @@ func (s *SearchDataProductsResponseItem) GetLifecycle() NilDataProductLifeCycle 
 	return s.Lifecycle
 }
 
-// GetVisibility returns the value of Visibility.
-func (s *SearchDataProductsResponseItem) GetVisibility() DataProductVisibility {
-	return s.Visibility
+// GetOutputPorts returns the value of OutputPorts.
+func (s *SearchDataProductsResponseItem) GetOutputPorts() []SearchDataProductsOutputPort {
+	return s.OutputPorts
 }
 
-// GetEnvironments returns the value of Environments.
-func (s *SearchDataProductsResponseItem) GetEnvironments() []DataProductEnvironment {
-	return s.Environments
-}
-
-// GetUserCount returns the value of UserCount.
-func (s *SearchDataProductsResponseItem) GetUserCount() int {
-	return s.UserCount
-}
-
-// GetInputPortCount returns the value of InputPortCount.
-func (s *SearchDataProductsResponseItem) GetInputPortCount() int {
-	return s.InputPortCount
-}
-
-// GetTechnicalAssetCount returns the value of TechnicalAssetCount.
-func (s *SearchDataProductsResponseItem) GetTechnicalAssetCount() int {
-	return s.TechnicalAssetCount
+// GetConsumerCount returns the value of ConsumerCount.
+func (s *SearchDataProductsResponseItem) GetConsumerCount() int {
+	return s.ConsumerCount
 }
 
 // SetID sets the value of ID.
@@ -14944,29 +14950,9 @@ func (s *SearchDataProductsResponseItem) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetNamespace sets the value of Namespace.
-func (s *SearchDataProductsResponseItem) SetNamespace(val string) {
-	s.Namespace = val
-}
-
-// SetStatus sets the value of Status.
-func (s *SearchDataProductsResponseItem) SetStatus(val AbstractDataProductStatus) {
-	s.Status = val
-}
-
-// SetFinalizers sets the value of Finalizers.
-func (s *SearchDataProductsResponseItem) SetFinalizers(val []string) {
-	s.Finalizers = val
-}
-
 // SetTags sets the value of Tags.
 func (s *SearchDataProductsResponseItem) SetTags(val []Tag) {
 	s.Tags = val
-}
-
-// SetUsage sets the value of Usage.
-func (s *SearchDataProductsResponseItem) SetUsage(val NilString) {
-	s.Usage = val
 }
 
 // SetDomain sets the value of Domain.
@@ -14984,29 +14970,14 @@ func (s *SearchDataProductsResponseItem) SetLifecycle(val NilDataProductLifeCycl
 	s.Lifecycle = val
 }
 
-// SetVisibility sets the value of Visibility.
-func (s *SearchDataProductsResponseItem) SetVisibility(val DataProductVisibility) {
-	s.Visibility = val
+// SetOutputPorts sets the value of OutputPorts.
+func (s *SearchDataProductsResponseItem) SetOutputPorts(val []SearchDataProductsOutputPort) {
+	s.OutputPorts = val
 }
 
-// SetEnvironments sets the value of Environments.
-func (s *SearchDataProductsResponseItem) SetEnvironments(val []DataProductEnvironment) {
-	s.Environments = val
-}
-
-// SetUserCount sets the value of UserCount.
-func (s *SearchDataProductsResponseItem) SetUserCount(val int) {
-	s.UserCount = val
-}
-
-// SetInputPortCount sets the value of InputPortCount.
-func (s *SearchDataProductsResponseItem) SetInputPortCount(val int) {
-	s.InputPortCount = val
-}
-
-// SetTechnicalAssetCount sets the value of TechnicalAssetCount.
-func (s *SearchDataProductsResponseItem) SetTechnicalAssetCount(val int) {
-	s.TechnicalAssetCount = val
+// SetConsumerCount sets the value of ConsumerCount.
+func (s *SearchDataProductsResponseItem) SetConsumerCount(val int) {
+	s.ConsumerCount = val
 }
 
 // Ref: #/components/schemas/SearchOutputPortsResponse

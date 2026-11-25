@@ -619,9 +619,8 @@ type SanitizeResourceNameParams struct {
 
 // SearchDataProductsParams is parameters of search_data_products operation.
 type SearchDataProductsParams struct {
-	Query            OptString           `json:",omitempty,omitzero"`
-	Limit            OptInt              `json:",omitempty,omitzero"`
-	AssignmentFilter OptAssignmentFilter `json:",omitempty,omitzero"`
+	Query OptString `json:",omitempty,omitzero"`
+	Limit OptInt    `json:",omitempty,omitzero"`
 }
 
 // SearchOutputPortsParams is parameters of search_output_ports operation.

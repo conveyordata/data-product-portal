@@ -4,13 +4,15 @@ from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, selectinload, undefer
+from fastembed import TextEmbedding
+from sqlalchemy import asc, distinct, func, select
+from sqlalchemy.orm import joinedload, selectinload, undefer, with_expression
 from sqlalchemy.orm.util import identity_key
 
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
@@ -62,7 +64,7 @@ from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
 from app.database.database import UNFILTERED
-from app.database.visibility import member_of
+from app.database.visibility import member_of, output_port_visible_ignoring_consumption
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -72,9 +74,9 @@ from app.users.schema import User
 
 
 class DataProductService(AbstractDataProductService):
-    def __init__(self, db: Session):
-        super().__init__(db)
-        self.embedding_model = get_text_embedding_model()
+    @property
+    def embedding_model(self) -> TextEmbedding:
+        return get_text_embedding_model()
 
     @staticmethod
     def _sync_public_reader_grouping(
@@ -156,32 +158,6 @@ class DataProductService(AbstractDataProductService):
         *,
         assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
-        query = self._data_products_query(assignment_filter).order_by(
-            asc(DataProductModel.name)
-        )
-        return self._with_default_lifecycle(self.db.scalars(query).unique().all())
-
-    def search_data_products(
-        self,
-        query: Optional[str],
-        limit: int,
-        assignment_filter: AssignmentFilter,
-    ) -> Sequence[DataProductModel]:
-        ordered_by = DataProductModel.name.asc()
-        if query:
-            query_embedding = self.embedding_model.embed(query)
-            ordered_by = DataProductModel.embeddings.cosine_distance(
-                *query_embedding
-            ).asc()
-
-        stmt = (
-            self._data_products_query(assignment_filter)
-            .order_by(ordered_by)
-            .limit(limit)
-        )
-        return self._with_default_lifecycle(self.db.scalars(stmt).unique().all())
-
-    def _data_products_query(self, assignment_filter: AssignmentFilter):
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
             selectinload(DataProductModel.environments),
@@ -194,7 +170,54 @@ class DataProductService(AbstractDataProductService):
                 query = query.where(member_of(self.db, DataProductModel.id))
             case _:
                 assert_never(assignment_filter)
-        return query
+        query = query.order_by(asc(DataProductModel.name))
+        return self._with_default_lifecycle(self.db.scalars(query).unique().all())
+
+    def search_data_products(
+        self, query: Optional[str], limit: int
+    ) -> Sequence[DataProductModel]:
+        ordered_by = DataProductModel.name.asc()
+        if query:
+            query_embedding = self.embedding_model.embed(query)
+            ordered_by = DataProductModel.embeddings.cosine_distance(
+                *query_embedding
+            ).asc()
+
+        # Leave out private Output Ports the user only sees
+        # because one of their Data Products consumes them: the marketplace lists
+        # what a user can request, not what they already use.
+        visible_output_port = output_port_visible_ignoring_consumption(
+            self.db, OutputPortModel
+        )
+        stmt = (
+            select(DataProductModel)
+            .options(
+                selectinload(DataProductModel.tags).raiseload("*"),
+                selectinload(DataProductModel.datasets.and_(visible_output_port)),
+                with_expression(
+                    DataProductModel.consumer_count,
+                    self._consumer_count(visible_output_port),
+                ),
+            )
+            .order_by(ordered_by)
+            .limit(limit)
+        )
+        return self._with_default_lifecycle(self.db.scalars(stmt).unique().all())
+
+    @staticmethod
+    def _consumer_count(visible_output_port):
+        return (
+            select(
+                func.count(distinct(InputPortModel.consuming_abstract_data_product_id))
+            )
+            .join(OutputPortModel, OutputPortModel.id == InputPortModel.output_port_id)
+            .where(
+                OutputPortModel.data_product_id == DataProductModel.id,
+                InputPortModel.status == InputPortStatus.APPROVED,
+                visible_output_port,
+            )
+            .scalar_subquery()
+        )
 
     def _with_default_lifecycle(
         self, dps: Sequence[DataProductModel]

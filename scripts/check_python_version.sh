@@ -2,7 +2,6 @@
 set -uo pipefail
 
 minor() { grep -m1 -oE '[0-9]+\.[0-9]+' | head -1; }
-hook() { sed -n "/name: mypy ($1)/,/- id:/p" .pre-commit-config.yaml | grep -m1 'language_version' | minor; }
 
 expected=$(grep -m1 -E '^requires-python = ' backend/pyproject.toml | minor)
 if [[ -z "$expected" ]]; then
@@ -16,8 +15,6 @@ found=(
   "Taskfile.yml poetry:reqs|$(grep -m1 -oE 'requirements-poetry\.in .*--python-version [0-9]+\.[0-9]+' Taskfile.yml | grep -oE '[0-9]+\.[0-9]+$')"
   "plugins/pyproject.toml requires-python|$(grep -m1 -E '^requires-python = ' plugins/pyproject.toml | minor)"
   "plugins/pyproject.toml python|$(grep -m1 -E '^python = ' plugins/pyproject.toml | minor)"
-  "mypy (backend) hook|$(hook backend)"
-  "mypy (plugins) hook|$(hook plugins)"
 )
 
 status=0

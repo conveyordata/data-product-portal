@@ -13,6 +13,8 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 -   **Types**: Ensure TypeScript interfaces strictly match the backend's OpenAPI schemas.
 -   **Minimal Fetching**: Only fetch the data a view actually needs from the backend; avoid over-fetching.
 -   **Async races**: Disable the control during an in-flight request instead of guarding against stale responses; use the RTK Query hook's `isLoading` instead of tracking it yourself.
+-   **RTK Query**: Read `currentData` when a query's arguments can change. A mutation invalidates the tags of every query that shows the data it changes.
+-   **Form defaults**: Set Ant Design form defaults with `initialValue` on `Form.Item` or `initialValues` on `Form`, never on the controlled child.
 -   **Localization**: Use `i18next` for all user-facing strings. No hardcoded text. The pre-commit hook extracts new keys into `public/locales/`.
 -   **Code Quality**: Run `scripts/precommit.sh` before committing, never run biome or tsc directly
 -   **Visual check**: For any change a user can see, load the `portal-design` skill before building, and look at the result with the `screenshot` skill (`--compare main`) before handing it over.

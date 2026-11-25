@@ -3,6 +3,7 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from fastembed import TextEmbedding
 from sqlalchemy import func, literal_column, select
 from sqlalchemy.orm import (
     Session,
@@ -105,7 +106,10 @@ class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
-        self.embedding_model = get_text_embedding_model()
+
+    @property
+    def embedding_model(self) -> TextEmbedding:
+        return get_text_embedding_model()
 
     def _ensure_access_durations_are_configured(
         self,

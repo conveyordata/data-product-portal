@@ -15,7 +15,7 @@ export enum PosthogEvents {
     REQUESTS_ACCEPT = 'requests_accept',
     REQUESTS_REJECT = 'requests_reject',
 
-    MARKETPLACE_SEARCHED_DATASET = 'marketplace_searched_dataset',
+    MARKETPLACE_SEARCHED_DATA_PRODUCT = 'marketplace_searched_data_product',
     MARKETPLACE_DATASET_TAB_CLICKED = 'marketplace_dataset_tab_clicked',
     MARKETPLACE_FILTER_USED = 'marketplace_filter_used',
 
