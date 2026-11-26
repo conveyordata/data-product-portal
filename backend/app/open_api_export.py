@@ -103,9 +103,6 @@ def custom_openapi(app: FastAPI):
                     if isinstance(prop, dict):
                         prop.pop("readOnly", None)
 
-        # ogen reserves IdentityType for Identity's generated union discriminator.
-        schemas["IdentityType"]["x-ogen-name"] = "IdentityKind"
-
     app.openapi_schema = final_schema
     return app.openapi_schema
 

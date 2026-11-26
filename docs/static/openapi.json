@@ -12668,7 +12668,7 @@
             "$ref": "#/components/schemas/DataProduct"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "anyOf": [
@@ -12759,7 +12759,7 @@
             "$ref": "#/components/schemas/DataProduct"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "anyOf": [
@@ -14867,7 +14867,7 @@
           "identity": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Identity"
+                "$ref": "#/components/schemas/IdentityGet"
               },
               {
                 "type": "null"
@@ -15554,7 +15554,7 @@
             "title": "Id"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -15937,28 +15937,6 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "Identity": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/UserIdentity"
-          },
-          {
-            "$ref": "#/components/schemas/GroupIdentity"
-          },
-          {
-            "$ref": "#/components/schemas/MachineUserIdentity"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "group": "#/components/schemas/GroupIdentity",
-            "machine_user": "#/components/schemas/MachineUserIdentity",
-            "user": "#/components/schemas/UserIdentity"
-          }
-        },
-        "title": "Identity"
-      },
       "IdentityBatchCreateError": {
         "properties": {
           "item": {
@@ -16129,6 +16107,28 @@
         ],
         "title": "IdentityBatchDeleteRequest"
       },
+      "IdentityGet": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/GroupIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/MachineUserIdentity"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "group": "#/components/schemas/GroupIdentity",
+            "machine_user": "#/components/schemas/MachineUserIdentity",
+            "user": "#/components/schemas/UserIdentity"
+          }
+        },
+        "title": "IdentityGet"
+      },
       "IdentityType": {
         "type": "string",
         "enum": [
@@ -16136,8 +16136,7 @@
           "group",
           "machine_user"
         ],
-        "title": "IdentityType",
-        "x-ogen-name": "IdentityKind"
+        "title": "IdentityType"
       },
       "InputPortEvent": {
         "properties": {

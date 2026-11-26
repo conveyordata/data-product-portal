@@ -321,7 +321,7 @@ export type UserIdentity = {
   admin_expiry?: string | null;
   type: "user";
 };
-export type Identity =
+export type IdentityGet =
   | ({
       type: "group";
     } & GroupIdentity)
@@ -404,7 +404,7 @@ export type User = {
 };
 export type GlobalRoleAssignmentResponse = {
   id: string;
-  identity: Identity;
+  identity: IdentityGet;
   role: Role;
   decision: DecisionStatus;
   requested_on: string | null;
@@ -459,7 +459,7 @@ export type DataProduct = {
 export type DataProductRoleAssignmentResponse = {
   id: string;
   data_product: DataProduct;
-  identity: Identity;
+  identity: IdentityGet;
   role: Role | null;
   decision: DecisionStatus;
   requested_on: string | null;

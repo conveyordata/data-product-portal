@@ -22,7 +22,7 @@ class MachineUserIdentity(MachineUser):
 
 # Because the frontend cannot identify the type of the Identity,
 # this is introduced to avoid setting a "type" param on every type response schema.
-type Identity = Annotated[
+type IdentityGet = Annotated[
     UserIdentity | GroupIdentity | MachineUserIdentity,
     Field(discriminator="type"),
 ]

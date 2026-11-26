@@ -3913,22 +3913,6 @@ func (s *HTTPValidationError) Validate() error {
 	return nil
 }
 
-func (s Identity) Validate() error {
-	switch s.Type {
-	case UserIdentityIdentity:
-		if err := s.UserIdentity.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case GroupIdentityIdentity:
-		return nil // no validation needed
-	case MachineUserIdentityIdentity:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
-}
-
 func (s *IdentityBatchCreateError) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -4281,7 +4265,23 @@ func (s *IdentityBatchDeleteRequest) Validate() error {
 	return nil
 }
 
-func (s IdentityKind) Validate() error {
+func (s IdentityGet) Validate() error {
+	switch s.Type {
+	case UserIdentityIdentityGet:
+		if err := s.UserIdentity.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case GroupIdentityIdentityGet:
+		return nil // no validation needed
+	case MachineUserIdentityIdentityGet:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s IdentityType) Validate() error {
 	switch s {
 	case "user":
 		return nil

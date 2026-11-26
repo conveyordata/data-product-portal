@@ -122,24 +122,24 @@ class GlobalRoleAssignmentResponse:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                componentsschemas_identity_type_0 = UserIdentity.from_dict(data)
+                componentsschemas_identity_get_type_0 = UserIdentity.from_dict(data)
 
-                return componentsschemas_identity_type_0
+                return componentsschemas_identity_get_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                componentsschemas_identity_type_1 = GroupIdentity.from_dict(data)
+                componentsschemas_identity_get_type_1 = GroupIdentity.from_dict(data)
 
-                return componentsschemas_identity_type_1
+                return componentsschemas_identity_get_type_1
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             if not isinstance(data, dict):
                 raise TypeError()
-            componentsschemas_identity_type_2 = MachineUserIdentity.from_dict(data)
+            componentsschemas_identity_get_type_2 = MachineUserIdentity.from_dict(data)
 
-            return componentsschemas_identity_type_2
+            return componentsschemas_identity_get_type_2
 
         identity = _parse_identity(d.pop("identity"))
 

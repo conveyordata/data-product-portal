@@ -21895,171 +21895,6 @@ func (s *HTTPValidationError) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes Identity as json.
-func (s Identity) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-func (s Identity) encodeFields(e *jx.Encoder) {
-	switch s.Type {
-	case UserIdentityIdentity:
-		e.FieldStart("type")
-		e.Str("user")
-		{
-			s := s.UserIdentity
-			{
-				e.FieldStart("id")
-				json.EncodeUUID(e, s.ID)
-			}
-			{
-				e.FieldStart("email")
-				e.Str(s.Email)
-			}
-			{
-				e.FieldStart("external_id")
-				e.Str(s.ExternalID)
-			}
-			{
-				e.FieldStart("first_name")
-				e.Str(s.FirstName)
-			}
-			{
-				e.FieldStart("last_name")
-				e.Str(s.LastName)
-			}
-			{
-				e.FieldStart("has_seen_tour")
-				e.Bool(s.HasSeenTour)
-			}
-			{
-				e.FieldStart("can_become_admin")
-				e.Bool(s.CanBecomeAdmin)
-			}
-			{
-				if s.AdminExpiry.Set {
-					e.FieldStart("admin_expiry")
-					s.AdminExpiry.Encode(e, json.EncodeDateTime)
-				}
-			}
-		}
-	case GroupIdentityIdentity:
-		e.FieldStart("type")
-		e.Str("group")
-		{
-			s := s.GroupIdentity
-			{
-				e.FieldStart("id")
-				json.EncodeUUID(e, s.ID)
-			}
-			{
-				e.FieldStart("external_id")
-				e.Str(s.ExternalID)
-			}
-			{
-				e.FieldStart("display_name")
-				e.Str(s.DisplayName)
-			}
-		}
-	case MachineUserIdentityIdentity:
-		e.FieldStart("type")
-		e.Str("machine_user")
-		{
-			s := s.MachineUserIdentity
-			{
-				e.FieldStart("id")
-				json.EncodeUUID(e, s.ID)
-			}
-			{
-				e.FieldStart("external_id")
-				e.Str(s.ExternalID)
-			}
-			{
-				e.FieldStart("display_name")
-				e.Str(s.DisplayName)
-			}
-		}
-	}
-}
-
-// Decode decodes Identity from json.
-func (s *Identity) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode Identity to nil")
-	}
-	// Sum type discriminator.
-	if typ := d.Next(); typ != jx.Object {
-		return errors.Errorf("unexpected json type %q", typ)
-	}
-
-	var found bool
-	if err := d.Capture(func(d *jx.Decoder) error {
-		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
-			if found {
-				return d.Skip()
-			}
-			switch string(key) {
-			case "type":
-				typ, err := d.Str()
-				if err != nil {
-					return err
-				}
-				switch typ {
-				case "user":
-					s.Type = UserIdentityIdentity
-					found = true
-				case "group":
-					s.Type = GroupIdentityIdentity
-					found = true
-				case "machine_user":
-					s.Type = MachineUserIdentityIdentity
-					found = true
-				default:
-					return errors.Errorf("unknown type %s", typ)
-				}
-				return nil
-			}
-			return d.Skip()
-		})
-	}); err != nil {
-		return errors.Wrap(err, "capture")
-	}
-	if !found {
-		return errors.New("unable to detect sum type variant")
-	}
-	switch s.Type {
-	case UserIdentityIdentity:
-		if err := s.UserIdentity.Decode(d); err != nil {
-			return err
-		}
-	case GroupIdentityIdentity:
-		if err := s.GroupIdentity.Decode(d); err != nil {
-			return err
-		}
-	case MachineUserIdentityIdentity:
-		if err := s.MachineUserIdentity.Decode(d); err != nil {
-			return err
-		}
-	default:
-		return errors.Errorf("inferred invalid type: %s", s.Type)
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s Identity) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Identity) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *IdentityBatchCreateError) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -23113,44 +22948,209 @@ func (s *IdentityBatchDeleteRequest) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes IdentityKind as json.
-func (s IdentityKind) Encode(e *jx.Encoder) {
-	e.Str(string(s))
+// Encode encodes IdentityGet as json.
+func (s IdentityGet) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
 }
 
-// Decode decodes IdentityKind from json.
-func (s *IdentityKind) Decode(d *jx.Decoder) error {
+func (s IdentityGet) encodeFields(e *jx.Encoder) {
+	switch s.Type {
+	case UserIdentityIdentityGet:
+		e.FieldStart("type")
+		e.Str("user")
+		{
+			s := s.UserIdentity
+			{
+				e.FieldStart("id")
+				json.EncodeUUID(e, s.ID)
+			}
+			{
+				e.FieldStart("email")
+				e.Str(s.Email)
+			}
+			{
+				e.FieldStart("external_id")
+				e.Str(s.ExternalID)
+			}
+			{
+				e.FieldStart("first_name")
+				e.Str(s.FirstName)
+			}
+			{
+				e.FieldStart("last_name")
+				e.Str(s.LastName)
+			}
+			{
+				e.FieldStart("has_seen_tour")
+				e.Bool(s.HasSeenTour)
+			}
+			{
+				e.FieldStart("can_become_admin")
+				e.Bool(s.CanBecomeAdmin)
+			}
+			{
+				if s.AdminExpiry.Set {
+					e.FieldStart("admin_expiry")
+					s.AdminExpiry.Encode(e, json.EncodeDateTime)
+				}
+			}
+		}
+	case GroupIdentityIdentityGet:
+		e.FieldStart("type")
+		e.Str("group")
+		{
+			s := s.GroupIdentity
+			{
+				e.FieldStart("id")
+				json.EncodeUUID(e, s.ID)
+			}
+			{
+				e.FieldStart("external_id")
+				e.Str(s.ExternalID)
+			}
+			{
+				e.FieldStart("display_name")
+				e.Str(s.DisplayName)
+			}
+		}
+	case MachineUserIdentityIdentityGet:
+		e.FieldStart("type")
+		e.Str("machine_user")
+		{
+			s := s.MachineUserIdentity
+			{
+				e.FieldStart("id")
+				json.EncodeUUID(e, s.ID)
+			}
+			{
+				e.FieldStart("external_id")
+				e.Str(s.ExternalID)
+			}
+			{
+				e.FieldStart("display_name")
+				e.Str(s.DisplayName)
+			}
+		}
+	}
+}
+
+// Decode decodes IdentityGet from json.
+func (s *IdentityGet) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode IdentityKind to nil")
+		return errors.New("invalid: unable to decode IdentityGet to nil")
 	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch IdentityKind(v) {
-	case IdentityKindUser:
-		*s = IdentityKindUser
-	case IdentityKindGroup:
-		*s = IdentityKindGroup
-	case IdentityKindMachineUser:
-		*s = IdentityKindMachineUser
-	default:
-		*s = IdentityKind(v)
+	// Sum type discriminator.
+	if typ := d.Next(); typ != jx.Object {
+		return errors.Errorf("unexpected json type %q", typ)
 	}
 
+	var found bool
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
+			if found {
+				return d.Skip()
+			}
+			switch string(key) {
+			case "type":
+				typ, err := d.Str()
+				if err != nil {
+					return err
+				}
+				switch typ {
+				case "user":
+					s.Type = UserIdentityIdentityGet
+					found = true
+				case "group":
+					s.Type = GroupIdentityIdentityGet
+					found = true
+				case "machine_user":
+					s.Type = MachineUserIdentityIdentityGet
+					found = true
+				default:
+					return errors.Errorf("unknown type %s", typ)
+				}
+				return nil
+			}
+			return d.Skip()
+		})
+	}); err != nil {
+		return errors.Wrap(err, "capture")
+	}
+	if !found {
+		return errors.New("unable to detect sum type variant")
+	}
+	switch s.Type {
+	case UserIdentityIdentityGet:
+		if err := s.UserIdentity.Decode(d); err != nil {
+			return err
+		}
+	case GroupIdentityIdentityGet:
+		if err := s.GroupIdentity.Decode(d); err != nil {
+			return err
+		}
+	case MachineUserIdentityIdentityGet:
+		if err := s.MachineUserIdentity.Decode(d); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("inferred invalid type: %s", s.Type)
+	}
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s IdentityKind) MarshalJSON() ([]byte, error) {
+func (s IdentityGet) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *IdentityKind) UnmarshalJSON(data []byte) error {
+func (s *IdentityGet) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes IdentityType as json.
+func (s IdentityType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes IdentityType from json.
+func (s *IdentityType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode IdentityType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch IdentityType(v) {
+	case IdentityTypeUser:
+		*s = IdentityTypeUser
+	case IdentityTypeGroup:
+		*s = IdentityTypeGroup
+	case IdentityTypeMachineUser:
+		*s = IdentityTypeMachineUser
+	default:
+		*s = IdentityType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s IdentityType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *IdentityType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -27254,8 +27254,8 @@ func (s *OptNilFieldDependencyArray) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes Identity as json.
-func (o OptNilIdentity) Encode(e *jx.Encoder) {
+// Encode encodes IdentityGet as json.
+func (o OptNilIdentityGet) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
@@ -27266,17 +27266,17 @@ func (o OptNilIdentity) Encode(e *jx.Encoder) {
 	o.Value.Encode(e)
 }
 
-// Decode decodes Identity from json.
-func (o *OptNilIdentity) Decode(d *jx.Decoder) error {
+// Decode decodes IdentityGet from json.
+func (o *OptNilIdentityGet) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptNilIdentity to nil")
+		return errors.New("invalid: unable to decode OptNilIdentityGet to nil")
 	}
 	if d.Next() == jx.Null {
 		if err := d.Null(); err != nil {
 			return err
 		}
 
-		var v Identity
+		var v IdentityGet
 		o.Value = v
 		o.Set = true
 		o.Null = true
@@ -27291,14 +27291,14 @@ func (o *OptNilIdentity) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptNilIdentity) MarshalJSON() ([]byte, error) {
+func (s OptNilIdentityGet) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptNilIdentity) UnmarshalJSON(data []byte) error {
+func (s *OptNilIdentityGet) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
