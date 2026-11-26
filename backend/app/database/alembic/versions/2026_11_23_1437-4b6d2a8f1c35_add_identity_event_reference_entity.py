@@ -21,6 +21,10 @@ def upgrade() -> None:
         sa.table("event_reference_entities", sa.column("key", sa.String)),
         [{"key": "IDENTITY"}],
     )
+    op.execute(
+        "UPDATE events SET subject_type = 'IDENTITY' WHERE subject_type = 'USER'"
+    )
+    op.execute("UPDATE events SET target_type = 'IDENTITY' WHERE target_type = 'USER'")
 
 
 def downgrade() -> None:

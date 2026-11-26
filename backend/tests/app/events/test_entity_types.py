@@ -111,15 +111,66 @@ def test_identity_event_migration__preserves_deleted_identity_history(
         migration, "op", Operations(MigrationContext.configure(session.connection()))
     )
     migration.downgrade()
+    session.refresh(event)
+    assert event.subject_type == EventEntityType.USER
+    assert event.target_type == EventEntityType.USER
     migration.upgrade()
     session.expire_all()
 
     preserved_event = session.get(Event, event_id)
     assert preserved_event is not None
-    assert preserved_event.subject_type == EventEntityType.USER
-    assert preserved_event.target_type == EventEntityType.USER
+    assert preserved_event.subject_type == EventEntityType.IDENTITY
+    assert preserved_event.target_type == EventEntityType.IDENTITY
     assert preserved_event.subject_id == identity_id
     assert preserved_event.target_id == identity_id
     assert preserved_event.deleted_subject_identifier == display_name
     assert preserved_event.deleted_target_identifier == display_name
-    assert preserved_event.user is None
+    assert preserved_event.identity is None
+
+
+@pytest.mark.parametrize("deleted", [False, True])
+def test_identity_event_migration__converts_existing_user_references(
+    session, monkeypatch, deleted
+):
+    user = UserFactory()
+    user_id, email = user.id, user.email
+    event = EventFactory(
+        subject_id=user_id,
+        subject_type=EventEntityType.USER,
+        target_id=user_id,
+        target_type=EventEntityType.USER,
+        deleted_subject_identifier=None,
+    )
+    other_event = EventFactory(
+        subject_type=EventEntityType.OUTPUT_PORT,
+        target_id=uuid4(),
+        target_type=EventEntityType.TECHNICAL_ASSET,
+    )
+    event_id, actor_id, created_on = event.id, event.actor_id, event.created_on
+    if deleted:
+        session.delete(user)
+        session.flush()
+    migration = import_module(
+        "app.database.alembic.versions."
+        "2026_11_23_1437-4b6d2a8f1c35_add_identity_event_reference_entity"
+    )
+    monkeypatch.setattr(
+        migration, "op", Operations(MigrationContext.configure(session.connection()))
+    )
+    migration.downgrade()
+
+    migration.upgrade()
+    session.refresh(event)
+    session.refresh(other_event)
+
+    assert event.id == event_id
+    assert event.subject_type == EventEntityType.IDENTITY
+    assert event.target_type == EventEntityType.IDENTITY
+    assert event.subject_id == user_id
+    assert event.target_id == user_id
+    assert event.actor_id == actor_id
+    assert event.created_on == created_on
+    assert event.deleted_subject_identifier == (email if deleted else None)
+    assert event.deleted_target_identifier == (email if deleted else None)
+    assert other_event.subject_type == EventEntityType.OUTPUT_PORT
+    assert other_event.target_type == EventEntityType.TECHNICAL_ASSET
