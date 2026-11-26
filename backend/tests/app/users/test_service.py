@@ -183,6 +183,7 @@ class TestUserService:
         assert session.get(User, user.id) is None
         assert group in session
 
+    @pytest.mark.seeds_casbin
     def test_remove_users_batch__clears_only_deleted_users_authorization(
         self,
         policies: CasbinPolicies,

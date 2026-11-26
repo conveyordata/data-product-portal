@@ -8,11 +8,12 @@ from tests.factories.lifecycle import LifecycleFactory
 
 from .data_product_type import DataProductTypeFactory
 from .domain import DomainFactory
+from .model_factory import ModelFactory
 
 fake = Faker()
 
 
-class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
+class DataProductFactory(ModelFactory[DataProduct]):
     class Meta:
         model = DataProduct
 

@@ -11,9 +11,9 @@ from sqlalchemy import select, text  # noqa: TID251
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype, Scope
-from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
 from app.core.authz.authorization import CasbinPolicies
@@ -179,11 +179,14 @@ def clear_db(request: pytest.FixtureRequest) -> Iterator[None]:
         _use_wall_clock_defaults(TestingSessionLocal())
         _clear_database(TestingSessionLocal())
     else:
+        stale = []
         with engine.connect() as connection:
             transaction = connection.begin()
             RollbackSession.rollback_connection = connection
             try:
                 yield
+                if not request.node.get_closest_marker("seeds_casbin"):
+                    stale = _rules_rebuild_would_remove()
             finally:
                 RollbackSession.rollback_connection = None
                 TestingSessionLocal.close()
@@ -191,7 +194,25 @@ def clear_db(request: pytest.FixtureRequest) -> Iterator[None]:
         policies = CasbinPolicies()
         policies._enforcer.load_policy()
         policies._cache.clear()
+        assert not stale, (
+            f"Casbin holds rules that CasbinSync.rebuild() would remove: {stale}."
+            " Build them in app/authorization/casbin_sync.py, or clean them up."
+        )
     reset_unique_fakers()
+
+
+def _rules_rebuild_would_remove() -> list[tuple[str, ...]]:
+    model = CasbinPolicies()._enforcer.get_model()
+    stored = {
+        (ptype, *rule)
+        for section in ("p", "g")
+        for ptype in model[section]
+        for rule in model[section][ptype].policy
+    }
+    session = TestingSessionLocal()
+    session.flush()
+    built = {(rule.ptype, *map(str, rule)) for rule in CasbinSync(session).rules()}
+    return sorted(stored - built)
 
 
 def _use_wall_clock_defaults(session: Session) -> None:
@@ -233,7 +254,7 @@ def _clear_database(session: Session) -> None:
     roles_table = Base.metadata.tables.get("roles")
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
-    AuthorizationService(session).reload_enforcer()
+    CasbinSync(session).rebuild()
     session.commit()  # allow-commit
 
 

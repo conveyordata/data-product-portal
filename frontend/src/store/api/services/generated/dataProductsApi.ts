@@ -590,7 +590,7 @@ export type UserIdentity = {
   admin_expiry?: string | null;
   type: "user";
 };
-export type Identity =
+export type IdentityGet =
   | ({
       type: "group";
     } & GroupIdentity)
@@ -627,7 +627,7 @@ export type GetEventHistoryResponseItem = {
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
   exploration?: Exploration | null;
-  identity?: Identity | null;
+  identity?: IdentityGet | null;
   announcement?: Announcement | null;
 };
 export type GetEventHistoryResponse = {

@@ -4,7 +4,7 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import any_, exists, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -90,6 +90,20 @@ class TechnicalAssetService:
     def _get_access_modes(
         self, access_mode_ids: list[UUID], technical_asset_type
     ) -> list[AccessModeModel]:
+        if not access_mode_ids:
+            if self.db.scalar(
+                select(
+                    exists().where(
+                        technical_asset_type
+                        == any_(AccessModeModel.technical_asset_types)
+                    )
+                )
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Technical asset type {technical_asset_type} requires at least one access mode",
+                )
+            return []
         access_modes = self.db.scalars(
             select(AccessModeModel).where(AccessModeModel.id.in_(access_mode_ids))
         ).all()

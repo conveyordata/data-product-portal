@@ -5,7 +5,7 @@ import { TechnicalAssetCreate } from '@/pages/technical-asset-create/technical-a
 import type { RenderTechnicalAssetAccessPathRequest } from '@/store/api/services/generated/pluginsApi.ts';
 import { ResourceNameModel, ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
+import { mockAccessModes, mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mock_platform_service_configuration, mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import {
@@ -149,7 +149,69 @@ describe('TechnicalAssetCreate', async () => {
         expect(input).toHaveValue('my-org/my-repo');
     });
 
-    it('should be able to select multiple access modes and choose specific modes', async () => {
+    it('should preselect the default access mode and send the selected access modes', async () => {
+        defaultMocks();
+        const requests = vi.fn();
+        server.use(
+            http.post(`*/api/v2/data_products/${mockDataProducts[0].id}/technical_assets`, async ({ request }) => {
+                requests(await request.json());
+                return HttpResponse.json({ id: '1' });
+            }),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+
+        expect(await screen.findByLabelText('Row selected')).toBeChecked();
+        const readWrite = screen.getByLabelText('Select row');
+        expect(readWrite).not.toBeChecked();
+        await user.click(readWrite);
+
+        await user.click(screen.getByText('Create'));
+
+        expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
+        expect(requests).toHaveBeenCalledWith(expect.objectContaining({ access_mode_ids: ['1', '2'] }));
+    }, 15000);
+
+    it('should preselect the default again when switching to a type with the same default', async () => {
+        defaultMocks();
+        mockAccessModesHttp([
+            {
+                ...mockAccessModes[0],
+                technical_asset_types: ['S3TechnicalAssetConfiguration', 'GitHubPlugin'],
+                default_for_technical_asset_types: ['S3TechnicalAssetConfiguration', 'GitHubPlugin'],
+            },
+            mockAccessModes[1],
+        ]);
+        const requests = vi.fn();
+        server.use(
+            http.post(`*/api/v2/data_products/${mockDataProducts[0].id}/technical_assets`, async ({ request }) => {
+                requests(await request.json());
+                return HttpResponse.json({ id: '1' });
+            }),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderPage();
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+        await user.click(await screen.findByLabelText('Select row'));
+        expect(screen.getAllByLabelText('Row selected')).toHaveLength(2);
+
+        await waitFor(() => expect(screen.getByLabelText(/^github$/i)).toBeEnabled());
+        await fillInGitHub(user);
+        await waitFor(() => expect(screen.getByText('Create').closest('button')).toBeEnabled());
+        await user.click(screen.getByText('Create'));
+
+        expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
+        expect(requests).toHaveBeenCalledWith(expect.objectContaining({ access_mode_ids: ['1'] }));
+    }, 15000);
+
+    it('should require at least one access mode', async () => {
         defaultMocks();
         mockCreateTechnicalAsset(mockDataProducts[0].id);
 
@@ -159,18 +221,14 @@ describe('TechnicalAssetCreate', async () => {
         await fillInNameAndDescription(user);
         await fillInS3(user);
 
-        await user.click(screen.getByText('Configure access modes'));
+        await user.click(await screen.findByLabelText('Row selected'));
+        await user.click(screen.getByText('Create'));
 
-        expect(await screen.findByText('Read Only')).toBeInTheDocument();
-        await user.click(screen.getAllByLabelText('Select row')[0]);
-
-        const createButton = screen.getByRole('button', { name: /Create/i });
-        await user.click(createButton);
-
-        expect(await screen.findByText('Technical asset detail')).toBeInTheDocument();
+        expect(await screen.findByText('Please select at least one access mode')).toBeInTheDocument();
+        expect(screen.queryByText('Technical asset detail')).not.toBeInTheDocument();
     }, 15000);
 
-    it('should not show access mode choice when no access mode matches the selected technical asset type', async () => {
+    it('should not show access modes when no access mode matches the selected technical asset type', async () => {
         defaultMocks();
         mockAccessModesHttp([
             {
@@ -178,6 +236,8 @@ describe('TechnicalAssetCreate', async () => {
                 name: 'Read Only',
                 description: 'Read-only access to data',
                 technical_asset_types: ['SnowflakeTechnicalAssetConfiguration'],
+                default_for_technical_asset_types: ['SnowflakeTechnicalAssetConfiguration'],
+                in_use_technical_asset_types: [],
             },
         ]);
 
@@ -189,8 +249,8 @@ describe('TechnicalAssetCreate', async () => {
         await fillInS3(user);
 
         await waitFor(() => {
-            expect(screen.queryByText('Single access mode')).not.toBeInTheDocument();
-            expect(screen.queryByText('Configure access modes')).not.toBeInTheDocument();
+            expect(screen.queryByText('Access modes')).not.toBeInTheDocument();
+            expect(screen.queryByText('Read Only')).not.toBeInTheDocument();
         });
     }, 15000);
 
@@ -328,8 +388,9 @@ describe('TechnicalAssetCreate', async () => {
             http.post<never, RenderTechnicalAssetAccessPathRequest>(
                 '*/api/v2/plugins/render_technical_asset_access_path',
                 async ({ request }) => {
-                    previews(await request.json());
-                    return HttpResponse.json({ technical_asset_access_path: 'preview' });
+                    const body = await request.json();
+                    previews(body);
+                    return HttpResponse.json({ technical_asset_access_path: `preview-${body.namespace}` });
                 },
             ),
         );
@@ -339,11 +400,14 @@ describe('TechnicalAssetCreate', async () => {
         await user.click(screen.getByLabelText(/^aws$/i));
         expect(previews).not.toHaveBeenCalled();
         await user.click(screen.getByLabelText(/^glue$/i));
-        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+        await waitFor(() =>
+            expect(screen.getByLabelText('Resulting path')).toHaveValue('preview-My new technical asset'),
+        );
 
         await waitFor(() => expect(screen.getByLabelText(/^github$/i)).toBeEnabled());
         await user.click(screen.getByLabelText(/^github$/i));
         const count = previews.mock.calls.length;
+        await waitFor(() => expect(screen.getByLabelText(/^aws$/i)).toBeEnabled());
         await user.click(screen.getByLabelText(/^aws$/i));
         expect(screen.queryByLabelText('Resulting path')).not.toBeInTheDocument();
         await user.click(screen.getByLabelText(/^s3$/i));
@@ -353,7 +417,9 @@ describe('TechnicalAssetCreate', async () => {
         await user.click(screen.getAllByText('datalake')[1]);
         await user.type(screen.getByLabelText(/^path$/i), 'test-path');
 
-        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+        await waitFor(() =>
+            expect(screen.getByLabelText('Resulting path')).toHaveValue('preview-My new technical asset'),
+        );
         expect(previews).toHaveBeenLastCalledWith(
             expect.objectContaining({
                 platform_id: awsConfig.platform.id,

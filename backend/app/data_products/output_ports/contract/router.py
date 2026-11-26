@@ -1,9 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-import yaml
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, File, UploadFile
 
 from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.contract.schema_request import BitolContractRequest
@@ -97,27 +95,6 @@ def ingest_output_port_contract_yaml(
     file: Annotated[UploadFile, File()],
     db: DbSession,
 ) -> OutputPortSchemaResponse:
-    try:
-        payload = yaml.safe_load(file.file.read())
-    except yaml.YAMLError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid YAML payload",
-        ) from exc
-
-    if not isinstance(payload, dict):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="YAML payload must be a mapping/object",
-        )
-
-    try:
-        contract = BitolContractRequest.model_validate(payload)
-    except ValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=exc.errors(include_url=False),
-        ) from exc
-
+    contract = OutputPortContractService.parse_contract_yaml(file.file.read())
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortContractService(db).ingest_contract(ds.id, contract)

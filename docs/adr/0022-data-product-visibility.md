@@ -165,3 +165,7 @@ Casbin no longer stores these rules. `Authorization(db).has_access(...)` in `app
 Every access check goes through `has_access`: route checks, the access check endpoint and services. `CasbinPolicies()` only keeps the rules Casbin still stores in step with the database.
 
 The database is asked on every request, so revoked access ends right away, on every worker. Expired access ends when the daily expiry job marks the Input Port as expired. The known gaps above still apply to the rules Casbin does store.
+
+### Domain roles stay in the Casbin model
+
+The Casbin model keeps its domain roles (`g2` in `app/core/authz/rbac_model.conf`) and the `dom` field of the access question, although nothing writes a `g2` rule yet. Domain Role Assignments are planned, and they will use them. Don't remove `g2` as unused.

@@ -254,6 +254,28 @@ func (s *AccessModeWithType) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.DefaultForTechnicalAssetTypes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "default_for_technical_asset_types",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.InUseTechnicalAssetTypes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "in_use_technical_asset_types",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -3913,22 +3935,6 @@ func (s *HTTPValidationError) Validate() error {
 	return nil
 }
 
-func (s Identity) Validate() error {
-	switch s.Type {
-	case UserIdentityIdentity:
-		if err := s.UserIdentity.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case GroupIdentityIdentity:
-		return nil // no validation needed
-	case MachineUserIdentityIdentity:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
-}
-
 func (s *IdentityBatchCreateError) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -4281,7 +4287,23 @@ func (s *IdentityBatchDeleteRequest) Validate() error {
 	return nil
 }
 
-func (s IdentityKind) Validate() error {
+func (s IdentityGet) Validate() error {
+	switch s.Type {
+	case UserIdentityIdentityGet:
+		if err := s.UserIdentity.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case GroupIdentityIdentityGet:
+		return nil // no validation needed
+	case MachineUserIdentityIdentityGet:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s IdentityType) Validate() error {
 	switch s {
 	case "user":
 		return nil

@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+import pytest
+
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
@@ -66,6 +68,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
+    @pytest.mark.seeds_casbin
     def test_swap(self, policies: CasbinPolicies):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()

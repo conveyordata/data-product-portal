@@ -480,6 +480,9 @@ type AccessModeCreate struct {
 	Name                string   `json:"name"`
 	Description         string   `json:"description"`
 	TechnicalAssetTypes []string `json:"technical_asset_types"`
+	// Technical asset types for which this access mode becomes the default. A type keeps its default until
+	// another access mode is made its default.
+	DefaultForTechnicalAssetTypes []string `json:"default_for_technical_asset_types"`
 }
 
 // GetName returns the value of Name.
@@ -497,6 +500,11 @@ func (s *AccessModeCreate) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeCreate) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
 // SetName sets the value of Name.
 func (s *AccessModeCreate) SetName(val string) {
 	s.Name = val
@@ -512,10 +520,18 @@ func (s *AccessModeCreate) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
 }
 
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeCreate) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
 // Ref: #/components/schemas/AccessModeUpdate
 type AccessModeUpdate struct {
 	Description         string   `json:"description"`
 	TechnicalAssetTypes []string `json:"technical_asset_types"`
+	// Technical asset types for which this access mode becomes the default. A type keeps its default until
+	// another access mode is made its default.
+	DefaultForTechnicalAssetTypes []string `json:"default_for_technical_asset_types"`
 }
 
 // GetDescription returns the value of Description.
@@ -528,6 +544,11 @@ func (s *AccessModeUpdate) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeUpdate) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
 // SetDescription sets the value of Description.
 func (s *AccessModeUpdate) SetDescription(val string) {
 	s.Description = val
@@ -538,12 +559,19 @@ func (s *AccessModeUpdate) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
 }
 
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeUpdate) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
 // Ref: #/components/schemas/AccessModeWithType
 type AccessModeWithType struct {
-	ID                  uuid.UUID `json:"id"`
-	Name                string    `json:"name"`
-	Description         string    `json:"description"`
-	TechnicalAssetTypes []string  `json:"technical_asset_types"`
+	ID                            uuid.UUID `json:"id"`
+	Name                          string    `json:"name"`
+	Description                   string    `json:"description"`
+	TechnicalAssetTypes           []string  `json:"technical_asset_types"`
+	DefaultForTechnicalAssetTypes []string  `json:"default_for_technical_asset_types"`
+	InUseTechnicalAssetTypes      []string  `json:"in_use_technical_asset_types"`
 }
 
 // GetID returns the value of ID.
@@ -566,6 +594,16 @@ func (s *AccessModeWithType) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeWithType) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
+// GetInUseTechnicalAssetTypes returns the value of InUseTechnicalAssetTypes.
+func (s *AccessModeWithType) GetInUseTechnicalAssetTypes() []string {
+	return s.InUseTechnicalAssetTypes
+}
+
 // SetID sets the value of ID.
 func (s *AccessModeWithType) SetID(val uuid.UUID) {
 	s.ID = val
@@ -584,6 +622,16 @@ func (s *AccessModeWithType) SetDescription(val string) {
 // SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
 func (s *AccessModeWithType) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
+}
+
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeWithType) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
+// SetInUseTechnicalAssetTypes sets the value of InUseTechnicalAssetTypes.
+func (s *AccessModeWithType) SetInUseTechnicalAssetTypes(val []string) {
+	s.InUseTechnicalAssetTypes = val
 }
 
 // Ref: #/components/schemas/AccessResponse
@@ -2461,7 +2509,7 @@ func (s *DataProductLifeCyclesGetItem) SetIsDefault(val bool) {
 type DataProductRoleAssignmentResponse struct {
 	ID          uuid.UUID      `json:"id"`
 	DataProduct DataProduct    `json:"data_product"`
-	Identity    Identity       `json:"identity"`
+	Identity    IdentityGet    `json:"identity"`
 	Role        NilRole        `json:"role"`
 	Decision    DecisionStatus `json:"decision"`
 	RequestedOn NilDateTime    `json:"requested_on"`
@@ -2481,7 +2529,7 @@ func (s *DataProductRoleAssignmentResponse) GetDataProduct() DataProduct {
 }
 
 // GetIdentity returns the value of Identity.
-func (s *DataProductRoleAssignmentResponse) GetIdentity() Identity {
+func (s *DataProductRoleAssignmentResponse) GetIdentity() IdentityGet {
 	return s.Identity
 }
 
@@ -2526,7 +2574,7 @@ func (s *DataProductRoleAssignmentResponse) SetDataProduct(val DataProduct) {
 }
 
 // SetIdentity sets the value of Identity.
-func (s *DataProductRoleAssignmentResponse) SetIdentity(val Identity) {
+func (s *DataProductRoleAssignmentResponse) SetIdentity(val IdentityGet) {
 	s.Identity = val
 }
 
@@ -5414,7 +5462,7 @@ type GetEventHistoryResponseItem struct {
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
 	Exploration              OptNilExploration     `json:"exploration"`
-	Identity                 OptNilIdentity        `json:"identity"`
+	Identity                 OptNilIdentityGet     `json:"identity"`
 	Announcement             OptNilAnnouncement    `json:"announcement"`
 }
 
@@ -5504,7 +5552,7 @@ func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
 }
 
 // GetIdentity returns the value of Identity.
-func (s *GetEventHistoryResponseItem) GetIdentity() OptNilIdentity {
+func (s *GetEventHistoryResponseItem) GetIdentity() OptNilIdentityGet {
 	return s.Identity
 }
 
@@ -5599,7 +5647,7 @@ func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
 }
 
 // SetIdentity sets the value of Identity.
-func (s *GetEventHistoryResponseItem) SetIdentity(val OptNilIdentity) {
+func (s *GetEventHistoryResponseItem) SetIdentity(val OptNilIdentityGet) {
 	s.Identity = val
 }
 
@@ -6688,7 +6736,7 @@ func (*GetUsersResponse) getUsersRes() {}
 // Ref: #/components/schemas/GlobalRoleAssignmentResponse
 type GlobalRoleAssignmentResponse struct {
 	ID          uuid.UUID      `json:"id"`
-	Identity    Identity       `json:"identity"`
+	Identity    IdentityGet    `json:"identity"`
 	Role        Role           `json:"role"`
 	Decision    DecisionStatus `json:"decision"`
 	RequestedOn NilDateTime    `json:"requested_on"`
@@ -6703,7 +6751,7 @@ func (s *GlobalRoleAssignmentResponse) GetID() uuid.UUID {
 }
 
 // GetIdentity returns the value of Identity.
-func (s *GlobalRoleAssignmentResponse) GetIdentity() Identity {
+func (s *GlobalRoleAssignmentResponse) GetIdentity() IdentityGet {
 	return s.Identity
 }
 
@@ -6743,7 +6791,7 @@ func (s *GlobalRoleAssignmentResponse) SetID(val uuid.UUID) {
 }
 
 // SetIdentity sets the value of Identity.
-func (s *GlobalRoleAssignmentResponse) SetIdentity(val Identity) {
+func (s *GlobalRoleAssignmentResponse) SetIdentity(val IdentityGet) {
 	s.Identity = val
 }
 
@@ -6953,7 +7001,7 @@ func (s *GroupIdentity) SetType(val string) {
 // Ref: #/components/schemas/GroupMemberIdentityGet
 type GroupMemberIdentityGet struct {
 	ID         uuid.UUID    `json:"id"`
-	Type       IdentityKind `json:"type"`
+	Type       IdentityType `json:"type"`
 	ExternalID string       `json:"external_id"`
 }
 
@@ -6963,7 +7011,7 @@ func (s *GroupMemberIdentityGet) GetID() uuid.UUID {
 }
 
 // GetType returns the value of Type.
-func (s *GroupMemberIdentityGet) GetType() IdentityKind {
+func (s *GroupMemberIdentityGet) GetType() IdentityType {
 	return s.Type
 }
 
@@ -6978,7 +7026,7 @@ func (s *GroupMemberIdentityGet) SetID(val uuid.UUID) {
 }
 
 // SetType sets the value of Type.
-func (s *GroupMemberIdentityGet) SetType(val IdentityKind) {
+func (s *GroupMemberIdentityGet) SetType(val IdentityType) {
 	s.Type = val
 }
 
@@ -7376,98 +7424,6 @@ func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
 
-// Ref: #/components/schemas/Identity
-// Identity represents sum type.
-type Identity struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                IdentityType
-	UserIdentity        UserIdentity
-	GroupIdentity       GroupIdentity
-	MachineUserIdentity MachineUserIdentity
-}
-
-// IdentityType is oneOf type of Identity.
-type IdentityType string
-
-// Possible values for IdentityType.
-const (
-	UserIdentityIdentity        IdentityType = "user"
-	GroupIdentityIdentity       IdentityType = "group"
-	MachineUserIdentityIdentity IdentityType = "machine_user"
-)
-
-// IsUserIdentity reports whether Identity is UserIdentity.
-func (s Identity) IsUserIdentity() bool { return s.Type == UserIdentityIdentity }
-
-// IsGroupIdentity reports whether Identity is GroupIdentity.
-func (s Identity) IsGroupIdentity() bool { return s.Type == GroupIdentityIdentity }
-
-// IsMachineUserIdentity reports whether Identity is MachineUserIdentity.
-func (s Identity) IsMachineUserIdentity() bool { return s.Type == MachineUserIdentityIdentity }
-
-// SetUserIdentity sets Identity to UserIdentity.
-func (s *Identity) SetUserIdentity(v UserIdentity) {
-	s.Type = UserIdentityIdentity
-	s.UserIdentity = v
-}
-
-// GetUserIdentity returns UserIdentity and true boolean if Identity is UserIdentity.
-func (s Identity) GetUserIdentity() (v UserIdentity, ok bool) {
-	if !s.IsUserIdentity() {
-		return v, false
-	}
-	return s.UserIdentity, true
-}
-
-// NewUserIdentityIdentity returns new Identity from UserIdentity.
-func NewUserIdentityIdentity(v UserIdentity) Identity {
-	var s Identity
-	s.SetUserIdentity(v)
-	return s
-}
-
-// SetGroupIdentity sets Identity to GroupIdentity.
-func (s *Identity) SetGroupIdentity(v GroupIdentity) {
-	s.Type = GroupIdentityIdentity
-	s.GroupIdentity = v
-}
-
-// GetGroupIdentity returns GroupIdentity and true boolean if Identity is GroupIdentity.
-func (s Identity) GetGroupIdentity() (v GroupIdentity, ok bool) {
-	if !s.IsGroupIdentity() {
-		return v, false
-	}
-	return s.GroupIdentity, true
-}
-
-// NewGroupIdentityIdentity returns new Identity from GroupIdentity.
-func NewGroupIdentityIdentity(v GroupIdentity) Identity {
-	var s Identity
-	s.SetGroupIdentity(v)
-	return s
-}
-
-// SetMachineUserIdentity sets Identity to MachineUserIdentity.
-func (s *Identity) SetMachineUserIdentity(v MachineUserIdentity) {
-	s.Type = MachineUserIdentityIdentity
-	s.MachineUserIdentity = v
-}
-
-// GetMachineUserIdentity returns MachineUserIdentity and true boolean if Identity is MachineUserIdentity.
-func (s Identity) GetMachineUserIdentity() (v MachineUserIdentity, ok bool) {
-	if !s.IsMachineUserIdentity() {
-		return v, false
-	}
-	return s.MachineUserIdentity, true
-}
-
-// NewMachineUserIdentityIdentity returns new Identity from MachineUserIdentity.
-func NewMachineUserIdentityIdentity(v MachineUserIdentity) Identity {
-	var s Identity
-	s.SetMachineUserIdentity(v)
-	return s
-}
-
 // Ref: #/components/schemas/IdentityBatchCreateError
 type IdentityBatchCreateError struct {
 	Item   jx.Raw   `json:"item"`
@@ -7681,32 +7637,124 @@ func (s *IdentityBatchDeleteRequest) SetIds(val []uuid.UUID) {
 	s.Ids = val
 }
 
-// Ref: #/components/schemas/IdentityType
-type IdentityKind string
+// Ref: #/components/schemas/IdentityGet
+// IdentityGet represents sum type.
+type IdentityGet struct {
+	// Type selects the active sum variant, switch on this field.
+	Type                IdentityGetType
+	UserIdentity        UserIdentity
+	GroupIdentity       GroupIdentity
+	MachineUserIdentity MachineUserIdentity
+}
 
+// IdentityGetType is oneOf type of IdentityGet.
+type IdentityGetType string
+
+// Possible values for IdentityGetType.
 const (
-	IdentityKindUser        IdentityKind = "user"
-	IdentityKindGroup       IdentityKind = "group"
-	IdentityKindMachineUser IdentityKind = "machine_user"
+	UserIdentityIdentityGet        IdentityGetType = "user"
+	GroupIdentityIdentityGet       IdentityGetType = "group"
+	MachineUserIdentityIdentityGet IdentityGetType = "machine_user"
 )
 
-// AllValues returns all IdentityKind values.
-func (IdentityKind) AllValues() []IdentityKind {
-	return []IdentityKind{
-		IdentityKindUser,
-		IdentityKindGroup,
-		IdentityKindMachineUser,
+// IsUserIdentity reports whether IdentityGet is UserIdentity.
+func (s IdentityGet) IsUserIdentity() bool { return s.Type == UserIdentityIdentityGet }
+
+// IsGroupIdentity reports whether IdentityGet is GroupIdentity.
+func (s IdentityGet) IsGroupIdentity() bool { return s.Type == GroupIdentityIdentityGet }
+
+// IsMachineUserIdentity reports whether IdentityGet is MachineUserIdentity.
+func (s IdentityGet) IsMachineUserIdentity() bool { return s.Type == MachineUserIdentityIdentityGet }
+
+// SetUserIdentity sets IdentityGet to UserIdentity.
+func (s *IdentityGet) SetUserIdentity(v UserIdentity) {
+	s.Type = UserIdentityIdentityGet
+	s.UserIdentity = v
+}
+
+// GetUserIdentity returns UserIdentity and true boolean if IdentityGet is UserIdentity.
+func (s IdentityGet) GetUserIdentity() (v UserIdentity, ok bool) {
+	if !s.IsUserIdentity() {
+		return v, false
+	}
+	return s.UserIdentity, true
+}
+
+// NewUserIdentityIdentityGet returns new IdentityGet from UserIdentity.
+func NewUserIdentityIdentityGet(v UserIdentity) IdentityGet {
+	var s IdentityGet
+	s.SetUserIdentity(v)
+	return s
+}
+
+// SetGroupIdentity sets IdentityGet to GroupIdentity.
+func (s *IdentityGet) SetGroupIdentity(v GroupIdentity) {
+	s.Type = GroupIdentityIdentityGet
+	s.GroupIdentity = v
+}
+
+// GetGroupIdentity returns GroupIdentity and true boolean if IdentityGet is GroupIdentity.
+func (s IdentityGet) GetGroupIdentity() (v GroupIdentity, ok bool) {
+	if !s.IsGroupIdentity() {
+		return v, false
+	}
+	return s.GroupIdentity, true
+}
+
+// NewGroupIdentityIdentityGet returns new IdentityGet from GroupIdentity.
+func NewGroupIdentityIdentityGet(v GroupIdentity) IdentityGet {
+	var s IdentityGet
+	s.SetGroupIdentity(v)
+	return s
+}
+
+// SetMachineUserIdentity sets IdentityGet to MachineUserIdentity.
+func (s *IdentityGet) SetMachineUserIdentity(v MachineUserIdentity) {
+	s.Type = MachineUserIdentityIdentityGet
+	s.MachineUserIdentity = v
+}
+
+// GetMachineUserIdentity returns MachineUserIdentity and true boolean if IdentityGet is MachineUserIdentity.
+func (s IdentityGet) GetMachineUserIdentity() (v MachineUserIdentity, ok bool) {
+	if !s.IsMachineUserIdentity() {
+		return v, false
+	}
+	return s.MachineUserIdentity, true
+}
+
+// NewMachineUserIdentityIdentityGet returns new IdentityGet from MachineUserIdentity.
+func NewMachineUserIdentityIdentityGet(v MachineUserIdentity) IdentityGet {
+	var s IdentityGet
+	s.SetMachineUserIdentity(v)
+	return s
+}
+
+// Ref: #/components/schemas/IdentityType
+type IdentityType string
+
+const (
+	IdentityTypeUser        IdentityType = "user"
+	IdentityTypeGroup       IdentityType = "group"
+	IdentityTypeMachineUser IdentityType = "machine_user"
+)
+
+// AllValues returns all IdentityType values.
+func (IdentityType) AllValues() []IdentityType {
+	return []IdentityType{
+		IdentityTypeUser,
+		IdentityTypeGroup,
+		IdentityTypeMachineUser,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s IdentityKind) MarshalText() ([]byte, error) {
+func (s IdentityType) MarshalText() ([]byte, error) {
 	switch s {
-	case IdentityKindUser:
+	case IdentityTypeUser:
 		return []byte(s), nil
-	case IdentityKindGroup:
+	case IdentityTypeGroup:
 		return []byte(s), nil
-	case IdentityKindMachineUser:
+	case IdentityTypeMachineUser:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -7714,16 +7762,16 @@ func (s IdentityKind) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *IdentityKind) UnmarshalText(data []byte) error {
-	switch IdentityKind(data) {
-	case IdentityKindUser:
-		*s = IdentityKindUser
+func (s *IdentityType) UnmarshalText(data []byte) error {
+	switch IdentityType(data) {
+	case IdentityTypeUser:
+		*s = IdentityTypeUser
 		return nil
-	case IdentityKindGroup:
-		*s = IdentityKindGroup
+	case IdentityTypeGroup:
+		*s = IdentityTypeGroup
 		return nil
-	case IdentityKindMachineUser:
-		*s = IdentityKindMachineUser
+	case IdentityTypeMachineUser:
+		*s = IdentityTypeMachineUser
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -10059,57 +10107,57 @@ func (o OptNilFieldDependencyArray) Or(d []FieldDependency) []FieldDependency {
 	return d
 }
 
-// NewOptNilIdentity returns new OptNilIdentity with value set to v.
-func NewOptNilIdentity(v Identity) OptNilIdentity {
-	return OptNilIdentity{
+// NewOptNilIdentityGet returns new OptNilIdentityGet with value set to v.
+func NewOptNilIdentityGet(v IdentityGet) OptNilIdentityGet {
+	return OptNilIdentityGet{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptNilIdentity is optional nullable Identity.
-type OptNilIdentity struct {
-	Value Identity
+// OptNilIdentityGet is optional nullable IdentityGet.
+type OptNilIdentityGet struct {
+	Value IdentityGet
 	Set   bool
 	Null  bool
 }
 
-// IsSet returns true if OptNilIdentity was set.
-func (o OptNilIdentity) IsSet() bool { return o.Set }
+// IsSet returns true if OptNilIdentityGet was set.
+func (o OptNilIdentityGet) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptNilIdentity) Reset() {
-	var v Identity
+func (o *OptNilIdentityGet) Reset() {
+	var v IdentityGet
 	o.Value = v
 	o.Set = false
 	o.Null = false
 }
 
 // SetTo sets value to v.
-func (o *OptNilIdentity) SetTo(v Identity) {
+func (o *OptNilIdentityGet) SetTo(v IdentityGet) {
 	o.Set = true
 	o.Null = false
 	o.Value = v
 }
 
 // IsNull returns true if value is Null.
-func (o OptNilIdentity) IsNull() bool { return o.Null }
+func (o OptNilIdentityGet) IsNull() bool { return o.Null }
 
 // SetToNull sets value to null.
-func (o *OptNilIdentity) SetToNull() {
+func (o *OptNilIdentityGet) SetToNull() {
 	o.Set = true
 	o.Null = true
-	var v Identity
+	var v IdentityGet
 	o.Value = v
 }
 
 // IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
-func (o OptNilIdentity) IsEmpty() bool {
+func (o OptNilIdentityGet) IsEmpty() bool {
 	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptNilIdentity) Get() (v Identity, ok bool) {
+func (o OptNilIdentityGet) Get() (v IdentityGet, ok bool) {
 	if o.Null {
 		return v, false
 	}
@@ -10120,7 +10168,7 @@ func (o OptNilIdentity) Get() (v Identity, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptNilIdentity) Or(d Identity) Identity {
+func (o OptNilIdentityGet) Or(d IdentityGet) IdentityGet {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -16470,6 +16518,10 @@ func (s *UpdateAccessDurationResponse) SetAccessDurations(val []AccessDuration) 
 }
 
 func (*UpdateAccessDurationResponse) updateAccessDurationRes() {}
+
+type UpdateAccessModeBadRequestApplicationJSON jx.Raw
+
+func (*UpdateAccessModeBadRequestApplicationJSON) updateAccessModeRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

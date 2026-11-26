@@ -3792,11 +3792,11 @@
             }
           },
           "400": {
-            "description": "Cannot remove the specified technical asset types because they are in use by technical assets or input port requests.",
+            "description": "Cannot remove the specified technical asset types because they are in use by technical assets.",
             "content": {
               "application/json": {
                 "example": {
-                  "detail": "Cannot remove the specified technical asset types because they are in use by technical assets or input port requests."
+                  "detail": "Cannot remove the specified technical asset types because they are in use by technical assets."
                 }
               }
             }
@@ -3903,6 +3903,16 @@
               }
             }
           },
+          "400": {
+            "description": "Cannot remove the default access mode of a technical asset type that has other access modes. Make another access mode the default first.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Cannot remove the default access mode of a technical asset type that has other access modes. Make another access mode the default first."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3943,11 +3953,20 @@
             }
           },
           "400": {
-            "description": "Cannot remove the specified access mode because it is in use by technical assets or input port requests.",
+            "description": "Possible errors",
             "content": {
               "application/json": {
-                "example": {
-                  "detail": "Cannot remove the specified access mode because it is in use by technical assets or input port requests."
+                "examples": {
+                  "cannot_remove_the_specified_access_mode_because_it_is_in_use_by_technical_assets_or_input_port_requests": {
+                    "value": {
+                      "detail": "Cannot remove the specified access mode because it is in use by technical assets or input port requests."
+                    }
+                  },
+                  "cannot_remove_the_default_access_mode_of_a_technical_asset_type_that_has_other_access_modes_make_another_access_mode_the_default_first": {
+                    "value": {
+                      "detail": "Cannot remove the default access mode of a technical asset type that has other access modes. Make another access mode the default first."
+                    }
+                  }
                 }
               }
             }
@@ -10873,6 +10892,15 @@
             },
             "type": "array",
             "title": "Technical Asset Types"
+          },
+          "default_for_technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Default For Technical Asset Types",
+            "description": "Technical asset types for which this access mode becomes the default. A type keeps its default until another access mode is made its default.",
+            "default": []
           }
         },
         "type": "object",
@@ -10895,6 +10923,15 @@
             },
             "type": "array",
             "title": "Technical Asset Types"
+          },
+          "default_for_technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Default For Technical Asset Types",
+            "description": "Technical asset types for which this access mode becomes the default. A type keeps its default until another access mode is made its default.",
+            "default": []
           }
         },
         "type": "object",
@@ -10925,6 +10962,20 @@
             },
             "type": "array",
             "title": "Technical Asset Types"
+          },
+          "default_for_technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Default For Technical Asset Types"
+          },
+          "in_use_technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "In Use Technical Asset Types"
           }
         },
         "type": "object",
@@ -10932,7 +10983,9 @@
           "id",
           "name",
           "description",
-          "technical_asset_types"
+          "technical_asset_types",
+          "default_for_technical_asset_types",
+          "in_use_technical_asset_types"
         ],
         "title": "AccessModeWithType"
       },
@@ -12668,7 +12721,7 @@
             "$ref": "#/components/schemas/DataProduct"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "anyOf": [
@@ -12759,7 +12812,7 @@
             "$ref": "#/components/schemas/DataProduct"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "anyOf": [
@@ -14867,7 +14920,7 @@
           "identity": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Identity"
+                "$ref": "#/components/schemas/IdentityGet"
               },
               {
                 "type": "null"
@@ -15554,7 +15607,7 @@
             "title": "Id"
           },
           "identity": {
-            "$ref": "#/components/schemas/Identity"
+            "$ref": "#/components/schemas/IdentityGet"
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -15937,28 +15990,6 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "Identity": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/UserIdentity"
-          },
-          {
-            "$ref": "#/components/schemas/GroupIdentity"
-          },
-          {
-            "$ref": "#/components/schemas/MachineUserIdentity"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "group": "#/components/schemas/GroupIdentity",
-            "machine_user": "#/components/schemas/MachineUserIdentity",
-            "user": "#/components/schemas/UserIdentity"
-          }
-        },
-        "title": "Identity"
-      },
       "IdentityBatchCreateError": {
         "properties": {
           "item": {
@@ -16129,6 +16160,28 @@
         ],
         "title": "IdentityBatchDeleteRequest"
       },
+      "IdentityGet": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/GroupIdentity"
+          },
+          {
+            "$ref": "#/components/schemas/MachineUserIdentity"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "group": "#/components/schemas/GroupIdentity",
+            "machine_user": "#/components/schemas/MachineUserIdentity",
+            "user": "#/components/schemas/UserIdentity"
+          }
+        },
+        "title": "IdentityGet"
+      },
       "IdentityType": {
         "type": "string",
         "enum": [
@@ -16136,8 +16189,7 @@
           "group",
           "machine_user"
         ],
-        "title": "IdentityType",
-        "x-ogen-name": "IdentityKind"
+        "title": "IdentityType"
       },
       "InputPortEvent": {
         "properties": {

@@ -8,9 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.authorization.casbin_sync import CasbinSync
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Scope
-from app.authorization.service import AuthorizationService
 from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
 from app.data_products.model import DataProductEnvironment, DataProductVisibility
@@ -1246,7 +1246,7 @@ class TestDataProductsRouter:
             data_product_id=data_product.id, role_id=role.id, identity_id=group.id
         )
 
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
 
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 200, response.text
@@ -1368,7 +1368,7 @@ class TestDataProductsRouter:
             consuming_abstract_data_product=other_consumer,
             status=InputPortStatus.APPROVED,
         )
-        AuthorizationService(session).reload_enforcer()
+        CasbinSync(session).rebuild()
         return producer, output_port, consumer, other_consumer
 
     def test_get_data_product__hidden_producer_not_visible_to_consumer(

@@ -161,6 +161,8 @@ INSERT INTO public.access_modes (id, name, technical_asset_types, description) V
 
 INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_admin }}'::uuid, 'admin', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Admin access, gives users full control over data and settings');
 
+INSERT INTO public.default_access_modes (technical_asset_type, access_mode_id) VALUES ('RedshiftTechnicalAssetConfiguration', '{{ access_mode_read }}'::uuid);
+
 -- ...existing platform configuration code...
 INSERT INTO public.platforms (id, name) VALUES ('6be7613c-42fb-4b93-952d-1874ed1ddf76', 'Conveyor');
 

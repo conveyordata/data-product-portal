@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy import and_, or_, select, update
 from sqlalchemy import event as sql_event
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.announcements.model import Announcement
@@ -14,8 +14,10 @@ from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.explorations.model import Exploration
+from app.groups.model import Group
 from app.identities.model import Identity
 from app.identities.service import get_identity_display_name
+from app.machine_users.model import MachineUser
 from app.users.model import User
 
 
@@ -203,6 +205,11 @@ class EventService:
     def get_history(self, id: UUID, type: EventEntityType) -> Sequence[EventModel]:
         return self.db.scalars(
             select(EventModel)
+            .options(
+                joinedload(EventModel.identity).selectin_polymorphic(
+                    [User, Group, MachineUser]
+                )
+            )
             .where(
                 or_(
                     (EventModel.subject_id == id) & (EventModel.subject_type == type),

@@ -10,11 +10,12 @@ from app.authorization.roles.schema import Prototype
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import CasbinPolicies
 from tests import test_session
+from tests.factories.model_factory import ModelFactory
 
 faker: Final[Faker] = Faker()
 
 
-class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
+class RoleFactory(ModelFactory[Role]):
     class Meta:
         model = Role
 

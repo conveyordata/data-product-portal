@@ -9,7 +9,7 @@ from app.authorization.role_assignments.global_.model import (
     GlobalRoleAssignment as GlobalRoleAssignmentModel,
 )
 from app.authorization.roles.schema import Role
-from app.identities.schema import Identity
+from app.identities.schema import IdentityGet
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -38,7 +38,7 @@ class RoleAssignmentRequest(BaseModel):
 
 class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
-    identity: Identity
+    identity: IdentityGet
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]

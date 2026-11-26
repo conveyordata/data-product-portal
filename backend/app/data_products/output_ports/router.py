@@ -14,7 +14,7 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import AuthenticatedUser
-from app.core.authz import Action, Authorization, CasbinPolicies, OutputPortResolver
+from app.core.authz import Action, Authorization, OutputPortResolver
 from app.core.authz.resolvers import DataProductResolver
 from app.data_products.output_ports.announcements.router import (
     router as announcements_router,
@@ -237,7 +237,6 @@ def remove_output_port(
     authenticated_user: AuthenticatedUser,
 ) -> None:
     dataset = OutputPortService(db).remove_output_port(id, data_product_id)
-    CasbinPolicies().clear_assignments_for_resource(resource_id=str(id))
 
     event_id = EventService(db).create_event(
         CreateEvent(

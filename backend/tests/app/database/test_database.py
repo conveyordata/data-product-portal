@@ -49,6 +49,11 @@ def test_apply_auth__password_mode_uses_the_password_from_the_url(monkeypatch):
         assert connection.exec_driver_sql("select 1").scalar() == 1
 
 
+def test_engine__turns_jit_off():
+    with database.engine.connect() as connection:
+        assert connection.exec_driver_sql("show jit").scalar() == "off"
+
+
 def test_require_password_in_password_mode__rejects_a_missing_password():
     with pytest.raises(ValidationError, match="POSTGRES_PASSWORD is required"):
         Settings(POSTGRES_AUTH_MODE="password", POSTGRES_PASSWORD=None)

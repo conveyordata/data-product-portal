@@ -1,5 +1,5 @@
-from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.core.authz.authorization import CasbinPolicies
+from app.core.authz.rules import DATA_PRODUCT_READER_ROLE
 from app.data_products.model import DataProductVisibility
 from tests.factories import DataProductFactory
 

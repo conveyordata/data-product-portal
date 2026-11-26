@@ -8,12 +8,16 @@ export const mockAccessModes: AccessModeWithType[] = [
         name: 'Read Only',
         description: 'Read-only access to data',
         technical_asset_types: ['S3TechnicalAssetConfiguration'],
+        default_for_technical_asset_types: ['S3TechnicalAssetConfiguration'],
+        in_use_technical_asset_types: [],
     },
     {
         id: '2',
         name: 'Read Write',
         description: 'Read and write access to data',
         technical_asset_types: ['S3TechnicalAssetConfiguration'],
+        default_for_technical_asset_types: [],
+        in_use_technical_asset_types: [],
     },
 ];
 

@@ -41,7 +41,9 @@ In principle should always be present on non GET endpoints and sensitive GET end
 *   Name tests `test_<method_name>__<scenario>`.
 *   Use factories to build test data.
 *   Each test runs in a transaction that is rolled back afterwards. Assert row locks with `row_lock_modes` from `tests/session_util.py` instead of a second connection. Mark a test `@pytest.mark.commits` only when its data must be visible to another connection, like migrations; its tables are truncated afterwards.
+*   After each test that rolls back, Casbin may only hold rules that `CasbinSync` builds from the database, so a new kind of Casbin rule also needs building in `app/authorization/casbin_sync.py`. Mark a test `@pytest.mark.seeds_casbin` only when it deliberately writes Casbin rules without the database rows they stand for.
 *   Every new route must ship with full test coverage.
+*   If you want to test a data migration, do it in `tests/app/database/alembic/versions/test_<revision>_<slug>.py`, using `before_migration`. That way the next data migration follows the same pattern.
 
 ## Running Commands
 

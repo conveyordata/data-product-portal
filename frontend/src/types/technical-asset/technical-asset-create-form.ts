@@ -16,6 +16,5 @@ export type TechnicalAssetsCreateForm = {
     description: string;
     configuration: TechnicalAssetConfiguration;
     technical_mapping: TechnicalMapping;
-    access_mode_type: 'single' | 'multiple';
     access_mode_ids: string[];
 };

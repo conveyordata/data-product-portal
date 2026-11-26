@@ -76,7 +76,15 @@ def _azure_credential() -> "DefaultAzureCredential":
 
 engine = create_engine(
     get_url(),
-    connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
+    connect_args={
+        "connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS,
+        # JIT compilation costs more than it saves on short queries, and the
+        # visibility filters inflate cost estimates enough to trigger it.
+        # https://www.postgresql.org/docs/current/jit-decision.html
+        # https://www.postgresql.org/message-id/E1w8GWU-002bSL-31@gemulon.postgresql.org
+        # https://adamj.eu/tech/2023/11/09/django-disable-postgresql-jit/
+        "options": "-c jit=off",
+    },
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_timeout=settings.DB_POOL_TIMEOUT_SECONDS,

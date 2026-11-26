@@ -11,7 +11,7 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role
 from app.data_products.schema import DataProduct
-from app.identities.schema import Identity
+from app.identities.schema import IdentityGet
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -45,7 +45,7 @@ class ModifyDataProductRoleAssignment(BaseModel):
 class DataProductRoleAssignmentResponse(ORMModel):
     id: UUID
     data_product: DataProduct
-    identity: Identity
+    identity: IdentityGet
     role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]
