@@ -24,7 +24,7 @@ import {
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductOwnerIds } from '@/utils/data-product-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-form.module.scss';
 

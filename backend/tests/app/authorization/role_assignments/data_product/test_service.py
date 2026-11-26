@@ -1,5 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
+from app.authorization.role_assignments.data_product.auth import (
+    DataProductAuthAssignment,
+)
+from app.authorization.role_assignments.data_product.schema import (
+    UpdateDataProductRoleAssignment,
+)
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
@@ -19,6 +27,47 @@ from tests.session_util import as_user
 
 
 class TestDataProductRoleAssignmentsService:
+    @pytest.mark.parametrize("identity_factory", [GroupFactory, MachineUserFactory])
+    @pytest.mark.parametrize("operation", ["deny", "demote"])
+    def test_update_assignment__allows_removing_non_user_ownership(
+        self, session, identity_factory, operation
+    ):
+        actor = UserFactory()
+        data_product = DataProductFactory()
+        owner_role = RoleFactory.data_product_owner()
+        DataProductRoleAssignmentFactory(
+            identity_id=actor.id,
+            data_product_id=data_product.id,
+            role_id=owner_role.id,
+        )
+        assignment = DataProductRoleAssignmentFactory(
+            identity_id=identity_factory().id,
+            data_product_id=data_product.id,
+            role_id=owner_role.id,
+            decision=(
+                DecisionStatus.PENDING
+                if operation == "deny"
+                else DecisionStatus.APPROVED
+            ),
+        )
+        request = (
+            UpdateDataProductRoleAssignment(
+                id=assignment.id, decision=DecisionStatus.DENIED
+            )
+            if operation == "deny"
+            else UpdateDataProductRoleAssignment(
+                id=assignment.id, role_id=RoleFactory(scope=Scope.DATA_PRODUCT).id
+            )
+        )
+
+        updated = RoleAssignmentService(session).update_assignment(request, actor=actor)
+
+        if operation == "deny":
+            assert updated.decision == DecisionStatus.DENIED
+        else:
+            assert updated.role_id == request.role_id
+            DataProductAuthAssignment(updated, previous_role_id=owner_role.id).swap()
+
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
         data_product = DataProductFactory()
@@ -84,9 +133,50 @@ class TestDataProductRoleAssignmentsService:
             assert pending_old.id in requests_ids
             assert approved_old.id not in requests_ids
 
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
+    def test_get_user_requests__includes_requests_on_behalf_of_identities(
+        self, session, identity_factory
+    ):
+        user = UserFactory()
+        other_user = UserFactory()
+        identity = identity_factory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        submitted = DataProductRoleAssignmentFactory(
+            identity_id=identity.id,
+            requested_by=user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        received = DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            requested_by=other_user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=identity.id,
+            requested_by=other_user,
+            data_product_id=DataProductFactory().id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        with as_user(session, user.id):
+            requests = RoleAssignmentService(session).get_user_requests(user, True)
+
+        assert {request.id for request in requests} == {submitted.id, received.id}
+
+    @pytest.mark.parametrize(
+        "identity_factory", [UserFactory, GroupFactory, MachineUserFactory]
+    )
     def test_get_pending_data_product_role_assignments__includes_group_permissions(
         self,
         session,
+        identity_factory,
     ):
         approver = UserFactory()
         requester = UserFactory()
@@ -110,7 +200,7 @@ class TestDataProductRoleAssignmentsService:
             requested_by=requester,
         )
         pending_assignment = DataProductRoleAssignmentFactory(
-            identity_id=requester.id,
+            identity_id=identity_factory().id,
             data_product_id=data_product.id,
             role_id=requested_role.id,
             decision=DecisionStatus.PENDING,

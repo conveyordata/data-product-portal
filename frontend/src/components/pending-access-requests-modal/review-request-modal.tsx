@@ -1,4 +1,4 @@
-import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import {
     Avatar,
     Badge,
@@ -30,6 +30,7 @@ import {
     OutputPortOutlined,
     TechnicalAssetOutlined,
 } from '@/components/icons';
+import { IdentityIcon } from '@/components/identity-avatar/identity-avatar.component.tsx';
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
@@ -47,6 +48,7 @@ import {
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
+import { getIdentityDisplayName, getIdentitySecondaryLabel, getIdentityTypeLabel } from '@/utils/identity.ts';
 import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 
 type Props = {
@@ -250,15 +252,19 @@ function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): R
     }
 
     if (action.request_type === RequestType_DataProductRoleAssignment) {
-        const roleName = action.role ? action.role.name : t('a role');
+        const roleName = action.role?.name ?? t('a role');
+        const identity = action.identity;
+
         return {
-            requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
-            requesterEmail: action.requested_by?.email || '',
+            requesterName: action.requested_by
+                ? `${action.requested_by.first_name} ${action.requested_by.last_name}`
+                : '',
+            requesterEmail: action.requested_by?.email ?? '',
             source: {
-                name: `${action.user.first_name} ${action.user.last_name}`,
-                email: action.user.email,
-                type: t('User'),
-                icon: <UserOutlined />,
+                name: getIdentityDisplayName(identity),
+                email: getIdentitySecondaryLabel(identity),
+                type: getIdentityTypeLabel(identity, t),
+                icon: <IdentityIcon type={identity.type} />,
             },
             target: {
                 name: action.data_product.name,
@@ -269,7 +275,7 @@ function getRequestDetails(action: Request, t: TFunction, token: GlobalToken): R
             accessType: roleName,
             justification: '',
             hasJustification: false,
-            requestedOn: action.requested_on || '',
+            requestedOn: action.requested_on ?? '',
             title: t('Review Role Assignment Request'),
         };
     }
@@ -451,21 +457,36 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
             >
                 <Flex vertical gap="medium">
                     <Flex gap="small" align="stretch">
-                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3 }}>
+                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3, minWidth: 0 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
-                                    {t('Requesting Consumer')}
+                                    {action.request_type === RequestType_DataProductRoleAssignment
+                                        ? t('Identity')
+                                        : t('Requesting Consumer')}
                                 </Typography.Text>
                                 <Flex align="center" gap="small">
                                     <Avatar
                                         icon={details.source.icon}
                                         style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
                                     />
-                                    <Flex vertical>
+                                    <Flex vertical style={{ minWidth: 0 }}>
                                         {typeof details.source.name === 'string' ? (
                                             <Typography.Text strong>{details.source.name}</Typography.Text>
                                         ) : (
                                             details.source.name
+                                        )}
+                                        {action.request_type === RequestType_DataProductRoleAssignment && (
+                                            <>
+                                                <Typography.Text type="secondary">
+                                                    {details.source.type}
+                                                </Typography.Text>
+                                                <Typography.Text
+                                                    type="secondary"
+                                                    ellipsis={{ tooltip: details.source.email }}
+                                                >
+                                                    {details.source.email}
+                                                </Typography.Text>
+                                            </>
                                         )}
                                     </Flex>
                                 </Flex>

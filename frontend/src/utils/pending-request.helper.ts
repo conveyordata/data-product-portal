@@ -128,9 +128,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Approved,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the Data Product'), type: 'success' });
+                dispatchMessage({ content: t('Data Product role request has been approved'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant user access to the Data Product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to approve Data Product role request'), type: 'error' });
             }
         },
         [decideDataProductRoleAssignment, t],
@@ -145,9 +145,9 @@ export const usePendingActionHandlers = () => {
                         decision: DecisionStatus.Denied,
                     },
                 }).unwrap();
-                dispatchMessage({ content: t('User access to the Data Product has been denied'), type: 'success' });
+                dispatchMessage({ content: t('Data Product role request has been rejected'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to deny user access to the Data Product'), type: 'error' });
+                dispatchMessage({ content: t('Failed to reject Data Product role request'), type: 'error' });
             }
         },
         [decideDataProductRoleAssignment, t],

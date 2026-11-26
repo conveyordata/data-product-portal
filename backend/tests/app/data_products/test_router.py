@@ -9,12 +9,13 @@ from fastapi.testclient import TestClient
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.casbin_sync import CasbinSync
-from app.authorization.role_assignments.enums import AssignmentFilter
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
 from app.data_products.model import DataProductEnvironment, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.events.enums import EventEntityType, EventType
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -31,6 +32,7 @@ from tests.factories import (
     GroupMembershipFactory,
     InputPortFactory,
     LifecycleFactory,
+    MachineUserFactory,
     OutputPortFactory,
     PlatformFactory,
     RoleFactory,
@@ -1268,19 +1270,53 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 403
 
-    def test_create_data_product__accepts_group_owner(
+    @pytest.mark.parametrize("identity_factory", [GroupFactory, MachineUserFactory])
+    def test_create_data_product__rejects_non_user_owner(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+        identity_factory,
+    ):
+        payload["owners"] = [str(identity_factory().id)]
+
+        response = self.create_data_product(client, payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Only users can be Data Product owners"
+
+    def test_create_data_product__user_owner(
         self,
         payload,
         client,
         user_with_create_data_product_rights,
     ):
-        group = GroupFactory()
-        member = UserFactory()
-        GroupMembershipFactory(group=group, member=member)
-        payload["owners"] = [str(group.id)]
+        identity = UserFactory()
+        payload["owners"] = [str(identity.id)]
 
         response = self.create_data_product(client, payload)
         assert response.status_code == 200, response.text
+        data_product_id = response.json()["id"]
+        assignments_response = client.get(
+            "/api/v2/authz/role_assignments/data_product",
+            params={"data_product_id": data_product_id},
+        )
+        assert assignments_response.status_code == 200
+        assignments = assignments_response.json()["role_assignments"]
+        assert len(assignments) == 1
+        assert assignments[0]["identity"]["id"] == str(identity.id)
+        assert assignments[0]["decision"] == DecisionStatus.APPROVED
+
+        history_response = client.get(f"{ENDPOINT}/{data_product_id}/history")
+        assert history_response.status_code == 200
+        event = next(
+            event
+            for event in history_response.json()["events"]
+            if event["name"] == EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED
+        )
+        assert event["target_type"] == EventEntityType.IDENTITY
+        assert event["identity"]["id"] == str(identity.id)
+        assert event["identity"]["type"] == identity.type
 
     @staticmethod
     def create_data_product(client: TestClient, default_data_product_payload):

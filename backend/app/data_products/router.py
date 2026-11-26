@@ -153,7 +153,7 @@ def _assign_owner_role_assignments(
                 subject_id=response.data_product_id,
                 subject_type=EventEntityType.DATA_PRODUCT,
                 target_id=response.identity_id,
-                target_type=EventEntityType.USER,
+                target_type=EventEntityType.IDENTITY,
                 actor_id=actor.id,
             )
         )

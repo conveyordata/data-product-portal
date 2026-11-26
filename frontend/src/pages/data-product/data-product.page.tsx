@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { IdentityAccessOverview } from '@/components/data-access/identity-access-overview/identity-access-overview.component.tsx';
 import { DataProductVisibilityIcon } from '@/components/data-products/data-product-visibility-icon.tsx';
 import { DetailPageLayout } from '@/components/detail-page-layout/detail-page-layout.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -19,8 +19,8 @@ import {
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
+import { useGetDataProductOwners } from '@/utils/data-product-role.helper.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 
 export function DataProduct() {
@@ -94,7 +94,7 @@ export function DataProduct() {
             sidebar={
                 <>
                     <DataProductActions dataProductId={dataProductId} />
-                    <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                    <IdentityAccessOverview identities={dataProductOwners} title={t('Data Product Owners')} />
                 </>
             }
         >

@@ -60,10 +60,11 @@ import {
     createOutputPortPath,
 } from '@/types/navigation.ts';
 import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-function.helper.tsx';
-import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
+import { useGetDataProductOwners } from '@/utils/data-product-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { isUserIdentity } from '@/utils/identity.ts';
 import styles from './output-port-form.module.scss';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
@@ -502,7 +503,9 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         [validateResourceName],
     );
     const datasetOwners = useGetDatasetOwnerIds(currentOutputPort?.id);
-    const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
+    const dataProductOwners = useGetDataProductOwners(dataProduct?.id)
+        ?.filter(isUserIdentity)
+        .map((owner) => owner.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
     const isHiddenDataProduct = dataProduct?.visibility === DataProductVisibility.Hidden;
 

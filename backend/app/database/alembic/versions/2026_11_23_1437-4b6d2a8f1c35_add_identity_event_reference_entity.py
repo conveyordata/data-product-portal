@@ -1,0 +1,65 @@
+"""add identity event reference entity
+
+Revision ID: 4b6d2a8f1c35
+Revises: f89462ec4af6
+Create Date: 2026-11-23 14:37:00.000000
+"""
+
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+from alembic import op
+
+revision: str = "4b6d2a8f1c35"
+down_revision: Union[str, None] = "f89462ec4af6"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    op.bulk_insert(
+        sa.table("event_reference_entities", sa.column("key", sa.String)),
+        [{"key": "IDENTITY"}],
+    )
+    op.execute(
+        "UPDATE events SET subject_type = 'IDENTITY' WHERE subject_type = 'USER'"
+    )
+    op.execute("UPDATE events SET target_type = 'IDENTITY' WHERE target_type = 'USER'")
+
+
+def downgrade() -> None:
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1
+                FROM events
+                WHERE subject_type = 'IDENTITY'
+                  AND subject_id NOT IN (SELECT id FROM users)
+                  AND (
+                      subject_id IN (SELECT id FROM identities)
+                      OR deleted_subject_identifier IS NULL
+                  )
+            ) OR EXISTS (
+                SELECT 1
+                FROM events
+                WHERE target_type = 'IDENTITY'
+                  AND target_id NOT IN (SELECT id FROM users)
+                  AND (
+                      target_id IN (SELECT id FROM identities)
+                      OR deleted_target_identifier IS NULL
+                  )
+            ) THEN
+                RAISE EXCEPTION
+                    'Cannot downgrade while non-user or unresolved identity events exist';
+            END IF;
+        END
+        $$;
+        """
+    )
+    op.execute(
+        "UPDATE events SET subject_type = 'USER' WHERE subject_type = 'IDENTITY'"
+    )
+    op.execute("UPDATE events SET target_type = 'USER' WHERE target_type = 'IDENTITY'")
+    op.execute("DELETE FROM event_reference_entities WHERE key = 'IDENTITY'")

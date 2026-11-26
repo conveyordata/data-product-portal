@@ -11,6 +11,7 @@ from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.events.enums import EventEntityType
 from app.explorations.schema_response import Exploration
+from app.identities.schema import IdentityGet
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -33,6 +34,7 @@ class GetEventHistoryResponseItem(ORMModel):
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
     exploration: Optional[Exploration] = None
+    identity: Optional[IdentityGet] = None
     announcement: Optional[Announcement] = None
 
 

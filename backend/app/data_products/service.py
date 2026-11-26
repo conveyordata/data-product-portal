@@ -17,6 +17,9 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService,
+)
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.configuration.data_product_lifecycles.model import (
@@ -266,6 +269,7 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        RoleAssignmentService(self.db).ensure_owners_are_users(data_product.owners)
         DomainService(self.db).ensure_assignable(data_product.domain_id)
         data_product_schema = data_product.model_dump(
             exclude={"input_ports", "environment_ids"}

@@ -1,36 +1,16 @@
 import { Button, Flex, Input } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
-import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { DataProductRoleModal } from '@/pages/data-product/components/data-product-role-modal/data-product-role-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
-import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
-import {
-    type DataProductRoleAssignmentResponse,
-    useCreateDataProductRoleAssignmentMutation,
-    useListDataProductRoleAssignmentsQuery,
-} from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
-import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi';
-import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
+import { useListDataProductRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { Scope } from '@/types/roles';
-import { dispatchMessage } from '@/utils/feedback.ts';
-import { searchMatchesUser } from '@/utils/search.ts';
+import { identityMatchesSearch } from '@/utils/identity.ts';
 import styles from './team-tab.module.scss';
-
-function filterUsers(
-    users: DataProductRoleAssignmentResponse[],
-    searchTerm: string,
-): DataProductRoleAssignmentResponse[] {
-    if (!searchTerm) return users;
-
-    return users.filter((assignment) => searchMatchesUser(searchTerm, assignment?.user));
-}
 
 type Props = {
     dataProductId: string;
@@ -38,22 +18,18 @@ type Props = {
 export function TeamTab({ dataProductId }: Props) {
     const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
-    const user = useSelector(selectCurrentUser);
-    const { data: dataProduct } = useGetDataProductQuery(dataProductId);
     const roleAssignmentsQuery = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,
     });
-    const { data: roleAssignments, isFetching } = roleAssignmentsQuery;
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
-
+    const { data: roleAssignments } = roleAssignmentsQuery;
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const { data: { roles: DATA_PRODUCT_ROLES = [] } = {} } = useGetRolesQuery(Scope.DATA_PRODUCT);
-
-    const filteredUsers = useMemo(() => {
-        return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
-    }, [searchTerm, roleAssignments]);
-    const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
-
+    const filteredAssignments = useMemo(
+        () =>
+            roleAssignments?.role_assignments.filter((assignment) =>
+                identityMatchesSearch(assignment.identity, searchTerm),
+            ) ?? [],
+        [roleAssignments, searchTerm],
+    );
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -62,60 +38,31 @@ export function TeamTab({ dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
-    const canAddUser = access?.allowed || false;
-
-    const handleGrantAccessToDataProduct = useCallback(
-        async (user: UsersGet, role_id: string) => {
-            try {
-                await addUserToDataProduct({
-                    data_product_id: dataProductId,
-                    user_id: user.id,
-                    role_id: role_id,
-                }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the Data Product'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant access to the Data Product'), type: 'error' });
-            }
-        },
-        [addUserToDataProduct, dataProductId, t],
-    );
-
-    if (!dataProduct || !user) return null;
+    const canAssign = access?.allowed === true;
 
     return (
         <>
             <Flex vertical gap="medium">
                 <Flex gap="small">
                     <Input.Search
-                        placeholder={t('Search users by email or name')}
+                        placeholder={t('Search by name, email, or external ID')}
                         allowClear
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
-                        {t('Add User')}
+                    <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAssign}>
+                        {t('Add team member')}
                     </Button>
                 </Flex>
                 <TeamTable
                     dataProductId={dataProductId}
-                    dataProductUsers={filteredUsers}
+                    assignments={roleAssignments?.role_assignments ?? []}
+                    filteredAssignments={filteredAssignments}
                     roleAssignmentsQuery={roleAssignmentsQuery}
                     filter={searchFilter(searchTerm, setSearchTerm)}
                 />
             </Flex>
-            {isVisible && (
-                <UserPopup
-                    isOpen={isVisible}
-                    onClose={handleClose}
-                    isLoading={isFetching || isAddingUser}
-                    userIdsToHide={dataProductUserIds}
-                    roles={DATA_PRODUCT_ROLES}
-                    item={{
-                        action: handleGrantAccessToDataProduct,
-                        label: t('Grant Access'),
-                    }}
-                />
-            )}
+            {isVisible && <DataProductRoleModal dataProductId={dataProductId} mode="assign" onClose={handleClose} />}
         </>
     );
 }

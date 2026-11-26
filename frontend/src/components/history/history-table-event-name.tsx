@@ -76,7 +76,7 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
         );
 
         let element = <></>;
-        if (target_type !== EventReferenceEntity.User) {
+        if (target_type !== EventReferenceEntity.User && target_type !== EventEntityType.Identity) {
             element = (
                 <Button
                     type="link"
