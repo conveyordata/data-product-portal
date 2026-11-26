@@ -388,8 +388,9 @@ describe('TechnicalAssetCreate', async () => {
             http.post<never, RenderTechnicalAssetAccessPathRequest>(
                 '*/api/v2/plugins/render_technical_asset_access_path',
                 async ({ request }) => {
-                    previews(await request.json());
-                    return HttpResponse.json({ technical_asset_access_path: 'preview' });
+                    const body = await request.json();
+                    previews(body);
+                    return HttpResponse.json({ technical_asset_access_path: `preview-${body.namespace}` });
                 },
             ),
         );
@@ -399,7 +400,9 @@ describe('TechnicalAssetCreate', async () => {
         await user.click(screen.getByLabelText(/^aws$/i));
         expect(previews).not.toHaveBeenCalled();
         await user.click(screen.getByLabelText(/^glue$/i));
-        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+        await waitFor(() =>
+            expect(screen.getByLabelText('Resulting path')).toHaveValue('preview-My new technical asset'),
+        );
 
         await waitFor(() => expect(screen.getByLabelText(/^github$/i)).toBeEnabled());
         await user.click(screen.getByLabelText(/^github$/i));
@@ -414,7 +417,9 @@ describe('TechnicalAssetCreate', async () => {
         await user.click(screen.getAllByText('datalake')[1]);
         await user.type(screen.getByLabelText(/^path$/i), 'test-path');
 
-        await waitFor(() => expect(screen.getByLabelText('Resulting path')).toHaveValue('preview'));
+        await waitFor(() =>
+            expect(screen.getByLabelText('Resulting path')).toHaveValue('preview-My new technical asset'),
+        );
         expect(previews).toHaveBeenLastCalledWith(
             expect.objectContaining({
                 platform_id: awsConfig.platform.id,
