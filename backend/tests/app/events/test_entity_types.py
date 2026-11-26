@@ -5,12 +5,18 @@ import pytest
 import sqlalchemy as sa
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
+from pydantic import TypeAdapter
 
 from app.events.enums import EventEntityType
 from app.events.model import Event
 from app.events.schema_response import GetEventHistoryResponseItem
+from app.events.service import EventService
+from app.identities.schema import IdentityGet
 from app.identities.service import get_identity_display_name
 from app.users.notifications.model import Notification
+from app.users.notifications.service import NotificationService
+from app.users.schema import User
+from tests import engine
 from tests.factories import (
     EventFactory,
     GroupFactory,
@@ -18,6 +24,83 @@ from tests.factories import (
     NotificationFactory,
     UserFactory,
 )
+
+
+@pytest.mark.parametrize("reader", ["history", "notifications"])
+@pytest.mark.parametrize("reference", ["subject", "target"])
+def test_event_reads__eager_load_identity_subtypes(session, reader, reference):
+    recipient = UserFactory()
+    recipient_schema = User.model_validate(recipient)
+    resource_id = uuid4()
+    adapter = TypeAdapter(IdentityGet | None)
+    expected = {}
+    other_reference = "target" if reference == "subject" else "subject"
+    for factory in (UserFactory, GroupFactory, MachineUserFactory):
+        for _ in range(3):
+            identity = factory()
+            event = EventFactory(
+                actor=recipient,
+                **{
+                    f"{reference}_id": identity.id,
+                    f"{reference}_type": EventEntityType.IDENTITY,
+                    f"{other_reference}_id": resource_id,
+                    f"{other_reference}_type": EventEntityType.DATA_PRODUCT,
+                },
+            )
+            NotificationFactory(event=event, user=recipient)
+            expected[event.id] = adapter.dump_python(
+                adapter.validate_python(identity), mode="json"
+            )
+    deleted = UserFactory()
+    deleted_event = EventFactory(
+        actor=recipient,
+        subject_id=resource_id,
+        subject_type=EventEntityType.DATA_PRODUCT,
+        target_id=deleted.id,
+        target_type=EventEntityType.IDENTITY,
+    )
+    plain_event = EventFactory(
+        actor=recipient,
+        subject_id=resource_id,
+        subject_type=EventEntityType.DATA_PRODUCT,
+    )
+    for event in (deleted_event, plain_event):
+        NotificationFactory(event=event, user=recipient)
+        expected[event.id] = None
+    session.delete(deleted)
+    session.flush()
+    session.expunge_all()
+    queries = []
+
+    def record(conn, cursor, statement, parameters, context, executemany):
+        if statement.lstrip().upper().startswith("SELECT"):
+            queries.append(statement)
+
+    sa.event.listen(engine, "before_cursor_execute", record)
+    try:
+        if reader == "history":
+            events = EventService(session).get_history(
+                resource_id, EventEntityType.DATA_PRODUCT
+            )
+        else:
+            events = [
+                notification.event
+                for notification in NotificationService(session).get_user_notifications(
+                    recipient_schema
+                )
+            ]
+        assert len(queries) <= 4
+        queries.clear()
+        actual = {
+            event.id: adapter.dump_python(
+                adapter.validate_python(event.identity), mode="json"
+            )
+            for event in events
+        }
+        assert actual == expected
+        assert queries == []
+    finally:
+        sa.event.remove(engine, "before_cursor_execute", record)
 
 
 @pytest.mark.parametrize("entity_type", list(EventEntityType))

@@ -25,7 +25,8 @@ from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.explorations.model import Exploration
-from app.groups.model import GroupMembership
+from app.groups.model import Group, GroupMembership
+from app.machine_users.model import MachineUser
 from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
 from app.users.schema import User
@@ -40,7 +41,9 @@ class NotificationService:
             select(NotificationModel)
             .options(
                 joinedload(NotificationModel.user),
-                joinedload(NotificationModel.event),
+                joinedload(NotificationModel.event)
+                .joinedload(EventModel.identity)
+                .selectin_polymorphic([UserModel, Group, MachineUser]),
             )
             .join(EventModel, EventModel.id == NotificationModel.event_id)
             .outerjoin(AnnouncementModel, AnnouncementModel.id == EventModel.target_id)
