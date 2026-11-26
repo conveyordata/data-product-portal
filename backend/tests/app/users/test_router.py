@@ -180,6 +180,7 @@ class TestUsersRouter:
             assert returned_event["deleted_actor_identifier"] == actor_email
 
     @pytest.mark.usefixtures("admin")
+    @pytest.mark.seeds_casbin
     def test_remove_user__clears_authorization(self, client, policies, session):
         user = UserFactory()
         other_user = UserFactory()

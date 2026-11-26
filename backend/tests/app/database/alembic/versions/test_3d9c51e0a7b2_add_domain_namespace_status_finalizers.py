@@ -1,29 +1,18 @@
 from uuid import uuid4
 
 import pytest
-from alembic import command
 from sqlalchemy import column, delete, insert, select, table
 
-from app.plugins.migrations import (
-    _config,
-    _version_locations,
-    migrate_all,
-    owns_a_table,
-)
-from app.plugins.registry import plugin_registry
 from tests import engine
+from tests.migration_util import before_migration
 
-PREVIOUS = "a82c9b3e7d41"
+REVISION = "3d9c51e0a7b2"  # app/database/alembic/versions/2026_10_19_1200-3d9c51e0a7b2_add_domain_namespace_status_finalizers.py
 
 pytestmark = pytest.mark.commits
 
 
-def test_migration__backfills_unique_namespaces_from_names():
-    url = engine.url.render_as_string(hide_password=False)
-    installed = [p for p in plugin_registry.discovered() if owns_a_table(p)]
-    config = _config(_version_locations(installed), url)
-    command.downgrade(config, PREVIOUS)
-    try:
+def test_upgrade__backfills_unique_namespaces_from_names():
+    with before_migration(REVISION):
         # One transaction per row so created_on, and thus suffix order, differs
         for name in ["Risk & Compliance", "risk & compliance", "!!!", "..", "Sales"]:
             with engine.begin() as connection:
@@ -32,8 +21,6 @@ def test_migration__backfills_unique_namespaces_from_names():
                         id=uuid4(), name=name
                     )
                 )
-    finally:
-        migrate_all(installed, engine)
 
     domains = table(
         "domains",

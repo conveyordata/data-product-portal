@@ -254,6 +254,28 @@ func (s *AccessModeWithType) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.DefaultForTechnicalAssetTypes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "default_for_technical_asset_types",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.InUseTechnicalAssetTypes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "in_use_technical_asset_types",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}

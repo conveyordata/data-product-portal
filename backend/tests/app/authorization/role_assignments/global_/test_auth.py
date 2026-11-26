@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+import pytest
+
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.auth import GlobalAuthAssignment
 from app.authorization.roles.schema import Role, Scope
@@ -63,6 +65,7 @@ class TestAuth:
         GlobalAuthAssignment(assignment).remove()
         assert not policies.has_admin_role(user_id=str(user.id))
 
+    @pytest.mark.seeds_casbin
     def test_swap(self, policies: CasbinPolicies):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)

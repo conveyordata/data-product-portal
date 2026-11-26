@@ -161,6 +161,7 @@ class TestRolesRouter:
         assert data["description"] == "admins can have a custom description"
 
     @pytest.mark.usefixtures("admin")
+    @pytest.mark.seeds_casbin
     def test_delete_role__clears_global_assignments(self, client, policies):
         user = UserFactory()
         role = RoleFactory(scope=Scope.GLOBAL)

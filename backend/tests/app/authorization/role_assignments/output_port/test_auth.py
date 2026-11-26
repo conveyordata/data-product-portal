@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+import pytest
+
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.auth import DatasetAuthAssignment
 from app.authorization.roles.schema import Role, Scope
@@ -60,6 +62,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
+    @pytest.mark.seeds_casbin
     def test_swap(self, policies: CasbinPolicies):
         dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()

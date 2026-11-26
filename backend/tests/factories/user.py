@@ -7,7 +7,7 @@ from tests.factories.identity import IdentityFactory
 fake = Faker()
 
 
-class UserFactory(IdentityFactory):
+class UserFactory(IdentityFactory[User]):
     class Meta:
         model = User
 

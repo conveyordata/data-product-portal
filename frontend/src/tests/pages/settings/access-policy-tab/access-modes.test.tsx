@@ -1,22 +1,21 @@
 import { HttpResponse, http } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AccessModes from '@/pages/settings/components/settings-tabs/access-policy-tab/access-modes.tsx';
-import { CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR } from '@/store/common/api-errors.ts';
-import * as errors from '@/store/common/errors.ts';
-import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
+import { mockAccessModes, mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
 import { mockGetPlugins } from '@/tests/mocks/plugins.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 import * as feedback from '@/utils/feedback.ts';
 
 describe('AccessModes', () => {
-    const removeFirstAccessModeAndConfirm = async (user: ReturnType<typeof userEvent.setup>) => {
-        await waitFor(() => {
-            expect(screen.getAllByRole('button', { name: /Remove/i }).length).toBeGreaterThan(0);
-        });
+    const removeButtons = () => screen.getAllByText('Remove').map((label) => label.closest('button'));
 
-        await user.click(screen.getAllByRole('button', { name: /Remove/i })[0]);
-        await user.click(await screen.findByRole('button', { name: /Confirm/i }));
+    const removeReadWriteAndConfirm = async (user: ReturnType<typeof userEvent.setup>) => {
+        await screen.findByText('Read Write');
+        const readWriteRemove = removeButtons()[1];
+        if (!readWriteRemove) throw new Error('Remove button not found');
+        await user.click(readWriteRemove);
+        await user.click(await screen.findByText('Confirm'));
     };
 
     beforeEach(() => {
@@ -108,10 +107,10 @@ describe('AccessModes', () => {
         mockAccessModesHttp();
         renderWithProviders(<AccessModes />);
 
-        await removeFirstAccessModeAndConfirm(user);
+        await removeReadWriteAndConfirm(user);
 
         await waitFor(() => {
-            expect(deletedAccessModeId).toBe('1');
+            expect(deletedAccessModeId).toBe('2');
             expect(dispatchMessageSpy).toHaveBeenCalledWith({
                 content: 'Access mode deleted successfully',
                 type: 'success',
@@ -119,46 +118,33 @@ describe('AccessModes', () => {
         });
     });
 
-    it('shows expected error message when deleting an access mode in use fails', async () => {
-        const user = userEvent.setup();
-        const dispatchMessageSpy = vi.spyOn(feedback, 'dispatchMessage');
-
-        server.use(
-            http.delete('*/api/v2/configuration/access_modes/:id', () =>
-                HttpResponse.json({ detail: CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR }, { status: 400 }),
-            ),
-        );
-
-        mockAccessModesHttp();
+    it('disables Remove with an explanation when Technical Assets use it', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
+        mockAccessModesHttp([
+            mockAccessModes[0],
+            { ...mockAccessModes[1], in_use_technical_asset_types: ['S3TechnicalAssetConfiguration'] },
+        ]);
         renderWithProviders(<AccessModes />);
 
-        await removeFirstAccessModeAndConfirm(user);
+        await screen.findByText('Read Write');
+        const readWriteRemove = removeButtons()[1];
+        expect(readWriteRemove).toBeDisabled();
 
-        await waitFor(() => {
-            expect(dispatchMessageSpy).toHaveBeenCalledWith({
-                content: CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
-                type: 'error',
-            });
-        });
+        await user.hover(readWriteRemove ?? document.body);
+        expect(await screen.findByText('Technical Assets use this access mode')).toBeInTheDocument();
     });
 
-    it('shows generic error handling when deleting an access mode fails unexpectedly', async () => {
-        const user = userEvent.setup();
-        const showGenericErrorMessageSpy = vi.spyOn(errors, 'showGenericErrorMessage');
-
-        server.use(
-            http.delete('*/api/v2/configuration/access_modes/:id', () =>
-                HttpResponse.json({ detail: 'Unexpected failure while deleting access mode' }, { status: 500 }),
-            ),
-        );
-
+    it('disables Remove for the default of a type that has other access modes', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         mockAccessModesHttp();
         renderWithProviders(<AccessModes />);
 
-        await removeFirstAccessModeAndConfirm(user);
+        await screen.findByText('Read Only');
+        const readOnlyRemove = removeButtons()[0];
+        expect(readOnlyRemove).toBeDisabled();
+        expect(removeButtons()[1]).toBeEnabled();
 
-        await waitFor(() => {
-            expect(showGenericErrorMessageSpy).toHaveBeenCalledTimes(1);
-        });
+        await user.hover(readOnlyRemove ?? document.body);
+        expect(await screen.findByText('Make another access mode the default for S3 first')).toBeInTheDocument();
     });
 });

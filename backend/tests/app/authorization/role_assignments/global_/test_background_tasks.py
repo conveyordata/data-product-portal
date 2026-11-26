@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from app.authorization.role_assignments.global_.background_tasks import (
     revoke_expired_admins,
 )
@@ -53,6 +55,7 @@ class TestRevokeExpiredAdmins:
         assert policies.has_admin_role(user_id=user.id) is True
         assert user.admin_expiry is not None
 
+    @pytest.mark.seeds_casbin
     def test_revoke_expired_admins__no_expiry_is_ignored(
         self,
         policies: CasbinPolicies,

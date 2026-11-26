@@ -2,6 +2,9 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from app.authorization.role_assignments.data_product.auth import (
+    DataProductAuthAssignment,
+)
 from app.authorization.role_assignments.data_product.schema import (
     UpdateDataProductRoleAssignment,
 )
@@ -63,6 +66,7 @@ class TestDataProductRoleAssignmentsService:
             assert updated.decision == DecisionStatus.DENIED
         else:
             assert updated.role_id == request.role_id
+            DataProductAuthAssignment(updated, previous_role_id=owner_role.id).swap()
 
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)

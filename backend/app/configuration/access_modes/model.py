@@ -1,10 +1,22 @@
 import uuid
 
-from sqlalchemy import UUID, Column, String
+from sqlalchemy import UUID, Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import Mapped, relationship
 
 from app.database.database import Base
 from app.shared.model import BaseORM
+
+
+class DefaultAccessMode(Base, BaseORM):
+    __tablename__ = "default_access_modes"
+
+    technical_asset_type = Column(String, primary_key=True)
+    access_mode_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("access_modes.id", ondelete="CASCADE"),
+        nullable=False,
+    )
 
 
 class AccessMode(Base, BaseORM):
@@ -16,6 +28,15 @@ class AccessMode(Base, BaseORM):
     technical_asset_types = Column(
         ARRAY(String), nullable=False, default=list, server_default="{}"
     )
+    defaults: Mapped[list[DefaultAccessMode]] = relationship(
+        order_by=DefaultAccessMode.technical_asset_type,
+        viewonly=True,
+        lazy="raise",
+    )
+
+    @property
+    def default_for_technical_asset_types(self) -> list[str]:
+        return [default.technical_asset_type for default in self.defaults]
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, AccessMode):

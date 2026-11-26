@@ -1,72 +1,87 @@
-import { Form, Input, Modal, Select } from 'antd';
-import { useCallback } from 'react';
+import { Form, Input, Modal } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+    type TechnicalAssetTypeSelection,
+    TechnicalAssetTypesTable,
+} from '@/pages/settings/components/settings-tabs/access-policy-tab/technical-asset-types-table.tsx';
+import {
+    type AccessModeWithType,
     useCreateAccessModeMutation,
+    useGetAccessModesQuery,
     useUpdateAccessModeMutation,
 } from '@/store/api/services/generated/configurationAccessModesApi.ts';
-import type { AccessMode } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
-import { isCanNotRemoveTechnicalAssetTypesError } from '@/store/common/api-errors.ts';
-import { showGenericErrorMessage } from '@/store/common/errors.ts';
 
 const { TextArea } = Input;
 
 type Props = {
     onClose: () => void;
-    editAccessMode?: AccessMode;
+    editAccessMode?: AccessModeWithType;
 };
 type AccessModeValues = {
     name: string;
     description: string;
-    technical_asset_types: string[];
+    technical_asset_types: TechnicalAssetTypeSelection;
 };
 export default function AccessModesModal({ editAccessMode, onClose }: Props) {
     const { t } = useTranslation();
     const mode = editAccessMode === undefined ? 'create' : 'edit';
     const [form] = Form.useForm<AccessModeValues>();
     const { data: { plugins = [] } = {}, isFetching: isFetchingPlugins } = useGetPluginsQuery();
+    const { data: { access_modes: accessModes = [] } = {}, isFetching: isFetchingAccessModes } =
+        useGetAccessModesQuery();
+
+    const technicalAssetTypeOptions = useMemo(
+        () =>
+            plugins
+                .filter((plugin) => plugin.show_in_form)
+                .map((plugin) => ({ label: t(plugin.display_name), value: plugin.plugin })),
+        [plugins, t],
+    );
+    const otherAccessModes = useMemo(
+        () => accessModes.filter((accessMode) => accessMode.id !== editAccessMode?.id),
+        [accessModes, editAccessMode],
+    );
+    const typesWithOtherDefault = useMemo(
+        () => new Set(otherAccessModes.flatMap((accessMode) => accessMode.default_for_technical_asset_types)),
+        [otherAccessModes],
+    );
+    const lockedTypes = useMemo(() => {
+        const typesWithOtherAccessModes = new Set(
+            otherAccessModes.flatMap((accessMode) => accessMode.technical_asset_types),
+        );
+        const locked = new Map<string, string>();
+        for (const type of editAccessMode?.default_for_technical_asset_types ?? []) {
+            if (typesWithOtherAccessModes.has(type)) {
+                locked.set(type, t('Make another access mode the default for this type before removing it'));
+            }
+        }
+        for (const type of editAccessMode?.in_use_technical_asset_types ?? []) {
+            locked.set(type, t('Technical Assets of this type still use this access mode'));
+        }
+        return locked;
+    }, [otherAccessModes, editAccessMode, t]);
 
     const [createAccessMode] = useCreateAccessModeMutation();
     const [updateAccessMode] = useUpdateAccessModeMutation();
     const onFinish = useCallback(
-        async (values: AccessModeValues) => {
-            switch (mode) {
-                case 'create':
-                    await createAccessMode(values).unwrap();
-                    onClose();
-                    return;
-                case 'edit': {
-                    try {
-                        await updateAccessMode({
-                            id: editAccessMode?.id ?? '',
-                            accessModeUpdate: {
-                                description: values.description,
-                                technical_asset_types: values.technical_asset_types,
-                            },
-                        }).unwrap();
-                    } catch (error) {
-                        if (isCanNotRemoveTechnicalAssetTypesError(error)) {
-                            form.setFields([
-                                {
-                                    name: 'technical_asset_types',
-                                    errors: [
-                                        t(
-                                            'You cannot remove Technical Asset types that are still used by Technical Assets',
-                                        ),
-                                    ],
-                                },
-                            ]);
-                            return;
-                        }
-                        showGenericErrorMessage(error);
-                    }
-                    onClose();
-                    return;
+        async ({ name, description, technical_asset_types }: AccessModeValues) => {
+            try {
+                if (editAccessMode) {
+                    await updateAccessMode({
+                        id: editAccessMode.id,
+                        accessModeUpdate: { description, ...technical_asset_types },
+                    }).unwrap();
+                } else {
+                    await createAccessMode({ name, description, ...technical_asset_types }).unwrap();
                 }
+                onClose();
+            } catch {
+                // The request already showed its error, so the modal stays open.
             }
         },
-        [mode, createAccessMode, updateAccessMode, editAccessMode, form, onClose, t],
+        [createAccessMode, updateAccessMode, editAccessMode, onClose],
     );
 
     return (
@@ -77,7 +92,19 @@ export default function AccessModesModal({ editAccessMode, onClose }: Props) {
             onOk={() => form.submit()}
             onCancel={onClose}
         >
-            <Form<AccessModeValues> form={form} layout="vertical" initialValues={editAccessMode} onFinish={onFinish}>
+            <Form<AccessModeValues>
+                form={form}
+                layout="vertical"
+                initialValues={{
+                    name: editAccessMode?.name,
+                    description: editAccessMode?.description,
+                    technical_asset_types: {
+                        technical_asset_types: editAccessMode?.technical_asset_types ?? [],
+                        default_for_technical_asset_types: editAccessMode?.default_for_technical_asset_types ?? [],
+                    },
+                }}
+                onFinish={onFinish}
+            >
                 <Form.Item<AccessModeValues>
                     name="name"
                     label={t('Name')}
@@ -89,24 +116,27 @@ export default function AccessModesModal({ editAccessMode, onClose }: Props) {
                 <Form.Item<AccessModeValues>
                     name="technical_asset_types"
                     label={t('Technical Asset types')}
-                    required={mode === 'create'}
+                    extra={t(
+                        'The default access mode of a Technical Asset type is preselected when creating a Technical Asset of that type.',
+                    )}
+                    required
                     rules={[
                         {
-                            required: true,
-                            message: t('Please provide at least one Technical Asset type for the access mode'),
+                            validator: async (_, value?: TechnicalAssetTypeSelection) => {
+                                if (!value?.technical_asset_types.length) {
+                                    throw new Error(
+                                        t('Please provide at least one Technical Asset type for the access mode'),
+                                    );
+                                }
+                            },
                         },
                     ]}
                 >
-                    <Select
-                        loading={isFetchingPlugins}
-                        onChange={() => form.setFields([{ name: 'technical_asset_types', errors: [] }])}
-                        options={plugins
-                            .filter((plugin) => plugin.show_in_form)
-                            .map((plugin) => ({
-                                label: t(plugin.display_name),
-                                value: plugin.plugin,
-                            }))}
-                        mode="multiple"
+                    <TechnicalAssetTypesTable
+                        options={technicalAssetTypeOptions}
+                        typesWithOtherDefault={typesWithOtherDefault}
+                        lockedTypes={lockedTypes}
+                        loading={isFetchingPlugins || isFetchingAccessModes}
                     />
                 </Form.Item>
                 <Form.Item<AccessModeValues>

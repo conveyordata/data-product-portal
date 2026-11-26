@@ -480,6 +480,9 @@ type AccessModeCreate struct {
 	Name                string   `json:"name"`
 	Description         string   `json:"description"`
 	TechnicalAssetTypes []string `json:"technical_asset_types"`
+	// Technical asset types for which this access mode becomes the default. A type keeps its default until
+	// another access mode is made its default.
+	DefaultForTechnicalAssetTypes []string `json:"default_for_technical_asset_types"`
 }
 
 // GetName returns the value of Name.
@@ -497,6 +500,11 @@ func (s *AccessModeCreate) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeCreate) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
 // SetName sets the value of Name.
 func (s *AccessModeCreate) SetName(val string) {
 	s.Name = val
@@ -512,10 +520,18 @@ func (s *AccessModeCreate) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
 }
 
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeCreate) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
 // Ref: #/components/schemas/AccessModeUpdate
 type AccessModeUpdate struct {
 	Description         string   `json:"description"`
 	TechnicalAssetTypes []string `json:"technical_asset_types"`
+	// Technical asset types for which this access mode becomes the default. A type keeps its default until
+	// another access mode is made its default.
+	DefaultForTechnicalAssetTypes []string `json:"default_for_technical_asset_types"`
 }
 
 // GetDescription returns the value of Description.
@@ -528,6 +544,11 @@ func (s *AccessModeUpdate) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeUpdate) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
 // SetDescription sets the value of Description.
 func (s *AccessModeUpdate) SetDescription(val string) {
 	s.Description = val
@@ -538,12 +559,19 @@ func (s *AccessModeUpdate) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
 }
 
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeUpdate) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
 // Ref: #/components/schemas/AccessModeWithType
 type AccessModeWithType struct {
-	ID                  uuid.UUID `json:"id"`
-	Name                string    `json:"name"`
-	Description         string    `json:"description"`
-	TechnicalAssetTypes []string  `json:"technical_asset_types"`
+	ID                            uuid.UUID `json:"id"`
+	Name                          string    `json:"name"`
+	Description                   string    `json:"description"`
+	TechnicalAssetTypes           []string  `json:"technical_asset_types"`
+	DefaultForTechnicalAssetTypes []string  `json:"default_for_technical_asset_types"`
+	InUseTechnicalAssetTypes      []string  `json:"in_use_technical_asset_types"`
 }
 
 // GetID returns the value of ID.
@@ -566,6 +594,16 @@ func (s *AccessModeWithType) GetTechnicalAssetTypes() []string {
 	return s.TechnicalAssetTypes
 }
 
+// GetDefaultForTechnicalAssetTypes returns the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeWithType) GetDefaultForTechnicalAssetTypes() []string {
+	return s.DefaultForTechnicalAssetTypes
+}
+
+// GetInUseTechnicalAssetTypes returns the value of InUseTechnicalAssetTypes.
+func (s *AccessModeWithType) GetInUseTechnicalAssetTypes() []string {
+	return s.InUseTechnicalAssetTypes
+}
+
 // SetID sets the value of ID.
 func (s *AccessModeWithType) SetID(val uuid.UUID) {
 	s.ID = val
@@ -584,6 +622,16 @@ func (s *AccessModeWithType) SetDescription(val string) {
 // SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
 func (s *AccessModeWithType) SetTechnicalAssetTypes(val []string) {
 	s.TechnicalAssetTypes = val
+}
+
+// SetDefaultForTechnicalAssetTypes sets the value of DefaultForTechnicalAssetTypes.
+func (s *AccessModeWithType) SetDefaultForTechnicalAssetTypes(val []string) {
+	s.DefaultForTechnicalAssetTypes = val
+}
+
+// SetInUseTechnicalAssetTypes sets the value of InUseTechnicalAssetTypes.
+func (s *AccessModeWithType) SetInUseTechnicalAssetTypes(val []string) {
+	s.InUseTechnicalAssetTypes = val
 }
 
 // Ref: #/components/schemas/AccessResponse
@@ -16470,6 +16518,10 @@ func (s *UpdateAccessDurationResponse) SetAccessDurations(val []AccessDuration) 
 }
 
 func (*UpdateAccessDurationResponse) updateAccessDurationRes() {}
+
+type UpdateAccessModeBadRequestApplicationJSON jx.Raw
+
+func (*UpdateAccessModeBadRequestApplicationJSON) updateAccessModeRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

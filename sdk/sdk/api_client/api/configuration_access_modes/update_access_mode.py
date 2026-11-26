@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote
 from uuid import UUID
 
@@ -37,11 +37,15 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> AccessMode | HTTPValidationError | None:
+) -> AccessMode | Any | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = AccessMode.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
 
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
@@ -56,7 +60,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[AccessMode | HTTPValidationError]:
+) -> Response[AccessMode | Any | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,7 +74,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AccessModeUpdate,
-) -> Response[AccessMode | HTTPValidationError]:
+) -> Response[AccessMode | Any | HTTPValidationError]:
     """Update Access Mode
 
     Args:
@@ -82,7 +86,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AccessMode | HTTPValidationError]
+        Response[AccessMode | Any | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -102,7 +106,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: AccessModeUpdate,
-) -> AccessMode | HTTPValidationError | None:
+) -> AccessMode | Any | HTTPValidationError | None:
     """Update Access Mode
 
     Args:
@@ -114,7 +118,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AccessMode | HTTPValidationError
+        AccessMode | Any | HTTPValidationError
     """
 
     return sync_detailed(
@@ -129,7 +133,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: AccessModeUpdate,
-) -> Response[AccessMode | HTTPValidationError]:
+) -> Response[AccessMode | Any | HTTPValidationError]:
     """Update Access Mode
 
     Args:
@@ -141,7 +145,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AccessMode | HTTPValidationError]
+        Response[AccessMode | Any | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -159,7 +163,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: AccessModeUpdate,
-) -> AccessMode | HTTPValidationError | None:
+) -> AccessMode | Any | HTTPValidationError | None:
     """Update Access Mode
 
     Args:
@@ -171,7 +175,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AccessMode | HTTPValidationError
+        AccessMode | Any | HTTPValidationError
     """
 
     return (

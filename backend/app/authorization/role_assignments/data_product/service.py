@@ -169,17 +169,18 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
+    def ensure_owners_are_users(self, identity_ids: Sequence[UUID]) -> None:
+        for identity_id in identity_ids:
+            if ensure_identity_exists(identity_id, self.db).type != IdentityType.USER:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Only users can be Data Product owners",
+                )
+
     def _ensure_owner_is_user(self, role_id: UUID, identity_id: UUID) -> None:
         role = self.db.get(Role, role_id)
-        if (
-            role is not None
-            and role.prototype == Prototype.OWNER
-            and ensure_identity_exists(identity_id, self.db).type != IdentityType.USER
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Only users can be Data Product owners",
-            )
+        if role is not None and role.prototype == Prototype.OWNER:
+            self.ensure_owners_are_users([identity_id])
 
     def _guard_against_illegal_owner_removal(
         self, assignment: DataProductRoleAssignment
