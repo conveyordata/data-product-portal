@@ -17,6 +17,7 @@ This migration can take some time, depending on the amount of Data Products pres
 
 ### features
 
+- **[UI]**: The People page now assigns global roles to groups and machine users alongside users. Different columns can be sorted together. Admin eligibility remains user-only.
 - **[UI]**: Data Product teams can now include groups and machine users alongside users. The Add team member modal provides a searchable identity table with type filtering and a role selector. The Owner option is available only for users.
 - **[Marketplace]**: The marketplace lists Data Products instead of Output Ports. Search matches on a Data Product's name, description, about, Output Ports and the Technical Assets those Output Ports expose. When a Data Product has a single Output Port with at most one access mode, **Add to cart** adds it directly; otherwise a dialog lets you pick the Output Ports and an access mode for each.
 - **[API/UI]**: Admins choose the default access mode per Technical Asset type in the access mode settings, where Technical Asset types are now picked in a table with an included and a default checkbox. Types an access mode can't drop, because they are in use or it is their default, are locked with an explanation instead of failing on save, and so is removing an access mode that is in use or still a default. `GET /api/v2/configuration/access_modes` returns `default_for_technical_asset_types` and `in_use_technical_asset_types` for each access mode.

@@ -2,7 +2,7 @@
 
 ## Context and Problem Statement
 
-Every Technical Asset has a namespace. It is generated from the asset name (or typed in by the creator), must match `[a-z0-9+=,.@_-]` with at most 64 characters, and can not be changed after creation.
+Every Technical Asset has a namespace. It is generated from the asset name (or typed in by the creator), must match `[a-z0-9+=,.@_-]` with a configurable length per plugin, defaulting to 64 characters, and can not be changed after creation.
 
 Until now the namespace had to be unique within the owning Data Product. A Data Product with an S3 Technical Asset and an SSM Parameter Store Technical Asset for the same dataset could therefore not call both `orders`, even though they are different kinds of resources.
 
