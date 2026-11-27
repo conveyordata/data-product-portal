@@ -5532,14 +5532,14 @@ files = [
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12.20261113"
+version = "6.0.12.20261122"
 description = "Typing stubs for PyYAML"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_pyyaml-6.0.12.20261113-py3-none-any.whl", hash = "sha256:3600749e613748afdc4327f0b17c3296cf880cdbc7335f320007abd9dd815f67"},
-    {file = "types_pyyaml-6.0.12.20261113.tar.gz", hash = "sha256:0828be2580fd94151182364f4d0158e4de62fdbeeb8d4296f7f7d2b6c22bb640"},
+    {file = "types_pyyaml-6.0.12.20261122-py3-none-any.whl", hash = "sha256:689fbbe883b60471166dede9dba6ac0dbdbcf0ea98062d7ec195430f5bbdb009"},
+    {file = "types_pyyaml-6.0.12.20261122.tar.gz", hash = "sha256:7fa577c893a1db255cbb02320884ffcb97b7a219fe515bec6c5f15d5d3af41ed"},
 ]
 
 [[package]]
