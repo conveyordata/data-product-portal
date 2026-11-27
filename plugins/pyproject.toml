@@ -11,7 +11,7 @@ dependencies = [
     "sqlalchemy>=2.1.9",
     "alembic>=1.20.1",
     "boto3>=1.44.6",
-    "fastmcp>=4.2.2",
+    "fastmcp>=4.2.4",
 ]
 
 [project.entry-points."data_product_portal.plugins"]
