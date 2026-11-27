@@ -1516,39 +1516,39 @@ tqdm = ">=4.66,<5"
 
 [[package]]
 name = "fastmcp"
-version = "4.2.3"
+version = "4.2.4"
 description = "The fast, Pythonic way to build MCP servers and clients."
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "plugins"]
 files = [
-    {file = "fastmcp-4.2.3-py3-none-any.whl", hash = "sha256:82fde5c1db2a6d865015726b15502a2657205e4549295dc1357fcb7b1c521a4d"},
-    {file = "fastmcp-4.2.3.tar.gz", hash = "sha256:0c9d1739d59e89506489bea589dec6193d204ab86e9739333d6bb46c13476477"},
+    {file = "fastmcp-4.2.4-py3-none-any.whl", hash = "sha256:fddc1fe906ad0c202862469ecc5b8bf69dbc81a1ea8141112399c72449527cd4"},
+    {file = "fastmcp-4.2.4.tar.gz", hash = "sha256:9039b0eb7cde12353ae60396015e9bf8bedd278ed7b6196ee4a8eb4b63d84b06"},
 ]
 
 [package.dependencies]
-fastmcp-slim = {version = "4.2.3", extras = ["client", "server"]}
+fastmcp-slim = {version = "4.2.4", extras = ["client", "server"]}
 
 [package.extras]
-anthropic = ["fastmcp-slim[anthropic] (==4.2.3)"]
-apps = ["fastmcp-slim[apps] (==4.2.3)"]
-azure = ["fastmcp-slim[azure] (==4.2.3)"]
-code-mode = ["fastmcp-slim[code-mode] (==4.2.3)"]
-gemini = ["fastmcp-slim[gemini] (==4.2.3)"]
-jev = ["fastmcp-slim[jev] (==4.2.3)"]
-openai = ["fastmcp-slim[openai] (==4.2.3)"]
-tasks = ["fastmcp-tasks (==4.2.3)"]
+anthropic = ["fastmcp-slim[anthropic] (==4.2.4)"]
+apps = ["fastmcp-slim[apps] (==4.2.4)"]
+azure = ["fastmcp-slim[azure] (==4.2.4)"]
+code-mode = ["fastmcp-slim[code-mode] (==4.2.4)"]
+gemini = ["fastmcp-slim[gemini] (==4.2.4)"]
+jev = ["fastmcp-slim[jev] (==4.2.4)"]
+openai = ["fastmcp-slim[openai] (==4.2.4)"]
+tasks = ["fastmcp-tasks (==4.2.4)"]
 
 [[package]]
 name = "fastmcp-slim"
-version = "4.2.3"
+version = "4.2.4"
 description = "The dependency-slim FastMCP package."
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "plugins"]
 files = [
-    {file = "fastmcp_slim-4.2.3-py3-none-any.whl", hash = "sha256:6d68766ad18d5966230d7216c1e070325ffc547a3c8bc49172174f6c42ea617d"},
-    {file = "fastmcp_slim-4.2.3.tar.gz", hash = "sha256:9037cd8c0a2804152102f559f8f6a9c615377b6aeb9d2b6a466c0afe9df5839b"},
+    {file = "fastmcp_slim-4.2.4-py3-none-any.whl", hash = "sha256:d8c4ecad3b7ad6cb4c0a26c0d05c66af74033753d39601bee5290a10cf102a24"},
+    {file = "fastmcp_slim-4.2.4.tar.gz", hash = "sha256:2aa508dace0e5d9176fe116077cdbf22a18c62f97ddd1decf5625b9f4faf55df"},
 ]
 
 [package.dependencies]
@@ -6135,4 +6135,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<4.0"
-content-hash = "330479c5c49415a04ebd0ad3779ac72121f1797f2812a2b559c1c7ca787b0003"
+content-hash = "50b23ac724e73e5d4c4f40b9d8a89210f68b182dae4749b2d56f1a7489bf67db"
