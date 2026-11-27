@@ -29,7 +29,7 @@ sqlalchemy = { version = "^2.1.9", extras = ['asyncio'] }
 sqlalchemy-utils = ">=0.42.1,<0.44.0"
 sqlalchemy-easy-softdelete = ">=0.9.1,<2.1.0"
 psycopg = { version = "^3.3.0", extras = ["binary"] }
-pyyaml = "^6.0.3"
+pyyaml = "^6.0.4"
 pyjwt = "^2.14.0"
 shortuuid = "^1.0.13"
 boto3 = "^1.44.9"
