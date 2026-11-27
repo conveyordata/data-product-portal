@@ -7,7 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "data-product-portal>=0.8.1",
     "fastapi>=0.165.0",
-    "pydantic>=2.14.3",
+    "pydantic>=2.14.4",
     "sqlalchemy>=2.1.9",
     "alembic>=1.20.1",
     "boto3>=1.44.6",
