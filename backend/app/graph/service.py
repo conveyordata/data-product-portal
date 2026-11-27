@@ -3,10 +3,10 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.orm import Session, aliased, with_polymorphic
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.domains.model import Domain
 from app.core.logging import logger
@@ -189,7 +189,7 @@ class GraphService:
                         id=f"{link['dataset_id']}-{link['consumer_id']}",
                         source=link["dataset_id"],
                         target=link["consumer_id"],
-                        animated=link["status"] == DecisionStatus.APPROVED.value,
+                        animated=link["status"] == InputPortStatus.APPROVED,
                     )
                     for link in abstract_data_product_links
                 ]
@@ -227,7 +227,7 @@ class GraphService:
                         id=f"{link['producer_id']}-{link['consumer_id']}",
                         source=link["producer_id"],
                         target=link["consumer_id"],
-                        animated=link["status"] == DecisionStatus.APPROVED.name,
+                        animated=link["status"] == InputPortStatus.APPROVED,
                     )
                     for link in abstract_data_product_links
                 ]

@@ -6,6 +6,7 @@ but DecisionStatus enum values are lowercase (e.g., 'approved').
 The fix: Use DecisionStatus.APPROVED.name (uppercase) instead of the enum object directly.
 """
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.graph.service import GraphService
 from tests.factories import (
@@ -102,3 +103,35 @@ class TestGraphServiceEnumMatching:
         animated_edges = [edge for edge in graph_data.edges if edge.animated]
 
         assert len(animated_edges) == 1
+
+
+class TestGraphServiceProducerConsumerEdges:
+    def test_get_graph_data__approved_input_port_edge_is_animated(self, session):
+        producer = DataProductFactory()
+        output_port = OutputPortFactory(data_product=producer)
+        consumer = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer,
+            output_port=output_port,
+            status=InputPortStatus.APPROVED,
+        )
+
+        with as_user(session, UserFactory().id):
+            graph_data = GraphService(session).get_graph_data()
+
+        assert [edge.animated for edge in graph_data.edges] == [True]
+
+    def test_get_graph_data__pending_input_port_edge_is_not_animated(self, session):
+        producer = DataProductFactory()
+        output_port = OutputPortFactory(data_product=producer)
+        consumer = DataProductFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=consumer,
+            output_port=output_port,
+            status=InputPortStatus.PENDING,
+        )
+
+        with as_user(session, UserFactory().id):
+            graph_data = GraphService(session).get_graph_data()
+
+        assert [edge.animated for edge in graph_data.edges] == [False]
