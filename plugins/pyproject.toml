@@ -10,7 +10,7 @@ dependencies = [
     "pydantic>=2.14.3",
     "sqlalchemy>=2.1.9",
     "alembic>=1.20.1",
-    "boto3>=1.44.6",
+    "boto3>=1.44.9",
     "fastmcp>=4.2.2",
 ]
 
